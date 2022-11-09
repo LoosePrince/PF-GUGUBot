@@ -1,6 +1,7 @@
 # MCDRQQchat
 #### PFingan服务器MCDRQQ机器人插件  
 源：[QQChat-用于连接和的插件MinecraftQQ](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/qq_chat)
+修改：[XueK__](#)
 ### 这是基于原插件的修改版本
 ## 功能列表
 QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `/help`
