@@ -3,6 +3,16 @@
 源：[QQChat-用于连接Minecraft和QQ的插件](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/qq_chat)<br>
 修改：[XueK__]( )
 ### 这是基于原插件的修改版本
+
+## 依赖
+### Python包
+- requests
+### 前置插件
+- [CoolQAPI](https://github.com/AnzhiZhang/CoolQAPI)
+- [OnlinePlayerAPI](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/OnlinePlayerAPI)
+- [ConfigAPI](https://github.com/MCDReforged/ConfigAPI)
+- [JsonDataAPI](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/JsonDataAPI)
+
 ## 功能列表
 QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `/help`
 基本功能：聊天互相转发
