@@ -114,5 +114,68 @@ QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `/help
 ```
 内置模式：`普通` `傲娇`
 
-
+## 配置文件
+```
+# 填管理员QQ号，有几个就填几个
+admin_id: [123456, 7891011]
+# true为开启，false为关闭
+command: {
+  # ban_word:违禁词测回
+  ban_word: true, 
+  # ingame_key_word:游戏内关键词回复
+  ingame_key_word: true, 
+  # key_word:群内关键词回复
+  key_word: true, 
+  # list:在线查询
+  list: true, 
+  # 获取服务器内聊天内容
+  mc: true, 
+  # 机器人昵称
+  name: true, 
+  # 获取QQ聊天内容
+  qq: true, 
+  # 开服指令
+  start_command: true, 
+  # 白名单功能
+  whitelist: true, 
+  # 辅助审核功能
+  shenhe: true
+  }
+# 配置文件读取
+dict_address: {
+  # 违禁词
+  ban_word_dict: .//config//QQChat//ban_word.json, 
+  # 关键词
+  key_word_dict: .//config//QQChat//key_word.json, 
+  # 游戏内关键词
+  key_word_ingame_dict: .//config//QQChat//key_word_ingame.json, 
+  # 辅助审核日志文件
+  shenhe_log: .//config//QQChat//shenhe_log.txt, 
+  # 开服指令
+  start_command_dict: .//config//QQChat//start_commands.json, 
+  # uuid绑定
+  uuid_qqid: .//config//QQChat//uuid_qqid.json, 
+  # 辅助审核
+  shenheman: .//config//QQChat//shenheman.json, 
+  # 白名单
+  whitelist: .//server//whitelist.json
+  }
+# 转发设置
+forward: {
+  # 服务器往QQ群转发
+  mc_to_qq: true,
+  # QQ群往服务器转发 
+  qq_to_mc: true
+  }
+# 服务器IP，请填公网域名，端口号前面那段，例：mcserver.com:25564
+game_ip: mcserver.com
+# 服务器端口
+game_port: '25565'
+# 填写群号,有几个就填几个
+group_id: [123456,7891011]
+# 绑定ID自动绑定服务器白名单
+whitelist_add_with_bound: true
+# 退群自动删除绑定和白名单
+whitelist_remove_with_leave: true
+```
 
