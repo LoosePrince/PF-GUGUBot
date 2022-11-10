@@ -167,7 +167,7 @@ forward: {
   # QQ群往服务器转发 
   qq_to_mc: true
   }
-# 服务器IP，请填公网域名，端口号前面那段，例：mcserver.com:25564
+# 服务器IP，请填公网域名，端口号前面那段，例：mcserver.com:25565
 game_ip: mcserver.com
 # 服务器端口
 game_port: '25565'
