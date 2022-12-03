@@ -246,15 +246,15 @@ class qbot(object):
                 self.key_word_ingame.handle_command(' '.join(command), bot, info, style=self.style)
 
         # uuid匹配相关
-        elif info.content.startswith('/uuid'):
+        elif info.content.startswith('#uuid'):
             # uuid 帮助
-            if info.content == '/uuid':
+            if info.content == '#uuid':
                 bot.reply(info, uuid_help)
             # 查看uuid 匹配表
-            elif command[1] == 'list':
+            elif command[1] == '列表':
                 bot.reply(info, "uuid匹配如下：\n"+'\n'.join([str(k)+'-'+str(v)+'-'+self.data[v] for k,v in self.uuid_qqid.items()]))
             # 更新匹配表
-            elif command[1] == 'reload':
+            elif command[1] == '重载':
                 # 白名单表 [{uuid:value, name: value}]
                 temp = self.loading_file(self.config["dict_address"]['whitelist'])
                 # 解压白名单表
@@ -262,7 +262,7 @@ class qbot(object):
                 self.match_id()
                 bot.reply(info, '已重新匹配~')
             # 更改白名单名字
-            elif command[1] == 'update':
+            elif command[1] in ['修改','更改','更新']:
                 pre_name = command[2]
                 cur_name = command[3]
                 with open(self.config["dict_address"]['whitelist'],'r') as f:
@@ -280,9 +280,7 @@ class qbot(object):
                         break
                 if not changed:
                     bot.reply(info, '未找到对应名字awa！')                
-            # 查看白名单表
-            elif command[1] == 'name':
-                bot.reply(info, '白名单如下：'+'\n'.join(sorted(self.whitelist.values())))  
+
         # 机器人名字 <- 服务器人数
         elif info.content.startswith('#名字'):
             if info.content == '#名字':
@@ -304,22 +302,22 @@ class qbot(object):
                     bot.set_group_card(gid, int(bot.get_login_info().json()['data']['user_id']), " ")
                 bot.reply(info, "显示游戏内人数已关闭")     
 
-        elif info.content.startswith('/shenhe'):
-            if info.content == '/shenhe':
+        elif info.content.startswith('#审核'):
+            if info.content == '#审核':
                 bot.reply(info, shenhe_help)
-            elif command[1] == 'on':
+            elif command[1] == '开':
                 self.config['command']['shenhe'] = True
                 bot.reply(info, '自动审核开启')
-            elif command[1] == 'off':
+            elif command[1] == '关':
                 self.config['command']['shenhe'] = False
                 bot.reply(info, '自动审核关闭')
-            elif command[1] == 'add':
+            elif command[1] == '添加':
                 if len(command) == 4 and command[3] not in self.shenheman:
                     self.shenheman[command[3]] = command[2] # 别名：QQ号
                     bot.reply(info,style[self.style]['add_success'])
                 elif command[3] in self.shenheman:
                     bot.reply(info,'已存在该别名')
-            elif command[1] == 'del' and len(command) > 2:
+            elif command[1] == '删除' and len(command) > 2:
                 
                 if command[2] in self.shenheman.values():
                     for k,v in self.shenheman.items():
@@ -328,7 +326,7 @@ class qbot(object):
                     bot.reply(info,style[self.style]['delete_success'])
                 else:
                     bot.reply(info,'审核员不存在哦！')
-            elif command[1] == 'list':
+            elif command[1] == '列表':
                 temp = defaultdict(list)
                 for name,qq_hao in self.shenheman.items():
                     temp[qq_hao].append(name)
