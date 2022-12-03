@@ -102,7 +102,7 @@ class qbot(object):
                     info.user_id,
                     '通过'])+'\n')
             bot.reply(info,f"已通过{self.shenhe[info.user_id][0][0]}的申请awa")
-            self.shenhe.pop(0)
+            self.shenhe[info.user_id].pop(0)
         # 审核不通过
         elif self.config['command']['shenhe'] and command[0] == '拒绝' and len(self.shenhe[info.user_id]) > 0:
             bot.set_group_add_request(self.shenhe[info.user_id][0][1],self.shenhe[info.user_id][0][2],False)
@@ -112,7 +112,7 @@ class qbot(object):
                     info.user_id,
                     '拒绝'])+'\n')
             bot.reply(info,f"已拒绝{self.shenhe[info.user_id][0][0]}的申请awa")
-            self.shenhe.pop(0)
+            self.shenhe[info.user_id].pop(0)
         
         if info.source_type == 'private':
             self.private_command(server, info, bot, command)
