@@ -57,6 +57,7 @@ def on_load(server: PluginServerInterface, old):
     server.register_event_listener('GUGUbot.qq_message', qq_bot.send_msg_to_mc)
     server.register_event_listener('GUGUbot.qq_command', qq_bot.on_qq_command)
     server.register_event_listener('GUGUbot.quit_notification', qq_bot.quit_notification)
+    server.register_event_listener('GUGUbot.apply_notification', qq_bot.apply_notice)
 
 qq_bot = None
 # 更新机器人名字 <- 显示在线人数功能
