@@ -1,3 +1,5 @@
 mcdreforged>=2.0.1
 json
 requests
+ConfigAPI
+JsonDataAPI
