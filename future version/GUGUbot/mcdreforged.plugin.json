@@ -1,0 +1,20 @@
+{
+	"id": "GUGUbot",
+	"version": "1.0.0",
+	"name": "GUGUbot",
+	"description": {
+		"en_us": "A QQ bot connect MC and QQ",
+		"zh_cn": "一个QQ和MC互通的机器人"
+	},
+	"author": [
+		"XueK__"
+	],
+	"link": "",
+	"dependencies": {
+		"mcdreforged": ">=2.1.2"
+	},
+
+	"resources": [
+		"lang"
+	]
+}
