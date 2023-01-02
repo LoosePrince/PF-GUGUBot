@@ -1,9 +1,12 @@
 # The definition of the QQ Chat robot:
 import requests, time, json
 from collections import defaultdict
-from text import *
-import key_word_system, ban_word_system, start_command_system, shenhe_system, base_system
-import table
+from .text import *
+from .key_word_system import key_word_system
+from .ban_word_system import ban_word_system
+from .start_command_system import start_command_system
+
+from .table import table
 class qbot(object):
     def __init__(self, server, config, data, host, port):
         # 添加初始参数
@@ -39,7 +42,7 @@ class qbot(object):
         command = info.content.split(' ')
         command[0] = command[0].replace('#', '')
         # 检测违禁词
-        if self.config['command']['ban_word']:
+        if self.config['command']['ban_word'] and info.source_type == 'group':
             ban_result = self.ban_word.check_ban(' '.join(command))
             if ban_result:
                 bot.delete_msg(info.message_id)
@@ -47,9 +50,9 @@ class qbot(object):
                 return 
 
         # 玩家列表
-        elif self.config['command']['list'] and (command[0] in ['玩家列表','玩家'] or command[0] in ['假人列表','假人']):
+        if self.config['command']['list'] and (command[0] in ['玩家列表','玩家'] or command[0] in ['假人列表','假人']):
             content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
-            if command[0] == '列表': # 过滤假人
+            if command[0] in ['玩家列表','玩家']: # 过滤假人
                 t_player = [i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()]
             else: # 过滤真人
                 t_player = [i["name"] for i in content['sample'] if i["name"] not in self.whitelist.values()] 
@@ -64,8 +67,8 @@ class qbot(object):
                     ', '.join(t_player)))
 
         # 添加关键词
-        elif self.config['command']['key_word']:
-            self.key_word_ingame.handle_command(' '.join([2]+command), bot, info, style=self.style)
+        elif self.config['command']['key_word'] and command[0] in ["列表",'添加','删除']:
+            self.key_word.handle_command(' '.join(['关键词']+command), bot, info, style=self.style)
 
         # 游戏内关键词
         elif self.config['command']['ingame_key_word'] and command[0] == '游戏关键词':
@@ -162,7 +165,7 @@ class qbot(object):
             if info.content == '#白名单':
                 bot.reply(info, whitelist_help)
             # 执行指令
-            elif command[1] in ['添加', '删除','移除', '列表', '开', '关', '重载']:
+            elif len(command)>1 and command[1] in ['添加', '删除','移除', '列表', '开', '关', '重载']:
                 if command[1] == '添加':
                     server.execute(f'/whitelist add {command[2]}')
                     bot.reply(info, style[self.style]['add_success'])
@@ -196,11 +199,11 @@ class qbot(object):
         # 启动指令相关
         elif info.content.startswith('#启动指令'):
             # 开启开服指令
-            if command[1] == '开':
+            if len(command)>1 and command[1] == '开':
                 self.config['command']['start_command'] = True
                 bot.reply(info, '已开启开服指令！')
             # 关闭开服指令
-            elif command[1] == '关':
+            elif len(command)>1 and command[1] == '关':
                 self.config['command']['start_command'] = False
                 bot.reply(info, '已关闭开服指令！')
             else:
@@ -209,11 +212,11 @@ class qbot(object):
                 
         # 违禁词相关
         elif info.content.startswith('#违禁词'):
-            if command[1] == '开':
+            if len(command)>1 and command[1] == '开':
                 self.config['command']['ban_word'] = True
                 bot.reply(info, '已开启违禁词！')
             # 关闭违禁词
-            elif command[1] == '关':
+            elif len(command)>1 and command[1] == '关':
                 self.config['command']['ban_word'] = False
                 bot.reply(info, '已关闭违禁词！')
             else:
@@ -222,24 +225,24 @@ class qbot(object):
         # 关键词相关
         elif info.content.startswith('#关键词'):
             # 开启关键词
-            if command[1] == '开':
+            if len(command)>1 and command[1] == '开':
                 self.config['command']['key_word'] = True
                 bot.reply(info, '已开启关键词！')
             # 关闭关键词
-            elif command[1] == '关':
+            elif len(command)>1 and command[1] == '关':
                 self.config['command']['key_word'] = False
                 bot.reply(info, '已关闭关键词！')
             else:
-                self.ban_word.handle_command(' '.join(command), bot, info, style=self.style)
+                self.key_word.handle_command(' '.join(command), bot, info, style=self.style)
             
         # 游戏内关键词相关
         elif info.content.startswith('#游戏关键词'):
             # 开启游戏关键词
-            if command[1] == '开':
+            if len(command)>1 and command[1] == '开':
                 self.config['command']['ingame_key_word'] = True
                 bot.reply(info, '已开启游戏关键词！')
             # 关闭游戏关键词
-            elif command[1] == '关':
+            elif len(command)>1 and command[1] == '关':
                 self.config['command']['ingame_key_word'] = False
                 bot.reply(info, '已关闭游戏关键词！')
             else:
@@ -251,10 +254,10 @@ class qbot(object):
             if info.content == '#uuid':
                 bot.reply(info, uuid_help)
             # 查看uuid 匹配表
-            elif command[1] == '列表':
-                bot.reply(info, "uuid匹配如下：\n"+'\n'.join([str(k)+'-'+str(v)+'-'+self.data[v] for k,v in self.uuid_qqid.items()]))
+            elif len(command)>1 and command[1] == '列表':
+                bot.reply(info, "uuid匹配如下：\n"+'\n'.join([str(k)+'-'+str(v)+'-'+self.data[v] for k,v in self.uuid_qqid.items() if v in self.data]))
             # 更新匹配表
-            elif command[1] == '重载':
+            elif len(command)>1 and command[1] == '重载':
                 # 白名单表 [{uuid:value, name: value}]
                 temp = self.loading_file(self.config["dict_address"]['whitelist'])
                 # 解压白名单表
@@ -262,7 +265,7 @@ class qbot(object):
                 self.match_id()
                 bot.reply(info, '已重新匹配~')
             # 更改白名单名字
-            elif command[1] in ['修改','更改','更新']:
+            elif len(command)>1 and command[1] in ['修改','更改','更新']:
                 pre_name = command[2]
                 cur_name = command[3]
                 with open(self.config["dict_address"]['whitelist'],'r') as f:
@@ -285,7 +288,7 @@ class qbot(object):
         elif info.content.startswith('#名字'):
             if info.content == '#名字':
                 bot.reply(info, name_help)
-            elif command[1] == '开':
+            elif len(command)>1 and command[1] == '开':
                 self.config['command']['name'] = True
     
                 # 创造全局变量
@@ -296,7 +299,7 @@ class qbot(object):
                 self.set_number_as_name(server, bot, info)
 
                 bot.reply(info, "显示游戏内人数已开启")
-            elif command[1] == '关':
+            elif len(command)>1 and command[1] == '关':
                 self.config['command']['name'] = False
                 for gid in self.config['group_id']:
                     bot.set_group_card(gid, int(bot.get_login_info().json()['data']['user_id']), " ")
@@ -305,13 +308,13 @@ class qbot(object):
         elif info.content.startswith('#审核'):
             if info.content == '#审核':
                 bot.reply(info, shenhe_help)
-            elif command[1] == '开':
+            elif len(command)>1 and command[1] == '开':
                 self.config['command']['shenhe'] = True
                 bot.reply(info, '自动审核开启')
-            elif command[1] == '关':
+            elif len(command)>1 and command[1] == '关':
                 self.config['command']['shenhe'] = False
                 bot.reply(info, '自动审核关闭')
-            elif command[1] == '添加':
+            elif len(command)>1 and command[1] == '添加':
                 if len(command) == 4 and command[3] not in self.shenheman:
                     self.shenheman[command[3]] = command[2] # 别名：QQ号
                     bot.reply(info,style[self.style]['add_success'])
@@ -326,7 +329,7 @@ class qbot(object):
                     bot.reply(info,style[self.style]['delete_success'])
                 else:
                     bot.reply(info,'审核员不存在哦！')
-            elif command[1] == '列表':
+            elif len(command)>1 and command[1] == '列表':
                 temp = defaultdict(list)
                 for name,qq_hao in self.shenheman.items():
                     temp[qq_hao].append(name)
@@ -392,7 +395,7 @@ class qbot(object):
                 bot.reply(info, f'已切换为 {self.style}')
 
     # 退群处理
-    def quit_notification(self, server, info, bot):
+    def notification(self, server, info, bot):
         # 指定群里 + 是退群消息
         if info.source_id in self.config['group_id'] \
             and info.notice_type == 'group_decrease':
@@ -404,7 +407,7 @@ class qbot(object):
                 self.data.save()
 
     # 进群处理
-    def apply_notice(self,server, info, bot):
+    def on_qq_apply(self,server, info, bot):
         if info.source_id in self.config["group_id"] \
             and info.request_type == "group" and self.config["command"]["shenhe"]:
             # 获取名称
@@ -458,12 +461,12 @@ class qbot(object):
                 if (self.config['command']['ban_word'] == False or not reason)\
                     and self.config['command']['key_word']:
                     # 检测到关键词 -> 转发原文 + 转发回复
-                    if info.content in self.key_word:
+                    if info.content in self.key_word.data:
                         self.server.say(f'§6[QQ] §a[{self.find_game_name(user_id)}] §f{info.content}')
                         bot.reply(info,self.key_word.data[info.content])
                         # 过滤图片
                         if self.key_word.data[info.content][:9] != '[CQ:image':
-                            self.server.say(f'§6[QQ] §a[机器人] §f{self.key_word_dict[info.content]}')
+                            self.server.say(f'§6[QQ] §a[机器人] §f{self.key_word.data[info.content]}')
                     # 添加图片
                     elif info.user_id in self.picture_record_dict and info.raw_content[:9]=='[CQ:image':
                         self.key_word.data[self.picture_record_dict[info.user_id]]=info.raw_content

@@ -3,9 +3,8 @@ from mcdreforged.api.types import PluginServerInterface
 from mcdreforged.api.command import *
 import requests, os, sys, json, time
 from collections import defaultdict
-from table import table
-from bot import qbot
-from text import style, PLUGIN_METADATA, DEFAULT_CONFIG
+from .bot import qbot
+from .text import style, PLUGIN_METADATA, DEFAULT_CONFIG
 
 def on_load(server: PluginServerInterface, old):
     # 设置系统路径
@@ -17,6 +16,7 @@ def on_load(server: PluginServerInterface, old):
     global qq_bot
     config = Config(PLUGIN_METADATA['name'], DEFAULT_CONFIG)
     data = Json(PLUGIN_METADATA['name'])
+    
     host = server.get_plugin_instance('cool_q_api').get_config()['api_host']
     port = server.get_plugin_instance('cool_q_api').get_config()['api_port']
     if old is not None and hasattr(old, 'past_bot') and \
@@ -25,7 +25,7 @@ def on_load(server: PluginServerInterface, old):
         past_bot = old.past_bot
     else:
         past_bot = False
-
+    
     qq_bot = qbot(server,config,data,host,port)
 
     # 注册指令
@@ -54,10 +54,10 @@ def on_load(server: PluginServerInterface, old):
     server.register_help_message('!!del <关键词>','删除指定游戏关键词')
     server.register_help_message('@ <QQ名/号> <消息>','让机器人在qq里@')
     # 注册监听任务
-    server.register_event_listener('GUGUbot.qq_message', qq_bot.send_msg_to_mc)
-    server.register_event_listener('GUGUbot.qq_command', qq_bot.on_qq_command)
-    server.register_event_listener('GUGUbot.quit_notification', qq_bot.quit_notification)
-    server.register_event_listener('GUGUbot.apply_notification', qq_bot.apply_notice)
+    server.register_event_listener('cool_q_api.on_qq_info', qq_bot.send_msg_to_mc)
+    server.register_event_listener('cool_q_api.on_qq_command', qq_bot.on_qq_command)
+    server.register_event_listener('cool_q_api.on_qq_notice', qq_bot.notification)
+    server.register_event_listener('cool_q_api.on_qq_apply', qq_bot.on_qq_apply)
 
 qq_bot = None
 # 更新机器人名字 <- 显示在线人数功能
@@ -84,7 +84,7 @@ def on_server_startup(server):
     # 开服提示
     qq_bot.send_msg_to_all_qq(style[qq_bot.style]['server_start'])
     # 开服指令
-    for _,command in qq_bot.start_command_dict.items():
+    for _,command in qq_bot.start_command.data.items():
         # 执行指令
         server.execute(command)
 

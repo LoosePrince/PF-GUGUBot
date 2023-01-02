@@ -1,14 +1,11 @@
 PLUGIN_METADATA = {
-    'id': 'qq_chat',
-    'version': '1.0',
-    'name': 'QQChat',
-    'description': 'Bot for QQ and MC',
+    'id': 'gugubot',
+    'version': '1.0.0',
+    'name': 'GUGUbot',
+    'description': 'A bot connect mc and QQ',
     'author': 'XueK__',
-    'original author': 'zhang_anzhi',
-    'original link': 'https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/QQChat',
     'dependencies': {
         'cool_q_api': '*',
-        'online_player_api': '*',
         'config_api': '*',
         'json_data_api': '*'
     }
@@ -57,6 +54,7 @@ group_help_msg = '''命令帮助如下:
 #mc <消息> -> 向游戏内发送消息（可以触发游戏内关键词）
 #风格 -> 机器人风格帮助
 #游戏关键词 列表 -> 显示现有游戏内关键词列表
+#删除假人 <假人名字> -> 删除游戏内指定假人
 
 关键词相关：
 #添加 <关键词> <回复> -> 添加游戏内关键词回复
@@ -126,9 +124,9 @@ style_help = '''风格指令如下：
 
 uuid_help ='''uuid匹配指令如下：
 #uuid        -> 查看uuid相关帮助
-#uuid list   -> 查看uuid绑定表
-#uuid reload -> 重新匹配uuid
-#uuid update <老ID> <新ID> -> 改白名单的名字'''
+#uuid 列表   -> 查看uuid绑定表
+#uuid 重载 -> 重新匹配uuid
+#uuid 更新 <老ID> <新ID> -> 改白名单的名字'''
 
 name_help = '''机器人名字相关指令如下：
 #名字 -> 查看名字相关帮助
