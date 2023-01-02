@@ -1,5 +1,5 @@
 {
-	"id": "GUGUbot",
+	"id": "gugubot",
 	"version": "1.0.0",
 	"name": "GUGUbot",
 	"description": {
@@ -12,9 +12,5 @@
 	"link": "",
 	"dependencies": {
 		"mcdreforged": ">=2.1.2"
-	},
-
-	"resources": [
-		"lang"
-	]
+	}
 }
