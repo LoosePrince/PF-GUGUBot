@@ -189,9 +189,7 @@ whitelist_remove_with_leave: true
 
 # 使用条款
 - 禁止声明为你原创
-- 必须在关键词回复处添加以下关键词
--- `插件来源`
--- `https://github.com/LoosePrince/PF-MCDRQQchat`
+- 必须在关键词回复处添加以下关键词 `插件来源` `https://github.com/LoosePrince/PF-MCDRQQchat`
 - 禁止商业服使用、盈利等
 - 禁止售卖
 - 允许二次创作，但请标明来源
