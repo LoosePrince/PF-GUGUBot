@@ -1,6 +1,6 @@
 # PF-QQchat
 #### PFingan服务器MCDRQQ机器人插件  
-源：[QQChat-用于连接Minecraft和QQ的插件](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/qq_chat)<br>
+源：[QQChat-用于连接Minecraft和QQ的插件](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/qq_chat)<br>
 修改：[XueK__ - 前往项目](https://github.com/XueK66/PF-MCDRQQchat)
 ### 这是基于原插件的修改版本
 
