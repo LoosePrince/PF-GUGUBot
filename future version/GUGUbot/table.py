@@ -8,14 +8,14 @@ class table(object):
 
     def load(self) -> None: # 读取
         if os.path.isfile(self.path) and os.path.getsize(self.path) != 0:
-            with open(self.path,'r', encoding='UTF-8') as f:
+            with open(self.path,'r', encoding='utf-8') as f:
                 self.data = json.load(f)
         else:
             self.data = {}    
 
     def save(self) -> None: # 储存
-        with open(self.path, 'w', encoding='UTF-8') as f:
-            json.dump(self.data, f, ensure_ascii= False)        
+        with open(self.path, 'w', encoding='utf-8') as f:
+            json.dump(self.data, f, ensure_ascii=False)        
     
     def __getitem__(self, key): # 获取储存内容
         return self.data[key]    

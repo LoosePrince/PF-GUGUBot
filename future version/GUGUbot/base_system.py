@@ -19,8 +19,8 @@ class base_system(object):
             if parameter_length < 3:                                                # 缺少参数
                 bot.reply(info, style[reply_style]['lack_parameter'])
             else:
-                word, response = parameter[1], ' '.join(parameter[2:])
                 if word not in self.data:                                           # 正常添加
+                    word, response = parameter[1], ' '.join(parameter[2:])
                     self.data[word] = response
                     bot.reply(info, style[reply_style]['add_success'])
                 else:                                                               # 已存在
