@@ -6,7 +6,7 @@
 
 ## 依赖
 ### Python包
-- requests
+- [requests](https://www.python.org/)
 ### 前置插件
 - [CoolQAPI](https://github.com/AnzhiZhang/CoolQAPI)
 - [OnlinePlayerAPI](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/OnlinePlayerAPI)
