@@ -1,5 +1,5 @@
 # The definition of the QQ Chat robot:
-import requests, time, json
+import requests, time, json, re, os
 from collections import defaultdict
 from .text import *
 from .key_word_system import key_word_system
@@ -17,7 +17,7 @@ class qbot(object):
         self.port = port
         self.picture_record_dict = {}
         self.shenhe = defaultdict(list)
-        self.style = '傲娇'
+        self.style = '正常'
         self.suggestion = self.ingame_at_suggestion()
         # 读取文件
         self.loading_dicts()
@@ -37,7 +37,7 @@ class qbot(object):
     def on_qq_command(self,server, info, bot):
         # 过滤非关注的消息
         if not (info.source_id in self.config['group_id'] or
-            info.source_id in self.config['admin_id']) or info.content[0] != '#':
+            info.source_id in self.config['admin_id']) or info.raw_content[0] != '#':
             return 
         command = info.content.split(' ')
         command[0] = command[0].replace('#', '')
@@ -52,19 +52,21 @@ class qbot(object):
         # 玩家列表
         if self.config['command']['list'] and (command[0] in ['玩家列表','玩家'] or command[0] in ['假人列表','假人']):
             content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
-            if command[0] in ['玩家列表','玩家']: # 过滤假人
+            player = command[0] in ['玩家','玩家列表']
+            if player: # 过滤假人
                 t_player = [i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()]
             else: # 过滤真人
                 t_player = [i["name"] for i in content['sample'] if i["name"] not in self.whitelist.values()] 
-            list_reply_dict = {'列表':[style[self.style]['no_player_ingame'], 'player_list'],
-                                '假人列表':['没有假人在线哦！', 'bot_list']}
+
             if len(t_player) == 0 :
-                bot.reply(info,list_reply_dict[command[0]][0])
+                respond = style[self.style]['no_player_ingame'] if player else '没有假人在线哦！'
             else:
                 t_player.sort() # 名字排序
-                bot.reply(info, style[self.style][list_reply_dict[command[0]][1]].format(
+                respond = style[self.style]['player_list'].format(
                     len(t_player),
-                    ', '.join(t_player)))
+                    '玩家' if player else '假人',
+                    ', '.join(t_player))
+            bot.reply(info, respond)
 
         # 添加关键词
         elif self.config['command']['key_word'] and command[0] in ["列表",'添加','删除']:
@@ -382,7 +384,7 @@ class qbot(object):
                     # 重新匹配
                     self.match_id()
         # 机器人风格相关
-        elif info.content.startswith('#风格'):
+        elif command[0] == '风格':
             # 风格帮助
             if info.content == '#风格':
                 bot.reply(info, style_help)
@@ -427,7 +429,7 @@ class qbot(object):
         # uuid:qq_id
         self.uuid_qqid = {}
         # QQ绑定名单
-        with open(".//config//QQChat//QQChat.json",'r')  as f:
+        with open(".//config//GUGUbot//GUGUbot.json",'r',encoding='utf-8')  as f:
             # {qq_id: qq_name}
             QQ_bound = json.load(f)
         # 解压whitelist
@@ -469,11 +471,19 @@ class qbot(object):
                             self.server.say(f'§6[QQ] §a[机器人] §f{self.key_word.data[info.content]}')
                     # 添加图片
                     elif info.user_id in self.picture_record_dict and info.raw_content[:9]=='[CQ:image':
-                        self.key_word.data[self.picture_record_dict[info.user_id]]=info.raw_content
+                        pattern = "^\[CQ:image.+url=(.+)\]"
+                        url = re.match(pattern, url).groups()[-1]
+                        response = requests.get(url)
+                        if not os.path.exists("./config/GUGUbot/image/"):
+                            os.makedirs("./config/GUGUbot/image/")
+                        with open(f"./config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg", "wb") as f:
+                            f.write(response.content)
+                        # self.key_word.data[self.picture_record_dict[info.user_id]]=info.raw_content
+                        self.key_word.data[self.picture_record_dict[info.user_id]]=re.sub(pattern, "[CQ:image\\1url={}]".format(f"./config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg"), info.raw_content)
                         del self.picture_record_dict[info.user_id]
                         bot.reply(info,style[self.style]['add_success'])
                     # @ 模块 （现在只支持@ + 内容，非置顶@会出问题）
-                    elif '[CQ:at' in info.content:
+                    elif '@' in info.content:
                         temp = info.raw_content.split(']')
                         # 普通 @ 人
                         if len(temp) == 2:
@@ -515,7 +525,7 @@ class qbot(object):
                         self.server.say(f'§6[QQ] §a[{self.find_game_name(str(user_id))}] §f{info.content}')
             # 提示绑定
             else:
-                bot.reply(info, f'[CQ:at,qq={info.user_id}] 请使用/bound <ID>绑定游戏ID')
+                bot.reply(info, f'[CQ:at,qq={info.user_id}] 请使用#绑定 <ID>绑定游戏ID')
 
     # 转发消息
     def send_msg_to_qq(self,server ,info):
@@ -593,7 +603,7 @@ class qbot(object):
         self.member_dict = {}
         suggest_content = []
         # 添加绑定名单
-        with open('.//config//QQChat//QQChat.json','r') as f:
+        with open('.//config//GUGUbot//GUGUbot.json','r', encoding='utf-8') as f:
             game_name_dict = json.load(f)
         for k,v in game_name_dict.items():
             suggest_content.append(v)
