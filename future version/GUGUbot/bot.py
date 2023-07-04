@@ -354,7 +354,7 @@ class qbot(object):
                     bot.reply(info, response)
                     server.say(f'§a[机器人] §f{response}')
             else:
-                bot.reply(info, f'[CQ:at,qq={user_id}] 请使用#绑定 <ID>绑定游戏ID')
+                bot.reply(info, f'[CQ:at,qq={user_id}][CQ:image,file=file:///{os.getcwd()+"/plugins/GUGUbot/bound.jpg"}]')
         # 绑定功能
         elif len(command) == 2 and command[0] == '绑定':
             user_id = str(info.user_id)
@@ -479,7 +479,7 @@ class qbot(object):
                         with open(f"./config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg", "wb") as f:
                             f.write(response.content)
                         # self.key_word.data[self.picture_record_dict[info.user_id]]=info.raw_content
-                        self.key_word.data[self.picture_record_dict[info.user_id]]=re.sub(pattern, "[CQ:image\\1url={}]".format(f"./config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg"), info.raw_content)
+                        self.key_word.data[self.picture_record_dict[info.user_id]]=re.sub(pattern, "[CQ:image\\1file=file:///{}]".format(f"./config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg"), info.raw_content)
                         del self.picture_record_dict[info.user_id]
                         bot.reply(info,style[self.style]['add_success'])
                     # @ 模块 （现在只支持@ + 内容，非置顶@会出问题）
@@ -525,8 +525,7 @@ class qbot(object):
                         self.server.say(f'§6[QQ] §a[{self.find_game_name(str(user_id))}] §f{info.content}')
             # 提示绑定
             else:
-                bot.reply(info, f'[CQ:at,qq={info.user_id}] 请使用#绑定 <ID>绑定游戏ID')
-
+                bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file=file:///{os.getcwd()+"/plugins/GUGUbot/bound.jpg"}]')
     # 转发消息
     def send_msg_to_qq(self,server ,info):
         if info.is_player and self.config['forward']['mc_to_qq']:
