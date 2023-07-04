@@ -6,7 +6,7 @@
 
 ## 依赖
 ### Python包
-- [requests](https://www.python.org/)
+- [Python™](https://www.python.org/)
 ### Python模块
 - 已存储在插件对应的文件夹内的 [requirements.txt](requirements.txt) 中, 可以使用 `pip install -r requirements.txt` 安装
 ### 前置插件
