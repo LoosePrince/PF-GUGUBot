@@ -1,7 +1,7 @@
 # The definition of the QQ Chat robot:
 import requests, time, json, re, os
 from collections import defaultdict
-from .text import *
+from ..data.text import *
 from .key_word_system import key_word_system
 from .ban_word_system import ban_word_system
 from .start_command_system import start_command_system

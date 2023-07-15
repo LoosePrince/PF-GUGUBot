@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .base_system import base_system
-from .text import *
+from ..data.text import *
 
 class ban_word_system(base_system):
 

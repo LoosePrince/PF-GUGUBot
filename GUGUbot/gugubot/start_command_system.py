@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .base_system import base_system
-from .text import *
+from ..data.text import *
 
 class start_command_system(base_system):
     def __init__(self, path: str, help_msg = start_command_help):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .table import table
-from .text import *
+from ..data.text import *
 
 class base_system(object):
     def __init__(self, path:str, help_msg='帮助文件缺失'):

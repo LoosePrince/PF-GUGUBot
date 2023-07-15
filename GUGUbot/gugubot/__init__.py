@@ -4,7 +4,7 @@ from mcdreforged.api.command import *
 import requests, os, sys, json, time
 from collections import defaultdict
 from .bot import qbot
-from .text import style, PLUGIN_METADATA, DEFAULT_CONFIG
+from ..data.text import style, PLUGIN_METADATA, DEFAULT_CONFIG
 
 def on_load(server: PluginServerInterface, old):
     # 设置系统路径
