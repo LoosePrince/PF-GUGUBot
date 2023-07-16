@@ -126,7 +126,7 @@ QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮�
 [点击查看配置文件说明](https://github.com/LoosePrince/PF-GUGUBot/blob/main/Config-QQChat.yml)
 
 # 有bug或是新的idea
-提个Issue!
+提个Issue!有空的话会回复滴！
 
 # 使用条款
 - 禁止声明为你原创
