@@ -27,7 +27,7 @@ class qbot(object):
         self.bot = bot
         self.picture_record_dict = {}
         self.shenhe = defaultdict(list)
-        self.style = '正常'
+        self.style = "正常"
         self.suggestion = self.ingame_at_suggestion()
         # 读取文件
         self.loading_dicts()
@@ -415,7 +415,6 @@ class qbot(object):
                 server.execute(f"whitelist remove {self.data[user_id]}")
                 self.reply(event, f"{self.data[user_id]}已退群，白名单同步删除")
                 del self.data[user_id]
-                self.data.save()
 
     # 进群处理
     def on_qq_request(self,server, bot:CQHttp, event:Event):

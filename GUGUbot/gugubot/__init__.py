@@ -7,11 +7,10 @@ import os
 import sys
 from table import table
 
-
 def on_load(server: PluginServerInterface, old):
     # 设置系统路径
     set_sys_path()
-    global host,port,past_bot,past_info, event_loop
+    global host, port, past_bot, past_info, event_loop
     global qq_bot
     
     config = table("./config/GUGUBot/config.json", DEFAULT_CONFIG)
@@ -61,14 +60,13 @@ def on_load(server: PluginServerInterface, old):
     server.register_event_listener('qq_api.on_request', qq_bot.on_qq_request)
     server.register_event_listener('qq_api.on_notice', qq_bot.notification)
 
-
 qq_bot = None
 # 更新机器人名字 <- 显示在线人数功能
 def on_player_joined(server:PluginServerInterface, player:str, info:Info):
     if qq_bot \
         and qq_bot.config["command"]["name"] \
         and past_bot:
-        qq_bot.set_number_as_name(server, past_bot,past_info)
+        qq_bot.set_number_as_name(server, past_bot, past_info)
 
 # 更新机器人名字 <- 显示在线人数功能
 def on_player_left(server:PluginServerInterface, player:str):
