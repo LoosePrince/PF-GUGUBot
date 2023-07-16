@@ -522,7 +522,7 @@ class qbot(object):
                     server.say(f'§6[QQ] §a[{self.find_game_name(str(user_id), event.group_id)}] §f{event.content}')
             
     # 转发消息
-    def send_msg_to_qq(self, server:PluginServerInterface, info):
+    def send_msg_to_qq(self, server:PluginServerInterface, info:Info):
         if info.is_player and self.config['forward']['mc_to_qq']:
             # check ban
             if self.config['command']['ban_word']:
