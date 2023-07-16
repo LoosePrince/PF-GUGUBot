@@ -44,19 +44,19 @@ class qbot(object):
         self.shenheman = table(self.config["dict_address"]['shenheman'])                        # 群审核人员
 
     # 通用QQ 指令
-    def on_qq_command(self,server, info, bot):
+    def on_qq_command(self,server, bot:CQHttp, event:Event):
         # 过滤非关注的消息
-        if not (info.source_id in self.config['group_id'] or
-            info.source_id in self.config['admin_id']) or info.raw_content[0] != '#':
+        if not (event.user_id in self.config['group_id'] or
+            event.user_id in self.config['admin_id']) or event.raw_message[0] != '#':
             return 
-        command = info.content.split(' ')
+        command = event.content.split(' ')
         command[0] = command[0].replace('#', '')
         # 检测违禁词
-        if self.config['command']['ban_word'] and info.source_type == 'group':
+        if self.config['command']['ban_word'] and event.detail_type == 'group':
             ban_result = self.ban_word.check_ban(' '.join(command))
             if ban_result:
-                bot.delete_msg(info.message_id)
-                bot.reply(info, style[self.style]['ban_word_find'].format(ban_result[1]))
+                self.bot.delete_msg(event.message_id)
+                self.reply(event, style[self.style]['ban_word_find'].format(ban_result[1]))
                 return 
 
         # 玩家列表
@@ -76,73 +76,73 @@ class qbot(object):
                     len(t_player),
                     '玩家' if player else '假人',
                     ', '.join(t_player))
-            bot.reply(info, respond)
+            self.reply(event, respond)
 
         # 添加关键词
         elif self.config['command']['key_word'] and command[0] in ["列表",'添加','删除']:
-            self.key_word.handle_command(info.content, bot, info, style=self.style)
+            self.key_word.handle_command(event.content, bot, event, style=self.style)
 
         # 游戏内关键词
         elif self.config['command']['ingame_key_word'] and command[0] == '游戏关键词':
             if self.config['command']['ban_word']:
                 ban_result = self.ban_word.check_ban(''.join(command[1:]))
                 if ban_result:
-                    bot.delete_msg(info.message_id)
-                    bot.reply(info, style[self.style]['ban_word_find'].format(ban_result[1]))
+                    self.bot.delete_msg(event.message_id)
+                    self.reply(event, style[self.style]['ban_word_find'].format(ban_result[1]))
                     return 
-            self.key_word_ingame.handle_command(info.content, bot, info, style=self.style)
+            self.key_word_ingame.handle_command(event.content, bot, event, style=self.style)
 
         # 添加关键词图片
         elif self.config['command']['key_word'] and command[0] == '添加图片' and len(command)>1:
-            if command[1] not in self.key_word.data and info.user_id not in self.picture_record_dict:
+            if command[1] not in self.key_word.data and event.user_id not in self.picture_record_dict:
                 ban_result = self.ban_word.check_ban(command[1])
                 if ban_result:
-                    bot.delete_msg(info.message_id)
-                    bot.reply(info, style[self.style]['ban_word_find'].format(ban_result[1]))
+                    self.bot.delete_msg(event.message_id)
+                    self.reply(event, style[self.style]['ban_word_find'].format(ban_result[1]))
                     return 
                 else: # 正常添加
-                    self.picture_record_dict[info.user_id] = command[1]
-                    bot.reply(info, '请发送要添加的图片~')
+                    self.picture_record_dict[event.user_id] = command[1]
+                    self.reply(event, '请发送要添加的图片~')
             elif command[1] in self.key_word.data:
-                bot.reply(info, '已存在该关键词~')
+                self.reply(event, '已存在该关键词~')
             else:
-                bot.reply(info,'上一个关键词还未绑定，添加哒咩！') 
+                self.reply(event,'上一个关键词还未绑定，添加哒咩！') 
 
         # 审核通过
-        elif self.config['command']['shenhe'] and command[0] == '同意' and len(self.shenhe[info.user_id]) > 0:
-            bot.set_group_add_request(self.shenhe[info.user_id][0][1],self.shenhe[info.user_id][0][2],True)
+        elif self.config['command']['shenhe'] and command[0] == '同意' and len(self.shenhe[event.user_id]) > 0:
+            self.bot.set_group_add_request(self.shenhe[event.user_id][0][1],self.shenhe[event.user_id][0][2],True)
             with open(self.config["dict_address"]['shenhe_log'],'a+',encoding='utf-8') as f:
                 f.write(" ".join([time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
-                    self.shenhe[info.user_id][0][0],
-                    info.user_id,
+                    self.shenhe[event.user_id][0][0],
+                    event.user_id,
                     '通过'])+'\n')
-            bot.reply(info,f"已通过{self.shenhe[info.user_id][0][0]}的申请awa")
-            self.shenhe[info.user_id].pop(0)
+            self.reply(event,f"已通过{self.shenhe[event.user_id][0][0]}的申请awa")
+            self.shenhe[event.user_id].pop(0)
         # 审核不通过
-        elif self.config['command']['shenhe'] and command[0] == '拒绝' and len(self.shenhe[info.user_id]) > 0:
-            bot.set_group_add_request(self.shenhe[info.user_id][0][1],self.shenhe[info.user_id][0][2],False)
+        elif self.config['command']['shenhe'] and command[0] == '拒绝' and len(self.shenhe[event.user_id]) > 0:
+            self.bot.set_group_add_request(self.shenhe[event.user_id][0][1],self.shenhe[event.user_id][0][2],False)
             with open(self.config["dict_address"]['shenhe_log'],'a+',encoding='utf-8') as f:
                 f.write(" ".join([time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
-                    self.shenhe[info.user_id][0][0],
-                    info.user_id,
+                    self.shenhe[event.user_id][0][0],
+                    event.user_id,
                     '拒绝'])+'\n')
-            bot.reply(info,f"已拒绝{self.shenhe[info.user_id][0][0]}的申请awa")
-            self.shenhe[info.user_id].pop(0)
+            self.reply(event,f"已拒绝{self.shenhe[event.user_id][0][0]}的申请awa")
+            self.shenhe[event.user_id].pop(0)
         
-        if info.source_type == 'private':
-            self.private_command(server, info, bot, command)
-        elif info.source_type == 'group':
-            self.group_command(server, info, bot, command)
+        if event.detail_type == 'private':
+            self.private_command(server, bot, event, command)
+        elif event.detail_type == 'group':
+            self.group_command(server, bot, event, command)
 
     # 管理员指令
-    def private_command(self, server, info, bot, command):
+    def private_command(self, server, bot:CQHttp, event:Event, command):
         # 全部帮助菜单
-        if info.content == '#帮助':
-            bot.reply(info, admin_help_msg)
+        if event.content == '#帮助':
+            self.reply(event, admin_help_msg)
         # bound 帮助菜单
-        elif info.content.startswith('#绑定'):
-            if info.content == '#绑定':
-                bot.reply(info, bound_help)
+        elif event.content.startswith('#绑定'):
+            if event.content == '#绑定':
+                self.reply(event, bound_help)
             # 已绑定的名单    
             elif len(command) == 2 and command[1] == '列表':
                 bound_list = [f'{a} - {b}' for a, b in self.data.items()]
@@ -150,37 +150,37 @@ class qbot(object):
                 for i in range(0, len(bound_list)):
                     reply_msg += f'{i + 1}. {bound_list[i]}\n'
                 reply_msg = '还没有人绑定' if reply_msg == '' else reply_msg
-                bot.reply(info, reply_msg)
+                self.reply(event, reply_msg)
             # 查寻绑定的ID
             elif len(command) == 3 and command[1] == '查询':
                 if command[2] in self.data:
-                    bot.reply(info,
+                    self.reply(event,
                             f'{command[2]} 绑定的ID是{self.data[command[2]]}')
                 else:
-                    bot.reply(info, f'{command[2]} 未绑定')
+                    self.reply(event, f'{command[2]} 未绑定')
             # 解除绑定
             elif len(command) == 3 and command[1] == '解绑':
                 if command[2] in self.data:
                     del self.data[command[2]]
                     self.data.save()
-                    bot.reply(info, f'已解除 {command[2]} 绑定的ID')
+                    self.reply(event, f'已解除 {command[2]} 绑定的ID')
                 else:
-                    bot.reply(info, f'{command[2]} 未绑定')
+                    self.reply(event, f'{command[2]} 未绑定')
             # 绑定ID
             elif len(command) == 3 and command[1].isdigit():
                 self.data[command[1]] = command[2]
                 self.data.save()
-                bot.reply(info, '已成功绑定')
+                self.reply(event, '已成功绑定')
 
         # 白名单
-        elif info.content.startswith('#白名单'):
-            if info.content == '#白名单':
-                bot.reply(info, whitelist_help)
+        elif event.content.startswith('#白名单'):
+            if event.content == '#白名单':
+                self.reply(event, whitelist_help)
             # 执行指令
             elif len(command)>1 and command[1] in ['添加', '删除','移除', '列表', '开', '关', '重载']:
                 if command[1] == '添加':
                     server.execute(f'/whitelist add {command[2]}')
-                    bot.reply(info, style[self.style]['add_success'])
+                    self.reply(event, style[self.style]['add_success'])
                     while command[2] not in self.whitelist:
                         temp = self.loading_file(self.config["dict_address"]['whitelist'])
                         # 解压白名单表
@@ -189,84 +189,84 @@ class qbot(object):
                     self.match_id()
                 elif command[1] in ['删除','移除']:
                     server.execute(f'/whitelist remove {command[2]}')
-                    bot.reply(info ,style[self.style]['delete_success'])
+                    self.reply(event ,style[self.style]['delete_success'])
                     temp = self.loading_file(self.config["dict_address"]['whitelist'])
                     # 解压白名单表
                     self.whitelist = {list(i.values())[0]:list(i.values())[1] for i in temp}
                 elif command[1] == '开':
                     server.execute(f'/whitelist on')
-                    bot.reply(info, '白名单已开启！')
+                    self.reply(event, '白名单已开启！')
                 elif command[1] == '关':
                     server.execute(f'/whitelist off')
-                    bot.reply(info, '白名单已关闭！')
+                    self.reply(event, '白名单已关闭！')
                 elif command[1] == '重载':
                     server.execute(f'/whitelist reload')
                     temp = self.loading_file(self.config["dict_address"]['whitelist'])
                     # 解压白名单表
                     self.whitelist = {list(i.values())[0]:list(i.values())[1] for i in temp}
-                    bot.reply(info, '白名单已重载~')
+                    self.reply(event, '白名单已重载~')
                 else:
-                    bot.reply(info,'白名单如下：\n'+'\n'.join(sorted(self.whitelist.values())))
+                    self.reply(event,'白名单如下：\n'+'\n'.join(sorted(self.whitelist.values())))
                     
         # 启动指令相关
-        elif info.content.startswith('#启动指令'):
+        elif event.content.startswith('#启动指令'):
             # 开启开服指令
             if len(command)>1 and command[1] == '开':
                 self.config['command']['start_command'] = True
-                bot.reply(info, '已开启开服指令！')
+                self.reply(event, '已开启开服指令！')
             # 关闭开服指令
             elif len(command)>1 and command[1] == '关':
                 self.config['command']['start_command'] = False
-                bot.reply(info, '已关闭开服指令！')
+                self.reply(event, '已关闭开服指令！')
             else:
-                self.start_command.handle_command(info.content, bot, info, style=self.style)
+                self.start_command.handle_command(event.content, bot, event, style=self.style)
               
         # 违禁词相关
-        elif info.content.startswith('#违禁词'):
+        elif event.content.startswith('#违禁词'):
             if len(command)>1 and command[1] == '开':
                 self.config['command']['ban_word'] = True
-                bot.reply(info, '已开启违禁词！')
+                self.reply(event, '已开启违禁词！')
             # 关闭违禁词
             elif len(command)>1 and command[1] == '关':
                 self.config['command']['ban_word'] = False
-                bot.reply(info, '已关闭违禁词！')
+                self.reply(event, '已关闭违禁词！')
             else:
-                self.ban_word.handle_command(info.content, bot, info, style=self.style)
+                self.ban_word.handle_command(event.content, bot, event, style=self.style)
         
         # 关键词相关
-        elif info.content.startswith('#关键词'):
+        elif event.content.startswith('#关键词'):
             # 开启关键词
             if len(command)>1 and command[1] in ['开','on']:
                 self.config['command']['key_word'] = True
-                bot.reply(info, '已开启关键词！')
+                self.reply(event, '已开启关键词！')
             # 关闭关键词
             elif len(command)>1 and command[1] in ['关', 'off']:
                 self.config['command']['key_word'] = False
-                bot.reply(info, '已关闭关键词！')
+                self.reply(event, '已关闭关键词！')
             else:
-                self.key_word.handle_command(info.content, bot, info, style=self.style)
+                self.key_word.handle_command(event.content, bot, event, style=self.style)
             
         # 游戏内关键词相关
-        elif info.content.startswith('#游戏关键词'):
+        elif event.content.startswith('#游戏关键词'):
             # 开启游戏关键词
             if len(command)>1 and command[1] == '开':
                 self.config['command']['ingame_key_word'] = True
-                bot.reply(info, '已开启游戏关键词！')
+                self.reply(event, '已开启游戏关键词！')
             # 关闭游戏关键词
             elif len(command)>1 and command[1] == '关':
                 self.config['command']['ingame_key_word'] = False
-                bot.reply(info, '已关闭游戏关键词！')
+                self.reply(event, '已关闭游戏关键词！')
             else:
-                self.key_word_ingame.handle_command(info.content, bot, info, style=self.style)
+                self.key_word_ingame.handle_command(event.content, bot, event, style=self.style)
 
         # uuid匹配相关
-        elif info.content.startswith('#uuid'):
+        elif event.content.startswith('#uuid'):
             # uuid 帮助
-            if info.content == '#uuid':
-                bot.reply(info, uuid_help)
+            if event.content == '#uuid':
+                self.reply(event, uuid_help)
             # 查看uuid 匹配表
             elif len(command)>1 and command[1] == '列表':
-                bot.reply(info, "uuid匹配如下：\n"+'\n'.join([str(k)+'-'+str(v)+'-'+self.data[v] for k,v in self.uuid_qqid.items() if v in self.data]))
+                self.reply(event, "uuid匹配如下：\n"+'\n'.join([str(k)+'-'+str(v)+'-'+self.data[v] for k,v in self.uuid_qqid.items() if v in self.data]))
             # 更新匹配表
             elif len(command)>1 and command[1] == '重载':
                 # 白名单表 [{uuid:value, name: value}]
@@ -274,7 +274,7 @@ class qbot(object):
                 # 解压白名单表
                 self.whitelist = {list(i.values())[0]:list(i.values())[1] for i in temp}
                 self.match_id()
-                bot.reply(info, '已重新匹配~')
+                self.reply(event, '已重新匹配~')
             # 更改白名单名字
             elif len(command)>1 and command[1] in ['修改','更改','更新']:
                 pre_name = command[2]
@@ -286,73 +286,73 @@ class qbot(object):
                     if pre_name == whitelist[index]['name']:
                         changed = True
                         whitelist[index]['name'] = cur_name
-                        bot.reply(info,'已将 {} 改名为 {}'.format(pre_name,cur_name))
+                        self.reply(event,'已将 {} 改名为 {}'.format(pre_name,cur_name))
                         with open(self.config["dict_address"]['whitelist'],'w') as f:
                             whitelist = json.dump(whitelist,f) # [{uuid:value,name:value}]
                         self.match_id()
-                        bot.reply(info, '已重新匹配~')
+                        self.reply(event, '已重新匹配~')
                         break
                 if not changed:
-                    bot.reply(info, '未找到对应名字awa！')                
+                    self.reply(event, '未找到对应名字awa！')                
 
         # 机器人名字 <- 服务器人数
-        elif info.content.startswith('#名字'):
-            if info.content == '#名字':
-                bot.reply(info, name_help)
+        elif event.content.startswith('#名字'):
+            if event.content == '#名字':
+                self.reply(event, name_help)
             elif len(command)>1 and command[1] == '开':
                 self.config['command']['name'] = True
     
                 # 创造全局变量
-                global past_info,past_bot
-                past_info = info
+                global past_event,past_bot
+                past_event = event
                 past_bot = bot
 
-                self.set_number_as_name(server, bot, info)
+                self.set_number_as_name(server, bot, event)
 
-                bot.reply(info, "显示游戏内人数已开启")
+                self.reply(event, "显示游戏内人数已开启")
             elif len(command)>1 and command[1] == '关':
                 self.config['command']['name'] = False
                 for gid in self.config['group_id']:
-                    bot.set_group_card(gid, int(bot.get_login_info().json()['data']['user_id']), " ")
-                bot.reply(info, "显示游戏内人数已关闭")     
+                    self.bot.set_group_card(gid, int(event.self_id), " ")
+                self.reply(event, "显示游戏内人数已关闭")     
 
-        elif info.content.startswith('#审核'):
-            if info.content == '#审核':
-                bot.reply(info, shenhe_help)
+        elif event.content.startswith('#审核'):
+            if event.content == '#审核':
+                self.reply(event, shenhe_help)
             elif len(command)>1 and command[1] == '开':
                 self.config['command']['shenhe'] = True
-                bot.reply(info, '自动审核开启')
+                self.reply(event, '自动审核开启')
             elif len(command)>1 and command[1] == '关':
                 self.config['command']['shenhe'] = False
-                bot.reply(info, '自动审核关闭')
+                self.reply(event, '自动审核关闭')
             elif len(command)>1 and command[1] == '添加':
                 if len(command) == 4 and command[3] not in self.shenheman:
                     self.shenheman[command[3]] = command[2] # 别名：QQ号
-                    bot.reply(info,style[self.style]['add_success'])
+                    self.reply(event,style[self.style]['add_success'])
                 elif command[3] in self.shenheman:
-                    bot.reply(info,'已存在该别名')
+                    self.reply(event,'已存在该别名')
             elif command[1] == '删除' and len(command) > 2:
                 
                 if command[2] in self.shenheman.values():
                     for k,v in self.shenheman.items():
                         if v == command[2]:
                             del self.shenheman[k]
-                    bot.reply(info,style[self.style]['delete_success'])
+                    self.reply(event,style[self.style]['delete_success'])
                 else:
-                    bot.reply(info,'审核员不存在哦！')
+                    self.reply(event,'审核员不存在哦！')
             elif len(command)>1 and command[1] == '列表':
                 temp = defaultdict(list)
                 for name,qq_hao in self.shenheman.items():
                     temp[qq_hao].append(name)
-                bot.reply(info, "有如下审核员：\n"+"\n".join([k+'-'+",".join(v) for k,v in temp.items()]))
+                self.reply(event, "有如下审核员：\n"+"\n".join([k+'-'+",".join(v) for k,v in temp.items()]))
 
     # 群指令
-    def group_command(self, server, info, bot, command):
-        if info.content == '#帮助':  # 群帮助
-            bot.reply(info, group_help_msg)
+    def group_command(self, server, bot:CQHttp, event:Event, command):
+        if event.content == '#帮助':  # 群帮助
+            self.reply(event, group_help_msg)
         elif self.config['command']['mc'] and command[0] == 'mc': # qq发送到游戏内消息
-            user_id = str(info.user_id)
-            message = info.content[4:]
+            user_id = str(event.user_id)
+            message = event.content[4:]
             # 检测绑定
             if user_id in self.data.keys():
                 # 正常转发
@@ -360,28 +360,28 @@ class qbot(object):
                 # 回复关键词
                 response = self.key_word_ingame.check_response(message)
                 if response: 
-                    bot.reply(info, response)
+                    self.reply(event, response)
                     server.say(f'§a[机器人] §f{response}')
             else:
-                bot.reply(info, f'[CQ:at,qq={user_id}][CQ:image,file=file:///{os.getcwd()+"/plugins/GUGUbot/bound.jpg"}]')
+                self.reply(event, f'[CQ:at,qq={user_id}][CQ:image,file=file:///{os.getcwd()+"/plugins/GUGUbot/bound.jpg"}]')
         # 绑定功能
         elif len(command) == 2 and command[0] == '绑定':
-            user_id = str(info.user_id)
+            user_id = str(event.user_id)
             # 已绑定
             if user_id in self.data.keys():
                 _id = self.data[user_id]
-                bot.reply(info, f'[CQ:at,qq={user_id}] 您已绑定ID: {_id}, 请联系管理员修改')
+                self.reply(event, f'[CQ:at,qq={user_id}] 您已绑定ID: {_id}, 请联系管理员修改')
             # 未绑定
             else:
                 self.data[user_id] = command[1]
                 self.data.save()
-                bot.reply(info, f'[CQ:at,qq={user_id}] 已成功绑定')
+                self.reply(event, f'[CQ:at,qq={user_id}] 已成功绑定')
                 # 更换群名片
-                bot.set_group_card(info.source_id,user_id, self.data[user_id])
+                self.bot.set_group_card(event.user_id,user_id, self.data[user_id])
                 # 自动加白名单
                 if self.config['whitelist_add_with_bound']:
                     server.execute(f'whitelist add {command[1]}')
-                    bot.reply(info, f'[CQ:at,qq={user_id}] 已将您添加到服务器白名单')
+                    self.reply(event, f'[CQ:at,qq={user_id}] 已将您添加到服务器白名单')
                     # 重载白名单
                     server.execute(f'whitelist reload')
                     while command[1] not in self.whitelist:
@@ -395,43 +395,43 @@ class qbot(object):
         # 机器人风格相关
         elif command[0] == '风格':
             # 风格帮助
-            if info.content == '#风格':
-                bot.reply(info, style_help)
+            if event.content == '#风格':
+                self.reply(event, style_help)
             # 风格列表
             elif command[1] == '列表':
-                bot.reply(info, "现有如下风格：\n"+'\n'.join(style.keys()))
+                self.reply(event, "现有如下风格：\n"+'\n'.join(style.keys()))
             # 切换风格
             elif command[1] in style.keys():
                 self.style = command[1]
-                bot.reply(info, f'已切换为 {self.style}')
+                self.reply(event, f'已切换为 {self.style}')
 
     # 退群处理
-    def notification(self, server, info, bot):
+    def notification(self, server, bot:CQHttp, event:Event):
         # 指定群里 + 是退群消息
-        if info.source_id in self.config['group_id'] \
-            and info.notice_type == 'group_decrease':
-            user_id = str(info.user_id)
+        if event.user_id in self.config['group_id'] \
+            and event.sub_type == 'group_decrease':
+            user_id = str(event.user_id)
             if user_id in self.data.keys():
                 server.execute(f"whitelist remove {self.data[user_id]}")
-                bot.reply(info, f"{self.data[user_id]}已退群，白名单同步删除")
+                self.reply(event, f"{self.data[user_id]}已退群，白名单同步删除")
                 del self.data[user_id]
                 self.data.save()
 
     # 进群处理
-    def on_qq_request(self,server, info, bot):
-        if info.source_id in self.config["group_id"] \
-            and info.request_type == "group" and self.config["command"]["shenhe"]:
+    def on_qq_request(self,server, bot:CQHttp, event:Event):
+        if event.user_id in self.config["group_id"] \
+            and event.detail_type == "group" and self.config["command"]["shenhe"]:
             # 获取名称
             stranger_name = requests.post(f"http://{self.host}:{self.port}/get_stranger_info",
             json = {
-                "user_id":info.user_id
+                "user_id":event.user_id
             }).json()["data"]["nickname"]
             # 审核人
-            at_id = self.shenheman[info.comment] if info.comment in self.shenheman else self.config['admin_id'][0]
+            at_id = self.shenheman[event.comment] if event.comment in self.shenheman else self.config['admin_id'][0]
             # 通知
-            bot.reply(info, f"喵！[CQ:at,qq={at_id}] {stranger_name} 申请进群, 请审核")
+            self.reply(event, f"喵！[CQ:at,qq={at_id}] {stranger_name} 申请进群, 请审核")
             server.say(f'§6[QQ] §b[@{at_id}] §f{stranger_name} 申请进群, 请审核')
-            self.shenhe[at_id].append((stranger_name,info.flag,info.sub_type))
+            self.shenhe[at_id].append((stranger_name, event.flag, event.sub_type))
                         
     # 匹配uuid qqid
     def match_id(self) -> None:
@@ -461,7 +461,7 @@ class qbot(object):
                     reason = self.ban_word.check_ban(event.content)
                     # 包含违禁词 -> 撤回 + 提示 + 不转发
                     if reason:
-                        bot.delete_msg(event.message_id)
+                        self.bot.delete_msg(event.message_id)
                         self.reply(event, style[self.style]['ban_word_find'].format(reason[1]))
                 user_id = str(event.user_id)
                 # 检测关键词
@@ -495,19 +495,19 @@ class qbot(object):
                             target_id, event.content = (temp[0][10:],temp[1])
                             # 未绑定且不是机器人
                             if str(target_id) not in self.data.keys() \
-                                and str(target_id) != str(bot.get_login_info().json()['data']['user_id']):
-                                target_data = bot.get_group_member_info(info.source_id, target_id).json()['data']
+                                and str(target_id) != str(event.self_id):
+                                target_data = self.bot.get_group_member_info(event.user_id, target_id).json()['data']
                                 target_name = target_data['card'] if target_data['card'] != '' else target_data['nickname']
                                 target_name += '(未绑定)'
                             # 正常人
-                            elif str(target_id) != str(bot.get_login_info().json()['data']['user_id']):
+                            elif str(target_id) != str(event.self_id):
                                 target_name = self.find_game_name(target_id)
                             self.server.say(f'§6[QQ] §a[{self.data[user_id]}] §b[@{target_name}] §f{event.content}')
                         # 回复
                         else:
                             target_id = temp[1][10:]
                             # 是机器人
-                            if target_id == str(bot.get_login_info().json()['data']['user_id']):
+                            if target_id == str(event.self_id):
                                 q = {'message_id': temp[0][13:]}
                                 pre_message = requests.post(f'http://{self.host}:{self.port}/get_msg',json=q).json()['data']['message']
                                 target_name = pre_message.split(']')[0].split('&')[1][4:]
@@ -515,7 +515,7 @@ class qbot(object):
                             else:
                                 # 未绑定
                                 if target_id not in self.data.keys():
-                                    target_data = bot.get_group_member_info(info.source_id, target_id).json()['data']
+                                    target_data = self.bot.get_group_member_info(event.user_id, target_id).json()['data']
                                     target_name = target_data['card'] if target_data['card'] != '' else target_data['nickname'] 
                                     target_name += '(未绑定)'
                                 # 已绑定 -> 找游戏ID
@@ -532,7 +532,7 @@ class qbot(object):
             else:
                 self.reply(event, f'[CQ:at,qq={event.user_id}][CQ:image,file=file:///{os.getcwd()+"/plugins/GUGUbot/bound.jpg"}]')
     # 转发消息
-    def send_msg_to_qq(self, server:PluginServerInterface, info:Info):
+    def send_msg_to_qq(self, server:PluginServerInterface, info):
         if info.is_player and self.config['forward']['mc_to_qq']:
             # check ban
             if self.config['command']['ban_word']:
@@ -668,7 +668,7 @@ class qbot(object):
             self.send_group_msg(msg, group)
 
     # 机器人名称显示游戏内人数
-    def set_number_as_name(self, server, bot, info):
+    def set_number_as_name(self, server:PluginServerInterface, bot:CQHttp, event:Event):
         content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
         number = len([i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()])
         name = " "
@@ -678,7 +678,7 @@ class qbot(object):
         for gid in self.config['group_id']:
             data = {
             'group_id': gid,
-            'user_id': int(bot.get_login_info().json()['data']['user_id']),
+            'user_id': event.self_id,
             'card': name
             }
             requests.post(
