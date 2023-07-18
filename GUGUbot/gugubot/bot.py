@@ -135,7 +135,7 @@ class qbot(object):
             self.group_command(server, bot, event, command)
 
     # 管理员指令
-    def private_command(self, server, bot:CQHttp, event:Event, command):
+    def private_command(self, server, bot:CQHttp, event:Event, command:list):
         # 全部帮助菜单
         if event.content == '#帮助':
             self.reply(event, admin_help_msg)
@@ -347,7 +347,7 @@ class qbot(object):
                 self.reply(event, "有如下审核员：\n"+"\n".join([k+'-'+",".join(v) for k,v in temp.items()]))
 
     # 群指令
-    def group_command(self, server, bot:CQHttp, event:Event, command):
+    def group_command(self, server, bot:CQHttp, event:Event, command:list):
         if event.content == '#帮助':  # 群帮助
             self.reply(event, group_help_msg)
         elif self.config['command']['mc'] and command[0] == 'mc': # qq发送到游戏内消息
@@ -479,17 +479,20 @@ class qbot(object):
                 # 添加图片
                 elif event.user_id in self.picture_record_dict and event.raw_message[:9]=='[CQ:image':
                     # save pic
-                    pattern = "^\[CQ:image.+url=(.+)\]"
-                    url = re.match(pattern, url).groups()[-1]
-                    response = requests.get(url)
-                    if not os.path.exists("./config/GUGUbot/image/"):
-                        os.makedirs("./config/GUGUbot/image/")
-                    with open(f"./config/GUGUbot/image/{self.picture_record_dict[event.user_id]}.jpg", "wb") as f:
-                        f.write(response.content)
-                    # save dict
-                    self.key_word.data[self.picture_record_dict[event.user_id]]=re.sub(pattern, "[CQ:image\\1file=file:///{}]".format(f"./config/GUGUbot/image/{self.picture_record_dict[event.user_id]}.jpg"), event.raw_message)
-                    del self.picture_record_dict[event.user_id]
-                    self.reply(event, style[self.style]['add_success'])
+                    pattern = "\[CQ:image.+url=(.+)\]"
+                    try:
+                        url = re.match(pattern, event.raw_message).groups()[-1]
+                        response = requests.get(url)
+                        if not os.path.exists("./config/GUGUbot/image/"):
+                            os.makedirs("./config/GUGUbot/image/")
+                        with open(f"./config/GUGUbot/image/{self.picture_record_dict[event.user_id]}.jpg", "wb") as f:
+                            f.write(response.content)
+                        # save dict
+                        self.key_word.data[self.picture_record_dict[event.user_id]]=re.sub(pattern, "[CQ:image\\1file=file:///{}]".format(f"./config/GUGUbot/image/{self.picture_record_dict[event.user_id]}.jpg"), event.raw_message)
+                        del self.picture_record_dict[event.user_id]
+                        self.reply(event, style[self.style]['add_success'])
+                    except Exception as e:
+                        self.reply(event, e)
                 # @ 模块
                 elif '@' in event.content:
                     def _get_name(qq_id:str):
