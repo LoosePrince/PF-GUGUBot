@@ -10,10 +10,7 @@
 ### Python模块
 - 已存储在插件对应的文件夹内的 [requirements.txt](requirements.txt) 中, 可以使用 `pip install -r requirements.txt` 安装
 ### 前置插件
-- [CoolQAPI](https://github.com/AnzhiZhang/CoolQAPI)
-- [OnlinePlayerAPI](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/OnlinePlayerAPI)
-- [ConfigAPI](https://github.com/MCDReforged/ConfigAPI)
-- [JsonDataAPI](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/JsonDataAPI)
+- [qq_api](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/qq_api)
 
 ## 功能列表
 QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮助`
@@ -127,6 +124,12 @@ QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮�
 
 ## 配置文件
 [点击查看配置文件说明](https://github.com/LoosePrince/PF-GUGUBot/blob/main/Config-QQChat.yml)
+
+# 有bug或是新的idea
+提个Issue!有空的话会回复滴！
+
+# TODO
+- [ ] 字体的路径问题
 
 # 使用条款
 - 禁止声明为你原创

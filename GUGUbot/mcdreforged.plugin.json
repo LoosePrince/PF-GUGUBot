@@ -1,6 +1,6 @@
 {
 	"id": "gugubot",
-	"version": "1.0.2",
+	"version": "1.0.3-beta",
 	"name": "GUGUbot",
 	"description": {
 		"en_us": "A QQ bot connect MC and QQ",
@@ -9,7 +9,7 @@
 	"author": [
 		"XueK__"
 	],
-	"link": "",
+	"link": "https://github.com/XueK66/GUGUBot",
 	"dependencies": {
 		"mcdreforged": ">=2.1.2"
 	}

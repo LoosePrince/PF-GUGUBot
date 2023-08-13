@@ -1,4 +1,2 @@
-requests
-flask
-PyYAML
-psutil
+aiocqhttp
+mcdreforged>=2.0.1
