@@ -11,9 +11,12 @@
 - 已存储在插件对应的文件夹内的 [requirements.txt](requirements.txt) 中, 可以使用 `pip install -r requirements.txt` 安装
 ### 前置插件
 - [CoolQAPI](https://github.com/AnzhiZhang/CoolQAPI)
-- [OnlinePlayerAPI](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/OnlinePlayerAPI)
-- [ConfigAPI](https://github.com/MCDReforged/ConfigAPI)
-- [JsonDataAPI](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/JsonDataAPI)
+> #### 已废弃的前置插件
+> ```
+> [OnlinePlayerAPI] https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/OnlinePlayerAPI
+> [ConfigAPI] https://github.com/MCDReforged/ConfigAPI
+> [JsonDataAPI] https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/JsonDataAPI
+> ```
 
 ## 功能列表
 QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮助`
@@ -214,7 +217,31 @@ example:
 >
 > 建议从 `5701` 向上增加，如第一个服为 `5701` 第二个服为 `5702`
 
-## 开发
+# RCON的说明
+
+> 基于指令并获取返回结果
+
+## 配置
+#### 作用
+> 获取真实的在线情况
+> 开发中...
+### 服务端配置 - Server
+- server.properties
+```
+rcon.port=12345
+enable-rcon=true
+rcon.password=123456
+```
+### MCDR配置 - MCDR
+- config.yml
+```
+rcon:
+  enable: true
+  address: 127.0.0.1
+  port: 12345
+  password: 123456
+```
+# 开发
 
 请查看原始插件说明，如有需求请提交问题
 
@@ -246,7 +273,7 @@ example:
 用于获取 `CQHttp` 的实例。
 
 
-## 配置文件
+# 配置文件
 [点击查看配置文件说明](https://github.com/LoosePrince/PF-GUGUBot/blob/main/Config-QQChat.yml)
 
 # 有bug或是新的idea
