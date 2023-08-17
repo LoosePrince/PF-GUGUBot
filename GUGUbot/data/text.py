@@ -13,10 +13,13 @@ PLUGIN_METADATA = {
 DEFAULT_CONFIG = {
     'group_id': [1234561, 1234562],
     'admin_id': [1234563, 1234564],
+    'host': '',
+    'port': '',
     'whitelist_add_with_bound': False,
     'whitelist_remove_with_leave': True,
     'game_ip':'',
     'game_port':'',
+    'font_path': "./plugins/GUGUbot/font/MicrosoftYaHei-01.ttf",
     'forward': {
         'mc_to_qq': True,
         'qq_to_mc': True

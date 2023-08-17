@@ -1,2 +1,5 @@
 aiocqhttp
 mcdreforged>=2.0.1
+pandas
+pygame
+requests
