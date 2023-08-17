@@ -4,8 +4,8 @@ class table(object):
 
     def __init__(self,path:str="./default.json", default_content:dict=None) -> None: # 初始化，记录系统路径
         self.path = path
-        self.load()    
         self.default_content = default_content
+        self.load()    
 
     def load(self) -> None: # 读取
         if os.path.isfile(self.path) and os.path.getsize(self.path) != 0:
@@ -13,6 +13,8 @@ class table(object):
                 self.data = json.load(f)
         else:
             self.data = self.default_content if self.default_content else {}
+            with open(self.path, 'w', encoding='utf-8') as f:
+                json.dump(self.data, f, ensure_ascii=False)
 
     def save(self) -> None: # 储存
         with open(self.path, 'w', encoding='UTF-8') as f:

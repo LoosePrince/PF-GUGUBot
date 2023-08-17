@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
-from .bot import qbot
-from ..data.text import style, DEFAULT_CONFIG
-from mcdreforged.api.types import PluginServerInterface, Info
-from mcdreforged.api.command import *
+#+---------------------------------------------------------------------+
 import os
 import sys
-from table import table
 
+# GUGUbot加入系统路径
+gugu_dir = os.path.dirname(__file__)[:-7] # remove \gugubot
+sys.path.append(gugu_dir)  if gugu_dir not in sys.path  else None
+
+from .bot import qbot
+from data.text import style, DEFAULT_CONFIG
+from mcdreforged.api.types import PluginServerInterface, Info
+from mcdreforged.api.command import *
+from table import table
+#+---------------------------------------------------------------------+
 def on_load(server: PluginServerInterface, old):
     # 设置系统路径
     set_sys_path()
@@ -15,13 +21,9 @@ def on_load(server: PluginServerInterface, old):
     
     config = table("./config/GUGUBot/config.json", DEFAULT_CONFIG)
     data = table("./config/GUGUBot/GUGUBot.json")
-    
-    qq_api = server.get_plugin_instance("qq_api")
-    bot = qq_api.get_bot()
-    event_loop = qq_api.get_event_loop()
 
-    host = server.get_plugin_instance('qq_api').get_config()['api_host']
-    port = server.get_plugin_instance('qq_api').get_config()['api_port']
+    host = server.get_plugin_instance('cool_q_api').get_config()['api_host']
+    port = server.get_plugin_instance('cool_q_api').get_config()['api_port']
     if old is not None and hasattr(old, 'past_bot') and \
        old is not None and hasattr(old, 'past_info'):
         past_info = old.past_info
@@ -29,7 +31,7 @@ def on_load(server: PluginServerInterface, old):
     else:
         past_bot = False
     
-    qq_bot = qbot(server, config, data, host, port, bot = bot)
+    qq_bot = qbot(server, config, data, host, port)
 
     # 注册指令
     qq_bot.server.register_command(
@@ -55,10 +57,10 @@ def on_load(server: PluginServerInterface, old):
     server.register_help_message('!!del <关键词>','删除指定游戏关键词')
     server.register_help_message('@ <QQ名/号> <消息>','让机器人在qq里@')
     # 注册监听任务
-    server.register_event_listener('qq_api.on_message', qq_bot.send_msg_to_mc)
-    server.register_event_listener('qq_api.on_message', qq_bot.on_qq_command)
-    server.register_event_listener('qq_api.on_request', qq_bot.on_qq_request)
-    server.register_event_listener('qq_api.on_notice', qq_bot.notification)
+    server.register_event_listener('cool_q_api.on_qq_info', qq_bot.send_msg_to_mc)
+    server.register_event_listener('cool_q_api.on_qq_info', qq_bot.on_qq_command)
+    server.register_event_listener('cool_q_api.on_qq_apply', qq_bot.on_qq_request)
+    server.register_event_listener('cool_q_api.on_qq_notice', qq_bot.notification)
 
 qq_bot = None
 # 更新机器人名字 <- 显示在线人数功能
@@ -94,3 +96,4 @@ def set_sys_path()->None:
     file_dir = os.path.dirname(__file__)
     if file_dir not in sys.path:
         sys.path.append(file_dir)
+#+---------------------------------------------------------------------+
