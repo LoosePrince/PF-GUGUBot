@@ -2,32 +2,33 @@
 import json, os
 class table(object):    
 
-    def __init__(self,path:str="./default.json") -> None: # 初始化，记录系统路径
+    def __init__(self,path:str="./default.json", default_content:dict=None) -> None: # 初始化，记录系统路径
         self.path = path
         self.load()    
+        self.default_content = default_content
 
     def load(self) -> None: # 读取
         if os.path.isfile(self.path) and os.path.getsize(self.path) != 0:
             with open(self.path,'r', encoding='UTF-8') as f:
                 self.data = json.load(f)
         else:
-            self.data = {}    
+            self.data = self.default_content if self.default_content else {}
 
     def save(self) -> None: # 储存
         with open(self.path, 'w', encoding='UTF-8') as f:
             json.dump(self.data, f, ensure_ascii= False)        
     
-    def __getitem__(self, key): # 获取储存内容
+    def __getitem__(self, key:str): # 获取储存内容
         return self.data[key]    
 
-    def __setitem__(self, key, value): # 增加，修改
+    def __setitem__(self, key:str, value:str): # 增加，修改
         self.data[key] = value
         self.save()   
 
-    def __contains__(self,key): # in 
+    def __contains__(self,key:str): # in 
         return key in self.data
 
-    def __delitem__(self,key): # 删除
+    def __delitem__(self,key:str): # 删除
         if key in self.data:
             del self.data[key]
             self.save()
