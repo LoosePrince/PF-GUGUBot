@@ -10,7 +10,7 @@
 ### Python模块
 - 已存储在插件对应的文件夹内的 [requirements.txt](requirements.txt) 中, 可以使用 `pip install -r requirements.txt` 安装
 ### 前置插件
-- [cool_q_api](https://github.com/MCDReforged/QQAPI)
+- [qq_api](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/qq_api)
 
 ## 功能列表
 QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮助`
@@ -122,14 +122,135 @@ QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮�
 - 内置模式：`普通` `傲娇`
 - AI生成后内置的模式：`雌小鬼` `御姐` `萝莉` `波奇酱` `病娇` `中二病`
 
+# QQAPI
+
+> QQ bot API.
+
+## 说明
+
+### QQ Bot 配置（配置方法源自原始插件说明）
+
+推荐使用 [go-cqhttp](https://github.com/Mrs4s/go-cqhttp).
+
+在`account`字段中设置QQ帐号和密码：
+
+```yaml
+account:
+  uin: 1233456
+  password: ''
+```
+
+推荐使用WebSocket，请将配置中的 `http` 设置为 `false` ，将 `websocket` 设置为 `true` 。 然后在 go-cqhttp 配置的 `servers` 字段中设置 `ws-reverse` （此示例配置应与 QQAPI 的默认配置匹配）：
+
+```yaml
+servers:
+  - ws-reverse:
+      universal: ws://127.0.0.1:5700/ws/
+      reconnect-interval: 3000
+```
+
+---
+
+如果您想使用 HTTP，请将配置中的 `http` 设置为 `true` ，将 `websocket` 设置为 `false` 。 然后在 go-cqhttp 配置的 `servers` 字段中设置 `http` （此示例配置应与 QQAPI 的默认配置匹配）：
+
+```yaml
+servers:
+  - http:
+      address: 0.0.0.0:5700
+      post:
+      - url: http://127.0.0.1:5701/
+```
+
+## 配置文件
+
+| 配置项 | 默认值 | 说明 |
+| - | - | - |
+| http.enable | `false` | 是否使用 HTTP |
+| http.post_host | `127.0.0.1` | 接收数据上报的地址 |
+| http.post_port | `5701` | 对应 go-cqhttp 的 HTTP 监听端口 |
+| http.api_host | `127.0.0.1` | 对应 go-cqhttp 的地址 |
+| http.api_port | `5700` | 对应 go-cqhttp `url` 配置的端口 |
+| websocket.enable | `true` | 是否使用 WebSocket |
+| websocket.host | `127.0.0.1` | 对应 go-cqhttp 的地址 |
+| websocket.port | `5700` | 对应 go-cqhttp 的 WebSocket 监听端口 |
+
+### 关于多服使用
+
+本插件不提供多服功能，但仍然保留原本拥有的功能，不保证能够正常使用，如需使用请查看原始插件
+
+#### 指令
+
+| 指令 | 功能 |
+| - | - |
+| stop | 关闭QQBot |
+| help | 获取帮助 |
+| reload config | 重载配置文件 |
+| debug thread | 查看线程列表 |
+
+#### 配置
+
+| 配置项 | 默认值 | 说明 |
+| - | - | - |
+| webscocket | `false` | 是否使用 WebSocket（为 true 则使用 HTTP） |
+| host | `127.0.0.1` | 接收数据上报的地址 |
+| port | `5700` | 对应 go-cqhttp 的 HTTP 监听端口 |
+| server_list | 详见下文 | 需要转发的服务器列表 |
+| debug_mode | `false` | 调试模式 |
+
+`server_list`
+
+需要转发的服务器列表, 参照以下格式填写
+
+```yaml
+example:
+  host: 127.0.0.1
+  port: 5701
+```
+
+> 你还需要修改 QQAPI 配置文件的 `post_host`, `post_port` 使其与 `server_list` 的内容对应
+>
+> 建议从 `5701` 向上增加，如第一个服为 `5701` 第二个服为 `5702`
+
+## 开发
+
+请查看原始插件说明，如有需求请提交问题
+
+### 事件
+
+当从QQ接收到消息, 会触发以下各类事件
+
+每个事件监听器需要使用 `register_event_listener` API 注册, 事件ID为 `qq_api.事件名`
+
+- `server`：[PluginServerInterface](https://mcdreforged.readthedocs.io/zh_CN/latest/code_references/PluginServerInterface.html)
+- `bot`：[CQHttp](https://aiocqhttp.nonebot.dev/module/aiocqhttp/index.html#aiocqhttp.CQHttp)
+- `event`：[Event](https://aiocqhttp.nonebot.dev/module/aiocqhttp/index.html#aiocqhttp.Event)，其中 `on_message` 的参数为 `MessageEvent`，增加了 `content` 属性，为处理后的消息。
+
+| 事件 | 参考 |
+| - | - |
+| on_message(server, bot, event) | [on_message](https://aiocqhttp.nonebot.dev/module/aiocqhttp/index.html#aiocqhttp.CQHttp.on_message) |
+| on_notice(server, bot, event) | [on_notice](https://aiocqhttp.nonebot.dev/module/aiocqhttp/index.html#aiocqhttp.CQHttp.on_notice) |
+| on_request(server, bot, event) | [on_request](https://aiocqhttp.nonebot.dev/module/aiocqhttp/index.html#aiocqhttp.CQHttp.on_request) |
+| on_meta_event(server, bot, event) | [on_meta_event](https://aiocqhttp.nonebot.dev/module/aiocqhttp/index.html#aiocqhttp.CQHttp.on_meta_event) |
+
+### API
+
+#### get_event_loop()
+
+用于获取 `asyncio` 的 `event_loop`。
+
+#### get_bot()
+
+用于获取 `CQHttp` 的实例。
+
+
 ## 配置文件
 [点击查看配置文件说明](https://github.com/LoosePrince/PF-GUGUBot/blob/main/Config-QQChat.yml)
 
-# TODO
-- [x] 字体的路径问题
-
 # 有bug或是新的idea
 提个Issue!有空的话会回复滴！
+
+# TODO
+- [x] 字体的路径问题
 
 # 使用条款
 - 禁止声明为你原创
