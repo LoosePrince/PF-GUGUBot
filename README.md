@@ -216,32 +216,7 @@ example:
 > 你还需要修改 QQAPI 配置文件的 `post_host`, `post_port` 使其与 `server_list` 的内容对应
 >
 > 建议从 `5701` 向上增加，如第一个服为 `5701` 第二个服为 `5702`
-
-# RCON的说明
-
-> 基于指令并获取返回结果
-
-## 配置
-#### 作用
-> 获取真实的在线情况
-> 开发中...
-### 服务端配置 - Server
-- server.properties
-```
-rcon.port=12345
-enable-rcon=true
-rcon.password=123456
-```
-### MCDR配置 - MCDR
-- config.yml
-```
-rcon:
-  enable: true
-  address: 127.0.0.1
-  port: 12345
-  password: 123456
-```
-# 开发
+## 开发
 
 请查看原始插件说明，如有需求请提交问题
 
@@ -272,6 +247,30 @@ rcon:
 
 用于获取 `CQHttp` 的实例。
 
+# RCON的说明
+
+> 基于指令并获取返回结果
+
+## 配置
+#### 作用
+> 获取真实的在线情况
+> 开发中...
+### 服务端配置 - Server
+- server.properties
+```
+rcon.port=12345
+enable-rcon=true
+rcon.password=123456
+```
+### MCDR配置 - MCDR
+- config.yml
+```
+rcon:
+  enable: true
+  address: 127.0.0.1
+  port: 12345
+  password: 123456
+```
 
 # 配置文件
 [点击查看配置文件说明](https://github.com/LoosePrince/PF-GUGUBot/blob/main/Config-QQChat.yml)
