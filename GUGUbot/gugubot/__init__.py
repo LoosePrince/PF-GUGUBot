@@ -19,7 +19,7 @@ def on_load(server: PluginServerInterface, old):
     global host, port, past_bot, past_info, event_loop
     global qq_bot
     
-    config = table("./config/GUGUBot/config.json", DEFAULT_CONFIG)
+    config = table("./config/GUGUBot/config.json", DEFAULT_CONFIG, yaml=True)
     data = table("./config/GUGUBot/GUGUBot.json")
 
     host = server.get_plugin_instance('cool_q_api').get_config()['api_host']
