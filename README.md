@@ -222,7 +222,7 @@ rcon:
 [点击查看配置文件说明](https://github.com/LoosePrince/PF-GUGUBot/blob/main/Config-QQChat.yml)
 
 # 有bug或是新的idea
-如果需要更多联动或提交想法和问题请提交 [issues](https://github.com/LoosePrince/PF-GUGUBot/issues) 或 QQ [1377820366](http://wpa.qq.com/msgrd?v=3&uin=1377820366&site=qq&menu=yes) 提交！
+如果需要更多联动或提交想法和问题请提交 [issues](https://github.com/LoosePrince/PF-GUGUBot/issues) 或 QQ [1377820366](http://wpa.qq.com/msgrd?v=3&uin=1377820366&site=qq&menu=yes) 提交！ <br />
 视情况添加，请勿联系他人（开发者：[雪开](https://github.com/XueK66)）
 
 # TODO
