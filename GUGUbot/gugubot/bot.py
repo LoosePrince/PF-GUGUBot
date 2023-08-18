@@ -80,9 +80,9 @@ class qbot(object):
         for i, image in enumerate(line_image):
             root.blit(image, (0, i*30))
 
-        if not os.path.exists("./config/GUGUBot/image"):
-            os.makedirs("./config/GUGUBot/image")
-        image_path = "./config/GUGUBot/image/{}.jpg".format(int(time.time()))
+        if not os.path.exists("./config/GUGUbot/image"):
+            os.makedirs("./config/GUGUbot/image")
+        image_path = "./config/GUGUbot/image/{}.jpg".format(int(time.time()))
         pygame.image.save(root, image_path)
 
         return image_path
@@ -557,7 +557,7 @@ class qbot(object):
                         # get receiver name
                         query = {'message_id': match_result[0]}
                         pre_message = requests.post(f'http://{self.host}:{self.port}/get_msg',json=query).json()['data']['message']
-                        receiver = pre_message.split(']')[0].split('&')[1][4:]
+                        receiver = _get_name(str(pre_message.split(']')[0].split('=')[1]))
                         server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{match_result[-1]}')
                         return 
                     # only @

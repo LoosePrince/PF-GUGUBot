@@ -23,7 +23,7 @@ DEFAULT_CONFIG = {
     'forward': {
         'mc_to_qq': True,
         'qq_to_mc': True
-    },
+        },
     'command': {
         'list': True,
         'mc': True,
@@ -34,15 +34,17 @@ DEFAULT_CONFIG = {
         'name':True,
         'whitelist':True,
         'shenhe':True
-    },
-    'dict_address' : {"start_command_dict": './/config//GUGUbot//start_commands.json',
-            "key_word_dict": './/config//GUGUbot//key_word.json',
-            "ban_word_dict": './/config//GUGUbot//ban_word.json',
-            "key_word_ingame_dict": './/config//GUGUbot//key_word_ingame.json',
-            "uuid_qqid": './/config//GUGUbot//uuid_qqid.json',
-            "whitelist": './/server//whitelist.json',
-            "shenheman":'.//config//GUGUbot//shenheman.json',
-            'shenhe_log':'.//config//GUGUbot//shenhe_log.txt'},
+        },
+    'dict_address' : {
+        "start_command_dict": './/config//GUGUbot//start_commands.json',
+        "key_word_dict": './/config//GUGUbot//key_word.json',
+        "ban_word_dict": './/config//GUGUbot//ban_word.json',
+        "key_word_ingame_dict": './/config//GUGUbot//key_word_ingame.json',
+        "uuid_qqid": './/config//GUGUbot//uuid_qqid.json',
+        "whitelist": './/server//whitelist.json',
+        "shenheman":'.//config//GUGUbot//shenheman.json',
+        'shenhe_log':'.//config//GUGUbot//shenhe_log.txt'
+        },
     '配置说明': '''group_id: 需要转发的QQ群号码，可以添加多个
             admin_id: 管理员名单，可以添加多个
             whitelist_add_with_bound: 绑定时顺便添加白名单 true 开启 false 关闭
