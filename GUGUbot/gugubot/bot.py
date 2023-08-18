@@ -7,6 +7,7 @@ from .table import table
 from data.text import *
 from collections import defaultdict
 from mcdreforged.api.types import PluginServerInterface, Info
+from mcdreforged.minecraft.rcon.rcon_connection import RconConnection
 import json
 import os
 import types
@@ -14,6 +15,7 @@ import pygame
 import re
 import requests
 import time
+import yaml
 
 class qbot(object):
     def __init__(self, server, config, data, host, port):
@@ -29,6 +31,7 @@ class qbot(object):
         self.suggestion = self.ingame_at_suggestion()
         # 读取文件
         self.loading_dicts()
+        self.loading_rcon()
         pygame.init()
 
     # 读取文件
@@ -42,6 +45,22 @@ class qbot(object):
         temp = self.loading_file(self.config["dict_address"]['whitelist'])                      # 白名单表 [{uuid:value, name: value}]
         self.whitelist = {list(i.values())[0]:list(i.values())[1] for i in temp}                # 解压白名单表
         self.shenheman = table(self.config["dict_address"]['shenheman'])                        # 群审核人员
+
+    def loading_rcon(self) -> None:
+        try:
+            with open("./config.yaml", 'r', encoding='UTF-8') as f:
+                temp_data = yaml.load(f, Loader=yaml.FullLoader)
+            if temp_data['rcon']['enable']:
+                address = temp_data['rcon']['address']
+                port = temp_data['rcon']['port']
+                password = temp_data['rcon']['password']
+                self.rcon = RconConnection(address, port, password)
+                self.rcon.connect()
+                return
+            self.rcon = None
+        except Exception as e:
+            print(f"Rcon 加载失败：{e}")
+            self.rcon = None
 
     # 文字转图片-装饰器
     def addTextToImage(func):
@@ -557,7 +576,10 @@ class qbot(object):
                         # get receiver name
                         query = {'message_id': match_result[0]}
                         pre_message = requests.post(f'http://{self.host}:{self.port}/get_msg',json=query).json()['data']['message']
-                        receiver = _get_name(str(pre_message.split(']')[0].split('=')[1]))
+                        pattern = r"\[@(\d+)\].*|\[CQ:at,qq=(\d+)\].*"
+                        receiver_result = re.match(pattern, pre_message, re.DOTALL).groups()
+                        receiver_id = str(receiver_result[0]) if receiver_result[0] else str(receiver_result[1])
+                        receiver = _get_name(receiver_id)
                         server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{match_result[-1]}')
                         return 
                     # only @

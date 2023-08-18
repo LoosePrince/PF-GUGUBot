@@ -14,7 +14,7 @@ class table(object):
         if os.path.isfile(self.path) and os.path.getsize(self.path) != 0:
             if self.yaml:
                 with open(self.path,'r', encoding='UTF-8') as f:
-                    self.data = yaml.load(f)
+                    self.data = yaml.load(f, Loader=yaml.FullLoader)
             else:
                 with open(self.path,'r', encoding='UTF-8') as f:
                     self.data = json.load(f)
