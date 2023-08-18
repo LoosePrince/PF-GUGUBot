@@ -745,8 +745,11 @@ class qbot(object):
 
     # 机器人名称显示游戏内人数
     def set_number_as_name(self, server:PluginServerInterface, info: Info, bot):
-        content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
-        number = len([i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()])
+        if self.rcon:
+            number = len([i for i in self.rcon.send_command("list").split(": ")[-1].split(", ") if "假的" not in i])
+        else:
+            content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
+            number = len([i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()])
         name = " "
         if number != 0:
             name = "在线人数: {}".format(number)
