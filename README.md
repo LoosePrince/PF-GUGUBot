@@ -4,6 +4,8 @@
 修改：XueK__ [前往主页](https://github.com/XueK66)
 ### 这是基于原插件的修改版本
 
+使用方式：将`GUGUbot`文件夹（里面有`mcdreforged.plugin.json`）放入服务器的`/plugins`文件夹中即可
+
 ## 依赖
 ### Python包
 - [Python™](https://www.python.org/)
