@@ -7,6 +7,7 @@ from .table import table
 from data.text import *
 from collections import defaultdict
 from mcdreforged.api.types import PluginServerInterface, Info
+from mcdreforged.minecraft.rcon.rcon_connection import RconConnection
 import json
 import os
 import types
@@ -14,6 +15,7 @@ import pygame
 import re
 import requests
 import time
+import yaml
 
 class qbot(object):
     def __init__(self, server, config, data, host, port):
@@ -29,11 +31,12 @@ class qbot(object):
         self.suggestion = self.ingame_at_suggestion()
         # 读取文件
         self.loading_dicts()
+        self.loading_rcon()
         pygame.init()
 
     # 读取文件
     def loading_dicts(self) -> None:
-        self.font = pygame.font.Font(self.config["font_path"], 26)
+        self.font = pygame.font.Font(self.config["dict_address"]["font_path"], 26)
         self.start_command   = start_command_system(self.config["dict_address"]["start_command_dict"])                     # 开服指令
         self.key_word        = key_word_system(self.config["dict_address"]['key_word_dict'])                               # QQ 关键词
         self.key_word_ingame = key_word_system(self.config["dict_address"]['key_word_ingame_dict'], ingame_key_word_help)  # MC 关键词
@@ -42,6 +45,22 @@ class qbot(object):
         temp = self.loading_file(self.config["dict_address"]['whitelist'])                      # 白名单表 [{uuid:value, name: value}]
         self.whitelist = {list(i.values())[0]:list(i.values())[1] for i in temp}                # 解压白名单表
         self.shenheman = table(self.config["dict_address"]['shenheman'])                        # 群审核人员
+
+    def loading_rcon(self) -> None:
+        try:
+            with open("./config.yaml", 'r', encoding='UTF-8') as f:
+                temp_data = yaml.load(f, Loader=yaml.FullLoader)
+            if temp_data['rcon']['enable']:
+                address = temp_data['rcon']['address']
+                port = temp_data['rcon']['port']
+                password = temp_data['rcon']['password']
+                self.rcon = RconConnection(address, port, password)
+                self.rcon.connect()
+                return
+            self.rcon = None
+        except Exception as e:
+            print(f"Rcon 加载失败：{e}")
+            self.rcon = None
 
     # 文字转图片-装饰器
     def addTextToImage(func):
@@ -80,9 +99,9 @@ class qbot(object):
         for i, image in enumerate(line_image):
             root.blit(image, (0, i*30))
 
-        if not os.path.exists("./config/GUGUBot/image"):
-            os.makedirs("./config/GUGUBot/image")
-        image_path = "./config/GUGUBot/image/{}.jpg".format(int(time.time()))
+        if not os.path.exists("./config/GUGUbot/image"):
+            os.makedirs("./config/GUGUbot/image")
+        image_path = "./config/GUGUbot/image/{}.jpg".format(int(time.time()))
         pygame.image.save(root, image_path)
 
         return image_path
@@ -106,12 +125,21 @@ class qbot(object):
 
         # 玩家列表
         if self.config['command']['list'] and (command[0] in ['玩家列表','玩家'] or command[0] in ['假人列表','假人']):
-            content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
             player = command[0] in ['玩家','玩家列表']
-            if player: # 过滤假人
-                t_player = [i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()]
-            else: # 过滤真人
-                t_player = [i["name"] for i in content['sample'] if i["name"] not in self.whitelist.values()] 
+            if self.rcon:
+                result = self.rcon.send_command('list')
+                player_list = result.split(": ")[-1].split(", ")
+                t_player = [i for i in player_list if "假的" not in i] if player else [i for i in player_list if "假的" in i]
+            else:
+                try:
+                    content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
+                    
+                    if player: # 过滤假人
+                        t_player = [i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()]
+                    else: # 过滤真人
+                        t_player = [i["name"] for i in content['sample'] if i["name"] not in self.whitelist.values()] 
+                except:
+                    bot.reply(info, "未能获取到服务器信息，请检查服务器参数设置！（推荐开启rcon精准获取玩家信息）")
 
             if len(t_player) == 0 :
                 respond = style[self.style]['no_player_ingame'] if player else '没有假人在线哦！'
@@ -557,7 +585,10 @@ class qbot(object):
                         # get receiver name
                         query = {'message_id': match_result[0]}
                         pre_message = requests.post(f'http://{self.host}:{self.port}/get_msg',json=query).json()['data']['message']
-                        receiver = pre_message.split(']')[0].split('&')[1][4:]
+                        pattern = r"\[@(\d+)\].*|\[CQ:at,qq=(\d+)\].*"
+                        receiver_result = re.match(pattern, pre_message, re.DOTALL).groups()
+                        receiver_id = str(receiver_result[0]) if receiver_result[0] else str(receiver_result[1])
+                        receiver = _get_name(receiver_id)
                         server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{match_result[-1]}')
                         return 
                     # only @
