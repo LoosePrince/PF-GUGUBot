@@ -10,7 +10,13 @@
 ### Python模块
 - 已存储在插件对应的文件夹内的 [requirements.txt](requirements.txt) 中, 可以使用 `pip install -r requirements.txt` 安装
 ### 前置插件
-- [cool_q_api](https://github.com/MCDReforged/QQAPI)
+- [CoolQAPI](https://github.com/AnzhiZhang/CoolQAPI)
+> #### 已废弃的前置插件
+> ```
+> [OnlinePlayerAPI] https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/OnlinePlayerAPI
+> [ConfigAPI] https://github.com/MCDReforged/ConfigAPI
+> [JsonDataAPI] https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/JsonDataAPI
+> ```
 
 ## 功能列表
 QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮助`
@@ -122,14 +128,105 @@ QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮�
 - 内置模式：`普通` `傲娇`
 - AI生成后内置的模式：`雌小鬼` `御姐` `萝莉` `波奇酱` `病娇` `中二病`
 
+# QQAPI
+
+> QQ bot API.
+
+## 说明
+
+### QQ Bot 配置（配置方法源自原始插件说明）
+
+推荐使用 [go-cqhttp](https://github.com/Mrs4s/go-cqhttp)
+
+#### 使用go-cqhttp
+在`account`字段中设置QQ帐号和密码：
+
+```yaml
+account:
+  uin: 1233456
+  password: ''
+```
+
+#### 使用WebSocket
+ > 未经测试，如有需求请自行测试，若无法使用可提交[issues](https://github.com/LoosePrince/PF-GUGUBot/issues) 
+ - 将配置中的 `http` 设置为 `false` ，将 `websocket` 设置为 `true` 。 然后在 go-cqhttp 配置的 `servers` 字段中设置 `ws-reverse` （此示例配置应与 API 的默认配置匹配）：
+
+```yaml
+servers:
+  - ws-reverse:
+      universal: ws://127.0.0.1:5700/ws/
+      reconnect-interval: 3000
+```
+
+---
+
+#### 使用 HTTP
+ - 将配置中的 `http` 设置为 `true` ，将 `websocket` 设置为 `false` 。 然后在 go-cqhttp 配置的 `servers` 字段中设置 `http` （此示例配置应与 API 的默认配置匹配）：
+
+```yaml
+servers:
+  - http:
+      address: 0.0.0.0:5700
+      post:
+      - url: http://127.0.0.1:5701/
+```
+
 ## 配置文件
+
+| 配置项 | 默认值 | 说明 |
+| - | - | - |
+| http.enable | `false` | 是否使用 HTTP |
+| http.post_host | `127.0.0.1` | 接收数据上报的地址 |
+| http.post_port | `5701` | 对应 go-cqhttp 的 HTTP 监听端口 |
+| http.api_host | `127.0.0.1` | 对应 go-cqhttp 的地址 |
+| http.api_port | `5700` | 对应 go-cqhttp `url` 配置的端口 |
+| websocket.enable | `true` | 是否使用 WebSocket |
+| websocket.host | `127.0.0.1` | 对应 go-cqhttp 的地址 |
+| websocket.port | `5700` | 对应 go-cqhttp 的 WebSocket 监听端口 |
+
+### 关于多服使用
+
+本插件不提供多服功能，但仍然保留原本拥有的功能，不保证能够正常使用，如需使用请查看[原始插件](https://github.com/MCDReforged/QQAPI#%E5%85%B3%E4%BA%8E%E5%A4%9A%E6%9C%8D%E4%BD%BF%E7%94%A8)
+
+
+## 开发
+
+请[查看原始插件说明](https://github.com/MCDReforged/QQAPI/blob/master/doc/plugin.md)，如有需求请提交问题
+
+# RCON的说明
+
+> 基于指令并获取返回结果
+
+## 配置
+#### 作用
+> 1. 获取真实的在线情况
+> 2. 开发中...
+### 服务端配置 - Server
+- server.properties
+```
+rcon.port=12345
+enable-rcon=true
+rcon.password=123456
+```
+### MCDR配置 - MCDR
+- config.yml
+```
+rcon:
+  enable: true
+  address: 127.0.0.1
+  port: 12345
+  password: 123456
+```
+
+# 配置文件
 [点击查看配置文件说明](https://github.com/LoosePrince/PF-GUGUBot/blob/main/Config-QQChat.yml)
+
+# 有bug或是新的idea
+如果需要更多联动或提交想法和问题请提交 [issues](https://github.com/LoosePrince/PF-GUGUBot/issues) 或 QQ [1377820366](http://wpa.qq.com/msgrd?v=3&uin=1377820366&site=qq&menu=yes) 提交！ <br />
+视情况添加，请勿联系他人（开发者：[雪开](https://github.com/XueK66)）
 
 # TODO
 - [x] 字体的路径问题
-
-# 有bug或是新的idea
-提个Issue!有空的话会回复滴！
 
 # 使用条款
 - 禁止声明为你原创
