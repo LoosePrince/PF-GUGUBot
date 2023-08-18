@@ -4,31 +4,53 @@ admin_id:
 - 1234564
 # 指令开关（可以通过机器人调整）
 command:
+  # ban_word:违禁词撤回
   ban_word: true
+  # ingame_key_word:游戏内关键词回复
   ingame_key_word: true
+  # key_word:群内关键词回复
   key_word: true
+  # list:在线查询
   list: true
+  # 获取服务器内聊天内容
   mc: true
+  # 机器人昵称
   name: true
+  # 获取QQ聊天内容
   qq: true
+  # 开服指令
+  start_command: true, 
+  # 白名单功能
+  whitelist: true, 
+  # 辅助审核功能
   shenhe: true
-  whitelist: true
 # 字体路径，各种数据储存路径
 dict_address:
+  # 违禁词
   ban_word_dict: .//config//GUGUbot//ban_word.json
+  # 字体路径
   font_path: ./plugins/GUGUbot/font/MicrosoftYaHei-01.ttf
+  # 关键词
   key_word_dict: .//config//GUGUbot//key_word.json
+  # 游戏内关键词
   key_word_ingame_dict: .//config//GUGUbot//key_word_ingame.json
+  # 审核日志
   shenhe_log: .//config//GUGUbot//shenhe_log.txt
+  # 审核员
   shenheman: .//config//GUGUbot//shenheman.json
+  # 开服指令
   start_command_dict: .//config//GUGUbot//start_commands.json
+  # uuid 列表
   uuid_qqid: .//config//GUGUbot//uuid_qqid.json
+  # 白名单
   whitelist: .//server//whitelist.json
 # 转发设置
 forward:
+  # 服务器往QQ群转发
   mc_to_qq: true
+  # QQ群往服务器转发 
   qq_to_mc: true
-# 服务器的IP地址，查找玩家人数的备用方案
+# # 服务器IP，请填公网域名，端口号前面那段，例：mcserver.com:25564，查找玩家人数的备用方案
 game_ip: ''
 # 服务器的端口，查找玩家人数的备用方案
 game_port: ''
@@ -36,7 +58,7 @@ game_port: ''
 group_id:
 - 1234561
 - 1234562
-# 绑定时同时加入白名单
+# 绑定ID自动绑定服务器白名单
 whitelist_add_with_bound: false
 # 退群时移除白名单
 whitelist_remove_with_leave: true
