@@ -125,12 +125,18 @@ class qbot(object):
 
         # 玩家列表
         if self.config['command']['list'] and (command[0] in ['玩家列表','玩家'] or command[0] in ['假人列表','假人']):
-            content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
             player = command[0] in ['玩家','玩家列表']
-            if player: # 过滤假人
-                t_player = [i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()]
-            else: # 过滤真人
-                t_player = [i["name"] for i in content['sample'] if i["name"] not in self.whitelist.values()] 
+            if self.rcon:
+                result = self.rcon.send_command('list')
+                player_list = result.split(": ")[-1].split(", ")
+                t_player = [i for i in player_list if "假的" not in i] if player else [i for i in player_list if "假的" in i]
+            else:
+                content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
+                
+                if player: # 过滤假人
+                    t_player = [i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()]
+                else: # 过滤真人
+                    t_player = [i["name"] for i in content['sample'] if i["name"] not in self.whitelist.values()] 
 
             if len(t_player) == 0 :
                 respond = style[self.style]['no_player_ingame'] if player else '没有假人在线哦！'
