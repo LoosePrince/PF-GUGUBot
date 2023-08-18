@@ -33,7 +33,7 @@ class qbot(object):
 
     # 读取文件
     def loading_dicts(self) -> None:
-        self.font = pygame.font.Font(self.config["font_path"], 26)
+        self.font = pygame.font.Font(self.config["dict_address"]["font_path"], 26)
         self.start_command   = start_command_system(self.config["dict_address"]["start_command_dict"])                     # 开服指令
         self.key_word        = key_word_system(self.config["dict_address"]['key_word_dict'])                               # QQ 关键词
         self.key_word_ingame = key_word_system(self.config["dict_address"]['key_word_ingame_dict'], ingame_key_word_help)  # MC 关键词
