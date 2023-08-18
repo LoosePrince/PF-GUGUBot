@@ -12,6 +12,7 @@ import json
 import os
 import types
 import pygame
+import random
 import re
 import requests
 import time
@@ -631,7 +632,10 @@ class qbot(object):
             # 检测关键词
             elif info.content[:2] not in [ '@ ','!!']:
                 # 转发原句
-                self.send_msg_to_all_qq(f'[{info.player}] {info.content}')
+                roll_number = random.randint(0, 999+1)
+                template_index = roll_number % (len(mc2qq_template)-1) if roll_number >= 3 else -1
+                message = mc2qq_template[template_index].format(info.player, info.content)
+                self.send_msg_to_all_qq(message)
                 if self.config['command']['ingame_key_word'] and info.content in self.key_word_ingame:
                     # 游戏内回复
                     response = self.key_word_ingame.check_response(info.content)
