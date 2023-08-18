@@ -131,12 +131,15 @@ class qbot(object):
                 player_list = result.split(": ")[-1].split(", ")
                 t_player = [i for i in player_list if "假的" not in i] if player else [i for i in player_list if "假的" in i]
             else:
-                content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
-                
-                if player: # 过滤假人
-                    t_player = [i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()]
-                else: # 过滤真人
-                    t_player = [i["name"] for i in content['sample'] if i["name"] not in self.whitelist.values()] 
+                try:
+                    content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
+                    
+                    if player: # 过滤假人
+                        t_player = [i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()]
+                    else: # 过滤真人
+                        t_player = [i["name"] for i in content['sample'] if i["name"] not in self.whitelist.values()] 
+                except:
+                    bot.reply(info, "未能获取到服务器信息，请检查服务器参数设置！（推荐开启rcon精准获取玩家信息）")
 
             if len(t_player) == 0 :
                 respond = style[self.style]['no_player_ingame'] if player else '没有假人在线哦！'
