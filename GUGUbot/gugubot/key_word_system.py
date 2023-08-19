@@ -8,9 +8,9 @@ class key_word_system(base_system):
         super().__init__(path, help_msg)
 
     def handle_command(self, raw_command:str, info: Info, bot, reply_style:str='正常', *arg, **kargs):
-        parameter = raw_command.strip().split() 
+        parameter = raw_command[1:].strip().split() 
         if parameter[0] in ['添加', 'add', '删除','移除', 'del', '列表','list']:
-            raw_command = "关键词 " + raw_command
+            raw_command = "#关键词 " + raw_command[1:]
 
         super().handle_command(raw_command, info, bot, reply_style, *arg, *kargs)
 
