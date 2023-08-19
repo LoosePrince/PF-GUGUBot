@@ -19,7 +19,7 @@ class base_system(object):
         elif parameter[0] in ['添加', 'add']: 
             # lack of para          
             if parameter_length < 3:                                                
-                bot.reply(info, style[reply_style]['add_lack_parameter'])
+                bot.reply(info, style[reply_style]['lack_parameter'])
                 return
             # get word & response
             word, response = parameter[1], parameter[2]
@@ -34,7 +34,7 @@ class base_system(object):
         elif parameter[0] in ['删除','移除', 'del']:
             # lack para
             if parameter_length < 2:                                                  
-                bot.reply(info, style[reply_style]['del_lack_parameter'])
+                bot.reply(info, style[reply_style]['lack_parameter'])
                 return
             # # get word
             word = parameter[1]
@@ -43,7 +43,7 @@ class base_system(object):
                 bot.reply(info, style[reply_style]['del_no_exist'])
             # del
             del self.data[word]                                            
-            bot.reply(info, style[reply_style]['del_success'])
+            bot.reply(info, style[reply_style]['delete_success'])
         
         elif parameter[0] in ['列表','list']:
             # not word

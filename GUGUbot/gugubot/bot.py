@@ -49,7 +49,7 @@ class qbot(object):
 
     def loading_rcon(self) -> None:
         try:
-            with open("./config.yaml", 'r', encoding='UTF-8') as f:
+            with open("./config.yml", 'r', encoding='UTF-8') as f:
                 temp_data = yaml.load(f, Loader=yaml.FullLoader)
             if temp_data['rcon']['enable']:
                 address = temp_data['rcon']['address']
