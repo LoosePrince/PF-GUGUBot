@@ -12,6 +12,7 @@ from data.text import style, DEFAULT_CONFIG
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.command import *
 from .table import table
+import pygame
 #+---------------------------------------------------------------------+
 def on_load(server: PluginServerInterface, old):
     # 设置系统路径
@@ -81,6 +82,13 @@ def on_player_left(server:PluginServerInterface, player:str):
 def on_user_info(server:PluginServerInterface, info:Info):
     if qq_bot:
         qq_bot.send_msg_to_qq(server, info)
+
+# 卸载
+def on_unload(server:PluginServerInterface):
+    try:
+        pygame.quit()
+    except:
+        pass
 
 # 开服
 def on_server_startup(server:PluginServerInterface):
