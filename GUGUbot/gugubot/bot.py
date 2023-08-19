@@ -580,9 +580,9 @@ class qbot(object):
                         return f"{target_name}(未绑定)"
                     sender = _get_name(info.user_id)
                     # reply
-                    if "[CQ:reply,id=" in info.content:
-                        pattern = r"(?:\[CQ:reply,id=(\d+)\])(?:\[@(\d+)\])(.*)"
-                        match_result = re.match(pattern, info.content, re.DOTALL).groups()
+                    if "[CQ:reply" in info.content:
+                        pattern = r"(?:\[CQ:reply,id=(\d+)\])(?:\[@(\d+)\])+(.*)"
+                        match_result = re.match(pattern, info.content.replace("CQ:at,qq=","@"), re.DOTALL).groups()
                         # get receiver name
                         query = {'message_id': match_result[0]}
                         pre_message = requests.post(f'http://{self.host}:{self.port}/get_msg',json=query).json()['data']['message']
