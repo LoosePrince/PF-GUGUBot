@@ -593,10 +593,8 @@ class qbot(object):
                         server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{match_result[-1]}')
                         return 
                     # only @
-                    at_pattern = r"\[@(\d+)\]"
+                    at_pattern = r"\[@(\d+)\]|\[CQ:at,qq=(\d+)\]"
                     sub_string = re.sub(at_pattern, lambda id: f"§b[@{_get_name(id)}]", info.raw_content)
-                    at_pattern = r"\[CQ:at,qq=(\d+)\]"
-                    sub_string = re.sub(at_pattern, lambda id: f"§b[@{_get_name(id)}]", sub_string)
                     server.say(f'§6[QQ] §a[{sender}]§f {sub_string}')
                 # 普通消息
                 else: 
