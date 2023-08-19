@@ -585,10 +585,7 @@ class qbot(object):
                         match_result = re.match(pattern, info.content.replace("CQ:at,qq=","@"), re.DOTALL).groups()
                         # get receiver name
                         query = {'message_id': match_result[0]}
-                        pre_message = requests.post(f'http://{self.host}:{self.port}/get_msg',json=query).json()['data']['message']
-                        pattern = r"\[@(\d+)\].*|\[CQ:at,qq=(\d+)\].*"
-                        receiver_result = re.match(pattern, pre_message, re.DOTALL).groups()
-                        receiver_id = str(receiver_result[0]) if receiver_result[0] else str(receiver_result[1])
+                        receiver_id = requests.post(f'http://{self.host}:{self.port}/get_msg',json=query).json()['data']['sender']['user_id']
                         receiver = _get_name(receiver_id)
                         server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{match_result[-1]}')
                         return 
