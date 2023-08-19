@@ -5,10 +5,8 @@
 ### 这是基于原插件的修改版本
 
 使用方式：
-* 将`GUGUbot`文件夹（里面有`mcdreforged.plugin.json`）放入服务器的`/plugins`文件夹里
-* 在/plugins/GUGUbot(看得到`mcdreforged.plugin.json`)打开命令行
-* 输入`pip install -r requirements.txt`安装依赖插件
-* MCDR终端上加载/重载本插件 -> 完成！
+* 将Release里面的GUGUbot.mcdr放入`/plugins`
+* 加载后，在`/config/GUGUbot/config.yml`中配置机器人
 
 ## 依赖
 ### Python包
