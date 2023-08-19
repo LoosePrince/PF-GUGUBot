@@ -11,7 +11,7 @@ from .bot import qbot
 from data.text import style, DEFAULT_CONFIG
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.command import *
-from table import table
+from .table import table
 #+---------------------------------------------------------------------+
 def on_load(server: PluginServerInterface, old):
     # 设置系统路径
