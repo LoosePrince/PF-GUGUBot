@@ -565,11 +565,11 @@ class qbot(object):
                         with open(f"./config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg", "wb") as f:
                             f.write(response.content)
                         # save dict
-                        self.key_word.data[self.picture_record_dict[info.user_id]]=re.sub(pattern, "[CQ:image\\1file=file:///{}]".format(f"./config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg"), info.raw_content)
+                        self.key_word.data[self.picture_record_dict[info.user_id]]="[CQ:image,file=file:///{}]".format(os.getcwd()+f"/config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg")
                         del self.picture_record_dict[info.user_id]
                         bot.reply(info, style[self.style]['add_success'])
                     except Exception as e:
-                        bot.reply(info, e)
+                        bot.reply(info, str(e))
                 # @ 模块
                 elif '@' in info.content:
                     def _get_name(qq_id:str):
