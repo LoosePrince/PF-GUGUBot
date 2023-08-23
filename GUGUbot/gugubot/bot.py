@@ -31,9 +31,9 @@ class qbot(object):
         self.style = "正常"
         self.suggestion = self.ingame_at_suggestion()
         # 读取文件
+        pygame.init()
         self.loading_dicts()
         self.loading_rcon()
-        pygame.init()
 
     # 读取文件
     def loading_dicts(self) -> None:
