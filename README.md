@@ -173,8 +173,7 @@ servers:
 | post_port | `5701` | 对应 go-cqhttp 的 HTTP 监听端口 |
 | api_host | `127.0.0.1` | 对应 go-cqhttp 的地址 |
 | api_port | `5700` | 对应 go-cqhttp `url` 配置的端口 |
-| command_prefix | `/` | 请改成`#`, 以启用gugubot的命令功能
-
+| command_prefix | `/` | 请修改至 `#` 以使用命令功能
 ### 关于多服使用
 
 本插件不提供多服功能，但仍然保留原本拥有的功能，不保证能够正常使用，如需使用请查看[原始插件](https://github.com/MCDReforged/QQAPI#%E5%85%B3%E4%BA%8E%E5%A4%9A%E6%9C%8D%E4%BD%BF%E7%94%A8)
