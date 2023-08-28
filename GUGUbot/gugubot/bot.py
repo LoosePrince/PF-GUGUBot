@@ -533,7 +533,7 @@ class qbot(object):
             # 判断是否绑定
             if  str(info.user_id) not in self.data.keys():
                 # 提示绑定
-                bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file=file:///{os.getcwd()+"/plugins/GUGUbot/data/bound.jpg"}]')
+                bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file=file:///{os.getcwd()+"/config/GUGUbot/bound.jpg"}]')
                 return 
             # 如果开启违禁词
             if self.config['command']['ban_word']:
