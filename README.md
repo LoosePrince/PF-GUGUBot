@@ -15,12 +15,15 @@
 - 已存储在插件对应的文件夹内的 [requirements.txt](requirements.txt) 中, 可以使用 `pip install -r requirements.txt` 安装
 ### 前置插件
 - [CoolQAPI](https://github.com/AnzhiZhang/CoolQAPI)
-> #### 已废弃的前置插件
-> ```
-> [OnlinePlayerAPI] https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/OnlinePlayerAPI
-> [ConfigAPI] https://github.com/MCDReforged/ConfigAPI
-> [JsonDataAPI] https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/JsonDataAPI
-> ```
+#### 已废弃的前置插件
+
+> <details>
+>  
+> [OnlinePlayerAPI](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/OnlinePlayerAPI) <br>
+> [ConfigAPI](https://github.com/MCDReforged/ConfigAPI) <br>
+> [JsonDataAPI](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/JsonDataAPI)
+>
+> </details>
 
 ## 功能列表
 QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮助`
@@ -38,6 +41,9 @@ QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮�
 #名字   -> 查看机器人名字相关帮助
 #审核   -> 协助审核功能
 ```
+
+<details>
+
 * 游戏ID与QQ绑定 `#绑定`
 ```
 #绑定 列表 -> 查看绑定列表
@@ -107,6 +113,7 @@ QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮�
 #审核 删除 <QQ号> -> 删除审核员
 #审核 列表 -> 审核员列表
 ```
+</details>
 
 ### 群聊部分，请在群内使用
 ```
@@ -124,6 +131,9 @@ QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮�
 #删除 <关键词> -> 删除关键词
 #列表 -> 获取关键词回复列表
 ```
+
+<details>
+
 * 机器人回复风格切换 `#风格`
 ```
 #风格 列表   -> 风格列表
@@ -132,9 +142,11 @@ QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮�
 - 内置模式：`普通` `傲娇`
 - AI生成后内置的模式：`雌小鬼` `御姐` `萝莉` `波奇酱` `病娇` `中二病`
 
-# QQAPI
+</details>
 
-> QQ bot API.
+# CoolQAPI
+
+> CoolQAPI
 
 ## 说明
 
@@ -151,8 +163,10 @@ account:
   password: ''
 ```
 
-#### 使用WebSocket
- > 未经测试，如有需求请自行测试，若无法使用可提交[issues](https://github.com/LoosePrince/PF-GUGUBot/issues) 
+#### 使用WebSocket（无效）
+<details>
+  
+ > 源自转接QQAPI的失败内容
  - 将配置中的 `http` 设置为 `false` ，将 `websocket` 设置为 `true` 。 然后在 go-cqhttp 配置的 `servers` 字段中设置 `ws-reverse` （此示例配置应与 API 的默认配置匹配）：
 
 ```yaml
@@ -164,7 +178,9 @@ servers:
 
 ---
 
-#### 使用 HTTP
+</details>
+
+#### 使用 HTTP （推荐）
  - 将配置中的 `http` 设置为 `true` ，将 `websocket` 设置为 `false` 。 然后在 go-cqhttp 配置的 `servers` 字段中设置 `http` （此示例配置应与 API 的默认配置匹配）：
 
 ```yaml
@@ -176,7 +192,8 @@ servers:
 ```
 
 ## 配置文件
-
+<details>
+  
 | 配置项 | 默认值 | 说明 |
 | - | - | - |
 | http.enable | `false` | 是否使用 HTTP |
@@ -188,14 +205,21 @@ servers:
 | websocket.host | `127.0.0.1` | 对应 go-cqhttp 的地址 |
 | websocket.port | `5700` | 对应 go-cqhttp 的 WebSocket 监听端口 |
 
-### 关于多服使用
+</details>
 
+### 关于多服使用
+<details>
+  
 本插件不提供多服功能，但仍然保留原本拥有的功能，不保证能够正常使用，如需使用请查看[原始插件](https://github.com/MCDReforged/QQAPI#%E5%85%B3%E4%BA%8E%E5%A4%9A%E6%9C%8D%E4%BD%BF%E7%94%A8)
 
+</details>
 
 ## 开发
-
+<details>
+  
 请[查看原始插件说明](https://github.com/MCDReforged/QQAPI/blob/master/doc/plugin.md)，如有需求请提交问题
+
+</details>
 
 # RCON的说明
 
