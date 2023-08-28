@@ -110,6 +110,7 @@ class qbot(object):
     # 通用QQ 指令
     @addTextToImage
     def on_qq_command(self,server: PluginServerInterface, info: Info, bot):
+        server.logger.debug(f"收到消息上报：{info}")
         # 过滤非关注的消息
         if not (info.source_id in self.config['group_id'] or
             info.source_id in self.config['admin_id']) or info.raw_content[0] != '#':
@@ -482,6 +483,7 @@ class qbot(object):
     # 退群处理
     @addTextToImage
     def notification(self, server, info: Info, bot):
+        server.logger.debug(f"收到上报提示：{info}")
         # 指定群里 + 是退群消息
         if info.user_id in self.config['group_id'] \
             and info.sub_type == 'group_decrease':
@@ -494,6 +496,7 @@ class qbot(object):
     # 进群处理
     @addTextToImage
     def on_qq_request(self,server, info: Info, bot):
+        server.logger.debug(f"收到上报请求：{info}")
         if info.source_id in self.config["group_id"] \
             and info.source_type == "group" and self.config["command"]["shenhe"]:
             # 获取名称
@@ -553,8 +556,9 @@ class qbot(object):
                     # 过滤图片
                     is_picture = self.key_word.data[info.content][:9] != '[CQ:image'
                     server.say(f'§6[QQ] §a[机器人] §f{self.key_word.data[info.content] if not is_picture else "图片"}')
+                    return
                 # 添加图片
-                elif info.user_id in self.picture_record_dict and info.raw_content[:9]=='[CQ:image':
+                if info.user_id in self.picture_record_dict and info.raw_content[:9]=='[CQ:image':
                     # save pic
                     pattern = "\[CQ:image.+url=(.+)\]"
                     try:
@@ -570,35 +574,36 @@ class qbot(object):
                         bot.reply(info, style[self.style]['add_success'])
                     except Exception as e:
                         bot.reply(info, str(e))
-                # @ 模块
-                elif '@' in info.content:
-                    def _get_name(qq_id:str):
-                        if str(qq_id) in self.data:
-                            return self.find_game_name(qq_id, bot, info.source_id)
-                        target_data = bot.get_group_member_info(info.source_id, qq_id).json()['data']
-                        target_name = target_data['card'] if target_data['card'] != '' else target_data['nickname']
-                        return f"{target_name}(未绑定)"
-                    sender = _get_name(info.user_id)
-                    # reply
-                    if "[CQ:reply" in info.content:
-                        pattern = r"(?:\[CQ:reply,id=(\d+)\])(?:\[@(\d+)\])+(.*)"
-                        match_result = re.match(pattern, info.content.replace("CQ:at,qq=","@"), re.DOTALL).groups()
-                        # get receiver name
-                        query = {'message_id': match_result[0]}
-                        receiver_id = requests.post(f'http://{self.host}:{self.port}/get_msg',json=query).json()['data']['sender']['user_id']
-                        receiver = _get_name(receiver_id)
-                        server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{match_result[-1]}')
-                        return 
-                    # only @
-                    at_pattern = r"\[@(\d+)\]|\[CQ:at,qq=(\d+)\]"
-                    sub_string = re.sub(at_pattern, lambda id: f"§b[@{str(_get_name(id.groups()[0])) if id.groups()[0] else str(id.groups()[1])}]", info.raw_content)
-                    server.say(f'§6[QQ] §a[{sender}]§f {sub_string}')
-                # 普通消息
-                else: 
-                    # 提取链接中标题
-                    if info.content[:8] == '[CQ:json':
-                        info.content = '[链接]'+info.content.split('"desc":"')[2].split('&#44')[0][1:]
-                    server.say(f'§6[QQ] §a[{self.find_game_name(str(user_id), bot, info.source_id)}] §f{info.content}')
+                    return
+            # @ 模块
+            if '@' in info.content:
+                def _get_name(qq_id:str):
+                    if str(qq_id) in self.data:
+                        return self.find_game_name(qq_id, bot, info.source_id)
+                    target_data = bot.get_group_member_info(info.source_id, qq_id).json()['data']
+                    target_name = target_data['card'] if target_data['card'] != '' else target_data['nickname']
+                    return f"{target_name}(未绑定)"
+                sender = _get_name(info.user_id)
+                # reply
+                if "[CQ:reply" in info.content:
+                    pattern = r"(?:\[CQ:reply,id=(\d+)\])(?:\[@(\d+)\])+(.*)"
+                    match_result = re.match(pattern, info.content.replace("CQ:at,qq=","@"), re.DOTALL).groups()
+                    # get receiver name
+                    query = {'message_id': match_result[0]}
+                    receiver_id = requests.post(f'http://{self.host}:{self.port}/get_msg',json=query).json()['data']['sender']['user_id']
+                    receiver = _get_name(receiver_id)
+                    server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{match_result[-1]}')
+                    return 
+                # only @
+                at_pattern = r"\[@(\d+)\]|\[CQ:at,qq=(\d+)\]"
+                sub_string = re.sub(at_pattern, lambda id: f"§b[@{_get_name(str(id.groups()[0]) if id.groups()[0] else str(id.groups()[1]))}]", info.raw_content)
+                server.say(f'§6[QQ] §a[{sender}]§f {sub_string}')
+            # 普通消息
+            else: 
+                # 提取链接中标题
+                if info.content[:8] == '[CQ:json':
+                    info.content = '[链接]'+info.content.split('"desc":"')[2].split('&#44')[0][1:]
+                server.say(f'§6[QQ] §a[{self.find_game_name(str(user_id), bot, info.source_id)}] §f{info.content}')
             
     # 转发消息
     def send_msg_to_qq(self, server:PluginServerInterface, info:Info):
