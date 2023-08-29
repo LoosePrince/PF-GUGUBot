@@ -121,13 +121,13 @@ class qbot(object):
             bound_list = self.data.values()
             if self.rcon:
                 result = self.rcon.send_command('list')
-                player_list = result.split(": ")[-1].split(", ")
+                player_list = [i.strip() for i in result.split(": ")[-1].split(", ")]
                 t_player = [i for i in player_list if i in bound_list] if player else [i for i in player_list if i not in bound_list]
                 server.logger.debug(f"rcon获取列表如下：{player_list}")
             else:
                 try:
                     content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
-                    player_list = [i['name'] for i in content['sample']]
+                    player_list = [i['name'].strip() for i in content['sample']]
                     server.logger.debug(f"API获取列表如下：{player_list}")
                     if player: # 过滤假人
                         t_player = [i for i in player_list if i in bound_list]
