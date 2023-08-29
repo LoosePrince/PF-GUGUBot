@@ -68,8 +68,8 @@ class qbot(object):
 
     # 文字转图片-装饰器
     def addTextToImage(func):
-        def _newReply(font, self, info, message: str):
-            if len(message) >= 150:
+        def _newReply(font, font_limit:int, self, info, message: str):
+            if font_limit >= 0 and len(message) >= font_limit:
                 image_path = text2image(font, message)
                 message = f"[CQ:image,file={Path(image_path).as_uri()}]"
             """auto reply"""
@@ -87,7 +87,7 @@ class qbot(object):
 
         def _addTextToImage(self, server:PluginServerInterface, info: Info, bot):
             funcType = types.MethodType
-            _newReplyWithFont = partial( _newReply, self.font )
+            _newReplyWithFont = partial( _newReply, self.font, int(self.config["font_limit"]) )
             bot.reply = funcType(_newReplyWithFont, bot)
             return func(self, server, info, bot)
 
