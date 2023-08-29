@@ -423,7 +423,7 @@ class qbot(object):
                     bot.reply(info, response)
                     server.say(f'§a[机器人] §f{response}')
             else:
-                bot.reply(info, f'[CQ:at,qq={user_id}][CQ:image,file=file:///{os.getcwd()+"/plugins/GUGUbot/bound.jpg"}]')
+                bot.reply(info, f'[CQ:at,qq={user_id}][CQ:image,file={Path(os.getcwd()+"/plugins/GUGUbot/bound.jpg").as_uri()}]')
         # 绑定功能
         elif len(command) == 2 and command[0] == '绑定':
             user_id = str(info.user_id)
@@ -521,7 +521,7 @@ class qbot(object):
             # 判断是否绑定
             if  str(info.user_id) not in self.data.keys():
                 # 提示绑定
-                bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file=file:///{os.getcwd()+"/config/GUGUbot/bound.jpg"}]')
+                bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(os.getcwd()+"/config/GUGUbot/bound.jpg").as_uri()}]')
                 return 
             # 如果开启违禁词
             if self.config['command']['ban_word']:
@@ -554,7 +554,7 @@ class qbot(object):
                         with open(f"./config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg", "wb") as f:
                             f.write(response.content)
                         # save dict
-                        self.key_word.data[self.picture_record_dict[info.user_id]]="[CQ:image,file=file:///{}]".format(os.getcwd()+f"/config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg")
+                        self.key_word.data[self.picture_record_dict[info.user_id]]="[CQ:image,file={}]".format(Path(os.getcwd()+f"/config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg").as_uri())
                         del self.picture_record_dict[info.user_id]
                         bot.reply(info, style[self.style]['add_success'])
                     except Exception as e:
