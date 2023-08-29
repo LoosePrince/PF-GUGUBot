@@ -116,7 +116,7 @@ class qbot(object):
         (command[0] in ['玩家列表','玩家','player'] \
          or command[0] in ['假人列表','假人','fakeplayer'] \
          or command[0] in ['服务器','server']):
-            server_status = command[0] in ['服务器']
+            server_status = command[0] in ['服务器', 'server']
             player = command[0] in ['玩家','玩家列表']
             bound_list = self.data.values()
             if self.rcon:
