@@ -39,6 +39,7 @@ class qbot(object):
 
     # 读取文件
     def loading_dicts(self) -> None:
+        self.packing_copy()
         self.font = pygame.font.Font(self.config["dict_address"]["font_path"], 26)
         self.start_command   = start_command_system(self.config["dict_address"]["start_command_dict"])                     # 开服指令
         self.key_word        = key_word_system(self.config["dict_address"]['key_word_dict'])                               # QQ 关键词
@@ -67,8 +68,8 @@ class qbot(object):
 
     # 文字转图片-装饰器
     def addTextToImage(func):
-        def _newReply(font, self, info, message: str):
-            if len(message) >= 150:
+        def _newReply(font, font_limit:int, self, info, message: str):
+            if font_limit >= 0 and len(message) >= font_limit:
                 image_path = text2image(font, message)
                 message = f"[CQ:image,file={Path(image_path).as_uri()}]"
             """auto reply"""
@@ -86,7 +87,7 @@ class qbot(object):
 
         def _addTextToImage(self, server:PluginServerInterface, info: Info, bot):
             funcType = types.MethodType
-            _newReplyWithFont = partial( _newReply, self.font )
+            _newReplyWithFont = partial( _newReply, self.font, int(self.config["font_limit"]) )
             bot.reply = funcType(_newReplyWithFont, bot)
             return func(self, server, info, bot)
 
@@ -113,18 +114,20 @@ class qbot(object):
         # 玩家列表
         if self.config['command']['list'] and (command[0] in ['玩家列表','玩家'] or command[0] in ['假人列表','假人']):
             player = command[0] in ['玩家','玩家列表']
+            bound_list = self.data.values()
             if self.rcon:
                 result = self.rcon.send_command('list')
                 player_list = result.split(": ")[-1].split(", ")
-                t_player = [i for i in player_list if "假的" not in i] if player else [i for i in player_list if "假的" in i]
+                t_player = [i for i in player_list if i in bound_list] if player else [i for i in player_list if i not in bound_list]
+                server.logger.debug(f"rcon获取列表如下：{player_list}")
             else:
                 try:
                     content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
-                    
+                    server.logger.debug(f"API获取列表如下：{[i['name'] for i in content['sample']]}")
                     if player: # 过滤假人
-                        t_player = [i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()]
+                        t_player = [i["name"] for i in content['sample'] if i["name"] in bound_list]
                     else: # 过滤真人
-                        t_player = [i["name"] for i in content['sample'] if i["name"] not in self.whitelist.values()] 
+                        t_player = [i["name"] for i in content['sample'] if i["name"] not in bound_list] 
                 except:
                     bot.reply(info, "未能获取到服务器信息，请检查服务器参数设置！（推荐开启rcon精准获取玩家信息）")
 
@@ -373,7 +376,7 @@ class qbot(object):
             elif len(command)>1 and command[1] == '关':
                 self.config['command']['name'] = False
                 for gid in self.config['group_id']:
-                    bot.set_group_card(gid, int(info.self_id), " ")
+                    bot.set_group_card(gid, int(bot.get_login_info().json()["data"]['user_id']), " ")
                 bot.reply(info, "显示游戏内人数已关闭")     
 
         elif info.content.startswith('#审核'):
@@ -694,7 +697,7 @@ class qbot(object):
     
     # 通过QQ号找到绑定的游戏ID
     def find_game_name(self, qq_id:str, bot, group_id:str=None) -> str:
-        group_id = self.config['group_id'][0]
+        group_id = group_id if group_id in self.config['group_id'] else self.config['group_id'][0]
         qq_uuid = {v:k for k,v in self.uuid_qqid.items()}
         # 未启用白名单
         if not self.config['command']['whitelist']:
@@ -722,6 +725,17 @@ class qbot(object):
             with open(path,'w') as f:
                 return {}
 
+     # 解包字体，绑定图片
+    def packing_copy(self) -> None:
+        def __copyFile(path, target_path):
+            if not os.path.exists(target_path):
+                with self.server.open_bundled_file(path) as file_handler:
+                    message = file_handler.read()
+                with open(target_path, 'wb') as f:
+                    f.write(message)
+        __copyFile("data/bound.jpg", "./config/GUGUbot/bound.jpg")
+        __copyFile("font/MicrosoftYaHei-01.ttf", "./config/GUGUbot/MicrosoftYaHei-01.ttf")
+
     # 转发消息到指定群
     def send_group_msg(self, msg, group):
         requests.post(f'http://{self.host}:{self.port}/send_group_msg', json={
@@ -736,12 +750,15 @@ class qbot(object):
 
     # 机器人名称显示游戏内人数
     def set_number_as_name(self, server:PluginServerInterface, info: Info, bot):
+        bound_list = self.data.values()
         if self.rcon:
-            number = len([i for i in self.rcon.send_command("list").split(": ")[-1].split(", ") if "假的" not in i])
+            number = len([i for i in self.rcon.send_command("list").split(": ")[-1].split(", ") if i in bound_list])
+            server.logger.debug(f'rcon获取列表如下：{self.rcon.send_command("list").split(": ")[-1].split(", ")}')
         else:
             try:
                 content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
-                number = len([i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()])
+                number = len([i["name"] for i in content['sample'] if i["name"] in bound_list])
+                server.logger.debug(f"API获取列表如下：{[i['name'] for i in content['sample']]}")
             except:
                 number = "API接口错误/请配置game_ip & game_port参数"
         name = " "
@@ -763,11 +780,11 @@ def text2image(font, input_string:str)->str:
     line_image = [ font.render(text, True, (0, 0, 0), (255 ,255 ,255)) for text in message ]
 
     max_length = max([i.get_width() for i in line_image])
-    root = pygame.Surface((max_length,len(message)*30))
+    root = pygame.Surface((max_length,len(message)*33))
     root.fill((255,255,255))
 
     for i, image in enumerate(line_image):
-        root.blit(image, (0, i*30))
+        root.blit(image, (0, i*33))
 
     if not os.path.exists("./config/GUGUbot/image"):
         os.makedirs("./config/GUGUbot/image")
