@@ -728,11 +728,11 @@ class qbot(object):
         def __copyFile(path, target_path):
             if not os.path.exists(target_path):
                 with self.server.open_bundled_file(path) as file_handler:
-                    message = file_handler.read().decode('utf8')
-                with open(target_path, 'w', encoding='utf-8') as f:
+                    message = file_handler.read()
+                with open(target_path, 'wb') as f:
                     f.write(message)
-        __copyFile("./data/bound.jpg", "./config/GUGUbot/bound.jpg")
-        __copyFile("./font/MicrosoftYaHei-01.ttf", "./config/GUGUbot/MicrosoftYaHei-01.ttf")
+        __copyFile("data/bound.jpg", "./config/GUGUbot/bound.jpg")
+        __copyFile("font/MicrosoftYaHei-01.ttf", "./config/GUGUbot/MicrosoftYaHei-01.ttf")
 
     # 转发消息到指定群
     def send_group_msg(self, msg, group):
