@@ -4,8 +4,9 @@ from .ban_word_system import ban_word_system
 from .key_word_system import key_word_system
 from .start_command_system import start_command_system
 from .table import table
-from data.text import *
 from collections import defaultdict
+from data.text import *
+from functools import partial
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.minecraft.rcon.rcon_connection import RconConnection
 import json
@@ -65,9 +66,9 @@ class qbot(object):
 
     # 文字转图片-装饰器
     def addTextToImage(func):
-        def _newReply(self, info, message: str):
+        def _newReply(font, self, info, message: str):
             if len(message) >= 150:
-                image_path = self.text2image(message)
+                image_path = text2image(font, message)
                 message = f"[CQ:image,file=file:///{image_path}]"
             """auto reply"""
             if info.source_type == 'private':
@@ -84,28 +85,11 @@ class qbot(object):
 
         def _addTextToImage(self, server:PluginServerInterface, info: Info, bot):
             funcType = types.MethodType
-            bot.reply = funcType(_newReply, bot)
+            _newReplyWithFont = partial( _newReply, self.font )
+            bot.reply = funcType(_newReplyWithFont, bot)
             return func(self, server, info, bot)
 
         return _addTextToImage
-
-    def text2image(self, input_string:str):
-        message = input_string.split("\n")
-        line_image = [ self.font.render(text, True, (0, 0, 0), (255 ,255 ,255)) for text in message ]
-
-        max_length = max([i.get_width() for i in line_image])
-        root = pygame.Surface((max_length,len(message)*30))
-        root.fill((255,255,255))
-
-        for i, image in enumerate(line_image):
-            root.blit(image, (0, i*30))
-
-        if not os.path.exists("./config/GUGUbot/image"):
-            os.makedirs("./config/GUGUbot/image")
-        image_path = "./config/GUGUbot/image/{}.jpg".format(int(time.time()))
-        pygame.image.save(root, image_path)
-
-        return image_path
 
     # 通用QQ 指令
     @addTextToImage
@@ -769,3 +753,21 @@ class qbot(object):
             requests.post(
             f'http://{self.host}:{self.port}/set_group_card',
             json=data)
+
+def text2image(font, input_string:str):
+    message = input_string.split("\n")
+    line_image = [ font.render(text, True, (0, 0, 0), (255 ,255 ,255)) for text in message ]
+
+    max_length = max([i.get_width() for i in line_image])
+    root = pygame.Surface((max_length,len(message)*30))
+    root.fill((255,255,255))
+
+    for i, image in enumerate(line_image):
+        root.blit(image, (0, i*30))
+
+    if not os.path.exists("./config/GUGUbot/image"):
+        os.makedirs("./config/GUGUbot/image")
+    image_path = "{}/config/GUGUbot/image/{}.jpg".format(os.getcwd(), int(time.time()))
+    pygame.image.save(root, image_path)
+
+    return image_path
