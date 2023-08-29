@@ -139,8 +139,7 @@ class qbot(object):
             if server_status:
                 true_player = [i for i in player_list if i in bound_list]
                 fake_player = [i for i in player_list if i not in bound_list]
-                server_status_reply = (f"\n--玩家--\n" + '\n'.join(true_player)) if true_player else "" + \
-                                    f"\n--假人--：\n" + '\n'.join(fake_player) if fake_player else ""
+                server_status_reply = ((f"\n---玩家---\n" + '\n'.join(true_player)) if true_player else "") + ((f"\n---假人---\n" + '\n'.join(fake_player)) if fake_player else "")
 
             if len(t_player) == 0 or len(player_list) == 0:
                 respond = style[self.style]['no_player_ingame'] if player or server_status else '没有假人在线哦!'
