@@ -138,7 +138,7 @@ class qbot(object):
                 respond = style[self.style]['player_list'].format(
                     len(t_player),
                     '玩家' if player else '假人',
-                    ', '.join(t_player))
+                    '\n'+'\n'.join(t_player))
             bot.reply(info, respond)
 
         # 添加关键词
