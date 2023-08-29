@@ -13,7 +13,7 @@ class start_command_system(base_system):
         super().handle_command(raw_command, info, bot, reply_style, *arg, **kargs)
 
         # need a server kargs
-        if parameter[0] in ['执行', 'exe']:                                          
+        if parameter and parameter[0] in ['执行', 'exe']:                                          
             self.exec(kargs['server'])
             bot.reply(info, style[reply_style]['command_success'])
 
