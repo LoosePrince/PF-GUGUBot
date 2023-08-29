@@ -709,6 +709,7 @@ class qbot(object):
                 return self.whitelist[uuid]
         target_data = bot.get_group_member_info(group_id, qq_id).json()['data']
         target_name = target_data['card'] if target_data['card'] != '' else target_data['nickname']
+        self.match_id()
         return f'{target_name}(名字不匹配)'
     
     # 游戏内关键词列表显示
