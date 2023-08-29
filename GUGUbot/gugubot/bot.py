@@ -53,9 +53,9 @@ class qbot(object):
             with open("./config.yml", 'r', encoding='UTF-8') as f:
                 temp_data = yaml.load(f, Loader=yaml.FullLoader)
             if temp_data['rcon']['enable']:
-                address = temp_data['rcon']['address']
-                port = temp_data['rcon']['port']
-                password = temp_data['rcon']['password']
+                address = str(temp_data['rcon']['address'])
+                port = int(temp_data['rcon']['port'])
+                password = str(temp_data['rcon']['password'])
                 self.rcon = RconConnection(address, port, password)
                 self.rcon.connect()
                 return
@@ -757,7 +757,7 @@ class qbot(object):
             f'http://{self.host}:{self.port}/set_group_card',
             json=data)
 
-def text2image(font, input_string:str):
+def text2image(font, input_string:str)->str:
     message = input_string.split("\n")
     line_image = [ font.render(text, True, (0, 0, 0), (255 ,255 ,255)) for text in message ]
 
