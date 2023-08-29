@@ -69,7 +69,7 @@ class qbot(object):
     # 文字转图片-装饰器
     def addTextToImage(func):
         def _newReply(font, font_limit:int, self, info, message: str):
-            if font_limit >= 0 and len(message) >= font_limit:
+            if font_limit >= 0 and len(message.split("]")[-1]) >= font_limit:
                 image_path = text2image(font, message)
                 message = f"[CQ:image,file={Path(image_path).as_uri()}]"
             """auto reply"""
@@ -138,7 +138,7 @@ class qbot(object):
                 respond = style[self.style]['player_list'].format(
                     len(t_player),
                     '玩家' if player else '假人',
-                    ', '.join(t_player))
+                    '\n'+'\n'.join(t_player))
             bot.reply(info, respond)
 
         # 添加关键词
@@ -426,7 +426,7 @@ class qbot(object):
                     bot.reply(info, response)
                     server.say(f'§a[机器人] §f{response}')
             else:
-                bot.reply(info, f'[CQ:at,qq={user_id}][CQ:image,file={Path(os.getcwd()+"/plugins/GUGUbot/bound.jpg").as_uri()}]')
+                bot.reply(info, f'[CQ:at,qq={user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
         # 绑定功能
         elif len(command) == 2 and command[0] == '绑定':
             user_id = str(info.user_id)
@@ -524,7 +524,7 @@ class qbot(object):
             # 判断是否绑定
             if  str(info.user_id) not in self.data.keys():
                 # 提示绑定
-                bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(os.getcwd()+"/config/GUGUbot/bound.jpg").as_uri()}]')
+                bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
                 return 
             # 如果开启违禁词
             if self.config['command']['ban_word']:
@@ -709,6 +709,7 @@ class qbot(object):
                 return self.whitelist[uuid]
         target_data = bot.get_group_member_info(group_id, qq_id).json()['data']
         target_name = target_data['card'] if target_data['card'] != '' else target_data['nickname']
+        self.match_id()
         return f'{target_name}(名字不匹配)'
     
     # 游戏内关键词列表显示

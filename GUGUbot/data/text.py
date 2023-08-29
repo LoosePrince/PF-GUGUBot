@@ -34,7 +34,8 @@ DEFAULT_CONFIG = {
         'shenhe':True
         },
     'dict_address' : {
-        'font_path': "./config/GUGUbot/MicrosoftYaHei-01.ttf",
+        "bound_image_path": ".//config//GUGUbot//bound.jpg",
+        'font_path': ".//config//GUGUbot//MicrosoftYaHei-01.ttf",
         "start_command_dict": './/config//GUGUbot//start_commands.json',
         "key_word_dict": './/config//GUGUbot//key_word.json',
         "ban_word_dict": './/config//GUGUbot//ban_word.json',
