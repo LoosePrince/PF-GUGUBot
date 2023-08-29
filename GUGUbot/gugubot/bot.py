@@ -114,18 +114,19 @@ class qbot(object):
         # 玩家列表
         if self.config['command']['list'] and (command[0] in ['玩家列表','玩家'] or command[0] in ['假人列表','假人']):
             player = command[0] in ['玩家','玩家列表']
+            bound_list = self.data.values()
             if self.rcon:
                 result = self.rcon.send_command('list')
                 player_list = result.split(": ")[-1].split(", ")
-                t_player = [i for i in player_list if "假的" not in i] if player else [i for i in player_list if "假的" in i]
+                t_player = [i for i in player_list if i in bound_list] if player else [i for i in player_list if i not in bound_list]
             else:
                 try:
                     content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
                     
                     if player: # 过滤假人
-                        t_player = [i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()]
+                        t_player = [i["name"] for i in content['sample'] if i["name"] in bound_list]
                     else: # 过滤真人
-                        t_player = [i["name"] for i in content['sample'] if i["name"] not in self.whitelist.values()] 
+                        t_player = [i["name"] for i in content['sample'] if i["name"] not in bound_list] 
                 except:
                     bot.reply(info, "未能获取到服务器信息，请检查服务器参数设置！（推荐开启rcon精准获取玩家信息）")
 
@@ -748,13 +749,14 @@ class qbot(object):
 
     # 机器人名称显示游戏内人数
     def set_number_as_name(self, server:PluginServerInterface, info: Info, bot):
+        bound_list = self.data.values()
         if self.rcon:
-            number = len([i for i in self.rcon.send_command("list").split(": ")[-1].split(", ") if "假的" not in i])
+            number = len([i for i in self.rcon.send_command("list").split(": ")[-1].split(", ") if i in bound_list])
             server.logger.debug(f'rcon获取列表如下：{self.rcon.send_command("list").split(": ")[-1].split(", ")}')
         else:
             try:
                 content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
-                number = len([i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()])
+                number = len([i["name"] for i in content['sample'] if i["name"] in bound_list])
                 server.logger.debug(f"API获取列表如下：{[i['name'] for i in content['sample']]}")
             except:
                 number = "API接口错误/请配置game_ip & game_port参数"
