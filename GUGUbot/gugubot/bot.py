@@ -751,7 +751,7 @@ class qbot(object):
         for gid in self.config['group_id']:
             data = {
             'group_id': gid,
-            'user_id': info.self_id,
+            'user_id': bot.get_login_info().json()["data"]['user_id'],
             'card': name
             }
             requests.post(
