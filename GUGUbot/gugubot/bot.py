@@ -738,8 +738,11 @@ class qbot(object):
         if self.rcon:
             number = len([i for i in self.rcon.send_command("list").split(": ")[-1].split(", ") if "假的" not in i])
         else:
-            content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
-            number = len([i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()])
+            try:
+                content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
+                number = len([i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()])
+            except:
+                number = "API接口错误/请配置game_ip & game_port参数"
         name = " "
         if number != 0:
             name = "在线人数: {}".format(number)
