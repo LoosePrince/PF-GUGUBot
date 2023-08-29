@@ -10,7 +10,7 @@
 使用方式：
 * 将Release里面的GUGUbot.mcdr放入`/plugins`
 * 加载后，在`/config/GUGUbot/config.yml`中配置机器人
-* 注意修改`CoolQAPI`的`command_prefix`的默认值，否则可能使用不了`命令`功能
+* 注意修改`CoolQAPI`的`command_prefix`的默认值为`#`，否则使用不了`命令`功能
 
 ## 依赖
 #### Python包
@@ -123,6 +123,7 @@ QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮�
 ```
 #玩家 -> 获取在线玩家列表
 #假人 -> 获取在线假人列表
+#服务器 -> 同时获取在线玩家和假人列表
 #绑定 <游戏ID> -> 绑定你的游戏ID
 #mc <消息> -> 向游戏内发送消息（可以触发游戏内关键词）
 #风格 -> 机器人风格帮助
@@ -214,12 +215,12 @@ servers:
 >  
 > | 配置项 | 默认值 | 说明 |
 > | - | - | - |
-> | http.enable | `false` | 是否使用 HTTP |
-> | http.post_host | `127.0.0.1` | 接收数据上报的地址 |
-> | http.post_port | `5701` | 对应 go-cqhttp 的 HTTP 监听端口 |
-> | http.api_host | `127.0.0.1` | 对应 go-cqhttp 的地址 |
-> | http.api_port | `5700` | 对应 go-cqhttp `url` 配置的端口 |
-> 
+> | post_host | `127.0.0.1` | 接收数据上报的地址 |
+> | post_port | `5701` | 对应 go-cqhttp 的 HTTP 监听端口 |
+> | api_host | `127.0.0.1` | 对应 go-cqhttp 的地址 |
+> | api_port | `5700` | 对应 go-cqhttp `url` 配置的端口 |
+> | command_prefix | `/` | 需要修改成`#`以启用机器人函数功能 | 
+>
 > </details>
 
 ### 关于多服使用
@@ -244,8 +245,8 @@ servers:
 
 # TODO
 - [x] 修复字体的路径问题
-- [ ] 彻底修复名字不匹配的问题
-- [ ] 解决部分情况下的@或回复时显示为QQ号的问题
+- [x] 彻底修复名字不匹配的问题
+- [x] 解决部分情况下的@或回复时显示为QQ号的问题
 - [ ] 修复功能异常或缺失的问题
 - [ ] 更多的rcon功能接入
 
