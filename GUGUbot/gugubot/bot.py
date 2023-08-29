@@ -375,7 +375,7 @@ class qbot(object):
             elif len(command)>1 and command[1] == '关':
                 self.config['command']['name'] = False
                 for gid in self.config['group_id']:
-                    bot.set_group_card(gid, int(info.self_id), " ")
+                    bot.set_group_card(gid, int(bot.get_login_info().json()["data"]['user_id']), " ")
                 bot.reply(info, "显示游戏内人数已关闭")     
 
         elif info.content.startswith('#审核'):
