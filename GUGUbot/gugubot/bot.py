@@ -112,7 +112,11 @@ class qbot(object):
                 return 
 
         # 玩家列表
-        if self.config['command']['list'] and (command[0] in ['玩家列表','玩家'] or command[0] in ['假人列表','假人']):
+        if self.config['command']['list'] and \
+        (command[0] in ['玩家列表','玩家','player'] \
+         or command[0] in ['假人列表','假人','fakeplayer'] \
+         or command[0] in ['服务器','server']):
+            server_status = command[0] in ['服务器']
             player = command[0] in ['玩家','玩家列表']
             bound_list = self.data.values()
             if self.rcon:
@@ -123,26 +127,33 @@ class qbot(object):
             else:
                 try:
                     content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
-                    server.logger.debug(f"API获取列表如下：{[i['name'] for i in content['sample']]}")
+                    player_list = [i['name'] for i in content['sample']]
+                    server.logger.debug(f"API获取列表如下：{player_list}")
                     if player: # 过滤假人
-                        t_player = [i["name"] for i in content['sample'] if i["name"] in bound_list]
+                        t_player = [i for i in player_list if i in bound_list]
                     else: # 过滤真人
-                        t_player = [i["name"] for i in content['sample'] if i["name"] not in bound_list] 
+                        t_player = [i for i in player_list if i not in bound_list] 
                 except:
                     bot.reply(info, "未能获取到服务器信息，请检查服务器参数设置！（推荐开启rcon精准获取玩家信息）")
+                
+            if server_status:
+                true_player = [i for i in player_list if i in bound_list]
+                fake_player = [i for i in player_list if i not in bound_list]
+                server_status_reply = (f"\n--玩家--\n" + '\n'.join(true_player)) if true_player else "" + \
+                                    f"\n--假人--：\n" + '\n'.join(fake_player) if fake_player else ""
 
-            if len(t_player) == 0 :
-                respond = style[self.style]['no_player_ingame'] if player else '没有假人在线哦！'
+            if len(t_player) == 0 or len(player_list) == 0:
+                respond = style[self.style]['no_player_ingame'] if player or server_status else '没有假人在线哦!'
             else:
                 t_player.sort() # 名字排序
                 respond = style[self.style]['player_list'].format(
-                    len(t_player),
-                    '玩家' if player else '假人',
-                    '\n'+'\n'.join(t_player))
+                    len(t_player) if not server_status else len(player_list),
+                    '玩家' if player else ('假人' if not server_status else '人员'),
+                    '\n'+'\n'.join(t_player) if not server_status else server_status_reply)
             bot.reply(info, respond)
 
         # 添加关键词
-        elif self.config['command']['key_word'] and command[0] in ["列表",'添加','删除']:
+        elif self.config['command']['key_word'] and command[0] in ["列表", 'list', '添加', 'add', '删除', '移除', 'del']:
             self.key_word.handle_command(info.content, info, bot, style=self.style)
 
         # 游戏内关键词
