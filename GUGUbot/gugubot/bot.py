@@ -750,10 +750,12 @@ class qbot(object):
     def set_number_as_name(self, server:PluginServerInterface, info: Info, bot):
         if self.rcon:
             number = len([i for i in self.rcon.send_command("list").split(": ")[-1].split(", ") if "假的" not in i])
+            server.logger.debug(f'rcon获取列表如下：{self.rcon.send_command("list").split(": ")[-1].split(", ")}')
         else:
             try:
                 content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
                 number = len([i["name"] for i in content['sample'] if i["name"] in self.whitelist.values()])
+                server.logger.debug(f"API获取列表如下：{[i['name'] for i in content['sample']]}")
             except:
                 number = "API接口错误/请配置game_ip & game_port参数"
         name = " "
