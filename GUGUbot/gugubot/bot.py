@@ -426,7 +426,7 @@ class qbot(object):
                     bot.reply(info, response)
                     server.say(f'§a[机器人] §f{response}')
             else:
-                bot.reply(info, f'[CQ:at,qq={user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
+                bot.reply(info, f'[CQ:at,qq={user_id}] [CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
         # 绑定功能
         elif len(command) == 2 and command[0] == '绑定':
             user_id = str(info.user_id)
@@ -524,7 +524,7 @@ class qbot(object):
             # 判断是否绑定
             if  str(info.user_id) not in self.data.keys():
                 # 提示绑定
-                bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
+                bot.reply(info, f'[CQ:at,qq={info.user_id}] [CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
                 return 
             # 如果开启违禁词
             if self.config['command']['ban_word']:
