@@ -695,7 +695,7 @@ class qbot(object):
     
     # 通过QQ号找到绑定的游戏ID
     def find_game_name(self, qq_id:str, bot, group_id:str=None) -> str:
-        group_id = self.config['group_id'][0]
+        group_id = group_id if group_id in self.config['group_id'] else self.config['group_id'][0]
         qq_uuid = {v:k for k,v in self.uuid_qqid.items()}
         # 未启用白名单
         if not self.config['command']['whitelist']:
@@ -775,11 +775,11 @@ def text2image(font, input_string:str)->str:
     line_image = [ font.render(text, True, (0, 0, 0), (255 ,255 ,255)) for text in message ]
 
     max_length = max([i.get_width() for i in line_image])
-    root = pygame.Surface((max_length,len(message)*30))
+    root = pygame.Surface((max_length,len(message)*33))
     root.fill((255,255,255))
 
     for i, image in enumerate(line_image):
-        root.blit(image, (0, i*30))
+        root.blit(image, (0, i*33))
 
     if not os.path.exists("./config/GUGUbot/image"):
         os.makedirs("./config/GUGUbot/image")
