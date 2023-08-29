@@ -18,6 +18,7 @@ DEFAULT_CONFIG = {
     'game_ip':'',
     'game_port':'',
     'font_limit':150,
+    'command_prefix': "#",
     'forward': {
         'mc_to_qq': True,
         'qq_to_mc': True

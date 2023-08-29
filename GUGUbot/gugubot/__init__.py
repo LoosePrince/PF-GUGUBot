@@ -25,6 +25,9 @@ def on_load(server: PluginServerInterface, old):
 
     host = server.get_plugin_instance('cool_q_api').get_config()['api_host']
     port = server.get_plugin_instance('cool_q_api').get_config()['api_port']
+    coolQ_command_prefix = server.get_plugin_instance('cool_q_api').get_config()['command_prefix']
+    if coolQ_command_prefix != config['command_prefix']:
+        server.logger.warning(f"CoolQAPI与gugubot所用command_prefix不一致，可能导致功能紊乱！CoolQ: {coolQ_command_prefix} vs gugubot: {config['command_prefix']}")
     if old is not None and hasattr(old, 'past_bot') and \
        old is not None and hasattr(old, 'past_info'):
         past_info = old.past_info

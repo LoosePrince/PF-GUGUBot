@@ -99,10 +99,10 @@ class qbot(object):
         server.logger.debug(f"收到消息上报：{info}")
         # 过滤非关注的消息
         if not (info.source_id in self.config['group_id'] or
-            info.source_id in self.config['admin_id']) or info.raw_content[0] != '#':
+            info.source_id in self.config['admin_id']) or info.raw_content[0] != self.config['command_prefix']:
             return 
         command = info.content.split(' ')
-        command[0] = command[0].replace('#', '')
+        command[0] = command[0].replace(self.config['command_prefix'], '')
         # 检测违禁词
         if self.config['command']['ban_word'] and info.source_type == 'group':
             ban_result = self.ban_word.check_ban(' '.join(command))
@@ -210,11 +210,11 @@ class qbot(object):
     # 管理员指令
     def private_command(self, server, info: Info, bot, command:list):
         # 全部帮助菜单
-        if info.content == '#帮助':
+        if info.content == f"{self.config['command_prefix']}帮助":
             bot.reply(info, admin_help_msg)
         # bound 帮助菜单
-        elif info.content.startswith('#绑定'):
-            if info.content == '#绑定':
+        elif info.content.startswith(f"{self.config['command_prefix']}绑定"):
+            if info.content == f"{self.config['command_prefix']}绑定":
                 bot.reply(info, bound_help)
             # 已绑定的名单    
             elif len(command) == 2 and command[1] == '列表':
@@ -246,8 +246,8 @@ class qbot(object):
                 bot.reply(info, '已成功绑定')
 
         # 白名单
-        elif info.content.startswith('#白名单'):
-            if info.content == '#白名单':
+        elif info.content.startswith(f"{self.config['command_prefix']}白名单"):
+            if info.content == f"{self.config['command_prefix']}白名单":
                 bot.reply(info, whitelist_help)
             # 执行指令
             elif len(command)>1 and command[1] in ['添加', '删除','移除', '列表', '开', '关', '重载']:
@@ -282,7 +282,7 @@ class qbot(object):
                     bot.reply(info,'白名单如下：\n'+'\n'.join(sorted(self.whitelist.values())))
                     
         # 启动指令相关
-        elif info.content.startswith('#启动指令'):
+        elif info.content.startswith(f"{self.config['command_prefix']}启动指令"):
             # 开启开服指令
             if len(command)>1 and command[1] == '开':
                 self.config['command']['start_command'] = True
@@ -295,7 +295,7 @@ class qbot(object):
                 self.start_command.handle_command(info.content, info, bot, style=self.style)
               
         # 违禁词相关
-        elif info.content.startswith('#违禁词'):
+        elif info.content.startswith(f"{self.config['command_prefix']}违禁词"):
             if len(command)>1 and command[1] == '开':
                 self.config['command']['ban_word'] = True
                 bot.reply(info, '已开启违禁词！')
@@ -307,7 +307,7 @@ class qbot(object):
                 self.ban_word.handle_command(info.content, info, bot, style=self.style)
         
         # 关键词相关
-        elif info.content.startswith('#关键词'):
+        elif info.content.startswith(f"{self.config['command_prefix']}关键词"):
             # 开启关键词
             if len(command)>1 and command[1] in ['开','on']:
                 self.config['command']['key_word'] = True
@@ -320,7 +320,7 @@ class qbot(object):
                 self.key_word.handle_command(info.content, info, bot, style=self.style)
             
         # 游戏内关键词相关
-        elif info.content.startswith('#游戏关键词'):
+        elif info.content.startswith(f"{self.config['command_prefix']}游戏关键词"):
             # 开启游戏关键词
             if len(command)>1 and command[1] == '开':
                 self.config['command']['ingame_key_word'] = True
@@ -333,9 +333,9 @@ class qbot(object):
                 self.key_word_ingame.handle_command(info.content, info, bot, style=self.style)
 
         # uuid匹配相关
-        elif info.content.startswith('#uuid'):
+        elif info.content.startswith(f"{self.config['command_prefix']}uuid"):
             # uuid 帮助
-            if info.content == '#uuid':
+            if info.content == f"{self.config['command_prefix']}uuid":
                 bot.reply(info, uuid_help)
             # 查看uuid 匹配表
             elif len(command)>1 and command[1] == '列表':
@@ -369,8 +369,8 @@ class qbot(object):
                     bot.reply(info, '未找到对应名字awa！')                
 
         # 机器人名字 <- 服务器人数
-        elif info.content.startswith('#名字'):
-            if info.content == '#名字':
+        elif info.content.startswith(f"{self.config['command_prefix']}名字"):
+            if info.content == f"{self.config['command_prefix']}名字":
                 bot.reply(info, name_help)
             elif len(command)>1 and command[1] == '开':
                 self.config['command']['name'] = True
@@ -389,8 +389,8 @@ class qbot(object):
                     bot.set_group_card(gid, int(bot.get_login_info().json()["data"]['user_id']), " ")
                 bot.reply(info, "显示游戏内人数已关闭")     
 
-        elif info.content.startswith('#审核'):
-            if info.content == '#审核':
+        elif info.content.startswith(f"{self.config['command_prefix']}审核"):
+            if info.content == f"{self.config['command_prefix']}审核":
                 bot.reply(info, shenhe_help)
             elif len(command)>1 and command[1] == '开':
                 self.config['command']['shenhe'] = True
@@ -421,7 +421,7 @@ class qbot(object):
 
     # 群指令
     def group_command(self, server, info: Info, bot, command:list):
-        if info.content == '#帮助':  # 群帮助
+        if info.content == f"{self.config['command_prefix']}帮助":  # 群帮助
             bot.reply(info, group_help_msg)
         elif self.config['command']['mc'] and command[0] == 'mc': # qq发送到游戏内消息
             user_id = str(info.user_id)
@@ -468,7 +468,7 @@ class qbot(object):
         # 机器人风格相关
         elif command[0] == '风格':
             # 风格帮助
-            if info.content == '#风格':
+            if info.content == f"{self.config['command_prefix']}风格":
                 bot.reply(info, style_help)
             # 风格列表
             elif command[1] == '列表':
@@ -529,7 +529,7 @@ class qbot(object):
     def send_msg_to_mc(self, server:PluginServerInterface, info: Info, bot):
         self.server = server
         # 判断是否转发
-        if info.content[0] != '#' and self.config['forward']['qq_to_mc'] \
+        if info.content[0] != self.config['command_prefix'] and self.config['forward']['qq_to_mc'] \
             and info.source_id in self.config['group_id']:
             # 判断是否绑定
             if  str(info.user_id) not in self.data.keys():
