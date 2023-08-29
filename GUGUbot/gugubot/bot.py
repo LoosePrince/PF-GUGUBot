@@ -98,13 +98,13 @@ class qbot(object):
     def on_qq_command(self,server: PluginServerInterface, info: Info, bot):
         server.logger.debug(f"收到消息上报：{info}")
         # 过滤非关注的消息
-        if not (info.source_id in self.config['group_id'] or
+        if not (info.source_id in self.config['group_id'] or info.source_id in self.config['admin_group_id'] or
             info.source_id in self.config['admin_id']) or info.raw_content[0] != self.config['command_prefix']:
             return 
         command = info.content.split(' ')
         command[0] = command[0].replace(self.config['command_prefix'], '')
         # 检测违禁词
-        if self.config['command']['ban_word'] and info.source_type == 'group':
+        if self.config['command']['ban_word'] and (info.source_type == 'group' and info.source_id not in self.config['admin_group_id']):
             ban_result = self.ban_word.check_ban(' '.join(command))
             if ban_result:
                 bot.delete_msg(info.message_id)
@@ -202,7 +202,7 @@ class qbot(object):
             bot.reply(info,f"已拒绝{self.shenhe[info.user_id][0][0]}的申请awa")
             self.shenhe[info.user_id].pop(0)
         
-        if info.source_type == 'private':
+        if info.source_type == 'private' or info.source_id in self.config['admin_group_id']:
             self.private_command(server, info, bot, command)
         elif info.source_type == 'group':
             self.group_command(server, info, bot, command)
