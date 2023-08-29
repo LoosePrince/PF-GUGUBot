@@ -9,6 +9,7 @@ from data.text import *
 from functools import partial
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.minecraft.rcon.rcon_connection import RconConnection
+from pathlib import Path
 import json
 import os
 import types
@@ -69,7 +70,7 @@ class qbot(object):
         def _newReply(font, self, info, message: str):
             if len(message) >= 150:
                 image_path = text2image(font, message)
-                message = f"[CQ:image,file=file:///{image_path}]"
+                message = f"[CQ:image,file={Path(image_path).as_uri()}]"
             """auto reply"""
             if info.source_type == 'private':
                 self.send_private_msg(info.source_id, message)
