@@ -86,6 +86,9 @@ def on_user_info(server:PluginServerInterface, info:Info):
     if qq_bot:
         qq_bot.send_msg_to_qq(server, info)
 
+def on_info(server:PluginServerInterface, info:Info):
+    print(f"gugubot收到：{info}")
+
 # 卸载
 def on_unload(server:PluginServerInterface):
     try:

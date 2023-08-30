@@ -585,7 +585,7 @@ class qbot(object):
                 sender = _get_name(str(info.user_id))
                 # reply
                 if "[CQ:reply" in info.content:
-                    pattern = r"(?:\[CQ:reply,id=(-?\d+)\])(?:\[@(\d+)\])+(.*)"
+                    pattern = r"(?:\[CQ:reply,id=(-?\d+)\])(?:\ ?\[@(\d+)\])+(.*)"
                     match_result = re.match(pattern, info.content.replace("CQ:at,qq=","@"), re.DOTALL).groups()
                     # get receiver name
                     query = {'message_id': match_result[0]}
