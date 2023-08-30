@@ -1,6 +1,6 @@
 {
 	"id": "gugubot",
-	"version": "1.0.5",
+	"version": "1.0.6-beta",
 	"name": "GUGUbot",
 	"description": {
 		"en_us": "A QQ bot connect MC and QQ",
