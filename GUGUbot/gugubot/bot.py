@@ -135,6 +135,7 @@ class qbot(object):
                         t_player = [i for i in player_list if i not in bound_list] 
                 except:
                     bot.reply(info, "未能获取到服务器信息，请检查服务器参数设置！（推荐开启rcon精准获取玩家信息）")
+                    return
                 
             if server_status:
                 true_player = [i for i in player_list if i in bound_list]
