@@ -581,7 +581,7 @@ class qbot(object):
                     target_data = bot.get_group_member_info(info.source_id, qq_id).json()['data']
                     target_name = target_data['card'] if target_data['card'] != '' else target_data['nickname']
                     return f"{target_name}(未绑定)"
-                sender = _get_name(info.user_id)
+                sender = _get_name(str(info.user_id))
                 # reply
                 if "[CQ:reply" in info.content:
                     pattern = r"(?:\[CQ:reply,id=(-?\d+)\])(?:\[@(\d+)\])+(.*)"
@@ -589,7 +589,7 @@ class qbot(object):
                     # get receiver name
                     query = {'message_id': match_result[0]}
                     receiver_id = requests.post(f'http://{self.host}:{self.port}/get_msg',json=query).json()['data']['sender']['user_id']
-                    receiver = _get_name(receiver_id)
+                    receiver = _get_name(str(receiver_id))
                     server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{match_result[-1]}')
                     return 
                 # only @
