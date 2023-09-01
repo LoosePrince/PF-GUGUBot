@@ -82,14 +82,15 @@ def on_player_left(server:PluginServerInterface, player:str):
         and past_bot:
         qq_bot.set_number_as_name(server, past_bot,past_info)
 
+# 离线玩家添加白名单功能
+def on_info(server:PluginServerInterface, info:Info):
+    if qq_bot:
+        qq_bot.add_offline_whitelist(server, info)
+
 # 游戏消息 -> QQ
 def on_user_info(server:PluginServerInterface, info:Info):
     if qq_bot:
         qq_bot.send_msg_to_qq(server, info)
-
-def on_info(server:PluginServerInterface, info:Info):
-    if qq_bot:
-        qq_bot.add_offline_whitelist(server, info)
 
 # 卸载
 def on_unload(server:PluginServerInterface):
