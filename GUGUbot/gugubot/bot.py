@@ -629,21 +629,20 @@ class qbot(object):
                     return
                 # 添加图片
                 if info.user_id in self.picture_record_dict and info.raw_content[:9]=='[CQ:image':
-                    # save pic
                     pattern = "\[CQ:image.+url=(.+)\]"
                     try:
-                        url = re.match(pattern, info.raw_content).groups()[-1]
-                        response = requests.get(url)
-                        if not os.path.exists("./config/GUGUbot/image/"):
+                        url = re.match(pattern, info.raw_content).groups()[-1] 
+                        response = requests.get(url)                              # 获取图片url
+                        if not os.path.exists("./config/GUGUbot/image/"):         # 创建文件夹
                             os.makedirs("./config/GUGUbot/image/")
-                        with open(f"./config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg", "wb") as f:
+                        with open(f"./config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg", "wb") as f: # 保存图片
                             f.write(response.content)
-                        # save dict
+                        # 保存关键词
                         self.key_word.data[self.picture_record_dict[info.user_id]]="[CQ:image,file={}]".format(Path(os.getcwd()+f"/config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg").as_uri())
-                        del self.picture_record_dict[info.user_id]
+                        del self.picture_record_dict[info.user_id]                # 缓存中移除用户
                         bot.reply(info, style[self.style]['add_success'])
                     except Exception as e:
-                        bot.reply(info, str(e))
+                        server.logger.bug(f"保存图片失败：{info}\n报错如下： {e}")
                     return
             # @ 模块
             if '@' in info.content:
@@ -654,7 +653,7 @@ class qbot(object):
                     target_name = target_data['card'] if target_data['card'] != '' else target_data['nickname']
                     return f"{target_name}(未绑定)"
                 sender = _get_name(str(info.user_id))
-                # reply
+                # 回复 -> 正则匹配
                 if "[CQ:reply" in info.content:
                     pattern = r"(?:\[CQ:reply,id=(-?\d+)\])(?:\ ?\[@(\d+)\])+(.*)"
                     match_result = re.match(pattern, info.content.replace("CQ:at,qq=","@"), re.DOTALL).groups()
@@ -664,7 +663,7 @@ class qbot(object):
                     receiver = _get_name(str(receiver_id))
                     server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{match_result[-1]}')
                     return 
-                # only @
+                # only @ -> 正则替换
                 at_pattern = r"\[@(\d+)\]|\[CQ:at,qq=(\d+)\]"
                 sub_string = re.sub(at_pattern, lambda id: f"§b[@{_get_name(str(id.groups()[0]) if id.groups()[0] else str(id.groups()[1]))}]", info.raw_content)
                 server.say(f'§6[QQ] §a[{sender}]§f {sub_string}')
@@ -678,10 +677,10 @@ class qbot(object):
     # 转发消息
     def send_msg_to_qq(self, server:PluginServerInterface, info:Info):
         if info.is_player and self.config['forward']['mc_to_qq']:
-            # check ban
+            # 检查违禁词
             if self.config['command']['ban_word']:
                 response = self.ban_word.check_ban(info.content)
-                if response:
+                if response: # 有违禁词 -> 不转发 + 警告
                     temp = '{"text":"' + '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。\n违禁理由：'+\
                         response[1] + '","color":"gray","italic":true}'
                     self.server.execute(f'tellraw {info.player} {temp}')
@@ -701,13 +700,14 @@ class qbot(object):
                     self.server.say(style[self.style]['delete_success'])
                 else:
                     self.server.say('未找到对应关键词~')
-            # 检测关键词
+            # 转发
             elif info.content[:2] not in [ '@ ','!!']:
                 # 转发原句
                 roll_number = random.randint(0, 999+1)
                 template_index = roll_number % (len(mc2qq_template)-1) if roll_number >= 3 else -1
                 message = mc2qq_template[template_index].format(info.player, info.content)
                 self.send_msg_to_all_qq(message)
+                # 判断游戏内关键词
                 if self.config['command']['ingame_key_word'] and info.content in self.key_word_ingame:
                     # 游戏内回复
                     response = self.key_word_ingame.check_response(info.content)
@@ -716,7 +716,6 @@ class qbot(object):
     ################################################################################
     # 辅助functions
     ################################################################################
-    
     
     # 通过QQ号找到绑定的游戏ID
     def find_game_name(self, qq_id:str, bot, group_id:str=None) -> str:
@@ -730,6 +729,7 @@ class qbot(object):
             uuid = qq_uuid[qq_id]
             if uuid in self.whitelist:
                 return self.whitelist[uuid]
+        # 未匹配到名字 -> 寻找QQ名片
         target_data = bot.get_group_member_info(group_id, qq_id).json()['data']
         target_name = target_data['card'] if target_data['card'] != '' else target_data['nickname']
         self.match_id()
@@ -755,18 +755,18 @@ class qbot(object):
             temp = self.loading_file(self.config["dict_address"]['whitelist'])
             self.whitelist = {list(i.values())[0]:list(i.values())[1] for i in temp} # 解压白名单表
         except Exception as e:
-            self.server.logger.warning(f"读取白名单出错：{e}")
+            self.server.logger.warning(f"读取白名单出错：{e}")                       # debug信息
 
     # 解包字体，绑定图片
     def packing_copy(self) -> None:
-        def __copyFile(path, target_path):
+        def __copyFile(path, target_path):            
             if not os.path.exists(target_path):
-                with self.server.open_bundled_file(path) as file_handler:
+                with self.server.open_bundled_file(path) as file_handler: # 从包内解包文件
                     message = file_handler.read()
-                with open(target_path, 'wb') as f:
+                with open(target_path, 'wb') as f:                        # 复制文件
                     f.write(message)
-        __copyFile("data/bound.jpg", "./config/GUGUbot/bound.jpg")
-        __copyFile("font/MicrosoftYaHei-01.ttf", "./config/GUGUbot/MicrosoftYaHei-01.ttf")
+        __copyFile("data/bound.jpg", "./config/GUGUbot/bound.jpg")        # 绑定图片
+        __copyFile("font/MicrosoftYaHei-01.ttf", "./config/GUGUbot/MicrosoftYaHei-01.ttf") # 默认字体
 
     # 转发消息到指定群
     def send_group_msg(self, msg, group):
@@ -783,20 +783,20 @@ class qbot(object):
     # 机器人名称显示游戏内人数
     def set_number_as_name(self, server:PluginServerInterface, info: Info, bot):
         bound_list = self.data.values()
-        if self.rcon:
+        if self.rcon: # rcon 命令获取（准确）
             number = len([i for i in self.rcon.send_command("list").split(": ")[-1].split(", ") if i in bound_list])
             server.logger.debug(f'rcon获取列表如下：{self.rcon.send_command("list").split(": ")[-1].split(", ")}')
         else:
-            try:
+            try:      # 使用API获取，高版本可能无效
                 content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
                 number = len([i["name"] for i in content['sample'] if i["name"] in bound_list])
                 server.logger.debug(f"API获取列表如下：{[i['name'] for i in content['sample']]}")
             except:
                 number = "API接口错误/请配置game_ip & game_port参数"
         name = " "
-        if number != 0:
+        if number != 0:     
             name = "在线人数: {}".format(number)
-            
+        # 更新名字
         for gid in self.config['group_id']:
             data = {
             'group_id': gid,
@@ -804,23 +804,26 @@ class qbot(object):
             'card': name
             }
             requests.post(
-            f'http://{self.host}:{self.port}/set_group_card',
-            json=data)
-
+                f'http://{self.host}:{self.port}/set_group_card',
+                json=data)
+#+---------------------------------------------------------------------+
+# 文字转图片函数，一定程度防止风控？
 def text2image(font, input_string:str)->str:
+    # 分割成行
     message = input_string.split("\n")
     line_image = [ font.render(text, True, (0, 0, 0), (255 ,255 ,255)) for text in message ]
-
+    # 寻找图片长度 + 宽度
     max_length = max([i.get_width() for i in line_image])
     root = pygame.Surface((max_length,len(message)*33))
     root.fill((255,255,255))
-
+    # 写入
     for i, image in enumerate(line_image):
         root.blit(image, (0, i*33))
-
+    # 保存本地
     if not os.path.exists("./config/GUGUbot/image"):
         os.makedirs("./config/GUGUbot/image")
     image_path = "{}/config/GUGUbot/image/{}.jpg".format(os.getcwd(), int(time.time()))
     pygame.image.save(root, image_path)
-
+    # 返回图片路径
     return image_path
+#+---------------------------------------------------------------------+
