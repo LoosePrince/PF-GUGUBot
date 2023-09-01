@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #+---------------------------------------------------------------------+
+import re
 import os
 import sys
 
@@ -14,24 +15,29 @@ from mcdreforged.api.command import *
 from .table import table
 import pygame
 #+---------------------------------------------------------------------+
-def on_load(server: PluginServerInterface, old):
+def on_load(server: PluginServerInterface, old)->None:
     # 设置系统路径
     set_sys_path()
     global host, port, past_bot, past_info, event_loop
     global qq_bot
-    
+    # 获取参数，绑定列表
     config = table("./config/GUGUBot/config.json", DEFAULT_CONFIG, yaml=True)
     data = table("./config/GUGUBot/GUGUBot.json")
-
+    # 获取QQ机器人信息
     host = server.get_plugin_instance('cool_q_api').get_config()['api_host']
     port = server.get_plugin_instance('cool_q_api').get_config()['api_port']
+    # 命令前缀判断
+    coolQ_command_prefix = server.get_plugin_instance('cool_q_api').get_config()['command_prefix']
+    if coolQ_command_prefix != config['command_prefix']:
+        server.logger.warning(f"CoolQAPI与gugubot所用command_prefix不一致，可能导致功能紊乱！CoolQ: {coolQ_command_prefix} vs gugubot: {config['command_prefix']}")
+    # 继承重载前参数
     if old is not None and hasattr(old, 'past_bot') and \
        old is not None and hasattr(old, 'past_info'):
         past_info = old.past_info
         past_bot = old.past_bot
     else:
         past_bot = False
-    
+    # gugubot主体
     qq_bot = qbot(server, config, data, host, port)
 
     # 注册指令
@@ -58,40 +64,48 @@ def on_load(server: PluginServerInterface, old):
     server.register_help_message('!!del <关键词>','删除指定游戏关键词')
     server.register_help_message('@ <QQ名/号> <消息>','让机器人在qq里@')
     # 注册监听任务
-    server.register_event_listener('cool_q_api.on_qq_info', qq_bot.send_msg_to_mc)
     server.register_event_listener('cool_q_api.on_qq_info', qq_bot.on_qq_command)
+    server.register_event_listener('cool_q_api.on_qq_info', qq_bot.send_msg_to_mc)
     server.register_event_listener('cool_q_api.on_qq_apply', qq_bot.on_qq_request)
     server.register_event_listener('cool_q_api.on_qq_notice', qq_bot.notification)
 
+#+---------------------------------------------------------------------+
+# 防止初始化报错
 qq_bot = None
+
 # 更新机器人名字 <- 显示在线人数功能
-def on_player_joined(server:PluginServerInterface, player:str, info:Info):
+def on_player_joined(server:PluginServerInterface, player:str, info:Info)->None:
     if qq_bot \
         and qq_bot.config["command"]["name"] \
         and past_bot:
         qq_bot.set_number_as_name(server, past_bot, past_info)
 
 # 更新机器人名字 <- 显示在线人数功能
-def on_player_left(server:PluginServerInterface, player:str):
+def on_player_left(server:PluginServerInterface, player:str)->None:
     if qq_bot \
         and qq_bot.config["command"]["name"] \
         and past_bot:
         qq_bot.set_number_as_name(server, past_bot,past_info)
 
-# 游戏消息 -> QQ
-def on_user_info(server:PluginServerInterface, info:Info):
+# 离线玩家添加白名单功能
+def on_info(server:PluginServerInterface, info:Info)->None:
+    if qq_bot:
+        qq_bot.add_offline_whitelist(server, info)
+
+# mc游戏消息 -> QQ
+def on_user_info(server:PluginServerInterface, info:Info)->None:
     if qq_bot:
         qq_bot.send_msg_to_qq(server, info)
 
 # 卸载
-def on_unload(server:PluginServerInterface):
+def on_unload(server:PluginServerInterface)->None:
     try:
         pygame.quit()
     except:
         pass
 
 # 开服
-def on_server_startup(server:PluginServerInterface):
+def on_server_startup(server:PluginServerInterface)->None:
     # 开服提示
     qq_bot.send_msg_to_all_qq(style[qq_bot.style]['server_start'])
     # 开服指令
