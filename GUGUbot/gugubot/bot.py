@@ -116,6 +116,93 @@ class qbot(object):
 
         return _addTextToImage
 
+    # 游戏内@
+    def ingame_at(self,src,ctx):
+        if  self.config['command']['qq']:
+            # get player name or system 
+            player = src.player if src.is_player else 'Console'
+            qq_user_id = ctx['QQ(name/id)'] if ctx['QQ(name/id)'].isdigit() else self.member_dict[ctx['QQ(name/id)']]
+            # check ban
+            if self.config["command"]["ban_word"]:
+                response = self.ban_word.check_ban(ctx['message'])
+                if response:
+                    temp = '{"text":"' + '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。违禁理由：'+ response[1] + '","color":"gray","italic":true}'
+                    self.server.execute(f'tellraw {player} {temp}')
+                    return 
+            # send
+            self.send_msg_to_all_qq(f'[{player}] [CQ:at,qq={qq_user_id}] {ctx["message"]}')
+
+    # 游戏内@ 推荐
+    def ingame_at_suggestion(self):
+        # 添加绑定名单
+        self.member_dict = {v:k for k,v in self.data.items()}
+        suggest_content = [v for v in self.data.values()]
+        # 添加群内信息
+        try: 
+            group_raw_info = []
+            for group_id in self.config['group_id']:
+                group_raw_info.append(requests.post(f'http://{self.host}:{self.port}/get_group_member_list', json={
+                    'group_id': group_id
+                }))
+            unpack = [i.json()['data'] for i in group_raw_info if i.json()['status'] == 'ok']
+        except:
+            unpack = []
+        for group in unpack:
+            for member in group:
+                self.member_dict[member['nickname']] = member['user_id']
+                self.member_dict[member['card']] = member['user_id']
+                suggest_content.append(member['card'])
+                suggest_content.append(member['nickname'])
+                suggest_content.append(str(member['user_id']))
+        return suggest_content
+    
+    # 游戏内指令发送qq
+    def ingame_command_qq(self,src,ctx):
+        if self.config['command']['qq']:
+            player = src.player if src.is_player else 'Console'
+            if self.config['command']['ban_word']:
+                reason = self.ban_word.check_ban(ctx["message"])
+                if reason:
+                    temp = '{"text":"' +\
+                        '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。\n违禁理由：'+\
+                        reason[1] + '","color":"gray","italic":true}'
+                    self.server.execute(f'tellraw {player} {temp}')
+                    return
+            # 正常转发
+            self.send_msg_to_all_qq(f'[{player}] {ctx["message"]}')
+            # 检测关键词
+            if ctx['message'] in self.key_word:
+                self.send_msg_to_all_qq(f'{self.key_word[ctx["message"]]}')
+                self.server.say(f'§a[机器人] §f{self.key_word[ctx["message"]]}')
+    
+    # 匹配uuid qqid
+    def match_id(self) -> None:
+        # uuid:qq_id
+        self.uuid_qqid = {}
+        # 解压whitelist
+        whitelist_dict = {}
+        for uuid, game_name in self.whitelist.items():
+            whitelist_dict[game_name] = uuid   
+        # 匹配    
+        for qq_id, qq_name in self.data.items():
+            if '(' in qq_name or '（' in qq_name:
+                qq_name = qq_name.split('(')[0].split('（')[0]
+            if qq_name in whitelist_dict:
+                self.uuid_qqid[whitelist_dict[qq_name]] = qq_id
+
+    # 退群处理
+    @addTextToImage
+    def notification(self, server, info: Info, bot):
+        server.logger.debug(f"收到上报提示：{info}")
+        # 指定群里 + 是退群消息
+        if info.user_id in self.config['group_id'] \
+            and info.sub_type == 'group_decrease':
+            user_id = str(info.user_id)
+            if user_id in self.data.keys():
+                server.execute(f"whitelist remove {self.data[user_id]}")
+                bot.reply(info, f"{self.data[user_id]}已退群，白名单同步删除")
+                del self.data[user_id]
+
     # 通用QQ 指令
     @addTextToImage
     def on_qq_command(self,server: PluginServerInterface, info: Info, bot):
@@ -491,19 +578,6 @@ class qbot(object):
                 self.style = command[1]
                 bot.reply(info, f'已切换为 {self.style}')
 
-    # 退群处理
-    @addTextToImage
-    def notification(self, server, info: Info, bot):
-        server.logger.debug(f"收到上报提示：{info}")
-        # 指定群里 + 是退群消息
-        if info.user_id in self.config['group_id'] \
-            and info.sub_type == 'group_decrease':
-            user_id = str(info.user_id)
-            if user_id in self.data.keys():
-                server.execute(f"whitelist remove {self.data[user_id]}")
-                bot.reply(info, f"{self.data[user_id]}已退群，白名单同步删除")
-                del self.data[user_id]
-
     # 进群处理
     @addTextToImage
     def on_qq_request(self,server, info: Info, bot):
@@ -521,21 +595,6 @@ class qbot(object):
             bot.reply(info, f"喵！[CQ:at,qq={at_id}] {stranger_name} 申请进群, 请审核")
             server.say(f'§6[QQ] §b[@{at_id}] §f{stranger_name} 申请进群, 请审核')
             self.shenhe[at_id].append((stranger_name, info.flag, info.sub_type))
-                        
-    # 匹配uuid qqid
-    def match_id(self) -> None:
-        # uuid:qq_id
-        self.uuid_qqid = {}
-        # 解压whitelist
-        whitelist_dict = {}
-        for uuid, game_name in self.whitelist.items():
-            whitelist_dict[game_name] = uuid   
-        # 匹配    
-        for qq_id, qq_name in self.data.items():
-            if '(' in qq_name or '（' in qq_name:
-                qq_name = qq_name.split('(')[0].split('（')[0]
-            if qq_name in whitelist_dict:
-                self.uuid_qqid[whitelist_dict[qq_name]] = qq_id
 
     # 转发消息
     @addTextToImage
@@ -652,66 +711,7 @@ class qbot(object):
                 if self.config['command']['ingame_key_word'] and info.content in self.key_word_ingame:
                     # 游戏内回复
                     response = self.key_word_ingame.check_response(info.content)
-                    self.server.say(f'§a[机器人] §f{response}')
-                
-    # 游戏内指令发送qq
-    def ingame_command_qq(self,src,ctx):
-        if self.config['command']['qq']:
-            player = src.player if src.is_player else 'Console'
-            if self.config['command']['ban_word']:
-                reason = self.ban_word.check_ban(ctx["message"])
-                if reason:
-                    temp = '{"text":"' +\
-                        '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。\n违禁理由：'+\
-                        reason[1] + '","color":"gray","italic":true}'
-                    self.server.execute(f'tellraw {player} {temp}')
-                    return
-            # 正常转发
-            self.send_msg_to_all_qq(f'[{player}] {ctx["message"]}')
-            # 检测关键词
-            if ctx['message'] in self.key_word:
-                self.send_msg_to_all_qq(f'{self.key_word[ctx["message"]]}')
-                self.server.say(f'§a[机器人] §f{self.key_word[ctx["message"]]}')
-
-    # 游戏内@
-    def ingame_at(self,src,ctx):
-        if  self.config['command']['qq']:
-            # get player name or system 
-            player = src.player if src.is_player else 'Console'
-            qq_user_id = ctx['QQ(name/id)'] if ctx['QQ(name/id)'].isdigit() else self.member_dict[ctx['QQ(name/id)']]
-            # check ban
-            if self.config["command"]["ban_word"]:
-                response = self.ban_word.check_ban(ctx['message'])
-                if response:
-                    temp = '{"text":"' + '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。违禁理由：'+ response[1] + '","color":"gray","italic":true}'
-                    self.server.execute(f'tellraw {player} {temp}')
-                    return 
-            # send
-            self.send_msg_to_all_qq(f'[{player}] [CQ:at,qq={qq_user_id}] {ctx["message"]}')
-
-    # 游戏内@ 推荐
-    def ingame_at_suggestion(self):
-        # 添加绑定名单
-        self.member_dict = {v:k for k,v in self.data.items()}
-        suggest_content = [v for v in self.data.values()]
-        # 添加群内信息
-        try: 
-            group_raw_info = []
-            for group_id in self.config['group_id']:
-                group_raw_info.append(requests.post(f'http://{self.host}:{self.port}/get_group_member_list', json={
-                    'group_id': group_id
-                }))
-            unpack = [i.json()['data'] for i in group_raw_info if i.json()['status'] == 'ok']
-        except:
-            unpack = []
-        for group in unpack:
-            for member in group:
-                self.member_dict[member['nickname']] = member['user_id']
-                self.member_dict[member['card']] = member['user_id']
-                suggest_content.append(member['card'])
-                suggest_content.append(member['nickname'])
-                suggest_content.append(str(member['user_id']))
-        return suggest_content
+                    self.server.say(f'§a[机器人] §f{response}')    
 
     ################################################################################
     # 辅助functions
@@ -757,7 +757,7 @@ class qbot(object):
         except Exception as e:
             self.server.logger.warning(f"读取白名单出错：{e}")
 
-     # 解包字体，绑定图片
+    # 解包字体，绑定图片
     def packing_copy(self) -> None:
         def __copyFile(path, target_path):
             if not os.path.exists(target_path):
