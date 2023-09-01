@@ -2,6 +2,10 @@
 admin_id:
 - 1234563
 - 1234564
+# 管理群群号 -> 群内所有成员拥有管理权限
+admin_group_id: 
+- 123321
+- 456654
 # 指令开关（可以通过机器人调整）
 command:
   # ban_word:违禁词撤回
@@ -24,6 +28,8 @@ command:
   whitelist: true, 
   # 辅助审核功能
   shenhe: true
+# 命令前缀（与CoolQ需要同步）
+command_prefix: "#"
 # 字体路径，各种数据储存路径
 dict_address:
   # 违禁词
@@ -44,6 +50,8 @@ dict_address:
   uuid_qqid: .//config//GUGUbot//uuid_qqid.json
   # 白名单
   whitelist: .//server//whitelist.json
+# 文字超长转图片 （默认大于150字转图片）
+font_limit: 150
 # 转发设置
 forward:
   # 服务器往QQ群转发
