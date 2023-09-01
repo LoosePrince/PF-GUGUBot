@@ -46,8 +46,7 @@ class qbot(object):
         self.key_word_ingame = key_word_system(self.config["dict_address"]['key_word_ingame_dict'], ingame_key_word_help)  # MC 关键词
         self.ban_word        = ban_word_system(self.config["dict_address"]['ban_word_dict'])                               # 违禁词
         self.uuid_qqid       = table(self.config["dict_address"]['uuid_qqid'])                                             # uuid - qqid 表
-        temp = self.loading_file(self.config["dict_address"]['whitelist'])                      # 白名单表 [{uuid:value, name: value}]
-        self.whitelist = {list(i.values())[0]:list(i.values())[1] for i in temp}                # 解压白名单表
+        self.loading_whitelist()                                                                # 白名单
         self.shenheman = table(self.config["dict_address"]['shenheman'])                        # 群审核人员
 
     def loading_rcon(self) -> None:
@@ -65,6 +64,30 @@ class qbot(object):
         except Exception as e:
             print(f"Rcon 加载失败：{e}")
             self.rcon = None
+
+    # 离线玩家加入白名单
+    def add_offline_whitelist(self, server:PluginServerInterface, info:Info):
+        pattern = r".*\[id=([a-z0-9\-]*),name=([^=]+),.*\].*You are not white-listed on this server!$" # 捕获警告
+        result = re.match(pattern, info.content)
+        if result and self.config['command']['whitelist'] and self.config['whitelist_add_with_bound']: # 不在白名单警告
+            uuid, name = result.groups()[0:2]
+            if name in self.data.values():                     # 在绑定名单中
+                self.loading_whitelist()                       # 获取最新白名单
+                if name not in self.whitelist.values():
+                    self.whitelist[uuid] = name
+                    whitelist_storage = [{uuid:name} for uuid, name in self.whitelist.items() ] # 转换至[{},{}]格式
+
+                    retry_times = 3                            # 保存
+                    while retry_times > 0:
+                        retry_times -= 1
+                        try:
+                            with open(self.config["dict_address"]['whitelist'], 'w') as f:
+                                json.dump(whitelist_storage, f)
+                                server.logger.info(f"离线玩家：{name}添加成功！")
+                            break
+                        except Exception as e:
+                            server.logger.debug(f"离线玩家：{name}添加失败 -> {e}")
+                            time.sleep(5)
 
     # 文字转图片-装饰器
     def addTextToImage(func):
@@ -236,14 +259,12 @@ class qbot(object):
             elif len(command) == 3 and command[1] == '解绑':
                 if command[2] in self.data:
                     del self.data[command[2]]
-                    self.data.save()
                     bot.reply(info, f'已解除 {command[2]} 绑定的ID')
                 else:
                     bot.reply(info, f'{command[2]} 未绑定')
             # 绑定ID
             elif len(command) == 3 and command[1].isdigit():
                 self.data[command[1]] = command[2]
-                self.data.save()
                 bot.reply(info, '已成功绑定')
 
         # 白名单
@@ -255,18 +276,16 @@ class qbot(object):
                 if command[1] == '添加':
                     server.execute(f'/whitelist add {command[2]}')
                     bot.reply(info, style[self.style]['add_success'])
-                    while command[2] not in self.whitelist:
-                        temp = self.loading_file(self.config["dict_address"]['whitelist'])
-                        # 解压白名单表
-                        self.whitelist = {list(i.values())[0]:list(i.values())[1] for i in temp}
-                        time.sleep(2)
+                    retry_times = 5
+                    while command[2] not in self.whitelist.values() and retry_times > 0:
+                        self.loading_whitelist()
+                        retry_times -= 1
+                        time.sleep(5)
                     self.match_id()
                 elif command[1] in ['删除','移除']:
                     server.execute(f'/whitelist remove {command[2]}')
                     bot.reply(info ,style[self.style]['delete_success'])
-                    temp = self.loading_file(self.config["dict_address"]['whitelist'])
-                    # 解压白名单表
-                    self.whitelist = {list(i.values())[0]:list(i.values())[1] for i in temp}
+                    self.loading_whitelist()
                 elif command[1] == '开':
                     server.execute(f'/whitelist on')
                     bot.reply(info, '白名单已开启！')
@@ -275,9 +294,7 @@ class qbot(object):
                     bot.reply(info, '白名单已关闭！')
                 elif command[1] == '重载':
                     server.execute(f'/whitelist reload')
-                    temp = self.loading_file(self.config["dict_address"]['whitelist'])
-                    # 解压白名单表
-                    self.whitelist = {list(i.values())[0]:list(i.values())[1] for i in temp}
+                    self.loading_whitelist()
                     bot.reply(info, '白名单已重载~')
                 else:
                     bot.reply(info,'白名单如下：\n'+'\n'.join(sorted(self.whitelist.values())))
@@ -343,10 +360,7 @@ class qbot(object):
                 bot.reply(info, "uuid匹配如下：\n"+'\n'.join([str(k)+'-'+str(v)+'-'+self.data[v] for k,v in self.uuid_qqid.items() if v in self.data]))
             # 更新匹配表
             elif len(command)>1 and command[1] == '重载':
-                # 白名单表 [{uuid:value, name: value}]
-                temp = self.loading_file(self.config["dict_address"]['whitelist'])
-                # 解压白名单表
-                self.whitelist = {list(i.values())[0]:list(i.values())[1] for i in temp}
+                self.loading_whitelist()
                 self.match_id()
                 bot.reply(info, '已重新匹配~')
             # 更改白名单名字
@@ -448,7 +462,6 @@ class qbot(object):
             # 未绑定
             else:
                 self.data[user_id] = command[1]
-                self.data.save()
                 bot.reply(info, f'[CQ:at,qq={user_id}] 已成功绑定')
                 # 更换群名片
                 bot.set_group_card(info.user_id,user_id, self.data[user_id])
@@ -458,11 +471,10 @@ class qbot(object):
                     bot.reply(info, f'[CQ:at,qq={user_id}] 已将您添加到服务器白名单')
                     # 重载白名单
                     server.execute(f'whitelist reload')
-                    while command[1] not in self.whitelist:
-                        # 白名单表 [{uuid:value, name: value}]
-                        temp = self.loading_file(self.config["dict_address"]['whitelist'])
-                        # 解压白名单表
-                        self.whitelist = {list(i.values())[0]:list(i.values())[1] for i in temp}
+                    retry_times = 3
+                    while command[1] not in self.whitelist.values() and retry_times > 0:
+                        self.loading_whitelist()
+                        retry_times -= 1
                         time.sleep(5)
                     # 重新匹配
                     self.match_id()
@@ -736,6 +748,14 @@ class qbot(object):
         except:
             with open(path,'w') as f:
                 return {}
+
+    # 读取白名单
+    def loading_whitelist(self)->None:
+        try:
+            temp = self.loading_file(self.config["dict_address"]['whitelist'])
+            self.whitelist = {list(i.values())[0]:list(i.values())[1] for i in temp} # 解压白名单表
+        except Exception as e:
+            self.server.logger.warning(f"读取白名单出错：{e}")
 
      # 解包字体，绑定图片
     def packing_copy(self) -> None:
