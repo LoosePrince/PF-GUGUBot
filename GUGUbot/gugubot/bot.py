@@ -348,9 +348,6 @@ class qbot(object):
                 if command[2] in self.data:
                     del self.data[command[2]]
                     bot.reply(info, f'已解除 {command[2]} 绑定的ID')
-                    if self.config['whitelist_add_with_bound'] and command[2] in self.whitelist.values():
-                        server.execute(f'/whitelist remove {command[2]}')
-                        self.loading_whitelist()
                 else:
                     bot.reply(info, f'{command[2]} 未绑定')
             # 绑定ID
