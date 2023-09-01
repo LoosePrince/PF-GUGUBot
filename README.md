@@ -1,6 +1,13 @@
 # PF-QQchat
 > PFingan服务器MCDRQQ机器人插件
 
+[![Page Views Count](https://badges.toozhao.com/badges/01H98QXADB4DYZBRC2EHSEJ4HW/green.svg)](https://badges.toozhao.com/stats/01H98QXADB4DYZBRC2EHSEJ4HW "Get your own page views count badge on badges.toozhao.com")
+![GitHub repo size](https://img.shields.io/github/repo-size/LoosePrince/PF-GUGUBot?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/LoosePrince/PF-GUGUBot?style=flat-square)
+![GitHub closed issues](https://img.shields.io/github/issues-closed/LoosePrince/PF-GUGUBot?style=flat-square) 
+[![GitHub downloads](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/total?style=flat-square)](https://github.com/LoosePrince/PF-GUGUBot/releases)
+[![GitHub release (latest by date)](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/latest/total?style=flat-square)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest)
+
 源： [QQChat-用于连接Minecraft和QQ的插件](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/qq_chat) <br>
 修改：XueK__ [前往主页](https://github.com/XueK66)
 <br></br>
