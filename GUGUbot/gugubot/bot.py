@@ -75,7 +75,7 @@ class qbot(object):
                 self.loading_whitelist()                       # 获取最新白名单
                 if name not in self.whitelist.values():
                     self.whitelist[uuid] = name
-                    whitelist_storage = [{uuid:name} for uuid, name in self.whitelist.items() ] # 转换至[{},{}]格式
+                    whitelist_storage = [{'uuid':uuid,'name':name} for uuid, name in self.whitelist.items() ] # 转换至[{},{}]格式
 
                     retry_times = 3                            # 保存
                     while retry_times > 0:
@@ -84,6 +84,7 @@ class qbot(object):
                             with open(self.config["dict_address"]['whitelist'], 'w') as f:
                                 json.dump(whitelist_storage, f)
                                 server.logger.info(f"离线玩家：{name}添加成功！")
+                                server.execute(f'/whitelist reload')
                             break
                         except Exception as e:
                             server.logger.debug(f"离线玩家：{name}添加失败 -> {e}")
@@ -753,7 +754,7 @@ class qbot(object):
     def loading_whitelist(self)->None:
         try:
             temp = self.loading_file(self.config["dict_address"]['whitelist'])
-            self.whitelist = {list(i.values())[0]:list(i.values())[1] for i in temp} # 解压白名单表
+            self.whitelist = {i['uuid']:i['name'] for i in temp} # 解压白名单表
         except Exception as e:
             self.server.logger.warning(f"读取白名单出错：{e}")                       # debug信息
 
