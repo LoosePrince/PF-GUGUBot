@@ -3,6 +3,7 @@
 
 ![查看次数](https://img.shields.io/github/watchers/LoosePrince/PF-GUGUBot?label=%E6%9F%A5%E7%9C%8B%E6%AC%A1%E6%95%B0)
 ![仓库大小](https://img.shields.io/github/repo-size/LoosePrince/PF-GUGUBot?label=仓库占用)
+![GitHub release (with filter)](https://img.shields.io/github/v/release/LoosePrince/PF-GUGUBot?label=%E6%9C%80%E6%96%B0%E7%89%88&link=https%3A%2F%2Fgithub.com%2FLoosePrince%2FPF-GUGUBot%2Freleases%2Flatest%2Fdownload%2FGUGUbot.mcdr)
 ![Issues](https://img.shields.io/github/issues/LoosePrince/PF-GUGUBot?label=Issues)
 ![已关闭issues](https://img.shields.io/github/issues-closed/LoosePrince/PF-GUGUBot?label=已关闭%20Issues) 
 [![下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/total?label=下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases)
