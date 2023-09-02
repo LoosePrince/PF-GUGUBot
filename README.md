@@ -1,12 +1,12 @@
 # PF-QQchat
 > PFingan服务器MCDRQQ机器人插件
 
-![查看次数](https://img.shields.io/github/watchers/LoosePrince/PF-GUGUBot?label=查看次数)
-![查看次数起始时间](https://img.shields.io/badge/查看次数统计起始于-2023%2F9%2F2-1)
-![仓库大小](https://img.shields.io/github/repo-size/LoosePrince/PF-GUGUBot?label=仓库占用)
+[![查看次数](https://img.shields.io/github/watchers/LoosePrince/PF-GUGUBot?label=查看次数)](/)
+[![查看次数起始时间](https://img.shields.io/badge/查看次数统计起始于-2023%2F9%2F2-1)](/)
+[![仓库大小](https://img.shields.io/github/repo-size/LoosePrince/PF-GUGUBot?label=仓库占用)](/)
 [![最新版](https://img.shields.io/github/v/release/LoosePrince/PF-GUGUBot?label=最新版)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest/download/GUGUbot.mcdr)
-![Issues](https://img.shields.io/github/issues/LoosePrince/PF-GUGUBot?label=Issues)
-![已关闭issues](https://img.shields.io/github/issues-closed/LoosePrince/PF-GUGUBot?label=已关闭%20Issues) 
+[![Issues](https://img.shields.io/github/issues/LoosePrince/PF-GUGUBot?label=Issues)](https://github.com/LoosePrince/PF-GUGUBot/issues)
+[![已关闭issues](https://img.shields.io/github/issues-closed/LoosePrince/PF-GUGUBot?label=已关闭%20Issues)](https://github.com/LoosePrince/PF-GUGUBot/issues?q=is%3Aissue+is%3Aclosed)
 [![下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/total?label=下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases)
 [![最新发布下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/latest/total?label=最新版本下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest)
 
