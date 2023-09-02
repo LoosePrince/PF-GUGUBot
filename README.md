@@ -1,14 +1,14 @@
 # PF-QQchat
 > PFingan服务器MCDRQQ机器人插件
 
-[![查看次数](https://img.shields.io/github/watchers/LoosePrince/PF-GUGUBot?label=查看次数)](/)
-[![查看次数起始时间](https://img.shields.io/badge/查看次数统计起始于-2023%2F9%2F2-1)](/)
-[![仓库大小](https://img.shields.io/github/repo-size/LoosePrince/PF-GUGUBot?label=仓库占用)](/)
-[![最新版](https://img.shields.io/github/v/release/LoosePrince/PF-GUGUBot?label=最新版)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest/download/GUGUbot.mcdr)
-[![Issues](https://img.shields.io/github/issues/LoosePrince/PF-GUGUBot?label=Issues)](https://github.com/LoosePrince/PF-GUGUBot/issues)
-[![已关闭issues](https://img.shields.io/github/issues-closed/LoosePrince/PF-GUGUBot?label=已关闭%20Issues)](https://github.com/LoosePrince/PF-GUGUBot/issues?q=is%3Aissue+is%3Aclosed)
-[![下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/total?label=下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases)
-[![最新发布下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/latest/total?label=最新版本下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest)
+[![页面浏览量计数](https://badges.toozhao.com/badges/01H98QXADB4DYZBRC2EHSEJ4HW/green.svg)](/)
+[![查看次数起始时间](https://img.shields.io/badge/查看次数统计起始于-2023%2F9%2F2-1?style=flat-square)](/)
+[![仓库大小](https://img.shields.io/github/repo-size/LoosePrince/PF-GUGUBot?style=flat-square&label=仓库占用)](/)
+[![最新版](https://img.shields.io/github/v/release/LoosePrince/PF-GUGUBot?style=flat-square&label=最新版)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest/download/GUGUbot.mcdr)
+[![Issues](https://img.shields.io/github/issues/LoosePrince/PF-GUGUBot?style=flat-square&label=Issues)](https://github.com/LoosePrince/PF-GUGUBot/issues)
+[![已关闭issues](https://img.shields.io/github/issues-closed/LoosePrince/PF-GUGUBot?style=flat-square&label=已关闭%20Issues)](https://github.com/LoosePrince/PF-GUGUBot/issues?q=is%3Aissue+is%3Aclosed)
+[![下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/total?style=flat-square&label=下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases)
+[![最新发布下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/latest/total?style=flat-square&label=最新版本下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest)
 
 源： [QQChat-用于连接Minecraft和QQ的插件](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/qq_chat) <br>
 修改：XueK__ [前往主页](https://github.com/XueK66)
