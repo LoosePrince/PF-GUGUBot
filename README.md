@@ -208,7 +208,7 @@ rcon:
 ```
 
 ## GUGUbot配置文件
-[点击查看配置文件说明](https://github.com/LoosePrince/PF-GUGUBot/blob/main/Config-QQChat.yml)
+[点击查看配置文件说明](https://github.com/LoosePrince/PF-GUGUBot/blob/main/config_default.yml)
 <br></br>
 
 # CoolQAPI配置
