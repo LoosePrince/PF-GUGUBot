@@ -1,4 +1,5 @@
 mcdreforged>=2.0.1
+flask
 pandas
 pygame
 requests
