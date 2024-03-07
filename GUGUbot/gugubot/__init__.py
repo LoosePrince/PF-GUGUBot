@@ -106,12 +106,13 @@ def on_unload(server:PluginServerInterface)->None:
 
 # 开服
 def on_server_startup(server:PluginServerInterface)->None:
-    # 开服提示
-    qq_bot.send_msg_to_all_qq(style[qq_bot.style]['server_start'])
-    # 开服指令
-    for _,command in qq_bot.start_command.data.items():
-        # 执行指令
-        server.execute(command)
+    if qq_bot:
+        # 开服提示
+        qq_bot.send_msg_to_all_qq(style[qq_bot.style]['server_start'])
+        # 开服指令
+        for _,command in qq_bot.start_command.data.items():
+            # 执行指令
+            server.execute(command)
 
 # 设置系统路径
 def set_sys_path()->None:
