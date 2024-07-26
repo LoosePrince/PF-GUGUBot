@@ -4,11 +4,11 @@
 
 > 2024/06/18
 > - CoolQ API已失联，所幸的是我们保留的一份存档，请点击 [CoolQ API](https://github.com/LoosePrince/PF-GUGUBot/releases/download/GUGUbot-v1.0.6/CoolQAPI.zip) 下载存档。
-> - 请注意，存档版本是我们服务器此前使用的版本，理论上不会出现问题（新版MCDR以不兼容），然后请注意解压文件，而不是直接拖入插件目录。
+> - 请注意，存档版本是我们服务器此前使用的版本，理论上不会出现问题（新版MCDR已不兼容），然后请注意解压文件，而不是直接拖入插件目录。
 # PF-QQchat
 > PFingan服务器MCDRQQ机器人插件
 
-[![页面浏览量计数](https://badges.toozhao.com/badges/01H98QXADB4DYZBRC2EHSEJ4HW/green.svg)](/)
+[![页面浏览量计数](https://badges.toozhao.com/badges/01H98QXADB4DYZBRC2EHSEJ4HW/green.svg)](/) 
 [![查看次数起始时间](https://img.shields.io/badge/查看次数统计起始于-2023%2F9%2F2-1?style=flat-square)](/)
 [![仓库大小](https://img.shields.io/github/repo-size/LoosePrince/PF-GUGUBot?style=flat-square&label=仓库占用)](/)
 [![最新版](https://img.shields.io/github/v/release/LoosePrince/PF-GUGUBot?style=flat-square&label=最新版)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest/download/GUGUbot.mcdr)
