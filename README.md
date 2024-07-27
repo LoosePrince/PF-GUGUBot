@@ -39,7 +39,7 @@
 
 > <details>
 >  
-> [OnlinePlayerAPI](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/OnlinePlayerAPI) <br>
+> [OnlinePlayerAPI](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/OnlinePlayerAPI) <br> 
 > [ConfigAPI](https://github.com/MCDReforged/ConfigAPI) <br>
 > [JsonDataAPI](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/JsonDataAPI)
 >
@@ -51,6 +51,8 @@
 基本功能：聊天互相转发
 
 #### 1.绑定游戏ID到QQ号
+> 请注意，本插件的绑定功能不可关闭
+
 #### 2.获取玩家和假人的在线情况
 #### 3.QQ管理群
 设定的QQ群内所有人都有管理员权限
@@ -319,35 +321,25 @@ servers:
 > | 配置项 | 默认值 | 说明 |
 > | - | - | - |
 > | post_host | `127.0.0.1` | 接收数据上报的地址 |
-> | post_port | `5701` | 对应 go-cqhttp 的 HTTP 监听端口 |
+> | post_port | `5701` | 对应 go-cqhttp `url` 配置的端口 | 
 > | api_host | `127.0.0.1` | 对应 go-cqhttp 的地址 |
-> | api_port | `5700` | 对应 go-cqhttp `url` 配置的端口 |
+> | api_port | `5700` | 对应 go-cqhttp 的 HTTP 监听端口 |
 > | command_prefix | `/` | 需要修改成`#`以启用机器人函数功能 | 
 > ```yaml
 > api_host: 127.0.0.1
-> api_port: 8080 
+> api_port: 5700 
 > command_prefix: "#"
 > post_host: 127.0.0.1 
 > post_path: ""
-> post_port: 8081 
+> post_port: 5701 
 > ```
 > </details>
 
 ### 关于多服使用
-> <details>
->   
-> 本插件不提供多服功能，但仍然保留原本拥有的功能，不保证能够正常使用，如需使用请查看[原始插件](https://github.com/MCDReforged/QQAPI#%E5%85%B3%E4%BA%8E%E5%A4%9A%E6%9C%8D%E4%BD%BF%E7%94%A8)
-> 
-> </details>
+> 不支持
 
 ### 开发
-> <details>
->  
-> 请[查看原始插件说明](https://github.com/MCDReforged/QQAPI/blob/master/doc/plugin.md)，如有需求请提交问题
-> 
-> </details>
-
-<br></br>
+> 无
 
 # 有BUG或是新的IDEA
 如果需要更多联动或提交想法和问题请提交 [issues](https://github.com/LoosePrince/PF-GUGUBot/issues) 或 QQ [1377820366](http://wpa.qq.com/msgrd?v=3&uin=1377820366&site=qq&menu=yes) 提交！ <br />
