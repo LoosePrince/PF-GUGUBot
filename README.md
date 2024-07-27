@@ -323,7 +323,14 @@ servers:
 > | api_host | `127.0.0.1` | 对应 go-cqhttp 的地址 |
 > | api_port | `5700` | 对应 go-cqhttp `url` 配置的端口 |
 > | command_prefix | `/` | 需要修改成`#`以启用机器人函数功能 | 
->
+> ```yaml
+> api_host: 127.0.0.1
+> api_port: 8080 
+> command_prefix: "#"
+> post_host: 127.0.0.1 
+> post_path: ""
+> post_port: 8081 
+> ```
 > </details>
 
 ### 关于多服使用
