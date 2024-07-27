@@ -315,6 +315,7 @@ servers:
 ```
 
 ### CoolQAPI配置文件
+**更改CoolQAPI配置需重启服务器才会生效！！**
 
 > <details>
 >  
@@ -322,6 +323,7 @@ servers:
 > | - | - | - |
 > | post_host | `127.0.0.1` | 接收数据上报的地址 |
 > | post_port | `5701` | 对应 go-cqhttp `url` 配置的端口 | 
+> | post_path | `post` | 对应 go-cqhttp `url` 配置的终点名 |
 > | api_host | `127.0.0.1` | 对应 go-cqhttp 的地址 |
 > | api_port | `5700` | 对应 go-cqhttp 的 HTTP 监听端口 |
 > | command_prefix | `/` | 需要修改成`#`以启用机器人函数功能 | 
@@ -330,9 +332,14 @@ servers:
 > api_port: 5700 
 > command_prefix: "#"
 > post_host: 127.0.0.1 
-> post_path: ""
+> post_path: ""    
 > post_port: 5701 
 > ```
+> 机器人监听地址 = http://api_host:api_port
+> 
+> 机器人反向地址 = http://post_host:post_port/post_path/
+>
+> 由于机器人默认反向地址`http://127.0.0.1:5701/`没有post_path，所以CoolQAPI中post_path留空。
 > </details>
 
 ### 关于多服使用
