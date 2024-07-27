@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .base_system import base_system
-from data.text import *
+from .data.text import *
 from mcdreforged.api.types import PluginServerInterface, Info
 
 class start_command_system(base_system):
