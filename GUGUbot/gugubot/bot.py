@@ -1,11 +1,11 @@
 #encoding=utf-8
 # The definition of the QQ Chat robot:
 from .ban_word_system import ban_word_system
+from .data.text import *
 from .key_word_system import key_word_system
 from .start_command_system import start_command_system
 from .table import table
 from collections import defaultdict
-from data.text import *
 from functools import partial
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.minecraft.rcon.rcon_connection import RconConnection
@@ -766,8 +766,8 @@ class qbot(object):
                     message = file_handler.read()
                 with open(target_path, 'wb') as f:                        # 复制文件
                     f.write(message)
-        __copyFile("data/bound.jpg", "./config/GUGUbot/bound.jpg")        # 绑定图片
-        __copyFile("font/MicrosoftYaHei-01.ttf", "./config/GUGUbot/MicrosoftYaHei-01.ttf") # 默认字体
+        __copyFile("gugubot/data/bound.jpg", "./config/GUGUbot/bound.jpg")        # 绑定图片
+        __copyFile("gugubot/font/MicrosoftYaHei-01.ttf", "./config/GUGUbot/MicrosoftYaHei-01.ttf") # 默认字体
 
     # 转发消息到指定群
     def send_group_msg(self, msg, group):

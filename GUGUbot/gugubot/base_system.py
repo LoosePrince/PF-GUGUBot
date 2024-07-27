@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .table import table
-from data.text import *
+from .data.text import *
 from mcdreforged.api.types import Info
 
 class base_system(object):

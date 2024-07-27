@@ -4,7 +4,7 @@
 
 > 2024/06/18
 > - CoolQ API已失联，所幸的是我们保留的一份存档，请点击 [CoolQ API](https://github.com/LoosePrince/PF-GUGUBot/releases/download/GUGUbot-v1.0.6-CoolQAPI/CoolQAPI.zip) 下载存档。 
-> - 请注意，存档版本是我们服务器此前使用的版本，理论上不会出现问题（原有版本在新版MCDR已不兼容，但是我们为它更新了一下兼容），然后请注意解压文件，而不是直接拖入插件目录。
+> - 请注意，存档版本是我们服务器此前使用的版本，理论上不会出现问题（原有版本在新版MCDR已不兼容，但是我们为它更新了一下兼容），然后请注意**解压**文件，而不是直接拖入插件目录。
 # PF-QQchat
 > PFingan服务器MCDRQQ机器人插件
 
@@ -17,7 +17,7 @@
 [![下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/total?style=flat-square&label=下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases)
 [![最新发布下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/latest/total?style=flat-square&label=最新版本下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest)
 
-本插件修改自： [QQChat-用于连接Minecraft和QQ的插件](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/qq_chat) <br>
+本插件修改自： [QQChat-用于连接Minecraft和QQ的插件](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/qq_chat) [原作者](https://github.com/AnzhiZhang) <br>
 技术支持：XueK__ [前往主页](https://github.com/XueK66)
 <br></br>
 
@@ -25,8 +25,10 @@
 
 使用方式：
 * 将Release里面的GUGUbot.mcdr放入`/plugins`
+* 将解压后的CoolQAPI放入`/plugins`
 * 加载后，在`/config/GUGUbot/config.yml`中配置机器人
-* 注意修改`CoolQAPI`的`command_prefix`的默认值为`#`，否则使用不了`命令`功能
+* 加载后，在`/config/CoolQAPI/config.yml`中配置服务
+* 注意修改`CoolQAPI`的`command_prefix`的为`#`，否则使用不了`命令`功能
 
 ## 依赖
 #### Python包
@@ -315,6 +317,7 @@ servers:
 ```
 
 ### CoolQAPI配置文件
+**更改CoolQAPI配置需重启服务器才会生效！！**
 
 > <details>
 >  
@@ -322,6 +325,7 @@ servers:
 > | - | - | - |
 > | post_host | `127.0.0.1` | 接收数据上报的地址 |
 > | post_port | `5701` | 对应 go-cqhttp `url` 配置的端口 | 
+> | post_path | `post` | 对应 go-cqhttp `url` 配置的终点名 |
 > | api_host | `127.0.0.1` | 对应 go-cqhttp 的地址 |
 > | api_port | `5700` | 对应 go-cqhttp 的 HTTP 监听端口 |
 > | command_prefix | `/` | 需要修改成`#`以启用机器人函数功能 | 
@@ -330,9 +334,14 @@ servers:
 > api_port: 5700 
 > command_prefix: "#"
 > post_host: 127.0.0.1 
-> post_path: ""
+> post_path: ""    
 > post_port: 5701 
 > ```
+> 机器人监听地址 = http://api_host:api_port
+> 
+> 机器人反向地址 = http://post_host:post_port/post_path/
+>
+> 由于机器人默认反向地址`http://127.0.0.1:5701/`没有post_path，所以CoolQAPI中post_path留空。
 > </details>
 
 ### 关于多服使用

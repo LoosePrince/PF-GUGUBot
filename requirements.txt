@@ -1,4 +1,4 @@
-mcdreforged>=2.0.1
+mcdreforged>=2.1.2
 flask
 pandas
 pygame

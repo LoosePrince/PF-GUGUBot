@@ -9,7 +9,7 @@ gugu_dir = os.path.dirname(__file__)[:-7] # remove \gugubot
 sys.path.append(gugu_dir)  if gugu_dir not in sys.path  else None
 
 from .bot import qbot
-from data.text import style, DEFAULT_CONFIG
+from .data.text import style, DEFAULT_CONFIG
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.command import *
 from .table import table
@@ -26,6 +26,9 @@ def on_load(server: PluginServerInterface, old)->None:
     # 获取QQ机器人信息
     host = server.get_plugin_instance('cool_q_api').get_config()['api_host']
     port = server.get_plugin_instance('cool_q_api').get_config()['api_port']
+    # 判断机器人信息是否能用
+    if host is None or port is None:
+        server.logger.error(f"CoolQApi信息获取失败：{host=} | {port=}")
     # 命令前缀判断
     coolQ_command_prefix = server.get_plugin_instance('cool_q_api').get_config()['command_prefix']
     if coolQ_command_prefix != config['command_prefix']:
@@ -75,26 +78,26 @@ qq_bot = None
 
 # 更新机器人名字 <- 显示在线人数功能
 def on_player_joined(server:PluginServerInterface, player:str, info:Info)->None:
-    if qq_bot \
+    if isinstance(qq_bot, qbot) \
         and qq_bot.config["command"]["name"] \
         and past_bot:
         qq_bot.set_number_as_name(server, past_bot, past_info)
 
 # 更新机器人名字 <- 显示在线人数功能
 def on_player_left(server:PluginServerInterface, player:str)->None:
-    if qq_bot \
+    if isinstance(qq_bot, qbot) \
         and qq_bot.config["command"]["name"] \
         and past_bot:
         qq_bot.set_number_as_name(server, past_bot,past_info)
 
 # 离线玩家添加白名单功能
 def on_info(server:PluginServerInterface, info:Info)->None:
-    if qq_bot:
+    if isinstance(qq_bot, qbot):
         qq_bot.add_offline_whitelist(server, info)
 
 # mc游戏消息 -> QQ
 def on_user_info(server:PluginServerInterface, info:Info)->None:
-    if qq_bot:
+    if isinstance(qq_bot, qbot):
         qq_bot.send_msg_to_qq(server, info)
 
 # 卸载
@@ -106,7 +109,7 @@ def on_unload(server:PluginServerInterface)->None:
 
 # 开服
 def on_server_startup(server:PluginServerInterface)->None:
-    if qq_bot:
+    if isinstance(qq_bot, qbot):
         # 开服提示
         qq_bot.send_msg_to_all_qq(style[qq_bot.style]['server_start'])
         # 开服指令

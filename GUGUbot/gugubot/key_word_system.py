@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .base_system import base_system
-from data.text import key_word_help
+from .data.text import key_word_help
 from mcdreforged.api.types import Info
 
 class key_word_system(base_system):
