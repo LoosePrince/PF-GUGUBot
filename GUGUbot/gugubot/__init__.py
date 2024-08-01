@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 #+---------------------------------------------------------------------+
-import re
 import os
 import sys
 
@@ -10,15 +9,15 @@ sys.path.append(gugu_dir)  if gugu_dir not in sys.path  else None
 
 from .bot import qbot
 from .data.text import style, DEFAULT_CONFIG
+from .table import table
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.command import *
-from .table import table
 import pygame
 #+---------------------------------------------------------------------+
 def on_load(server: PluginServerInterface, old)->None:
     # 设置系统路径
     set_sys_path()
-    global host, port, past_bot, past_info, event_loop
+    global host, port, past_bot, past_info
     global qq_bot
     # 获取参数，绑定列表
     config = table("./config/GUGUBot/config.json", DEFAULT_CONFIG, yaml=True)
