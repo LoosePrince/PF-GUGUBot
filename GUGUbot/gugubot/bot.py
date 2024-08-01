@@ -119,19 +119,21 @@ class qbot(object):
 
     # 游戏内@
     def ingame_at(self,src,ctx):
-        if  self.config['command']['qq']:
-            # get player name or system 
-            player = src.player if src.is_player else 'Console'
-            qq_user_id = ctx['QQ(name/id)'] if ctx['QQ(name/id)'].isdigit() else self.member_dict[ctx['QQ(name/id)']]
-            # check ban
-            if self.config["command"]["ban_word"]:
-                response = self.ban_word.check_ban(ctx['message'])
-                if response:
-                    temp = '{"text":"' + '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。违禁理由：'+ response[1] + '","color":"gray","italic":true}'
-                    self.server.execute(f'tellraw {player} {temp}')
-                    return 
-            # send
-            self.send_msg_to_all_qq(f'[{player}] [CQ:at,qq={qq_user_id}] {ctx["message"]}')
+        if not self.config['command']['qq']:
+            return 
+        # get name
+        player = src.player if src.is_player else 'Console'        
+        # check ban
+        ban_response = self.ban_word.check_ban(ctx['message'])
+        if self.config["command"]["ban_word"] and ban_response:
+            respond_warning = '{"text":"' + '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。违禁理由：' +\
+                     ban_response[1] +\
+                     '","color":"gray","italic":true}'
+            self.server.execute(f'tellraw {player} {respond_warning}')
+            return 
+        # send
+        qq_user_id = ctx['QQ(name/id)'] if ctx['QQ(name/id)'].isdigit() else self.member_dict[ctx['QQ(name/id)']]
+        self.send_msg_to_all_qq(f'[{player}] [CQ:at,qq={qq_user_id}] {ctx["message"]}')
 
     # 游戏内@ 推荐
     def ingame_at_suggestion(self):
