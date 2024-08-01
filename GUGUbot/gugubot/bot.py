@@ -50,20 +50,19 @@ class qbot(object):
         self.shenheman = table(self.config["dict_address"]['shenheman'])                        # 群审核人员
 
     def loading_rcon(self) -> None:
+        self.rcon = None
         try:
-            with open("./config.yml", 'r', encoding='UTF-8') as f:
+            with open("./config.yml", 'r', encoding='UTF-8') as f: # read server config
                 temp_data = yaml.load(f, Loader=yaml.FullLoader)
-            if temp_data['rcon']['enable']:
-                address = str(temp_data['rcon']['address'])
-                port = int(temp_data['rcon']['port'])
+            if temp_data['rcon']['enable']:                        # read rcon parameters
+                address  = str(temp_data['rcon']['address'])
+                port     = int(temp_data['rcon']['port'])
                 password = str(temp_data['rcon']['password'])
                 self.rcon = RconConnection(address, port, password)
                 self.rcon.connect()
                 return
-            self.rcon = None
         except Exception as e:
-            print(f"Rcon 加载失败：{e}")
-            self.rcon = None
+            self.server.logger.warning(f"Rcon 加载失败：{e}")
 
     # 离线玩家加入白名单
     def add_offline_whitelist(self, server:PluginServerInterface, info:Info):
