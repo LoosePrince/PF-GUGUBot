@@ -184,9 +184,7 @@ class qbot(object):
         # uuid:qq_id
         self.uuid_qqid = {}
         # 解压whitelist
-        whitelist_dict = {}
-        for uuid, game_name in self.whitelist.items():
-            whitelist_dict[game_name] = uuid   
+        whitelist_dict = {game_name:uuid for uuid, game_name in self.whitelist.items()}
         # 匹配    
         for qq_id, qq_name in self.data.items():
             if '(' in qq_name or '（' in qq_name:
