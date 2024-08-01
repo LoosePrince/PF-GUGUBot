@@ -138,8 +138,8 @@ class qbot(object):
     # 游戏内@ 推荐
     def ingame_at_suggestion(self):
         # 添加绑定名单
-        self.member_dict = {v:k for k,v in self.data.items()}
-        suggest_content = [v for v in self.data.values()]
+        self.member_dict = {v:k for k,v in self.data.items()} # 用于后续QQ名字对应
+        suggest_content = list(self.data.values())
         # 添加群内信息
         try: 
             group_raw_info = []
@@ -153,10 +153,10 @@ class qbot(object):
         for group in unpack:
             for member in group:
                 self.member_dict[member['nickname']] = member['user_id']
-                self.member_dict[member['card']] = member['user_id']
-                suggest_content.append(member['card'])
-                suggest_content.append(member['nickname'])
-                suggest_content.append(str(member['user_id']))
+                self.member_dict[member['card']]     = member['user_id']
+                suggest_content += [member['card'], 
+                                    member['nickname'], 
+                                    str(member['user_id'])]
         return suggest_content
     
     # 游戏内指令发送qq
