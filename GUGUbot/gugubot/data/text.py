@@ -1,13 +1,11 @@
 PLUGIN_METADATA = {
     'id': 'gugubot',
-    'version': '1.0.0',
+    'version': '1.0.7',
     'name': 'GUGUbot',
     'description': 'A bot connect mc and QQ',
     'author': 'XueK__',
     'dependencies': {
         'cool_q_api': '*',
-        'config_api': '*',
-        'json_data_api': '*'
     }
 }
 DEFAULT_CONFIG = {
@@ -153,7 +151,7 @@ mc2qq_template = [
     "[{}] {}",
     "{} 说：{}",
     "{} : {}",
-    "发情的{}说：{}"
+    "冒着爱心眼的{}说：{}"
 ]
 
 style = {
