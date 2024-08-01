@@ -92,7 +92,7 @@ class qbot(object):
     # 文字转图片-装饰器
     def addTextToImage(func):
         def _newReply(font, font_limit:int, self, info, message: str):
-            if font_limit >= 0 and len(message.split("]")[-1]) >= font_limit:
+            if font_limit >= 0 and len(message.split("]")[-1]) >= font_limit: # check condition
                 image_path = text2image(font, message)
                 message = f"[CQ:image,file={Path(image_path).as_uri()}]"
             """auto reply"""
@@ -102,9 +102,10 @@ class qbot(object):
                 self.send_group_msg(info.source_id, message)
             elif info.source_type == 'discuss':
                 self.send_discuss_msg(info.source_id, message)
+            """end reply"""
 
             try:
-                os.remove(image_path)
+                os.remove(image_path)                                         # remove temp image
             except:
                 pass
 
