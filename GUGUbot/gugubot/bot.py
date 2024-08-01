@@ -161,22 +161,23 @@ class qbot(object):
     
     # 游戏内指令发送qq
     def ingame_command_qq(self,src,ctx):
-        if self.config['command']['qq']:
-            player = src.player if src.is_player else 'Console'
-            if self.config['command']['ban_word']:
-                reason = self.ban_word.check_ban(ctx["message"])
-                if reason:
-                    temp = '{"text":"' +\
-                        '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。\n违禁理由：'+\
-                        reason[1] + '","color":"gray","italic":true}'
-                    self.server.execute(f'tellraw {player} {temp}')
-                    return
-            # 正常转发
-            self.send_msg_to_all_qq(f'[{player}] {ctx["message"]}')
-            # 检测关键词
-            if ctx['message'] in self.key_word:
-                self.send_msg_to_all_qq(f'{self.key_word[ctx["message"]]}')
-                self.server.say(f'§a[机器人] §f{self.key_word[ctx["message"]]}')
+        if not self.config['command']['qq']:
+            return
+        player = src.player if src.is_player else 'Console'
+        reason = self.ban_word.check_ban(ctx["message"])
+        if self.config['command']['ban_word'] and reason:
+            respond_warning = '{"text":"' +\
+                '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。\n违禁理由：'+\
+                reason[1] +\
+                '","color":"gray","italic":true}'
+            self.server.execute(f'tellraw {player} {respond_warning}')
+            return
+        # 正常转发
+        self.send_msg_to_all_qq(f'[{player}] {ctx["message"]}')
+        # 检测关键词
+        if ctx['message'] in self.key_word:
+            self.send_msg_to_all_qq(f'{self.key_word[ctx["message"]]}')
+            self.server.say(f'§a[机器人] §f{self.key_word[ctx["message"]]}')
     
     # 匹配uuid qqid
     def match_id(self) -> None:
