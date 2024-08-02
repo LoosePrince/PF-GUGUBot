@@ -609,8 +609,10 @@ class qbot(object):
     def send_msg_to_mc(self, server:PluginServerInterface, info: Info, bot):
         self.server = server
         # 判断是否转发
-        if info.content[0] != self.config['command_prefix'] and self.config['forward']['qq_to_mc'] \
-            and info.source_id in self.config['group_id'] and len(info.content) != 0:
+        if len(info.content) != 0 and \
+              info.content[0] != self.config['command_prefix'] and \
+              self.config['forward']['qq_to_mc'] and \
+              info.source_id in self.config['group_id']:
             # 判断是否绑定
             if  str(info.user_id) not in self.data.keys():
                 # 提示绑定
