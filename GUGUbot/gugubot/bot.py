@@ -207,61 +207,76 @@ class qbot(object):
 
     # 通用QQ 指令
     @addTextToImage
-    def on_qq_command(self,server: PluginServerInterface, info: Info, bot):
+    def on_qq_command(self, server: PluginServerInterface, info: Info, bot):
         server.logger.debug(f"收到消息上报：{info}")
         # 过滤非关注的消息
-        if not (info.source_id in self.config['group_id'] or info.source_id in self.config['admin_group_id'] or
-            info.source_id in self.config['admin_id']) or info.raw_content[0] != self.config['command_prefix']:
-            return 
+        if not (info.source_id in self.config['group_id'] 
+                or info.source_id in self.config['admin_group_id'] 
+                or info.source_id in self.config['admin_id']) \
+                or len(info.content)==0 \
+                or info.content[0] != self.config['command_prefix']:
+            return True
         command = info.content.split(' ')
         command[0] = command[0].replace(self.config['command_prefix'], '')
+        
+        
+        if stop:=self.common_command(server, info, bot, command):
+            return
+        
+        if info.source_type == 'private' or info.source_id in self.config['admin_group_id']:
+            self.private_command(server, info, bot, command)
+        elif info.source_type == 'group':
+            self.group_command(server, info, bot, command)
+
+    # 公共指令
+    def common_command(self, server: PluginServerInterface, info: Info, bot, command:list):
         # 检测违禁词
         if self.config['command']['ban_word'] and (info.source_type == 'group' and info.source_id not in self.config['admin_group_id']):
             ban_result = self.ban_word.check_ban(' '.join(command))
             if ban_result:
                 bot.delete_msg(info.message_id)
                 bot.reply(info, style[self.style]['ban_word_find'].format(ban_result[1]))
-                return 
+                return True
 
         # 玩家列表
+        list_command = ['玩家列表','玩家','player',\
+                        '假人列表','假人','fakeplayer',\
+                        '服务器','server']
         if self.config['command']['list'] and \
-        (command[0] in ['玩家列表','玩家','player'] \
-         or command[0] in ['假人列表','假人','fakeplayer'] \
-         or command[0] in ['服务器','server']):
+            command[0] in list_command:
             server_status = command[0] in ['服务器', 'server']
-            player = command[0] in ['玩家','玩家列表']
-            bound_list = self.data.values()
-            if self.rcon:
+            player_status = command[0] in ['玩家','玩家列表']
+            bound_list    = self.data.values()
+            if self.rcon is not None:
                 result = self.rcon.send_command('list')
                 player_list = [i.strip() for i in result.split(": ")[-1].split(", ")]
-                t_player = [i for i in player_list if i in bound_list] if player else [i for i in player_list if i not in bound_list]
                 server.logger.debug(f"rcon获取列表如下：{player_list}")
             else:
                 try:
                     content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
                     player_list = [i['name'].strip() for i in content['sample']]
                     server.logger.debug(f"API获取列表如下：{player_list}")
-                    if player: # 过滤假人
-                        t_player = [i for i in player_list if i in bound_list]
-                    else: # 过滤真人
-                        t_player = [i for i in player_list if i not in bound_list] 
                 except:
-                    bot.reply(info, "未能获取到服务器信息，请检查服务器参数设置！（推荐开启rcon精准获取玩家信息）")
-                    return
-                
-            if server_status:
-                true_player = [i for i in player_list if i in bound_list]
-                fake_player = [i for i in player_list if i not in bound_list]
-                server_status_reply = ((f"\n---玩家---\n" + '\n'.join(true_player)) if true_player else "") + ((f"\n---假人---\n" + '\n'.join(fake_player)) if fake_player else "")
+                    bot.reply(info, "未能通过api.miri.site获取到服务器信息，请检查服务器参数设置！（推荐开启rcon精准获取玩家信息）")
+                    return True
+            
+            player_list = [i for i in player_list if i in bound_list]
+            bot_list    = [i for i in player_list if i not in bound_list]
 
-            if len(t_player) == 0 or len(player_list) == 0:
-                respond = style[self.style]['no_player_ingame'] if player or server_status else '没有假人在线哦!'
-            else:
-                t_player.sort() # 名字排序
+            respond = ""
+            count   = 0
+            if player_status or server_status:
+                respond += f"\n---玩家---\n" + '\n'.join(sorted(player_list)) if len(player_list) != 0 else style[self.style]['no_player_ingame'] 
+                count   += len(player_list)
+            if not player_status:
+                respond += f"\n---假人---\n" + '\n'.join(sorted(bot_list))    if len(bot_list)    != 0 else '没有假人在线哦!'
+                count   += len(bot_list)
+            
+            if count != 0:
                 respond = style[self.style]['player_list'].format(
-                    len(t_player) if not server_status else len(player_list),
-                    '玩家' if player else ('假人' if not server_status else '人员'),
-                    '\n'+'\n'.join(t_player) if not server_status else server_status_reply)
+                    count,
+                    '玩家' if player_status else '假人' if not server_status else '人员',
+                    '\n'+ respond)
             bot.reply(info, respond)
 
         # 添加关键词
@@ -270,29 +285,27 @@ class qbot(object):
 
         # 游戏内关键词
         elif self.config['command']['ingame_key_word'] and command[0] == '游戏关键词':
-            if self.config['command']['ban_word']:
-                ban_result = self.ban_word.check_ban(''.join(command[1:]))
-                if ban_result:
-                    bot.delete_msg(info.message_id)
-                    bot.reply(info, style[self.style]['ban_word_find'].format(ban_result[1]))
-                    return 
+            if self.config['command']['ban_word'] and (ban_result := self.ban_word.check_ban(''.join(command[1:]))):
+                bot.delete_msg(info.message_id)
+                bot.reply(info, style[self.style]['ban_word_find'].format(ban_result[1]))
+                return True
             self.key_word_ingame.handle_command(info.content, info, bot, style=self.style)
 
         # 添加关键词图片
         elif self.config['command']['key_word'] and command[0] == '添加图片' and len(command)>1:
             if command[1] not in self.key_word.data and info.user_id not in self.picture_record_dict:
-                ban_result = self.ban_word.check_ban(command[1])
-                if ban_result:
+                if self.config['command']['ban_word'] and (ban_result := self.ban_word.check_ban(''.join(command[1:]))):
                     bot.delete_msg(info.message_id)
                     bot.reply(info, style[self.style]['ban_word_find'].format(ban_result[1]))
-                    return 
-                else: # 正常添加
-                    self.picture_record_dict[info.user_id] = command[1]
-                    bot.reply(info, '请发送要添加的图片~')
+                    return True
+                # 正常添加
+                self.picture_record_dict[info.user_id] = command[1]
+                respond = '请发送要添加的图片~'
             elif command[1] in self.key_word.data:
-                bot.reply(info, '已存在该关键词~')
+                respond = '已存在该关键词~'
             else:
-                bot.reply(info,'上一个关键词还未绑定，添加哒咩！') 
+                respond = '上一个关键词还未绑定，添加哒咩！'
+            bot.reply(info, respond) 
 
         # 审核通过
         elif self.config['command']['shenhe'] and command[0] == '同意' and len(self.shenhe[info.user_id]) > 0:
@@ -314,11 +327,6 @@ class qbot(object):
                     '拒绝'])+'\n')
             bot.reply(info,f"已拒绝{self.shenhe[info.user_id][0][0]}的申请awa")
             self.shenhe[info.user_id].pop(0)
-        
-        if info.source_type == 'private' or info.source_id in self.config['admin_group_id']:
-            self.private_command(server, info, bot, command)
-        elif info.source_type == 'group':
-            self.group_command(server, info, bot, command)
 
     # 管理员指令
     def private_command(self, server, info: Info, bot, command:list):
