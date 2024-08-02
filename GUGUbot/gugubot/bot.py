@@ -215,7 +215,7 @@ class qbot(object):
                 or info.source_id in self.config['admin_id']) \
                 or len(info.content)==0 \
                 or info.content[0] != self.config['command_prefix']:
-            return True
+            return 
         command = info.content.split(' ')
         command[0] = command[0].replace(self.config['command_prefix'], '')
         
@@ -335,14 +335,12 @@ class qbot(object):
             bot.reply(info, admin_help_msg)
         # bound 帮助菜单
         elif info.content.startswith(f"{self.config['command_prefix']}绑定"):
-            if info.content == f"{self.config['command_prefix']}绑定":
+            if len(command) == 1:
                 bot.reply(info, bound_help)
             # 已绑定的名单    
             elif len(command) == 2 and command[1] == '列表':
-                bound_list = [f'{a} - {b}' for a, b in self.data.items()]
-                reply_msg = ''
-                for i in range(0, len(bound_list)):
-                    reply_msg += f'{i + 1}. {bound_list[i]}\n'
+                bound_list = [f'{qqid} - {name}' for qqid, name in self.data.items()]
+                reply_msg = "\n".join(f'{i + 1}. {name}' for i, name in enumerate(bound_list))
                 reply_msg = '还没有人绑定' if reply_msg == '' else reply_msg
                 bot.reply(info, reply_msg)
             # 查寻绑定的ID
@@ -366,7 +364,7 @@ class qbot(object):
 
         # 白名单
         elif info.content.startswith(f"{self.config['command_prefix']}白名单"):
-            if info.content == f"{self.config['command_prefix']}白名单":
+            if len(command) == 1:
                 bot.reply(info, whitelist_help)
             # 执行指令
             elif len(command)>1 and command[1] in ['添加', '删除','移除', '列表', '开', '关', '重载']:
@@ -454,7 +452,8 @@ class qbot(object):
                 bot.reply(info, uuid_help)
             # 查看uuid 匹配表
             elif len(command)>1 and command[1] == '列表':
-                bot.reply(info, "uuid匹配如下：\n"+'\n'.join([str(k)+'-'+str(v)+'-'+self.data[v] for k,v in self.uuid_qqid.items() if v in self.data]))
+                bot.reply(info, "uuid匹配如下：\n"+ \
+                          '\n'.join([str(k)+'-'+str(v)+'-'+self.data[v] for k,v in self.uuid_qqid.items() if v in self.data]))
             # 更新匹配表
             elif len(command)>1 and command[1] == '重载':
                 self.loading_whitelist()
@@ -619,13 +618,11 @@ class qbot(object):
                 bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
                 return 
             # 如果开启违禁词
-            if self.config['command']['ban_word']:
-                reason = self.ban_word.check_ban(info.content)
+            if self.config['command']['ban_word'] and (reason := self.ban_word.check_ban(info.content)):
                 # 包含违禁词 -> 撤回 + 提示 + 不转发
-                if reason:
-                    bot.delete_msg(info.message_id)
-                    bot.reply(info, style[self.style]['ban_word_find'].format(reason[1]))
-                    return 
+                bot.delete_msg(info.message_id)
+                bot.reply(info, style[self.style]['ban_word_find'].format(reason[1]))
+                return 
             user_id = str(info.user_id)
             # 检测关键词
             if self.config['command']['key_word']:
@@ -634,22 +631,25 @@ class qbot(object):
                     server.say(f'§6[QQ] §a[{self.find_game_name(user_id, bot, info.source_id)}] §f{info.content}')
                     bot.reply(info,self.key_word.data[info.content])
                     # 过滤图片
-                    is_picture = self.key_word.data[info.content][:9] != '[CQ:image'
+                    is_picture = self.key_word.data[info.content].startswith('[CQ:image')
                     server.say(f'§6[QQ] §a[机器人] §f{self.key_word.data[info.content] if not is_picture else "图片"}')
                     return
                 # 添加图片
-                if info.user_id in self.picture_record_dict and info.raw_content[:9]=='[CQ:image':
+                if info.user_id in self.picture_record_dict and info.raw_content.startswith('[CQ:image'):
                     pattern = "\[CQ:image.+url=(.+)\]"
                     try:
                         url = re.match(pattern, info.raw_content).groups()[-1] 
                         response = requests.get(url)                              # 获取图片url
-                        if not os.path.exists("./config/GUGUbot/image/"):         # 创建文件夹
-                            os.makedirs("./config/GUGUbot/image/")
-                        with open(f"./config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg", "wb") as f: # 保存图片
+                        
+                        cache_directory = Path("./config/GUGUbot/image/")
+                        cache_directory.mkdir(parents=True, exist_ok=True)
+                        
+                        with open(cache_directory / f"{self.picture_record_dict[info.user_id]}.jpg", "wb") as f: # 保存图片
                             f.write(response.content)
                         # 保存关键词
-                        self.key_word.data[self.picture_record_dict[info.user_id]]="[CQ:image,file={}]".format(Path(os.getcwd()+f"/config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg").as_uri())
+                        self.key_word.data[self.picture_record_dict[info.user_id]]="[CQ:image,file={}]".format((cache_directory/f"{self.picture_record_dict[info.user_id]}.jpg").absolute().as_uri())
                         del self.picture_record_dict[info.user_id]                # 缓存中移除用户
+                        
                         bot.reply(info, style[self.style]['add_success'])
                     except Exception as e:
                         server.logger.bug(f"保存图片失败：{info}\n报错如下： {e}")
@@ -680,7 +680,7 @@ class qbot(object):
             # 普通消息
             else: 
                 # 提取链接中标题
-                if info.content[:8] == '[CQ:json':
+                if info.content.startswith('[CQ:json'):
                     info.content = '[链接]'+info.content.split('"desc":"')[2].split('&#44')[0][1:]
                 server.say(f'§6[QQ] §a[{self.find_game_name(str(user_id), bot, info.source_id)}] §f{info.content}')
             
@@ -688,15 +688,14 @@ class qbot(object):
     def send_msg_to_qq(self, server:PluginServerInterface, info:Info):
         if info.is_player and self.config['forward']['mc_to_qq']:
             # 检查违禁词
-            if self.config['command']['ban_word']:
-                response = self.ban_word.check_ban(info.content)
-                if response: # 有违禁词 -> 不转发 + 警告
-                    temp = '{"text":"' + '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。\n违禁理由：'+\
-                        response[1] + '","color":"gray","italic":true}'
-                    self.server.execute(f'tellraw {info.player} {temp}')
-                    return
+            if self.config['command']['ban_word'] and (response := self.ban_word.check_ban(info.content)):
+                # 有违禁词 -> 不转发 + 警告
+                temp = '{"text":"' + '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。\n违禁理由：'+\
+                    response[1] + '","color":"gray","italic":true}'
+                self.server.execute(f'tellraw {info.player} {temp}')
+                return
             # 游戏内关键词添加
-            if self.config['command']['ingame_key_word'] and info.content[:6] == '!!add ':
+            if self.config['command']['ingame_key_word'] and info.content.startswith('!!add '):
                 temp = info.content[6:].split(' ',1)
                 if len(temp) == 2 and temp[0] not in self.key_word_ingame.data:
                     self.key_word_ingame.data[temp[0]] = temp[1]
@@ -704,7 +703,7 @@ class qbot(object):
                 else:
                     self.server.say('关键词重复或者指令无效~')
             # 游戏内关键词删除
-            elif self.config['command']['ingame_key_word'] and info.content[:6] == '!!del ':
+            elif self.config['command']['ingame_key_word'] and info.content.startswith('!!del '):
                 if info.content[6:] in self.key_word_ingame.data:
                     del self.key_word_ingame.data[info.content[6:]]
                     self.server.say(style[self.style]['delete_success'])
@@ -802,20 +801,22 @@ class qbot(object):
                 number = len([i["name"] for i in content['sample'] if i["name"] in bound_list])
                 server.logger.debug(f"API获取列表如下：{[i['name'] for i in content['sample']]}")
             except:
-                number = "API接口错误/请配置game_ip & game_port参数"
+                server.logger.info("API接口错误/请配置game_ip & game_port参数")
+                number = 0
         name = " "
         if number != 0:     
             name = "在线人数: {}".format(number)
         # 更新名字
         for gid in self.config['group_id']:
             data = {
-            'group_id': gid,
-            'user_id': bot.get_login_info().json()["data"]['user_id'],
-            'card': name
+                'group_id': gid,
+                'user_id': bot.get_login_info().json()["data"]['user_id'],
+                'card': name
             }
             requests.post(
                 f'http://{self.host}:{self.port}/set_group_card',
-                json=data)
+                json=data
+            )
 #+---------------------------------------------------------------------+
 # 文字转图片函数，一定程度防止风控？
 def text2image(font, input_string:str)->str:
