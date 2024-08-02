@@ -610,7 +610,7 @@ class qbot(object):
         self.server = server
         # 判断是否转发
         if info.content[0] != self.config['command_prefix'] and self.config['forward']['qq_to_mc'] \
-            and info.source_id in self.config['group_id']:
+            and info.source_id in self.config['group_id'] and len(info.content) != 0:
             # 判断是否绑定
             if  str(info.user_id) not in self.data.keys():
                 # 提示绑定
