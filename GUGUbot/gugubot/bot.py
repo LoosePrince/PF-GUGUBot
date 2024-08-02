@@ -636,7 +636,7 @@ class qbot(object):
                     return
                 # 添加图片
                 if info.user_id in self.picture_record_dict and info.raw_content.startswith('[CQ:image'):
-                    pattern = "\[CQ:image.+url=(.+)\]"
+                    pattern = r'url=([^,\]]+)'
                     try:
                         url = re.match(pattern, info.raw_content).groups()[-1] 
                         response = requests.get(url)                              # 获取图片url
@@ -652,7 +652,7 @@ class qbot(object):
                         
                         bot.reply(info, style[self.style]['add_success'])
                     except Exception as e:
-                        server.logger.bug(f"保存图片失败：{info}\n报错如下： {e}")
+                        server.logger.debug(f"保存图片失败：{info}\n报错如下： {e}")
                     return
             # @ 模块
             if '@' in info.content:
