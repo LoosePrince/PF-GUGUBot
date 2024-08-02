@@ -1,4 +1,4 @@
-#encoding=utf-8
+﻿#encoding=utf-8
 # The definition of the QQ Chat robot:
 from .ban_word_system import ban_word_system
 from .data.text import *
@@ -208,7 +208,7 @@ class qbot(object):
     # 通用QQ 指令
     @addTextToImage
     def on_qq_command(self, server: PluginServerInterface, info: Info, bot):
-        server.logger.debug(f"收到消息上报：{info}")
+        server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_content}")
         # 过滤非关注的消息
         if not (info.source_id in self.config['group_id'] 
                 or info.source_id in self.config['admin_group_id'] 
@@ -218,7 +218,6 @@ class qbot(object):
             return 
         command = info.content.split(' ')
         command[0] = command[0].replace(self.config['command_prefix'], '')
-        
         
         if stop:=self.common_command(server, info, bot, command):
             return
@@ -635,12 +634,12 @@ class qbot(object):
                     server.say(f'§6[QQ] §a[机器人] §f{self.key_word.data[info.content] if not is_picture else "图片"}')
                     return
                 # 添加图片
-                if info.user_id in self.picture_record_dict and info.raw_content.startswith('[CQ:image'):
+                if info.user_id in self.picture_record_dict and info.raw_content[:9]=='[CQ:image':
                     pattern = r'url=([^,\]]+)'
                     try:
-                        url = re.match(pattern, info.raw_content).groups()[-1] 
+                        url = re.search(pattern, info.raw_content).groups()[-1] 
                         response = requests.get(url)                              # 获取图片url
-                        
+        
                         cache_directory = Path("./config/GUGUbot/image/")
                         cache_directory.mkdir(parents=True, exist_ok=True)
                         
@@ -652,7 +651,7 @@ class qbot(object):
                         
                         bot.reply(info, style[self.style]['add_success'])
                     except Exception as e:
-                        server.logger.debug(f"保存图片失败：{info}\n报错如下： {e}")
+                        server.logger.warning(f"保存图片失败：{info.raw_content}\n报错如下： {e}")
                     return
             # @ 模块
             if '@' in info.content:
