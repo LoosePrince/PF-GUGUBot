@@ -41,6 +41,7 @@ class base_system(object):
             # not exists
             if word not in self.data:    
                 bot.reply(info, style[reply_style]['del_no_exist'])
+                return
             # del
             del self.data[word]                                            
             bot.reply(info, style[reply_style]['delete_success'])
