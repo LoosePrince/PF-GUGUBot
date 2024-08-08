@@ -7,7 +7,7 @@
 > - 关于对 `CoolQAPI` 的反馈我们仅接受与 `GUGUbot` 相关的部分，有关其它插件的交互和维护我们可能没有这个精力。
 
 > 2024/08/08
-> - 据悉 `CoolQAPI` 已被更换为 [QQAPI](https://mcdreforged.com/en/plugin/qq_api)
+> - 据悉 `CoolQAPI` 已被更换为 [QQAPI](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/qq_api)
 > - 旧版 `CoolQAPI` 的维护请点击链接前往: [CoolQAPI](https://github.com/LoosePrince/PF-CoolQAPI)
 # PF-QQchat
 > PFingan服务器MCDRQQ机器人插件
@@ -22,9 +22,7 @@
 [![最新发布下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/latest/total?style=flat-square&label=最新版本下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest)
 
 本插件修改自： 
-[QQChat-用于连接Minecraft和QQ的插件 - 已失联](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/qq_chat) <br>
-[QQChat新版 - 仅做参考，但并不修改于此版本](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/qq_chat) <br>
-[原作者：AnzhiZhang](https://github.com/AnzhiZhang) <br>
+[QQChat新版 - 修改自它的旧版](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/qq_chat) | [原作者：AnzhiZhang](https://github.com/AnzhiZhang) <br>
 技术支持：XueK__ [前往主页](https://github.com/XueK66)
 <br></br>
 
@@ -45,7 +43,7 @@
 #### 前置插件
 - [CoolQAPI](https://github.com/LoosePrince/PF-CoolQAPI)
 > - PFingan服务器已接手CoolQAPI
-> - 我们尚未兼容[QQAPI](https://mcdreforged.com/en/plugin/qq_api)但是这在未来的计划中
+> - 我们尚未兼容 `QQAPI` 但是这在未来的计划中
 #### 已废弃的前置插件
 
 > <details>
