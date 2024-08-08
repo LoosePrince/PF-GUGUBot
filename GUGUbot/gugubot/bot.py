@@ -642,6 +642,7 @@ class qbot(object):
                 pattern = r'url=([^,\]]+)'
                 try:
                     url = re.search(pattern, info.raw_content).groups()[-1] 
+                    url = re.sub('&amp;', "&", url)
                     response = requests.get(url)                              # 获取图片url
     
                     cache_directory = Path("./config/GUGUbot/image/")
