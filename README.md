@@ -1,7 +1,4 @@
 ## 公告
-> 2024/1/14
-> - PFingan服务器已宣布关服，本插件将面临可能无限期的停更
-
 > 2024/06/18
 > - `CoolQAPI` 已失联，所幸的是我们保留的一份存档，请点击 [CoolQ API](https://github.com/LoosePrince/PF-GUGUBot/releases/download/GUGUbot-v1.0.6-CoolQAPI/CoolQAPI.zip) 下载存档。 
 > - 请注意，存档版本是我们服务器此前使用的版本，理论上不会出现问题（原有版本在新版MCDR已不兼容，但是我们为它更新了一下兼容），然后请注意 **解压** 文件，而不是直接拖入插件目录。
