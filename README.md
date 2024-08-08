@@ -1,14 +1,14 @@
 ## 公告
 > 2024/06/18
-> - `CoolQAPI` 已失联，所幸的是我们保留的一份存档，请点击 [CoolQ API](https://github.com/LoosePrince/PF-GUGUBot/releases/download/GUGUbot-v1.0.6-CoolQAPI/CoolQAPI.zip) 下载存档。 
-> - 请注意，存档版本是我们服务器此前使用的版本，理论上不会出现问题（原有版本在新版MCDR已不兼容，但是我们为它更新了一下兼容），然后请注意 **解压** 文件，而不是直接拖入插件目录。
+> - 据人反馈`CoolQAPI` 已失联。我们将提供旧版的CoolQAPI文件已保证插件运行。
 
 > 2024/08/01
-> - 在 `CoolQAPI` 恢复正常或者我们彻底抛弃它之前将会由我们进行维护。预计将不会有功能上的更新。
+> -  `CoolQAPI` 在我们彻底抛弃它之前将会由我们进行维护。预计将不会有功能上的更新。
 > - 关于对 `CoolQAPI` 的反馈我们仅接受与 `GUGUbot` 相关的部分，有关其它插件的交互和维护我们可能没有这个精力。
 
 > 2024/08/08
-> - 后续 `CoolQ API` 请点击链接前往: [CoolQAPI](https://github.com/LoosePrince/PF-CoolQAPI)
+> - 据悉 `CoolQAPI` 已被更换为 [QQAPI](https://mcdreforged.com/en/plugin/qq_api)
+> - 旧版 `CoolQAPI` 的维护请点击链接前往: [CoolQAPI](https://github.com/LoosePrince/PF-CoolQAPI)
 # PF-QQchat
 > PFingan服务器MCDRQQ机器人插件
 
@@ -44,7 +44,8 @@
 - 已存储在插件对应的文件夹内的 [requirements.txt](requirements.txt) 中, 可以使用 `pip install -r requirements.txt` 安装
 #### 前置插件
 - [CoolQAPI](https://github.com/LoosePrince/PF-CoolQAPI)
-> PFingan服务器已接手CoolQAPI
+> - PFingan服务器已接手CoolQAPI
+> - 我们尚未兼容[QQAPI](https://mcdreforged.com/en/plugin/qq_api)但是这在未来的计划中
 #### 已废弃的前置插件
 
 > <details>
