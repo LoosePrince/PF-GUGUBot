@@ -643,15 +643,16 @@ class qbot(object):
                 try:
                     url = re.search(pattern, info.raw_content).groups()[-1] 
                     url = re.sub('&amp;', "&", url)
-                    response = requests.get(url)                              # 获取图片url
+                    # response = requests.get(url)                              # 获取图片url
     
-                    cache_directory = Path("./config/GUGUbot/image/")
-                    cache_directory.mkdir(parents=True, exist_ok=True)
+                    # cache_directory = Path("./config/GUGUbot/image/")
+                    # cache_directory.mkdir(parents=True, exist_ok=True)
                     
-                    with open(cache_directory / f"{self.picture_record_dict[info.user_id]}.jpg", "wb") as f: # 保存图片
-                        f.write(response.content)
-                    # 保存关键词
-                    self.key_word.data[self.picture_record_dict[info.user_id]]="[CQ:image,file={}]".format((cache_directory/f"{self.picture_record_dict[info.user_id]}.jpg").absolute().as_uri())
+                    # with open(cache_directory / f"{self.picture_record_dict[info.user_id]}.jpg", "wb") as f: # 保存图片
+                    #     f.write(response.content)
+                    # # 保存关键词
+                    # self.key_word.data[self.picture_record_dict[info.user_id]]="[CQ:image,file={}]".format((cache_directory/f"{self.picture_record_dict[info.user_id]}.jpg").absolute().as_uri())
+                    self.key_word.data[self.picture_record_dict[info.user_id]]=f"[CQ:image,file={url}]"
                     del self.picture_record_dict[info.user_id]                # 缓存中移除用户
                     
                     bot.reply(info, style[self.style]['add_success'])
