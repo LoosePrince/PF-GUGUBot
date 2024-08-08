@@ -684,7 +684,9 @@ class qbot(object):
         else: 
             # 提取链接中标题
             if info.content.startswith('[CQ:json'):
-                info.content = '[链接]'+info.content.split('"desc":"')[2].split('&#44')[0][1:]
+                json_data = re.search(r'\[CQ:json,data=(\{.*\})\]', info.content).group(1)
+                json_data = json_data.replace('&#44;', ',').replace('&#91;', '[').replace('&#93;', ']')
+                info.content = '[链接]'+ json.loads(json_data)['meta']['detail_1']['desc']
             server.say(f'§6[QQ] §a[{self.find_game_name(str(user_id), bot, info.source_id)}] §f{info.content}')
             
     # 转发消息
