@@ -3,12 +3,15 @@
 > - PFingan服务器已宣布关服，本插件将面临可能无限期的停更
 
 > 2024/06/18
-> - `CoolQ API` 已失联，所幸的是我们保留的一份存档，请点击 [CoolQ API](https://github.com/LoosePrince/PF-GUGUBot/releases/download/GUGUbot-v1.0.6-CoolQAPI/CoolQAPI.zip) 下载存档。 
+> - `CoolQAPI` 已失联，所幸的是我们保留的一份存档，请点击 [CoolQ API](https://github.com/LoosePrince/PF-GUGUBot/releases/download/GUGUbot-v1.0.6-CoolQAPI/CoolQAPI.zip) 下载存档。 
 > - 请注意，存档版本是我们服务器此前使用的版本，理论上不会出现问题（原有版本在新版MCDR已不兼容，但是我们为它更新了一下兼容），然后请注意 **解压** 文件，而不是直接拖入插件目录。
 
 > 2024/08/01
-> - 在 `CoolQ API` 恢复正常或者我们彻底抛弃它之前将会由我们进行维护。预计将不会有功能上的更新。
-> - 关于对 `CoolQ API` 的反馈我们仅接受与 `GUGUbot` 相关的部分，有关其它插件的交互和维护我们可能没有这个精力。
+> - 在 `CoolQAPI` 恢复正常或者我们彻底抛弃它之前将会由我们进行维护。预计将不会有功能上的更新。
+> - 关于对 `CoolQAPI` 的反馈我们仅接受与 `GUGUbot` 相关的部分，有关其它插件的交互和维护我们可能没有这个精力。
+
+> 2024/08/08
+> - 后续 `CoolQ API` 请点击链接前往: [CoolQAPI](https://github.com/LoosePrince/PF-CoolQAPI)
 # PF-QQchat
 > PFingan服务器MCDRQQ机器人插件
 
@@ -40,7 +43,8 @@
 #### Python模块
 - 已存储在插件对应的文件夹内的 [requirements.txt](requirements.txt) 中, 可以使用 `pip install -r requirements.txt` 安装
 #### 前置插件
-- [CoolQAPI](https://github.com/AnzhiZhang/CoolQAPI)
+- [CoolQAPI](https://github.com/LoosePrince/PF-CoolQAPI)
+> PFingan服务器已接手CoolQAPI
 #### 已废弃的前置插件
 
 > <details>
@@ -293,66 +297,7 @@ rcon:
 
 > CoolQAPI是前置插件不可忽略
 
-## 说明
-
-### QQ Bot 配置
->配置方法部分源自原始插件说明
-
-推荐使用 [go-cqhttp](https://github.com/Mrs4s/go-cqhttp)
-
-#### 使用go-cqhttp
-在`account`字段中设置QQ帐号和密码：
-
-```yaml
-account:
-  uin: 1233456
-  password: ''
-```
-
-#### 使用 HTTP
-将配置中的 `http` 设置为 `true` ，将 `websocket` 设置为 `false` 。 然后在 go-cqhttp 配置的 `servers` 字段中设置 `http` （此配置应与CoolQAPI配置内容匹配）：
-
-```yaml
-servers:
-  - http:
-      address: 0.0.0.0:5700
-      post:
-      - url: http://127.0.0.1:5701/
-```
-
-### CoolQAPI配置文件
-**更改CoolQAPI配置需重启服务器才会生效！！**
-
-> <details>
->  
-> | 配置项 | 默认值 | 说明 |
-> | - | - | - |
-> | post_host | `127.0.0.1` | 接收数据上报的地址 |
-> | post_port | `5701` | 对应 go-cqhttp `url` 配置的端口 | 
-> | post_path | `post` | 对应 go-cqhttp `url` 配置的终点名 |
-> | api_host | `127.0.0.1` | 对应 go-cqhttp 的地址 |
-> | api_port | `5700` | 对应 go-cqhttp 的 HTTP 监听端口 |
-> | command_prefix | `/` | 需要修改成`#`以启用机器人函数功能 | 
-> ```yaml
-> api_host: 127.0.0.1
-> api_port: 5700 
-> command_prefix: "#"
-> post_host: 127.0.0.1 
-> post_path: ""    
-> post_port: 5701 
-> ```
-> 机器人监听地址 = http://api_host:api_port
-> 
-> 机器人反向地址 = http://post_host:post_port/post_path/
->
-> 由于机器人默认反向地址`http://127.0.0.1:5701/`没有post_path，所以CoolQAPI中post_path留空。
-> </details>
-
-### 关于多服使用
-> 不支持
-
-### 开发
-> 无
+### 请前往 [CoolQAPI](https://github.com/LoosePrince/PF-CoolQAPI) 库查看,该库由我们进行维护
 
 # 有BUG或是新的IDEA
 如果需要更多联动或提交想法和问题请提交 [issues](https://github.com/LoosePrince/PF-GUGUBot/issues) 或 QQ [1377820366](http://wpa.qq.com/msgrd?v=3&uin=1377820366&site=qq&menu=yes) 提交！ <br />
