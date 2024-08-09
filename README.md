@@ -44,15 +44,6 @@
 - [CoolQAPI](https://github.com/LoosePrince/PF-CoolQAPI)
 > - PFingan服务器已接手CoolQAPI
 > - 我们尚未兼容 `QQAPI` 但是这在未来的计划中
-#### 已废弃的前置插件
-
-> <details>
->  
-> [OnlinePlayerAPI](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/OnlinePlayerAPI) <br> 
-> [ConfigAPI](https://github.com/MCDReforged/ConfigAPI) <br>
-> [JsonDataAPI](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/.archived/JsonDataAPI)
->
-> </details>
 
 ## 功能列表
 > QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮助`
