@@ -1,0 +1,23 @@
+name: Sync README.md
+
+on:
+  push:
+    paths:
+      - README.md
+
+jobs:
+  sync-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Sync README.md to GUGUBot
+      run: |
+        cp README.md GUGUBot/README.md
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add GUGUBot/README.md
+        git commit -m "Sync README.md from root to GUGUBot"
+        git push
