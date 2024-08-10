@@ -248,19 +248,19 @@ class qbot(object):
             bound_list    = self.data.values()
             if self.rcon is not None:
                 result = self.rcon.send_command('list')
-                player_list = [i.strip() for i in result.split(": ")[-1].split(", ")]
-                server.logger.debug(f"rcon获取列表如下：{player_list}")
+                instance_list = [i.strip() for i in result.split(": ")[-1].split(", ")]
+                server.logger.info(f"rcon获取列表如下：{instance_list}")
             else:
                 try:
                     content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
-                    player_list = [i['name'].strip() for i in content['sample']]
-                    server.logger.debug(f"API获取列表如下：{player_list}")
+                    instance_list = [i['name'].strip() for i in content['sample']]
+                    server.logger.info(f"API获取列表如下：{instance_list}")
                 except:
                     bot.reply(info, "未能通过api.miri.site获取到服务器信息，请检查服务器参数设置！（推荐开启rcon精准获取玩家信息）")
                     return True
             
-            player_list = [i for i in player_list if i in bound_list]
-            bot_list    = [i for i in player_list if i not in bound_list]
+            player_list = [i for i in instance_list if i in bound_list]
+            bot_list    = [i for i in instance_list if i not in bound_list]
 
             respond = ""
             count   = 0
@@ -268,7 +268,7 @@ class qbot(object):
                 respond += f"\n---玩家---\n" + '\n'.join(sorted(player_list)) if len(player_list) != 0 else style[self.style]['no_player_ingame'] 
                 count   += len(player_list)
             if not player_status:
-                respond += f"\n---假人---\n" + '\n'.join(sorted(bot_list))    if len(bot_list)    != 0 else '没有假人在线哦!'
+                respond += f"\n---假人---\n" + '\n'.join(sorted(bot_list))    if len(bot_list)    != 0 else '\n没有假人在线哦!'
                 count   += len(bot_list)
             
             if count != 0:
@@ -680,7 +680,13 @@ class qbot(object):
                 return 
             # only @ -> 正则替换
             at_pattern = r"\[@(\d+)\]|\[CQ:at,qq=(\d+)\]"
-            sub_string = re.sub(at_pattern, lambda id: f"§b[@{_get_name(str(id.groups()[0]) if id.groups()[0] else str(id.groups()[1]))}]", info.raw_content)
+            sub_string = re.sub(
+                at_pattern, 
+                lambda id: f"§b[@{_get_name(
+                        str(id.group(1) or id.group(2))
+                    )}]", 
+                info.content
+            )
             server.say(f'§6[QQ] §a[{sender}]§f {sub_string}')
         # 普通消息
         else: 
