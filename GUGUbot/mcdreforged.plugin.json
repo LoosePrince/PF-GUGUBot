@@ -11,7 +11,7 @@
 	],
 	"link": "https://github.com/LoosePrince/PF-GUGUBot",
 	"dependencies": {
-		"mcdreforged": ">=2.1.2",
-		"cool_q_api": "*"
+		"mcdreforged": ">=2.1.2"
+		"cool_q_api": ">=0.2.0"
 	}
 }
