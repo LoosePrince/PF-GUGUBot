@@ -670,8 +670,8 @@ class qbot(object):
             sender = _get_name(str(info.user_id))
             # 回复 -> 正则匹配
             if "[CQ:reply" in info.content:
-                pattern = r"(?:\[CQ:reply,id=(-?\d+)\])(?:\ ?\[@(\d+)\])+(.*)"
-                match_result = re.match(pattern, info.content.replace("CQ:at,qq=","@"), re.DOTALL).groups()
+                pattern = r"(?:\[CQ:reply,id=(-?\d+)\])"
+                match_result = re.search(pattern, info.content.replace("CQ:at,qq=","@"), re.DOTALL).groups()
                 # get receiver name
                 query = {'message_id': match_result[0]}
                 receiver_id = requests.post(f'http://{self.host}:{self.port}/get_msg',json=query).json()['data']['sender']['user_id']
