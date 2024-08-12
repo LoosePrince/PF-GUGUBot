@@ -10,7 +10,7 @@ class base_system(object):
         self.help_msg = help_msg
 
     def handle_command(self, raw_command:str, info:Info, bot, reply_style:str='正常', *arg, **kargs):
-        parameter = raw_command.strip().split()[1:]                               
+        parameter = raw_command.strip().split(maxsplit=3)[1:]                               
         parameter_length = len(parameter)
 
         if not parameter_length or parameter[0] in ['帮助', 'help']:                         
@@ -41,6 +41,7 @@ class base_system(object):
             # not exists
             if word not in self.data:    
                 bot.reply(info, style[reply_style]['del_no_exist'])
+                return
             # del
             del self.data[word]                                            
             bot.reply(info, style[reply_style]['delete_success'])

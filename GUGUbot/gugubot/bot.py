@@ -1,4 +1,4 @@
-#encoding=utf-8
+﻿#encoding=utf-8
 # The definition of the QQ Chat robot:
 from .ban_word_system import ban_word_system
 from .data.text import *
@@ -50,20 +50,19 @@ class qbot(object):
         self.shenheman = table(self.config["dict_address"]['shenheman'])                        # 群审核人员
 
     def loading_rcon(self) -> None:
+        self.rcon = None
         try:
-            with open("./config.yml", 'r', encoding='UTF-8') as f:
+            with open("./config.yml", 'r', encoding='UTF-8') as f: # read server config
                 temp_data = yaml.load(f, Loader=yaml.FullLoader)
-            if temp_data['rcon']['enable']:
-                address = str(temp_data['rcon']['address'])
-                port = int(temp_data['rcon']['port'])
+            if temp_data['rcon']['enable']:                        # read rcon parameters
+                address  = str(temp_data['rcon']['address'])
+                port     = int(temp_data['rcon']['port'])
                 password = str(temp_data['rcon']['password'])
                 self.rcon = RconConnection(address, port, password)
                 self.rcon.connect()
                 return
-            self.rcon = None
         except Exception as e:
-            print(f"Rcon 加载失败：{e}")
-            self.rcon = None
+            self.server.logger.warning(f"Rcon 加载失败：{e}")
 
     # 离线玩家加入白名单
     def add_offline_whitelist(self, server:PluginServerInterface, info:Info):
@@ -93,7 +92,7 @@ class qbot(object):
     # 文字转图片-装饰器
     def addTextToImage(func):
         def _newReply(font, font_limit:int, self, info, message: str):
-            if font_limit >= 0 and len(message.split("]")[-1]) >= font_limit:
+            if font_limit >= 0 and len(message.split("]")[-1]) >= font_limit: # check condition
                 image_path = text2image(font, message)
                 message = f"[CQ:image,file={Path(image_path).as_uri()}]"
             """auto reply"""
@@ -103,9 +102,10 @@ class qbot(object):
                 self.send_group_msg(info.source_id, message)
             elif info.source_type == 'discuss':
                 self.send_discuss_msg(info.source_id, message)
+            """end reply"""
 
             try:
-                os.remove(image_path)
+                os.remove(image_path)                                         # remove temp image
             except:
                 pass
 
@@ -119,25 +119,27 @@ class qbot(object):
 
     # 游戏内@
     def ingame_at(self,src,ctx):
-        if  self.config['command']['qq']:
-            # get player name or system 
-            player = src.player if src.is_player else 'Console'
-            qq_user_id = ctx['QQ(name/id)'] if ctx['QQ(name/id)'].isdigit() else self.member_dict[ctx['QQ(name/id)']]
-            # check ban
-            if self.config["command"]["ban_word"]:
-                response = self.ban_word.check_ban(ctx['message'])
-                if response:
-                    temp = '{"text":"' + '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。违禁理由：'+ response[1] + '","color":"gray","italic":true}'
-                    self.server.execute(f'tellraw {player} {temp}')
-                    return 
-            # send
-            self.send_msg_to_all_qq(f'[{player}] [CQ:at,qq={qq_user_id}] {ctx["message"]}')
+        if not self.config['command']['qq']:
+            return 
+        # get name
+        player = src.player if src.is_player else 'Console'        
+        # check ban
+        ban_response = self.ban_word.check_ban(ctx['message'])
+        if self.config["command"]["ban_word"] and ban_response:
+            respond_warning = '{"text":"' + '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。违禁理由：' +\
+                     ban_response[1] +\
+                     '","color":"gray","italic":true}'
+            self.server.execute(f'tellraw {player} {respond_warning}')
+            return 
+        # send
+        qq_user_id = ctx['QQ(name/id)'] if ctx['QQ(name/id)'].isdigit() else self.member_dict[ctx['QQ(name/id)']]
+        self.send_msg_to_all_qq(f'[{player}] [CQ:at,qq={qq_user_id}] {ctx["message"]}')
 
     # 游戏内@ 推荐
     def ingame_at_suggestion(self):
         # 添加绑定名单
-        self.member_dict = {v:k for k,v in self.data.items()}
-        suggest_content = [v for v in self.data.values()]
+        self.member_dict = {v:k for k,v in self.data.items()} # 用于后续QQ名字对应
+        suggest_content = list(self.data.values())
         # 添加群内信息
         try: 
             group_raw_info = []
@@ -151,39 +153,38 @@ class qbot(object):
         for group in unpack:
             for member in group:
                 self.member_dict[member['nickname']] = member['user_id']
-                self.member_dict[member['card']] = member['user_id']
-                suggest_content.append(member['card'])
-                suggest_content.append(member['nickname'])
-                suggest_content.append(str(member['user_id']))
+                self.member_dict[member['card']]     = member['user_id']
+                suggest_content += [member['card'], 
+                                    member['nickname'], 
+                                    str(member['user_id'])]
         return suggest_content
     
     # 游戏内指令发送qq
     def ingame_command_qq(self,src,ctx):
-        if self.config['command']['qq']:
-            player = src.player if src.is_player else 'Console'
-            if self.config['command']['ban_word']:
-                reason = self.ban_word.check_ban(ctx["message"])
-                if reason:
-                    temp = '{"text":"' +\
-                        '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。\n违禁理由：'+\
-                        reason[1] + '","color":"gray","italic":true}'
-                    self.server.execute(f'tellraw {player} {temp}')
-                    return
-            # 正常转发
-            self.send_msg_to_all_qq(f'[{player}] {ctx["message"]}')
-            # 检测关键词
-            if ctx['message'] in self.key_word:
-                self.send_msg_to_all_qq(f'{self.key_word[ctx["message"]]}')
-                self.server.say(f'§a[机器人] §f{self.key_word[ctx["message"]]}')
+        if not self.config['command']['qq']:
+            return
+        player = src.player if src.is_player else 'Console'
+        reason = self.ban_word.check_ban(ctx["message"])
+        if self.config['command']['ban_word'] and reason:
+            respond_warning = '{"text":"' +\
+                '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。\n违禁理由：'+\
+                reason[1] +\
+                '","color":"gray","italic":true}'
+            self.server.execute(f'tellraw {player} {respond_warning}')
+            return
+        # 正常转发
+        self.send_msg_to_all_qq(f'[{player}] {ctx["message"]}')
+        # 检测关键词
+        if ctx['message'] in self.key_word:
+            self.send_msg_to_all_qq(f'{self.key_word[ctx["message"]]}')
+            self.server.say(f'§a[机器人] §f{self.key_word[ctx["message"]]}')
     
     # 匹配uuid qqid
     def match_id(self) -> None:
         # uuid:qq_id
         self.uuid_qqid = {}
         # 解压whitelist
-        whitelist_dict = {}
-        for uuid, game_name in self.whitelist.items():
-            whitelist_dict[game_name] = uuid   
+        whitelist_dict = {game_name:uuid for uuid, game_name in self.whitelist.items()}
         # 匹配    
         for qq_id, qq_name in self.data.items():
             if '(' in qq_name or '（' in qq_name:
@@ -206,61 +207,75 @@ class qbot(object):
 
     # 通用QQ 指令
     @addTextToImage
-    def on_qq_command(self,server: PluginServerInterface, info: Info, bot):
-        server.logger.debug(f"收到消息上报：{info}")
+    def on_qq_command(self, server: PluginServerInterface, info: Info, bot):
+        server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_content}")
         # 过滤非关注的消息
-        if not (info.source_id in self.config['group_id'] or info.source_id in self.config['admin_group_id'] or
-            info.source_id in self.config['admin_id']) or info.raw_content[0] != self.config['command_prefix']:
+        if not (info.source_id in self.config['group_id'] 
+                or info.source_id in self.config['admin_group_id'] 
+                or info.source_id in self.config['admin_id']) \
+                or len(info.content)==0 \
+                or info.content[0] != self.config['command_prefix']:
             return 
         command = info.content.split(' ')
         command[0] = command[0].replace(self.config['command_prefix'], '')
+        
+        if stop:=self.common_command(server, info, bot, command):
+            return
+        
+        if info.source_type == 'private' or info.source_id in self.config['admin_group_id']:
+            self.private_command(server, info, bot, command)
+        elif info.source_type == 'group':
+            self.group_command(server, info, bot, command)
+
+    # 公共指令
+    def common_command(self, server: PluginServerInterface, info: Info, bot, command:list):
         # 检测违禁词
         if self.config['command']['ban_word'] and (info.source_type == 'group' and info.source_id not in self.config['admin_group_id']):
             ban_result = self.ban_word.check_ban(' '.join(command))
             if ban_result:
                 bot.delete_msg(info.message_id)
                 bot.reply(info, style[self.style]['ban_word_find'].format(ban_result[1]))
-                return 
+                return True
 
         # 玩家列表
+        list_command = ['玩家列表','玩家','player',\
+                        '假人列表','假人','fakeplayer',\
+                        '服务器','server']
         if self.config['command']['list'] and \
-        (command[0] in ['玩家列表','玩家','player'] \
-         or command[0] in ['假人列表','假人','fakeplayer'] \
-         or command[0] in ['服务器','server']):
+            command[0] in list_command:
             server_status = command[0] in ['服务器', 'server']
-            player = command[0] in ['玩家','玩家列表']
-            bound_list = self.data.values()
-            if self.rcon:
+            player_status = command[0] in ['玩家','玩家列表']
+            bound_list    = self.data.values()
+            if self.rcon is not None:
                 result = self.rcon.send_command('list')
-                player_list = [i.strip() for i in result.split(": ")[-1].split(", ")]
-                t_player = [i for i in player_list if i in bound_list] if player else [i for i in player_list if i not in bound_list]
-                server.logger.debug(f"rcon获取列表如下：{player_list}")
+                instance_list = [i.strip() for i in result.split(": ")[-1].split(", ")]
+                server.logger.info(f"rcon获取列表如下：{instance_list}")
             else:
                 try:
                     content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
-                    player_list = [i['name'].strip() for i in content['sample']]
-                    server.logger.debug(f"API获取列表如下：{player_list}")
-                    if player: # 过滤假人
-                        t_player = [i for i in player_list if i in bound_list]
-                    else: # 过滤真人
-                        t_player = [i for i in player_list if i not in bound_list] 
+                    instance_list = [i['name'].strip() for i in content['sample']]
+                    server.logger.info(f"API获取列表如下：{instance_list}")
                 except:
-                    bot.reply(info, "未能获取到服务器信息，请检查服务器参数设置！（推荐开启rcon精准获取玩家信息）")
-                    return
-                
-            if server_status:
-                true_player = [i for i in player_list if i in bound_list]
-                fake_player = [i for i in player_list if i not in bound_list]
-                server_status_reply = ((f"\n---玩家---\n" + '\n'.join(true_player)) if true_player else "") + ((f"\n---假人---\n" + '\n'.join(fake_player)) if fake_player else "")
+                    bot.reply(info, "未能通过api.miri.site获取到服务器信息，请检查服务器参数设置！（推荐开启rcon精准获取玩家信息）")
+                    return True
+            
+            player_list = [i for i in instance_list if i in bound_list]
+            bot_list    = [i for i in instance_list if i not in bound_list]
 
-            if len(t_player) == 0 or len(player_list) == 0:
-                respond = style[self.style]['no_player_ingame'] if player or server_status else '没有假人在线哦!'
-            else:
-                t_player.sort() # 名字排序
+            respond = ""
+            count   = 0
+            if player_status or server_status:
+                respond += f"\n---玩家---\n" + '\n'.join(sorted(player_list)) if len(player_list) != 0 else style[self.style]['no_player_ingame'] 
+                count   += len(player_list)
+            if not player_status:
+                respond += f"\n---假人---\n" + '\n'.join(sorted(bot_list))    if len(bot_list)    != 0 else '\n没有假人在线哦!'
+                count   += len(bot_list)
+            
+            if count != 0:
                 respond = style[self.style]['player_list'].format(
-                    len(t_player) if not server_status else len(player_list),
-                    '玩家' if player else ('假人' if not server_status else '人员'),
-                    '\n'+'\n'.join(t_player) if not server_status else server_status_reply)
+                    count,
+                    '玩家' if player_status else '假人' if not server_status else '人员',
+                    '\n'+ respond)
             bot.reply(info, respond)
 
         # 添加关键词
@@ -269,29 +284,27 @@ class qbot(object):
 
         # 游戏内关键词
         elif self.config['command']['ingame_key_word'] and command[0] == '游戏关键词':
-            if self.config['command']['ban_word']:
-                ban_result = self.ban_word.check_ban(''.join(command[1:]))
-                if ban_result:
-                    bot.delete_msg(info.message_id)
-                    bot.reply(info, style[self.style]['ban_word_find'].format(ban_result[1]))
-                    return 
+            if self.config['command']['ban_word'] and (ban_result := self.ban_word.check_ban(''.join(command[1:]))):
+                bot.delete_msg(info.message_id)
+                bot.reply(info, style[self.style]['ban_word_find'].format(ban_result[1]))
+                return True
             self.key_word_ingame.handle_command(info.content, info, bot, style=self.style)
 
         # 添加关键词图片
         elif self.config['command']['key_word'] and command[0] == '添加图片' and len(command)>1:
             if command[1] not in self.key_word.data and info.user_id not in self.picture_record_dict:
-                ban_result = self.ban_word.check_ban(command[1])
-                if ban_result:
+                if self.config['command']['ban_word'] and (ban_result := self.ban_word.check_ban(''.join(command[1:]))):
                     bot.delete_msg(info.message_id)
                     bot.reply(info, style[self.style]['ban_word_find'].format(ban_result[1]))
-                    return 
-                else: # 正常添加
-                    self.picture_record_dict[info.user_id] = command[1]
-                    bot.reply(info, '请发送要添加的图片~')
+                    return True
+                # 正常添加
+                self.picture_record_dict[info.user_id] = command[1]
+                respond = '请发送要添加的图片~'
             elif command[1] in self.key_word.data:
-                bot.reply(info, '已存在该关键词~')
+                respond = '已存在该关键词~'
             else:
-                bot.reply(info,'上一个关键词还未绑定，添加哒咩！') 
+                respond = '上一个关键词还未绑定，添加哒咩！'
+            bot.reply(info, respond) 
 
         # 审核通过
         elif self.config['command']['shenhe'] and command[0] == '同意' and len(self.shenhe[info.user_id]) > 0:
@@ -313,11 +326,6 @@ class qbot(object):
                     '拒绝'])+'\n')
             bot.reply(info,f"已拒绝{self.shenhe[info.user_id][0][0]}的申请awa")
             self.shenhe[info.user_id].pop(0)
-        
-        if info.source_type == 'private' or info.source_id in self.config['admin_group_id']:
-            self.private_command(server, info, bot, command)
-        elif info.source_type == 'group':
-            self.group_command(server, info, bot, command)
 
     # 管理员指令
     def private_command(self, server, info: Info, bot, command:list):
@@ -326,14 +334,12 @@ class qbot(object):
             bot.reply(info, admin_help_msg)
         # bound 帮助菜单
         elif info.content.startswith(f"{self.config['command_prefix']}绑定"):
-            if info.content == f"{self.config['command_prefix']}绑定":
+            if len(command) == 1:
                 bot.reply(info, bound_help)
             # 已绑定的名单    
             elif len(command) == 2 and command[1] == '列表':
-                bound_list = [f'{a} - {b}' for a, b in self.data.items()]
-                reply_msg = ''
-                for i in range(0, len(bound_list)):
-                    reply_msg += f'{i + 1}. {bound_list[i]}\n'
+                bound_list = [f'{qqid} - {name}' for qqid, name in self.data.items()]
+                reply_msg = "\n".join(f'{i + 1}. {name}' for i, name in enumerate(bound_list))
                 reply_msg = '还没有人绑定' if reply_msg == '' else reply_msg
                 bot.reply(info, reply_msg)
             # 查寻绑定的ID
@@ -357,7 +363,7 @@ class qbot(object):
 
         # 白名单
         elif info.content.startswith(f"{self.config['command_prefix']}白名单"):
-            if info.content == f"{self.config['command_prefix']}白名单":
+            if len(command) == 1:
                 bot.reply(info, whitelist_help)
             # 执行指令
             elif len(command)>1 and command[1] in ['添加', '删除','移除', '列表', '开', '关', '重载']:
@@ -445,7 +451,8 @@ class qbot(object):
                 bot.reply(info, uuid_help)
             # 查看uuid 匹配表
             elif len(command)>1 and command[1] == '列表':
-                bot.reply(info, "uuid匹配如下：\n"+'\n'.join([str(k)+'-'+str(v)+'-'+self.data[v] for k,v in self.uuid_qqid.items() if v in self.data]))
+                bot.reply(info, "uuid匹配如下：\n"+ \
+                          '\n'.join([str(k)+'-'+str(v)+'-'+self.data[v] for k,v in self.uuid_qqid.items() if v in self.data]))
             # 更新匹配表
             elif len(command)>1 and command[1] == '重载':
                 self.loading_whitelist()
@@ -547,25 +554,25 @@ class qbot(object):
             if user_id in self.data.keys():
                 _id = self.data[user_id]
                 bot.reply(info, f'[CQ:at,qq={user_id}] 您已绑定ID: {_id}, 请联系管理员修改')
+                return
             # 未绑定
-            else:
-                self.data[user_id] = command[1]
-                bot.reply(info, f'[CQ:at,qq={user_id}] 已成功绑定')
-                # 更换群名片
-                bot.set_group_card(info.user_id,user_id, self.data[user_id])
-                # 自动加白名单
-                if self.config['whitelist_add_with_bound']:
-                    server.execute(f'whitelist add {command[1]}')
-                    bot.reply(info, f'[CQ:at,qq={user_id}] 已将您添加到服务器白名单')
-                    # 重载白名单
-                    server.execute(f'whitelist reload')
-                    retry_times = 3
-                    while command[1] not in self.whitelist.values() and retry_times > 0:
-                        self.loading_whitelist()
-                        retry_times -= 1
-                        time.sleep(5)
-                    # 重新匹配
-                    self.match_id()
+            self.data[user_id] = command[1]
+            bot.reply(info, f'[CQ:at,qq={user_id}] 已成功绑定')
+            # 更换群名片
+            bot.set_group_card(info.user_id,user_id, self.data[user_id])
+            # 自动加白名单
+            if self.config['whitelist_add_with_bound']:
+                server.execute(f'whitelist add {command[1]}')
+                bot.reply(info, f'[CQ:at,qq={user_id}] 已将您添加到服务器白名单')
+                # 重载白名单
+                server.execute(f'whitelist reload')
+                retry_times = 3
+                while command[1] not in self.whitelist.values() and retry_times > 0:
+                    self.loading_whitelist()
+                    retry_times -= 1
+                    time.sleep(5)
+                # 重新匹配
+                self.match_id()
         # 机器人风格相关
         elif command[0] == '风格':
             # 风格帮助
@@ -602,117 +609,133 @@ class qbot(object):
     def send_msg_to_mc(self, server:PluginServerInterface, info: Info, bot):
         self.server = server
         # 判断是否转发
-        if info.content[0] != self.config['command_prefix'] and self.config['forward']['qq_to_mc'] \
-            and info.source_id in self.config['group_id']:
-            # 判断是否绑定
-            if  str(info.user_id) not in self.data.keys():
-                # 提示绑定
-                bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
+        if len(info.content) == 0 or \
+              info.content[0] == self.config['command_prefix'] or \
+              not self.config['forward']['qq_to_mc'] or \
+              info.source_id not in self.config['group_id']:
+            return 
+        # 判断是否绑定
+        if  str(info.user_id) not in self.data.keys():
+            # 提示绑定
+            bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
+            return 
+        # 如果开启违禁词
+        if self.config['command']['ban_word'] and (reason := self.ban_word.check_ban(info.content)):
+            # 包含违禁词 -> 撤回 + 提示 + 不转发
+            bot.delete_msg(info.message_id)
+            bot.reply(info, style[self.style]['ban_word_find'].format(reason[1]))
+            return 
+        user_id = str(info.user_id)
+        # 检测关键词
+        if self.config['command']['key_word']:
+            # 检测到关键词 -> 转发原文 + 转发回复
+            if info.content in self.key_word.data:
+                server.say(f'§6[QQ] §a[{self.find_game_name(user_id, bot, info.source_id)}] §f{info.content}')
+                bot.reply(info,self.key_word.data[info.content])
+                # 过滤图片
+                is_picture = self.key_word.data[info.content].startswith('[CQ:image')
+                server.say(f'§6[QQ] §a[机器人] §f{self.key_word.data[info.content] if not is_picture else "图片"}')
+                return
+            # 添加图片
+            if info.user_id in self.picture_record_dict and \
+                    info.raw_content.startswith('[CQ:image'):
+                pattern = r'url=([^,\]]+)'
+                try:
+                    url = re.search(pattern, info.raw_content).groups()[-1] 
+                    url = re.sub('&amp;', "&", url)
+                    # response = requests.get(url)                              # 获取图片url
+    
+                    # cache_directory = Path("./config/GUGUbot/image/")
+                    # cache_directory.mkdir(parents=True, exist_ok=True)
+                    
+                    # with open(cache_directory / f"{self.picture_record_dict[info.user_id]}.jpg", "wb") as f: # 保存图片
+                    #     f.write(response.content)
+                    # # 保存关键词
+                    # self.key_word.data[self.picture_record_dict[info.user_id]]="[CQ:image,file={}]".format((cache_directory/f"{self.picture_record_dict[info.user_id]}.jpg").absolute().as_uri())
+                    self.key_word.data[self.picture_record_dict[info.user_id]]=f"[CQ:image,file={url}]"
+                    del self.picture_record_dict[info.user_id]                # 缓存中移除用户
+                    
+                    bot.reply(info, style[self.style]['add_success'])
+                except Exception as e:
+                    server.logger.warning(f"保存图片失败：{info.raw_content}\n报错如下： {e}")
+                return
+        # @ 模块
+        if '@' in info.content:
+            def _get_name(qq_id:str):
+                if str(qq_id) in self.data:
+                    return self.find_game_name(qq_id, bot, info.source_id)
+                target_data = bot.get_group_member_info(info.source_id, qq_id).json()['data']
+                target_name = target_data['card'] if target_data['card'] != '' else target_data['nickname']
+                return f"{target_name}(未绑定)"
+            sender = _get_name(str(info.user_id))
+            # 回复 -> 正则匹配
+            if "[CQ:reply" in info.content:
+                pattern = r"(?:\[CQ:reply,id=(-?\d+)\])"
+                match_result = re.search(pattern, info.content.replace("CQ:at,qq=","@"), re.DOTALL).groups()
+                # get receiver name
+                query = {'message_id': match_result[0]}
+                receiver_id = requests.post(f'http://{self.host}:{self.port}/get_msg',json=query).json()['data']['sender']['user_id']
+                receiver = _get_name(str(receiver_id))
+                server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{match_result[-1]}')
                 return 
-            # 如果开启违禁词
-            if self.config['command']['ban_word']:
-                reason = self.ban_word.check_ban(info.content)
-                # 包含违禁词 -> 撤回 + 提示 + 不转发
-                if reason:
-                    bot.delete_msg(info.message_id)
-                    bot.reply(info, style[self.style]['ban_word_find'].format(reason[1]))
-                    return 
-            user_id = str(info.user_id)
-            # 检测关键词
-            if self.config['command']['key_word']:
-                # 检测到关键词 -> 转发原文 + 转发回复
-                if info.content in self.key_word.data:
-                    server.say(f'§6[QQ] §a[{self.find_game_name(user_id, bot, info.source_id)}] §f{info.content}')
-                    bot.reply(info,self.key_word.data[info.content])
-                    # 过滤图片
-                    is_picture = self.key_word.data[info.content][:9] != '[CQ:image'
-                    server.say(f'§6[QQ] §a[机器人] §f{self.key_word.data[info.content] if not is_picture else "图片"}')
-                    return
-                # 添加图片
-                if info.user_id in self.picture_record_dict and info.raw_content[:9]=='[CQ:image':
-                    pattern = "\[CQ:image.+url=(.+)\]"
-                    try:
-                        url = re.match(pattern, info.raw_content).groups()[-1] 
-                        response = requests.get(url)                              # 获取图片url
-                        if not os.path.exists("./config/GUGUbot/image/"):         # 创建文件夹
-                            os.makedirs("./config/GUGUbot/image/")
-                        with open(f"./config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg", "wb") as f: # 保存图片
-                            f.write(response.content)
-                        # 保存关键词
-                        self.key_word.data[self.picture_record_dict[info.user_id]]="[CQ:image,file={}]".format(Path(os.getcwd()+f"/config/GUGUbot/image/{self.picture_record_dict[info.user_id]}.jpg").as_uri())
-                        del self.picture_record_dict[info.user_id]                # 缓存中移除用户
-                        bot.reply(info, style[self.style]['add_success'])
-                    except Exception as e:
-                        server.logger.bug(f"保存图片失败：{info}\n报错如下： {e}")
-                    return
-            # @ 模块
-            if '@' in info.content:
-                def _get_name(qq_id:str):
-                    if str(qq_id) in self.data:
-                        return self.find_game_name(qq_id, bot, info.source_id)
-                    target_data = bot.get_group_member_info(info.source_id, qq_id).json()['data']
-                    target_name = target_data['card'] if target_data['card'] != '' else target_data['nickname']
-                    return f"{target_name}(未绑定)"
-                sender = _get_name(str(info.user_id))
-                # 回复 -> 正则匹配
-                if "[CQ:reply" in info.content:
-                    pattern = r"(?:\[CQ:reply,id=(-?\d+)\])(?:\ ?\[@(\d+)\])+(.*)"
-                    match_result = re.match(pattern, info.content.replace("CQ:at,qq=","@"), re.DOTALL).groups()
-                    # get receiver name
-                    query = {'message_id': match_result[0]}
-                    receiver_id = requests.post(f'http://{self.host}:{self.port}/get_msg',json=query).json()['data']['sender']['user_id']
-                    receiver = _get_name(str(receiver_id))
-                    server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{match_result[-1]}')
-                    return 
-                # only @ -> 正则替换
-                at_pattern = r"\[@(\d+)\]|\[CQ:at,qq=(\d+)\]"
-                sub_string = re.sub(at_pattern, lambda id: f"§b[@{_get_name(str(id.groups()[0]) if id.groups()[0] else str(id.groups()[1]))}]", info.raw_content)
-                server.say(f'§6[QQ] §a[{sender}]§f {sub_string}')
-            # 普通消息
-            else: 
-                # 提取链接中标题
-                if info.content[:8] == '[CQ:json':
-                    info.content = '[链接]'+info.content.split('"desc":"')[2].split('&#44')[0][1:]
-                server.say(f'§6[QQ] §a[{self.find_game_name(str(user_id), bot, info.source_id)}] §f{info.content}')
+            # only @ -> 正则替换
+            at_pattern = r"\[@(\d+)\]|\[CQ:at,qq=(\d+)\]"
+            sub_string = re.sub(
+                at_pattern, 
+                lambda id: f"§b[@{_get_name(
+                        str(id.group(1) or id.group(2))
+                    )}]", 
+                info.content
+            )
+            server.say(f'§6[QQ] §a[{sender}]§f {sub_string}')
+        # 普通消息
+        else: 
+            # 提取链接中标题
+            if info.content.startswith('[CQ:json'):
+                json_data = re.search(r'\[CQ:json,data=(\{.*\})\]', info.content).group(1)
+                json_data = json_data.replace('&#44;', ',').replace('&#91;', '[').replace('&#93;', ']')
+                info.content = '[链接]'+ json.loads(json_data)['meta']['detail_1']['desc']
+            server.say(f'§6[QQ] §a[{self.find_game_name(str(user_id), bot, info.source_id)}] §f{info.content}')
             
     # 转发消息
     def send_msg_to_qq(self, server:PluginServerInterface, info:Info):
-        if info.is_player and self.config['forward']['mc_to_qq']:
-            # 检查违禁词
-            if self.config['command']['ban_word']:
-                response = self.ban_word.check_ban(info.content)
-                if response: # 有违禁词 -> 不转发 + 警告
-                    temp = '{"text":"' + '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。\n违禁理由：'+\
-                        response[1] + '","color":"gray","italic":true}'
-                    self.server.execute(f'tellraw {info.player} {temp}')
-                    return
-            # 游戏内关键词添加
-            if self.config['command']['ingame_key_word'] and info.content[:6] == '!!add ':
-                temp = info.content[6:].split(' ',1)
-                if len(temp) == 2 and temp[0] not in self.key_word_ingame.data:
-                    self.key_word_ingame.data[temp[0]] = temp[1]
-                    self.server.say(style[self.style]['add_success'])
-                else:
-                    self.server.say('关键词重复或者指令无效~')
-            # 游戏内关键词删除
-            elif self.config['command']['ingame_key_word'] and info.content[:6] == '!!del ':
-                if info.content[6:] in self.key_word_ingame.data:
-                    del self.key_word_ingame.data[info.content[6:]]
-                    self.server.say(style[self.style]['delete_success'])
-                else:
-                    self.server.say('未找到对应关键词~')
-            # 转发
-            elif info.content[:2] not in [ '@ ','!!']:
-                # 转发原句
-                roll_number = random.randint(0, 999+1)
-                template_index = roll_number % (len(mc2qq_template)-1) if roll_number >= 3 else -1
-                message = mc2qq_template[template_index].format(info.player, info.content)
-                self.send_msg_to_all_qq(message)
-                # 判断游戏内关键词
-                if self.config['command']['ingame_key_word'] and info.content in self.key_word_ingame:
-                    # 游戏内回复
-                    response = self.key_word_ingame.check_response(info.content)
-                    self.server.say(f'§a[机器人] §f{response}')    
+        if not info.is_player or\
+              not self.config['forward']['mc_to_qq']:
+            return
+        # 检查违禁词
+        if self.config['command']['ban_word'] and (response := self.ban_word.check_ban(info.content)):
+            # 有违禁词 -> 不转发 + 警告
+            temp = '{"text":"' + '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。\n违禁理由：'+\
+                response[1] + '","color":"gray","italic":true}'
+            self.server.execute(f'tellraw {info.player} {temp}')
+            return
+        # 游戏内关键词添加
+        if self.config['command']['ingame_key_word'] and info.content.startswith('!!add '):
+            temp = info.content[6:].split(' ',1)
+            if len(temp) == 2 and temp[0] not in self.key_word_ingame.data:
+                self.key_word_ingame.data[temp[0]] = temp[1]
+                self.server.say(style[self.style]['add_success'])
+            else:
+                self.server.say('关键词重复或者指令无效~')
+        # 游戏内关键词删除
+        elif self.config['command']['ingame_key_word'] and info.content.startswith('!!del '):
+            if info.content[6:] in self.key_word_ingame.data:
+                del self.key_word_ingame.data[info.content[6:]]
+                self.server.say(style[self.style]['delete_success'])
+            else:
+                self.server.say('未找到对应关键词~')
+        # 转发
+        elif info.content[:2] not in [ '@ ','!!']:
+            # 转发原句
+            roll_number = random.randint(0, 999+1)
+            template_index = roll_number % (len(mc2qq_template)-1) if roll_number >= 3 else -1
+            message = mc2qq_template[template_index].format(info.player, info.content)
+            self.send_msg_to_all_qq(message)
+            # 判断游戏内关键词
+            if self.config['command']['ingame_key_word'] and info.content in self.key_word_ingame:
+                # 游戏内回复
+                response = self.key_word_ingame.check_response(info.content)
+                self.server.say(f'§a[机器人] §f{response}')    
 
     ################################################################################
     # 辅助functions
@@ -793,20 +816,22 @@ class qbot(object):
                 number = len([i["name"] for i in content['sample'] if i["name"] in bound_list])
                 server.logger.debug(f"API获取列表如下：{[i['name'] for i in content['sample']]}")
             except:
-                number = "API接口错误/请配置game_ip & game_port参数"
+                server.logger.info("API接口错误/请配置game_ip & game_port参数")
+                number = 0
         name = " "
         if number != 0:     
             name = "在线人数: {}".format(number)
         # 更新名字
         for gid in self.config['group_id']:
             data = {
-            'group_id': gid,
-            'user_id': bot.get_login_info().json()["data"]['user_id'],
-            'card': name
+                'group_id': gid,
+                'user_id': bot.get_login_info().json()["data"]['user_id'],
+                'card': name
             }
             requests.post(
                 f'http://{self.host}:{self.port}/set_group_card',
-                json=data)
+                json=data
+            )
 #+---------------------------------------------------------------------+
 # 文字转图片函数，一定程度防止风控？
 def text2image(font, input_string:str)->str:

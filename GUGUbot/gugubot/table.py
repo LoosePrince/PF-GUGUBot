@@ -2,11 +2,13 @@
 import json
 import os
 import yaml
+from pathlib import Path
 class table(object):    
 
     def __init__(self,path:str="./default.json", default_content:dict=None, yaml:bool=False) -> None: # 初始化，记录系统路径
         self.yaml = yaml
         self.path = path if not self.yaml else path.replace(".json", ".yml")
+        self.path = Path(self.path)
         self.default_content = default_content
         self.load()    
 
@@ -23,6 +25,7 @@ class table(object):
             self.save()
 
     def save(self) -> None: # 储存
+        self.path.parents[0].mkdir(parents=True, exist_ok=True)
         if self.yaml:
             with open(self.path, 'w', encoding='UTF-8') as f:
                 yaml.dump(self.data, f, allow_unicode=True)        
