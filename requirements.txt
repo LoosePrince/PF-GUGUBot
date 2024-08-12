@@ -1,6 +1,5 @@
 mcdreforged>=2.1.2
 flask
-pandas
 pygame
 requests
 pyyaml
