@@ -34,6 +34,7 @@
 * 加载后，在`/config/GUGUbot/config.yml`中配置机器人
 * 加载后，在`/config/CoolQAPI/config.yml`中配置服务
 * 注意修改`CoolQAPI`的`command_prefix`的为`#`，否则使用不了`命令`功能
+* 如果您在安装完成后启动提示没有配置文件请下载[config_default.yml](https://github.com/LoosePrince/PF-GUGUBot/blob/main/config_default.yml)重名名为`config.yml`放入`/config/GUGUbot/config.yml`再运行
 
 ## 依赖
 #### Python包
