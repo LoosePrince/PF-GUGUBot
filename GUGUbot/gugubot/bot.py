@@ -662,9 +662,10 @@ class qbot(object):
         # @ 模块
         if '@' in info.content:
             def _get_name(qq_id:str, previous_message_content=None):
+                # 是绑定玩家
                 if str(qq_id) in self.data:
                     return self.find_game_name(qq_id, bot, info.source_id)
-                # 回复机器人
+                # 是机器人
                 elif str(qq_id) == str(bot.get_login_info().json()['data']['user_id']) and previous_message is not None:
                     pattern = r"^\((.*?)\)|^\[(.*?)\]|^(.*?) 说：|^(.*?) : |^冒着爱心眼的(.*?)说："
                     match = re.search(pattern, previous_message_content)
@@ -672,17 +673,20 @@ class qbot(object):
                         receiver_name = next(group for group in match.groups() if group is not None)
                         return receiver_name
                     return bot.get_login_info().json()['data']['nickname']
+                # 未绑定
                 target_data = bot.get_group_member_info(info.source_id, qq_id).json()['data']
                 target_name = target_data['card'] if target_data['card'] != '' else target_data['nickname']
                 return f"{target_name}(未绑定)"
             sender = _get_name(str(info.user_id))
             # 回复 -> 正则匹配
             if "[CQ:reply" in info.content:
+                # 提取回复id
                 pattern = r"(?:\[CQ:reply,id=(-?\d+)\])"
                 match_result = re.search(pattern, info.content.replace("CQ:at,qq=","@"), re.DOTALL).groups()
-                # get receiver name
+                # 提取回复消息
                 query = {'message_id': match_result[0]}
                 previous_message = requests.post(f'http://{self.host}:{self.port}/get_msg',json=query).json()['data']
+                # 寻找被回复人名字
                 receiver_id = previous_message['sender']['user_id']
                 receiver = _get_name(str(receiver_id), previous_message['message'])
                 server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{match_result[-1]}')
