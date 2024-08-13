@@ -1,5 +1,6 @@
 mcdreforged>=2.1.2
-flask
+Flask<=2.0.0
+Werkzeug<=2.0
 pygame
 requests
 pyyaml
