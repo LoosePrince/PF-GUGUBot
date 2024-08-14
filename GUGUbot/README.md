@@ -18,6 +18,7 @@
 > #### 这是基于原插件的修改版本，但是由于经过多次修改和重构，我们并不确定是否仍存在原本的代码
 
 使用方式：
+
 * 下载[PF-cq_qq_api前置插件](https://github.com/XueK66/PF-cq_qq_api/releases)并放入plugin
 * 将Release里面的GUGUbot.mcdr放入`/plugins`
 * 加载后，在`/config/GUGUbot/config.yml`中配置机器人
@@ -270,11 +271,11 @@ rcon:
 [点击查看配置文件说明](https://github.com/LoosePrince/PF-GUGUBot/blob/main/config_default.yml)
 <br></br>
 
-# webscoket_info_factory配置
+# cq_qq_api配置
 
-> webscoket_info_factory是前置插件不可忽略
+> cq_qq_api是前置插件不可忽略
 
-### 请前往 [webscoket_info_factory](https://github.com/XueK66/PF-cq_qq_api) 库查看,该库由我们进行维护
+### 请前往 [cq_qq_api](https://github.com/XueK66/PF-cq_qq_api) 库查看,该库由我们进行维护
 
 # 有BUG或是新的IDEA
 如果需要更多联动或提交想法和问题请提交 [issues](https://github.com/LoosePrince/PF-GUGUBot/issues) 或 QQ [1377820366](http://wpa.qq.com/msgrd?v=3&uin=1377820366&site=qq&menu=yes) 提交！ <br />
