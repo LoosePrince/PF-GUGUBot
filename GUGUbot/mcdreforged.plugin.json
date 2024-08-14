@@ -1,6 +1,6 @@
 {
 	"id": "gugubot",
-	"version": "1.0.6",
+	"version": "1.1.0",
 	"name": "GUGUbot",
 	"description": {
 		"en_us": "A QQ bot connect MC and QQ",
@@ -12,6 +12,6 @@
 	"link": "https://github.com/LoosePrince/PF-GUGUBot",
 	"dependencies": {
 		"mcdreforged": ">=2.1.2",
-		"cool_q_api": ">=0.2.0"
+		"websocket_info_factory": ">=1.0.0"
 	}
 }

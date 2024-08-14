@@ -17,21 +17,14 @@ import pygame
 def on_load(server: PluginServerInterface, old)->None:
     # 设置系统路径
     set_sys_path()
-    global host, port, past_bot, past_info
+    global past_bot, past_info
     global qq_bot
     # 获取参数，绑定列表
     config = table("./config/GUGUBot/config.json", DEFAULT_CONFIG, yaml=True)
     data = table("./config/GUGUBot/GUGUBot.json")
-    # 获取QQ机器人信息
-    host = server.get_plugin_instance('cool_q_api').get_config()['api_host']
-    port = server.get_plugin_instance('cool_q_api').get_config()['api_port']
-    # 判断机器人信息是否能用
-    if host is None or port is None:
-        server.logger.error(f"CoolQApi信息获取失败：{host=} | {port=}")
-    # 命令前缀判断
-    coolQ_command_prefix = server.get_plugin_instance('cool_q_api').get_config()['command_prefix']
-    if coolQ_command_prefix != config['command_prefix']:
-        server.logger.warning(f"CoolQAPI与gugubot所用command_prefix不一致，可能导致功能紊乱！CoolQ: {coolQ_command_prefix} vs gugubot: {config['command_prefix']}")
+
+    websocket_bot = server.get_plugin_instance("websocket_info_factory").get_bot()
+
     # 继承重载前参数
     if old is not None and hasattr(old, 'past_bot') and \
        old is not None and hasattr(old, 'past_info'):
@@ -40,7 +33,7 @@ def on_load(server: PluginServerInterface, old)->None:
     else:
         past_bot = False
     # gugubot主体
-    qq_bot = qbot(server, config, data, host, port)
+    qq_bot = qbot(server, config, data, websocket_bot)
 
     # 注册指令
     qq_bot.server.register_command(
@@ -66,10 +59,10 @@ def on_load(server: PluginServerInterface, old)->None:
     server.register_help_message('!!del <关键词>','删除指定游戏关键词')
     server.register_help_message('@ <QQ名/号> <消息>','让机器人在qq里@')
     # 注册监听任务
-    server.register_event_listener('cool_q_api.on_qq_info', qq_bot.on_qq_command)
-    server.register_event_listener('cool_q_api.on_qq_info', qq_bot.send_msg_to_mc)
-    server.register_event_listener('cool_q_api.on_qq_apply', qq_bot.on_qq_request)
-    server.register_event_listener('cool_q_api.on_qq_notice', qq_bot.notification)
+    server.register_event_listener('websocket_info_factory.on_qq_command', qq_bot.on_qq_command)
+    server.register_event_listener('websocket_info_factory.on_qq_message', qq_bot.send_msg_to_mc)
+    server.register_event_listener('websocket_info_factory.on_qq_request', qq_bot.on_qq_request)
+    server.register_event_listener('websocket_info_factory.on_qq_notice', qq_bot.notification)
 
 #+---------------------------------------------------------------------+
 # 防止初始化报错
