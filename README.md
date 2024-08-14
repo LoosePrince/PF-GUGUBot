@@ -1,14 +1,3 @@
-## 公告
-> 2024/06/18
-> - 据人反馈`CoolQAPI` 已失联。我们将提供旧版的CoolQAPI文件已保证插件运行。
-
-> 2024/08/01
-> -  `CoolQAPI` 在我们彻底抛弃它之前将会由我们进行维护。预计将不会有功能上的更新。
-> - 关于对 `CoolQAPI` 的反馈我们仅接受与 `GUGUbot` 相关的部分，有关其它插件的交互和维护我们可能没有这个精力。
-
-> 2024/08/08
-> - 据悉 `CoolQAPI` 已被更换为 [QQAPI](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/qq_api)
-> - 旧版 `CoolQAPI` 的维护请点击链接前往: [CoolQAPI](https://github.com/LoosePrince/PF-CoolQAPI)
 # PF-QQchat
 > PFingan服务器MCDRQQ机器人插件
 
@@ -29,11 +18,10 @@
 > #### 这是基于原插件的修改版本，但是由于经过多次修改和重构，我们并不确定是否仍存在原本的代码
 
 使用方式：
+* 下载[PF-websocket_info_factory前置插件](https://github.com/XueK66/PF-websocket_info_factory/releases)并放入plugin
 * 将Release里面的GUGUbot.mcdr放入`/plugins`
-* 将解压后的CoolQAPI放入`/plugins`
 * 加载后，在`/config/GUGUbot/config.yml`中配置机器人
-* 加载后，在`/config/CoolQAPI/config.yml`中配置服务
-* 注意修改`CoolQAPI`的`command_prefix`的为`#`，否则使用不了`命令`功能
+* 加载后，在`/config/websocket_info_factory/config.json`中配置服务
 * 如果您在安装完成后启动提示没有配置文件请下载[config_default.yml](https://github.com/LoosePrince/PF-GUGUBot/blob/main/config_default.yml)重名名为`config.yml`放入`/config/GUGUbot/config.yml`再运行
 
 ## 依赖
@@ -42,9 +30,7 @@
 #### Python模块
 - 已存储在插件对应的文件夹内的 [requirements.txt](requirements.txt) 中, 可以使用 `pip install -r requirements.txt` 安装
 #### 前置插件
-- [CoolQAPI](https://github.com/LoosePrince/PF-CoolQAPI)
-> - PFingan服务器已接手CoolQAPI
-> - 我们尚未兼容 `QQAPI` 但是这在未来的计划中
+- [websocket_info_factory](https://github.com/XueK66/PF-websocket_info_factory/releases)
 
 ## 功能列表
 > QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮助`
@@ -284,11 +270,11 @@ rcon:
 [点击查看配置文件说明](https://github.com/LoosePrince/PF-GUGUBot/blob/main/config_default.yml)
 <br></br>
 
-# CoolQAPI配置
+# webscoket_info_factory配置
 
-> CoolQAPI是前置插件不可忽略
+> webscoket_info_factory是前置插件不可忽略
 
-### 请前往 [CoolQAPI](https://github.com/LoosePrince/PF-CoolQAPI) 库查看,该库由我们进行维护
+### 请前往 [webscoket_info_factory](https://github.com/XueK66/PF-websocket_info_factory) 库查看,该库由我们进行维护
 
 # 有BUG或是新的IDEA
 如果需要更多联动或提交想法和问题请提交 [issues](https://github.com/LoosePrince/PF-GUGUBot/issues) 或 QQ [1377820366](http://wpa.qq.com/msgrd?v=3&uin=1377820366&site=qq&menu=yes) 提交！ <br />
