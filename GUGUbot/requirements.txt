@@ -1,6 +1,5 @@
 mcdreforged>=2.1.2
-Flask<=2.0.0
-Werkzeug<=2.0
+websocket-client
 pygame
 requests
 pyyaml
