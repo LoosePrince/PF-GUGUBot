@@ -23,7 +23,7 @@ def on_load(server: PluginServerInterface, old)->None:
     config = table("./config/GUGUBot/config.json", DEFAULT_CONFIG, yaml=True)
     data = table("./config/GUGUBot/GUGUBot.json")
 
-    websocket_bot = server.get_plugin_instance("websocket_info_factory").get_bot()
+    websocket_bot = server.get_plugin_instance("cq_qq_api").get_bot()
 
     # 继承重载前参数
     if old is not None and hasattr(old, 'past_bot') and \
@@ -59,10 +59,10 @@ def on_load(server: PluginServerInterface, old)->None:
     server.register_help_message('!!del <关键词>','删除指定游戏关键词')
     server.register_help_message('@ <QQ名/号> <消息>','让机器人在qq里@')
     # 注册监听任务
-    server.register_event_listener('websocket_info_factory.on_qq_command', qq_bot.on_qq_command)
-    server.register_event_listener('websocket_info_factory.on_qq_message', qq_bot.send_msg_to_mc)
-    server.register_event_listener('websocket_info_factory.on_qq_request', qq_bot.on_qq_request)
-    server.register_event_listener('websocket_info_factory.on_qq_notice', qq_bot.notification)
+    server.register_event_listener('cq_qq_api.on_qq_command', qq_bot.on_qq_command)
+    server.register_event_listener('cq_qq_api.on_qq_message', qq_bot.send_msg_to_mc)
+    server.register_event_listener('cq_qq_api.on_qq_request', qq_bot.on_qq_request)
+    server.register_event_listener('cq_qq_api.on_qq_notice', qq_bot.notification)
 
 #+---------------------------------------------------------------------+
 # 防止初始化报错
