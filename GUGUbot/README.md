@@ -18,7 +18,6 @@
 > #### 这是基于原插件的修改版本，但是由于经过多次修改和重构，我们并不确定是否仍存在原本的代码
 
 使用方式：
-
 * 下载[PF-cq_qq_api前置插件](https://github.com/XueK66/PF-cq_qq_api/releases)并放入plugin
 * 将Release里面的GUGUbot.mcdr放入`/plugins`
 * 加载后，在`/config/GUGUbot/config.yml`中配置机器人
