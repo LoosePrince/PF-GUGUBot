@@ -488,7 +488,7 @@ class qbot(object):
                 bot.reply(info, "显示游戏内人数已关闭")     
 
         elif info.content.startswith(f"{self.config['command_prefix']}审核"):
-            if info.content == f"{self.config['command_prefix']}审核":
+            if len(command)==1:
                 bot.reply(info, shenhe_help)
             elif len(command)>1 and command[1] == '开':
                 self.config['command']['shenhe'] = True
@@ -496,13 +496,13 @@ class qbot(object):
             elif len(command)>1 and command[1] == '关':
                 self.config['command']['shenhe'] = False
                 bot.reply(info, '自动审核关闭')
-            elif len(command)>1 and command[1] == '添加':
-                if len(command) == 4 and command[3] not in self.shenheman:
+            elif len(command)>=4 and command[1] == '添加':
+                if command[3] not in self.shenheman:
                     self.shenheman[command[3]] = command[2] # 别名：QQ号
                     bot.reply(info,style[self.style]['add_success'])
                 elif command[3] in self.shenheman:
                     bot.reply(info,'已存在该别名')
-            elif command[1] == '删除' and len(command) > 2:
+            elif command[1] == '删除' and len(command) >= 3:
                 
                 if command[2] in self.shenheman.values():
                     for k,v in self.shenheman.items():
@@ -511,10 +511,10 @@ class qbot(object):
                     bot.reply(info,style[self.style]['delete_success'])
                 else:
                     bot.reply(info,'审核员不存在哦！')
-            elif len(command)>1 and command[1] == '列表':
+            elif len(command)>=2 and command[1] == '列表':
                 temp = defaultdict(list)
-                for name,qq_hao in self.shenheman.items():
-                    temp[qq_hao].append(name)
+                for name,qq_id in self.shenheman.items():
+                    temp[qq_id].append(name)
                 bot.reply(info, "有如下审核员：\n"+"\n".join([k+'-'+",".join(v) for k,v in temp.items()]))
 
     # 群指令
