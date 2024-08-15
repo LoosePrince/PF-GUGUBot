@@ -572,8 +572,9 @@ class qbot(object):
     @addTextToImage
     def on_qq_request(self,server, info: Info, bot):
         server.logger.debug(f"收到上报请求：{info}")
-        if info.source_id in self.config["group_id"] \
-            and info.message_type == "group" and self.config["command"]["shenhe"]:
+        if info.message_type == "group" \
+            and info.group_id in self.config["group_id"] \
+            and self.config["command"]["shenhe"]:
             # 获取名称
             stranger_name = bot.get_stranger_info(info.user_id)["data"]["nickname"]
             # 审核人
