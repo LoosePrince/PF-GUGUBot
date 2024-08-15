@@ -677,7 +677,9 @@ class qbot(object):
                 # 寻找被回复人名字
                 receiver_id = previous_message['sender']['user_id']
                 receiver = _get_name(str(receiver_id), previous_message['message'])
-                server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{match_result[-1]}')
+                # 获取转发内容
+                forward_content = re.search(r'\[CQ:reply,id=-?\d+\](?:\[CQ:at,qq=\d+\])?(.*)', info.raw_content).group(1).strip()
+                server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{forward_content}')
                 return 
             # only @ -> 正则替换
             at_pattern = r"\[@(\d+)\]|\[CQ:at,qq=(\d+)\]"
