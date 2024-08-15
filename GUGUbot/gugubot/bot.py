@@ -60,7 +60,7 @@ class qbot(object):
                 address  = str(temp_data['rcon']['address'])
                 port     = int(temp_data['rcon']['port'])
                 password = str(temp_data['rcon']['password'])
-                self.server.logger.info(f"Try to connect rcon：{address}:{port}")
+                self.server.logger.info(f"尝试连接rcon，rcon地址：{address}:{port}")
                 self.rcon = RconConnection(address, port, password)
                 self.rcon.connect()
                 return
@@ -628,6 +628,7 @@ class qbot(object):
                     
                     bot.reply(info, style[self.style]['add_success'])
                 except Exception as e:
+                    bot.reply(info, "图片保存失败~")
                     server.logger.warning(f"保存图片失败：{info.raw_message}\n报错如下： {e}")
                 return
         # @ 模块

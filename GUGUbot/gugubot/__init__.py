@@ -27,7 +27,7 @@ def on_load(server: PluginServerInterface, old)->None:
     # 获取接口机器人
     cq_qq_api_instance = server.get_plugin_instance("cq_qq_api")
     if cq_qq_api_instance is None:
-        server.logger.error("Depend plugin not found!")
+        server.logger.error("~~ 未找到前置插件 ~~")
     cq_qq_api_bot = cq_qq_api_instance.get_bot()
 
     # 继承重载前参数
