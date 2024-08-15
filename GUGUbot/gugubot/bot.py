@@ -300,7 +300,7 @@ class qbot(object):
                 respond = '上一个关键词还未绑定，添加哒咩！'
             bot.reply(info, respond) 
 
-        # 审核通过
+        # 审核通过 找时间重写
         elif self.config['command']['shenhe'] and command[0] == '同意' and len(self.shenhe[info.user_id]) > 0:
             bot.set_group_add_request(self.shenhe[info.user_id][0][1],self.shenhe[info.user_id][0][2],True)
             with open(self.config["dict_address"]['shenhe_log'],'a+',encoding='utf-8') as f:
@@ -364,11 +364,7 @@ class qbot(object):
                 if command[1] == '添加':
                     server.execute(f'/whitelist add {command[2]}')
                     bot.reply(info, style[self.style]['add_success'])
-                    retry_times = 5
-                    while command[2] not in self.whitelist.values() and retry_times > 0:
-                        self.loading_whitelist()
-                        retry_times -= 1
-                        time.sleep(5)
+                    time.sleep(5)
                     self.match_id()
                 elif command[1] in ['删除','移除']:
                     server.execute(f'/whitelist remove {command[2]}')
@@ -441,7 +437,7 @@ class qbot(object):
         # uuid匹配相关
         elif info.content.startswith(f"{self.config['command_prefix']}uuid"):
             # uuid 帮助
-            if info.content == f"{self.config['command_prefix']}uuid":
+            if len(command)==1:
                 bot.reply(info, uuid_help)
             # 查看uuid 匹配表
             elif len(command)>1 and command[1] == '列表':
@@ -453,7 +449,7 @@ class qbot(object):
                 self.match_id()
                 bot.reply(info, '已重新匹配~')
             # 更改白名单名字
-            elif len(command)>1 and command[1] in ['修改','更改','更新']:
+            elif len(command)>=4 and command[1] in ['修改','更改','更新']:
                 pre_name = command[2]
                 cur_name = command[3]
                 with open(self.config["dict_address"]['whitelist'],'r') as f:
@@ -474,23 +470,21 @@ class qbot(object):
 
         # 机器人名字 <- 服务器人数
         elif info.content.startswith(f"{self.config['command_prefix']}名字"):
+
             if info.content == f"{self.config['command_prefix']}名字":
                 bot.reply(info, name_help)
+
             elif len(command)>1 and command[1] == '开':
                 self.config['command']['name'] = True
     
-                # 创造全局变量
-                global past_info,past_bot
-                past_info = info
-                past_bot = bot
-
-                self.set_number_as_name(server, info, bot)
-
+                self.set_number_as_name(server)
                 bot.reply(info, "显示游戏内人数已开启")
+
             elif len(command)>1 and command[1] == '关':
                 self.config['command']['name'] = False
+
                 for gid in self.config['group_id']:
-                    bot.set_group_card(gid, int(bot.get_login_info().json()["data"]['user_id']), " ")
+                    bot.set_group_card(gid, int(bot.get_login_info()["data"]['user_id']), " ")
                 bot.reply(info, "显示游戏内人数已关闭")     
 
         elif info.content.startswith(f"{self.config['command_prefix']}审核"):
