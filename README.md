@@ -13,11 +13,16 @@
 本插件修改自： 
 [QQChat新版 - 修改自它的旧版](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/qq_chat) | [原作者：AnzhiZhang](https://github.com/AnzhiZhang) <br>
 技术支持：XueK__ [前往主页](https://github.com/XueK66)
-<br></br>
 
 > #### 这是基于原插件的修改版本，但是由于经过多次修改和重构，我们并不确定是否仍存在原本的代码
 
-使用方式：
+## 使用方式：
+
+**提示：如果您是通过`插件仓库或其它来源`访问的此文档内容，那么请点击[PF-GUGUBot](https://github.com/LoosePrince/PF-GUGUBot)访问我们的仓库，并通过[Release](https://github.com/LoosePrince/PF-GUGUBot/releases/latest)下载最新的版本并查看对应版本的说明（`因为我们的文档更新并不及时`），而不是直接下载提供的文件（`有时可能不只有一份文件`）**
+
+**提示2：部分时候在使用时可能需要您具备一定的Python和插件相关的基础内容，因为有时我们上传的只是测试通过的版本，但它可能并不适配您的环境，同时请确保您看完了此文档关于配置的部分**
+
+流程：
 * 下载[PF-cq_qq_api前置插件](https://github.com/XueK66/PF-cq_qq_api/releases)并放入plugin
 * 将Release里面的GUGUbot.mcdr放入`/plugins`
 * 加载后，在`/config/GUGUbot/config.yml`中配置机器人
