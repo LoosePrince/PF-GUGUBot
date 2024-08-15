@@ -686,15 +686,15 @@ class qbot(object):
             not self.config['forward']['mc_to_qq']:
             return
         # 检查违禁词
-        if self.config['command']['ban_word'] and (response := self.ban_word.check_ban(info.content)):
+        if self.config['command']['ban_word'] and (ban_response := self.ban_word.check_ban(info.content)):
             # 有违禁词 -> 不转发 + 警告
             temp = '{"text":"' + '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。\n违禁理由：'+\
-                response[1] + '","color":"gray","italic":true}'
+                ban_response[1] + '","color":"gray","italic":true}'
             server.execute(f'tellraw {info.player} {temp}')
             return
         # 游戏内关键词添加
         if self.config['command']['ingame_key_word'] and info.content.startswith('!!add '):
-            temp = info.content[6:].split(' ',1)
+            temp = info.content.replace("!!add ", "", 1).split(maxsplit=1)
             if len(temp) == 2 and temp[0] not in self.key_word_ingame.data:
                 self.key_word_ingame.data[temp[0]] = temp[1]
                 server.say(style[self.style]['add_success'])
@@ -702,16 +702,17 @@ class qbot(object):
                 server.say('关键词重复或者指令无效~')
         # 游戏内关键词删除
         elif self.config['command']['ingame_key_word'] and info.content.startswith('!!del '):
-            if info.content[6:] in self.key_word_ingame.data:
-                del self.key_word_ingame.data[info.content[6:]]
+            key_word = info.content.replace("!!del ", "", 1)
+            if  key_word in self.key_word_ingame.data:
+                del self.key_word_ingame.data[key_word]
                 server.say(style[self.style]['delete_success'])
             else:
                 server.say('未找到对应关键词~')
         # 转发
         elif info.content[:2] not in [ '@ ','!!']:
             # 转发原句
-            roll_number = random.randint(0, 999+1)
-            template_index = roll_number % (len(mc2qq_template)-1) if roll_number >= 3 else -1
+            roll_number = random.randint(0, 9999+1)
+            template_index = (roll_number % (len(mc2qq_template)-1)) if roll_number >= 3 else -1
             message = mc2qq_template[template_index].format(info.player, info.content)
             self.send_msg_to_all_qq(message)
             # 判断游戏内关键词
