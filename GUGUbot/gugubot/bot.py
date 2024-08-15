@@ -546,20 +546,15 @@ class qbot(object):
             self.data[user_id] = command[1]
             bot.reply(info, f'[CQ:at,qq={user_id}] 已成功绑定')
             # 更换群名片
-            bot.set_group_card(info.user_id,user_id, self.data[user_id])
+            bot.set_group_card(info.group_id, user_id, self.data[user_id])
             # 自动加白名单
             if self.config['whitelist_add_with_bound']:
                 server.execute(f'whitelist add {command[1]}')
                 bot.reply(info, f'[CQ:at,qq={user_id}] 已将您添加到服务器白名单')
-                # 重载白名单
-                server.execute(f'whitelist reload')
-                retry_times = 3
-                while command[1] not in self.whitelist.values() and retry_times > 0:
-                    self.loading_whitelist()
-                    retry_times -= 1
-                    time.sleep(5)
+                time.sleep(5)
                 # 重新匹配
                 self.match_id()
+            
         # 机器人风格相关
         elif command[0] == '风格':
             # 风格帮助
