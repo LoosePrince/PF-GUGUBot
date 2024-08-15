@@ -197,14 +197,15 @@ class qbot(object):
     def notification(self, server, info: Info, bot):
         server.logger.debug(f"收到上报提示：{info}")
         # 指定群里 + 是退群消息
-        if info.user_id in self.config['group_id'] \
-            and info.sub_type == 'group_decrease':
+        if info.sub_type == 'group_decrease' \
+            and info.group_id in self.config['group_id']:
             user_id = str(info.user_id)
             if user_id in self.data.keys():
-                server.execute(f"whitelist remove {self.data[user_id]}")
-                bot.reply(info, f"{self.data[user_id]}已退群，白名单同步删除")
                 del self.data[user_id]
-
+                if self.config["command"]["whitelist"]:
+                    server.execute(f"whitelist remove {self.data[user_id]}")
+                    bot.reply(info, f"{self.data[user_id]}已退群，白名单同步删除")
+                
     # 通用QQ 指令   
     @addTextToImage
     def on_qq_command(self, server: PluginServerInterface, info: Info, bot):
@@ -232,10 +233,9 @@ class qbot(object):
     def common_command(self, server: PluginServerInterface, info: Info, bot, command:list):
         # 检测违禁词
         if self.config['command']['ban_word'] and (info.message_type == 'group' and info.source_id not in self.config['admin_group_id']):
-            ban_result = self.ban_word.check_ban(' '.join(command))
-            if ban_result:
+            if ban_response := self.ban_word.check_ban(' '.join(command)):
                 bot.delete_msg(info.message_id)
-                bot.reply(info, style[self.style]['ban_word_find'].format(ban_result[1]))
+                bot.reply(info, style[self.style]['ban_word_find'].format(ban_response[1]))
                 return True
 
         # 玩家列表
@@ -285,23 +285,16 @@ class qbot(object):
 
         # 游戏内关键词
         elif self.config['command']['ingame_key_word'] and command[0] == '游戏关键词':
-            if self.config['command']['ban_word'] and (ban_result := self.ban_word.check_ban(''.join(command[1:]))):
-                bot.delete_msg(info.message_id)
-                bot.reply(info, style[self.style]['ban_word_find'].format(ban_result[1]))
-                return True
             self.key_word_ingame.handle_command(info.content, info, bot, style=self.style)
 
         # 添加关键词图片
         elif self.config['command']['key_word'] and command[0] == '添加图片' and len(command)>1:
-            if command[1] not in self.key_word.data and info.user_id not in self.picture_record_dict:
-                if self.config['command']['ban_word'] and (ban_result := self.ban_word.check_ban(''.join(command[1:]))):
-                    bot.delete_msg(info.message_id)
-                    bot.reply(info, style[self.style]['ban_word_find'].format(ban_result[1]))
-                    return True
+            image_key_word = info.content.split(maxsplit=1)[-1]
+            if image_key_word not in self.key_word.data and info.user_id not in self.picture_record_dict:
                 # 正常添加
-                self.picture_record_dict[info.user_id] = command[1]
+                self.picture_record_dict[info.user_id] = image_key_word
                 respond = '请发送要添加的图片~'
-            elif command[1] in self.key_word.data:
+            elif image_key_word in self.key_word.data:
                 respond = '已存在该关键词~'
             else:
                 respond = '上一个关键词还未绑定，添加哒咩！'
@@ -757,7 +750,7 @@ class qbot(object):
                 return self.whitelist[uuid]
         # 未匹配到名字 -> 寻找QQ名片
         target_data = bot.get_group_member_info(group_id, qq_id)['data']
-        target_name = target_data['card'] if target_data['card'] != '' else target_data['nickname']
+        target_name = target_data['card'] or target_data['nickname']
         self.match_id()
         return f'{target_name}(名字不匹配)'
     
@@ -786,11 +779,12 @@ class qbot(object):
     # 解包字体，绑定图片
     def packing_copy(self) -> None:
         def __copyFile(path, target_path):            
-            if not os.path.exists(target_path):
-                with self.server.open_bundled_file(path) as file_handler: # 从包内解包文件
-                    message = file_handler.read()
-                with open(target_path, 'wb') as f:                        # 复制文件
-                    f.write(message)
+            if os.path.exists(target_path):
+                return
+            with self.server.open_bundled_file(path) as file_handler: # 从包内解包文件
+                message = file_handler.read()
+            with open(target_path, 'wb') as f:                        # 复制文件
+                f.write(message)
         __copyFile("gugubot/data/bound.jpg", "./config/GUGUbot/bound.jpg")        # 绑定图片
         __copyFile("gugubot/font/MicrosoftYaHei-01.ttf", "./config/GUGUbot/MicrosoftYaHei-01.ttf") # 默认字体
 
