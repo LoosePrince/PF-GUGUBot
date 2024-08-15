@@ -197,7 +197,7 @@ class qbot(object):
     def notification(self, server, info: Info, bot):
         server.logger.debug(f"收到上报提示：{info}")
         # 指定群里 + 是退群消息
-        if info.request_type == 'group_decrease' \
+        if info.notice_type == 'group_decrease' \
             and info.group_id in self.config['group_id']:
             user_id = str(info.user_id)
             if user_id in self.data.keys():
@@ -582,7 +582,7 @@ class qbot(object):
             # 通知
             bot.reply(info, f"喵！[CQ:at,qq={at_id}] {stranger_name} 申请进群, 请审核")
             server.say(f'§6[QQ] §b[@{at_id}] §f{stranger_name} 申请进群, 请审核')
-            self.shenhe[at_id].append((stranger_name, info.flag, info.sub_type))
+            self.shenhe[at_id].append((stranger_name, info.flag, info.message_type))
 
     # 转发消息
     @addTextToImage
