@@ -31,7 +31,9 @@ class qbot(object):
         self.picture_record_dict = {}
         self.shenhe = defaultdict(list)
         self.style = "正常"
+        self.member_dict = None
         self.suggestion = self.ingame_at_suggestion()
+        
         # 读取文件
         pygame.init()
         self.loading_dicts()
@@ -58,6 +60,7 @@ class qbot(object):
                 address  = str(temp_data['rcon']['address'])
                 port     = int(temp_data['rcon']['port'])
                 password = str(temp_data['rcon']['password'])
+                self.server.logger.info(f"Try to connect rcon：{address}:{port}")
                 self.rcon = RconConnection(address, port, password)
                 self.rcon.connect()
                 return
@@ -125,8 +128,7 @@ class qbot(object):
         # get name
         player = src.player if src.is_player else 'Console'        
         # check ban
-        ban_response = self.ban_word.check_ban(ctx['message'])
-        if self.config["command"]["ban_word"] and ban_response:
+        if self.config["command"]["ban_word"] and (ban_response := self.ban_word.check_ban(ctx['message'])):
             respond_warning = '{"text":"' + '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。违禁理由：' +\
                     ban_response[1] +\
                     '","color":"gray","italic":true}'
@@ -146,7 +148,7 @@ class qbot(object):
             group_raw_info = []
             for group_id in self.config['group_id']:
                 group_raw_info.append(self.bot.get_group_member_list(group_id))
-            unpack = [i.json()['data'] for i in group_raw_info if i.json()['status'] == 'ok']
+            unpack = [i['data'] for i in group_raw_info if i['status'] == 'ok']
         except:
             unpack = []
         for group in unpack:
@@ -157,24 +159,23 @@ class qbot(object):
                                     member['nickname'], 
                                     str(member['user_id'])]
         return suggest_content
-    
+
     # 游戏内指令发送qq
     def ingame_command_qq(self,src,ctx):
         if not self.config['command']['qq']:
             return
         player = src.player if src.is_player else 'Console'
-        reason = self.ban_word.check_ban(ctx["message"])
-        if self.config['command']['ban_word'] and reason:
-            respond_warning = '{"text":"' +\
-                '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。\n违禁理由：'+\
-                reason[1] +\
-                '","color":"gray","italic":true}'
+        # 违禁词
+        if self.config["command"]["ban_word"] and (ban_response := self.ban_word.check_ban(ctx['message'])):
+            respond_warning = '{"text":"' + '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。违禁理由：' +\
+                    ban_response[1] +\
+                    '","color":"gray","italic":true}'
             self.server.execute(f'tellraw {player} {respond_warning}')
-            return
+            return 
         # 正常转发
         self.send_msg_to_all_qq(f'[{player}] {ctx["message"]}')
         # 检测关键词
-        if ctx['message'] in self.key_word:
+        if self.config["command"]["key_word"] and ctx['message'] in self.key_word:
             self.send_msg_to_all_qq(f'{self.key_word[ctx["message"]]}')
             self.server.say(f'§a[机器人] §f{self.key_word[ctx["message"]]}')
     
