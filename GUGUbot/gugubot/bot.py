@@ -197,7 +197,7 @@ class qbot(object):
     def notification(self, server, info: Info, bot):
         server.logger.debug(f"收到上报提示：{info}")
         # 指定群里 + 是退群消息
-        if info.sub_type == 'group_decrease' \
+        if info.notice_type == 'group_decrease' \
             and info.group_id in self.config['group_id']:
             user_id = str(info.user_id)
             if user_id in self.data.keys():
@@ -582,7 +582,7 @@ class qbot(object):
             # 通知
             bot.reply(info, f"喵！[CQ:at,qq={at_id}] {stranger_name} 申请进群, 请审核")
             server.say(f'§6[QQ] §b[@{at_id}] §f{stranger_name} 申请进群, 请审核')
-            self.shenhe[at_id].append((stranger_name, info.flag, info.sub_type))
+            self.shenhe[at_id].append((stranger_name, info.flag, info.message_type))
 
     # 转发消息
     @addTextToImage
@@ -662,7 +662,7 @@ class qbot(object):
                 receiver_id = previous_message['sender']['user_id']
                 receiver = _get_name(str(receiver_id), previous_message['message'])
                 # 获取转发内容
-                forward_content = re.search(r'\[CQ:reply,id=-?\d+\](?:\[CQ:at,qq=\d+\])?(.*)', info.raw_content).group(1).strip()
+                forward_content = re.search(r'\[CQ:reply,id=-?\d+\](?:\[CQ:at,qq=\d+\])?(.*)', info.raw_message).group(1).strip()
                 server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{forward_content}')
                 return 
             # only @ -> 正则替换
