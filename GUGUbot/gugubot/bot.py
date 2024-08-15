@@ -803,7 +803,7 @@ class qbot(object):
             self.send_group_msg(msg, group)
 
     # 机器人名称显示游戏内人数
-    def set_number_as_name(self, server:PluginServerInterface, info: Info, bot):
+    def set_number_as_name(self, server:PluginServerInterface):
         bound_list = self.data.values()
         if self.rcon: # rcon 命令获取（准确）
             number = len([i for i in self.rcon.send_command("list").split(": ")[-1].split(", ") if i in bound_list])
@@ -821,7 +821,7 @@ class qbot(object):
             name = "在线人数: {}".format(number)
         # 更新名字
         for gid in self.config['group_id']:
-            bot.set_group_card(gid, bot.get_login_info()["data"]['user_id'], name)
+            self.bot.set_group_card(gid, self.bot.get_login_info()["data"]['user_id'], name)
 #+---------------------------------------------------------------------+
 # 文字转图片函数，一定程度防止风控？
 def text2image(font, input_string:str)->str:

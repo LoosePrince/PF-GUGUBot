@@ -19,11 +19,16 @@ def on_load(server: PluginServerInterface, old)->None:
     set_sys_path()
     global past_bot, past_info
     global qq_bot
+
     # 获取参数，绑定列表
     config = table("./config/GUGUBot/config.json", DEFAULT_CONFIG, yaml=True)
     data = table("./config/GUGUBot/GUGUBot.json")
 
-    websocket_bot = server.get_plugin_instance("cq_qq_api").get_bot()
+    # 获取接口机器人
+    cq_qq_api_instance = server.get_plugin_instance("cq_qq_api")
+    if cq_qq_api_instance is None:
+        server.logger.error("Depend plugin not found!")
+    cq_qq_api_bot = cq_qq_api_instance.get_bot()
 
     # 继承重载前参数
     if old is not None and hasattr(old, 'past_bot') and \
@@ -32,8 +37,9 @@ def on_load(server: PluginServerInterface, old)->None:
         past_bot = old.past_bot
     else:
         past_bot = False
+
     # gugubot主体
-    qq_bot = qbot(server, config, data, websocket_bot)
+    qq_bot = qbot(server, config, data, cq_qq_api_bot)
 
     # 注册指令
     qq_bot.server.register_command(
@@ -70,17 +76,13 @@ qq_bot = None
 
 # 更新机器人名字 <- 显示在线人数功能
 def on_player_joined(server:PluginServerInterface, player:str, info:Info)->None:
-    if isinstance(qq_bot, qbot) \
-        and qq_bot.config["command"]["name"] \
-        and past_bot:
-        qq_bot.set_number_as_name(server, past_bot, past_info)
+    if isinstance(qq_bot, qbot) and qq_bot.config["command"]["name"]:
+        qq_bot.set_number_as_name(server)
 
 # 更新机器人名字 <- 显示在线人数功能
 def on_player_left(server:PluginServerInterface, player:str)->None:
-    if isinstance(qq_bot, qbot) \
-        and qq_bot.config["command"]["name"] \
-        and past_bot:
-        qq_bot.set_number_as_name(server, past_bot,past_info)
+    if isinstance(qq_bot, qbot) and qq_bot.config["command"]["name"]:
+        qq_bot.set_number_as_name(server)
 
 # 离线玩家添加白名单功能
 def on_info(server:PluginServerInterface, info:Info)->None:
