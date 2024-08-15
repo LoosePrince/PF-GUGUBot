@@ -589,7 +589,7 @@ class qbot(object):
     def send_msg_to_mc(self, server:PluginServerInterface, info: Info, bot):
         # 判断是否转发
         if len(info.content) == 0 or \
-            info.content[0] == self.config['command_prefix'] or \
+            info.content.startswith(self.config['command_prefix']) or \
             not self.config['forward']['qq_to_mc'] or \
             info.source_id not in self.config['group_id']:
             return 
@@ -599,21 +599,21 @@ class qbot(object):
             bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
             return 
         # 如果开启违禁词
-        if self.config['command']['ban_word'] and (reason := self.ban_word.check_ban(info.content)):
+        if self.config['command']['ban_word'] and (ban_response := self.ban_word.check_ban(info.content)):
             # 包含违禁词 -> 撤回 + 提示 + 不转发
             bot.delete_msg(info.message_id)
-            bot.reply(info, style[self.style]['ban_word_find'].format(reason[1]))
+            bot.reply(info, style[self.style]['ban_word_find'].format(ban_response[1]))
             return 
         user_id = str(info.user_id)
         # 检测关键词
         if self.config['command']['key_word']:
             # 检测到关键词 -> 转发原文 + 转发回复
-            if info.content in self.key_word.data:
+            if info.content in self.key_word:
                 server.say(f'§6[QQ] §a[{self.find_game_name(user_id, bot, info.source_id)}] §f{info.content}')
-                bot.reply(info,self.key_word.data[info.content])
+                bot.reply(info,self.key_word[info.content])
                 # 过滤图片
-                is_picture = self.key_word.data[info.content].startswith('[CQ:image')
-                server.say(f'§6[QQ] §a[机器人] §f{self.key_word.data[info.content] if not is_picture else "图片"}')
+                is_picture = self.key_word[info.content].startswith('[CQ:image')
+                server.say(f'§6[QQ] §a[机器人] §f{self.key_word[info.content] if not is_picture else "图片"}')
                 return
             # 添加图片
             if info.user_id in self.picture_record_dict and \
