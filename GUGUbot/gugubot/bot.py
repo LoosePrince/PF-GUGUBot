@@ -587,7 +587,6 @@ class qbot(object):
     # 转发消息
     @addTextToImage
     def send_msg_to_mc(self, server:PluginServerInterface, info: Info, bot):
-        self.server = server
         # 判断是否转发
         if len(info.content) == 0 or \
             info.content[0] == self.config['command_prefix'] or \
@@ -691,23 +690,23 @@ class qbot(object):
             # 有违禁词 -> 不转发 + 警告
             temp = '{"text":"' + '消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。\n违禁理由：'+\
                 response[1] + '","color":"gray","italic":true}'
-            self.server.execute(f'tellraw {info.player} {temp}')
+            server.execute(f'tellraw {info.player} {temp}')
             return
         # 游戏内关键词添加
         if self.config['command']['ingame_key_word'] and info.content.startswith('!!add '):
             temp = info.content[6:].split(' ',1)
             if len(temp) == 2 and temp[0] not in self.key_word_ingame.data:
                 self.key_word_ingame.data[temp[0]] = temp[1]
-                self.server.say(style[self.style]['add_success'])
+                server.say(style[self.style]['add_success'])
             else:
-                self.server.say('关键词重复或者指令无效~')
+                server.say('关键词重复或者指令无效~')
         # 游戏内关键词删除
         elif self.config['command']['ingame_key_word'] and info.content.startswith('!!del '):
             if info.content[6:] in self.key_word_ingame.data:
                 del self.key_word_ingame.data[info.content[6:]]
-                self.server.say(style[self.style]['delete_success'])
+                server.say(style[self.style]['delete_success'])
             else:
-                self.server.say('未找到对应关键词~')
+                server.say('未找到对应关键词~')
         # 转发
         elif info.content[:2] not in [ '@ ','!!']:
             # 转发原句
@@ -719,7 +718,7 @@ class qbot(object):
             if self.config['command']['ingame_key_word'] and info.content in self.key_word_ingame:
                 # 游戏内回复
                 response = self.key_word_ingame.check_response(info.content)
-                self.server.say(f'§a[机器人] §f{response}')    
+                server.say(f'§a[机器人] §f{response}')    
 
     ################################################################################
     # 辅助functions
