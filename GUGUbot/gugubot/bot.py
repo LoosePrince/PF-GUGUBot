@@ -617,7 +617,8 @@ class qbot(object):
                 return
             # 添加图片
             if info.user_id in self.picture_record_dict and \
-                    info.raw_message.startswith('[CQ:image'):
+                    (info.raw_message.startswith('[CQ:image') \
+                     or info.raw_message.startswith("[CQ:mface")):
                 pattern = r'url=([^,\]]+)'
                 try:
                     url = re.search(pattern, info.raw_message).groups()[-1] 
