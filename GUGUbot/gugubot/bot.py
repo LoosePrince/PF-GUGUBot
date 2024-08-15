@@ -523,14 +523,13 @@ class qbot(object):
             bot.reply(info, group_help_msg)
         elif self.config['command']['mc'] and command[0] == 'mc': # qq发送到游戏内消息
             user_id = str(info.user_id)
-            message = info.content[4:]
+            message = info.content.replace(f"{self.config['command_prefix']}mc ","", 1)
             # 检测绑定
             if user_id in self.data.keys():
                 # 正常转发
                 server.say(f'§6[QQ] §a[{self.find_game_name(user_id, bot, info.source_id)}] §f{message}')
                 # 回复关键词
-                response = self.key_word_ingame.check_response(message)
-                if response: 
+                if self.config["command"]["ingame_key_word"] and (response := self.key_word_ingame.check_response(message)):
                     bot.reply(info, response)
                     server.say(f'§a[机器人] §f{response}')
             else:
