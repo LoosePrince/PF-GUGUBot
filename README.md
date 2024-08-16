@@ -19,10 +19,20 @@
 
 使用方式：
 * 下载[PF-cq_qq_api前置插件](https://github.com/XueK66/PF-cq_qq_api/releases)并放入plugin
+  
+  cq_qq_api MCDR一键安装指令：
+  > !!MCDR plugin install cq_qq_api
+
+* 加载后，在`/config/cq_qq_api/config.json`中[配置服务](https://github.com/XueK66/PF-cq_qq_api#配置)
 * 将Release里面的GUGUbot.mcdr放入`/plugins`
-* 加载后，在`/config/GUGUbot/config.yml`中配置机器人
-* 加载后，在`/config/cq_qq_api/config.json`中配置服务
+
+  gugubot MCDR一键安装指令：
+  > !!MCDR plugin install gugubot
+
+* 加载后，在`/config/GUGUbot/config.yml`中[配置机器人](#功能列表)
 * 如果您在安装完成后启动提示没有配置文件请下载[config_default.yml](https://github.com/LoosePrince/PF-GUGUBot/blob/main/config_default.yml)重名名为`config.yml`放入`/config/GUGUbot/config.yml`再运行
+
+* 有任何安装问题或是新的想法，欢迎[联系我们](#有BUG或是新的IDEA)
 
 ## 依赖
 #### Python包
