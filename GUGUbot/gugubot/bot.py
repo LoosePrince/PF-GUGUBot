@@ -788,6 +788,8 @@ class qbot(object):
         def __copyFile(path, target_path):            
             if os.path.exists(target_path):
                 return
+            target_path = Path(target_path)
+            target_path.parent.mkdir(parents=True, exist_ok=True)
             with self.server.open_bundled_file(path) as file_handler: # 从包内解包文件
                 message = file_handler.read()
             with open(target_path, 'wb') as f:                        # 复制文件
