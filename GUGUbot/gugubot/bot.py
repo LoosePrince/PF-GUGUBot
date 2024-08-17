@@ -32,7 +32,7 @@ class qbot(object):
         self.is_main_server = self.config.data.get("is_main_server", True)
         self.picture_record_dict = {}
         self.shenhe = defaultdict(list)
-        self.style = self.config.data.get("style", "正常")
+        self.style = self.config.data.get("style") if self.config.data.get("style") != "" else "正常"
         self.member_dict = None
         self.suggestion = self.ingame_at_suggestion()
         
@@ -96,9 +96,9 @@ class qbot(object):
 
     # 文字转图片-装饰器
     def addTextToImage(func):
-        def _newReply(font, font_limit:int, self, info, message: str, force_reply:bool = False):
+        def _newReply(font, font_limit:int, is_main_server, self, info, message: str, force_reply:bool = False):
             # 如果不是主群，且不强制转发
-            if not self.is_main_server and not force_reply:
+            if not is_main_server and not force_reply:
                 return 
 
             if font_limit >= 0 and len(message.split("]")[-1]) >= font_limit: # check condition
@@ -121,7 +121,7 @@ class qbot(object):
 
         def _addTextToImage(self, server:PluginServerInterface, info: Info, bot):
             funcType = types.MethodType
-            _newReplyWithFont = partial( _newReply, self.font, int(self.config["font_limit"]) )
+            _newReplyWithFont = partial( _newReply, self.font, int(self.config["font_limit"]), self.is_main_server )
             bot.reply = funcType(_newReplyWithFont, bot)
             return func(self, server, info, bot)
 

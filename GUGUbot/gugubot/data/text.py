@@ -20,7 +20,7 @@ DEFAULT_CONFIG = {
     'game_port':'',
     'font_limit':150,
     'command_prefix': "#",
-    'style': '',
+    'style': '正常',
     'forward': {
         'mc_to_qq': True,
         'qq_to_mc': True
