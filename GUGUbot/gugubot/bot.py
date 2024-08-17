@@ -28,11 +28,11 @@ class qbot(object):
         self.data = data
         self.bot = bot
 
-        self.server_name = self.config.get("server_name","")
-        self.is_main_server = self.config.get("is_main_server", True)
+        self.server_name = self.config.data.get("server_name","")
+        self.is_main_server = self.config.data.get("is_main_server", True)
         self.picture_record_dict = {}
         self.shenhe = defaultdict(list)
-        self.style = self.config.get("style", "正常")
+        self.style = self.config.data.get("style", "正常")
         self.member_dict = None
         self.suggestion = self.ingame_at_suggestion()
         
