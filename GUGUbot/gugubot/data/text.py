@@ -14,6 +14,7 @@ DEFAULT_CONFIG = {
     'admin_group_id': [123321, 456654],
     'server_name': '',
     'is_main_server': True,
+    'bound_notice': True,
     'whitelist_add_with_bound': False,
     'whitelist_remove_with_leave': True,
     'game_ip':'',
