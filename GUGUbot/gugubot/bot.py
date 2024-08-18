@@ -28,9 +28,11 @@ class qbot(object):
         self.data = data
         self.bot = bot
 
+        self.server_name = self.config.data.get("server_name","")
+        self.is_main_server = self.config.data.get("is_main_server", True)
         self.picture_record_dict = {}
         self.shenhe = defaultdict(list)
-        self.style = "正常"
+        self.style = self.config.data.get("style") if self.config.data.get("style") != "" else "正常"
         self.member_dict = None
         self.suggestion = self.ingame_at_suggestion()
         
@@ -94,7 +96,11 @@ class qbot(object):
 
     # 文字转图片-装饰器
     def addTextToImage(func):
-        def _newReply(font, font_limit:int, self, info, message: str):
+        def _newReply(font, font_limit:int, is_main_server, self, info, message: str, force_reply:bool = False):
+            # 如果不是主群，且不强制转发
+            if not is_main_server and not force_reply:
+                return 
+
             if font_limit >= 0 and len(message.split("]")[-1]) >= font_limit: # check condition
                 image_path = text2image(font, message)
                 message = f"[CQ:image,file={Path(image_path).as_uri()}]"
@@ -115,7 +121,7 @@ class qbot(object):
 
         def _addTextToImage(self, server:PluginServerInterface, info: Info, bot):
             funcType = types.MethodType
-            _newReplyWithFont = partial( _newReply, self.font, int(self.config["font_limit"]) )
+            _newReplyWithFont = partial( _newReply, self.font, int(self.config["font_limit"]), self.is_main_server )
             bot.reply = funcType(_newReplyWithFont, bot)
             return func(self, server, info, bot)
 
@@ -136,7 +142,8 @@ class qbot(object):
             return 
         # send
         qq_user_id = ctx['QQ(name/id)'] if ctx['QQ(name/id)'].isdigit() else self.member_dict[ctx['QQ(name/id)']]
-        self.send_msg_to_all_qq(f'[{player}] [CQ:at,qq={qq_user_id}] {ctx["message"]}')
+        message = f'[{player}] [CQ:at,qq={qq_user_id}] {ctx["message"]}'
+        self.send_msg_to_all_qq(message)
 
     # 游戏内@ 推荐
     def ingame_at_suggestion(self):
@@ -277,7 +284,8 @@ class qbot(object):
                     count,
                     '玩家' if player_status else '假人' if not server_status else '人员',
                     '\n'+ respond)
-            bot.reply(info, respond)
+            respond = self.add_server_name(respond)
+            bot.reply(info, respond, force_reply = True)
 
         # 添加关键词
         elif self.config['command']['key_word'] and command[0] in ["列表", 'list', '添加', 'add', '删除', '移除', 'del']:
@@ -532,7 +540,7 @@ class qbot(object):
                 if self.config["command"]["ingame_key_word"] and (response := self.key_word_ingame.check_response(message)):
                     bot.reply(info, response)
                     server.say(f'§a[机器人] §f{response}')
-            else:
+            elif self.config.data.get("bound_notice", True):
                 bot.reply(info, f'[CQ:at,qq={user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
         # 绑定功能
         elif len(command) == 2 and command[0] == '绑定':
@@ -566,6 +574,7 @@ class qbot(object):
             # 切换风格
             elif command[1] in style.keys():
                 self.style = command[1]
+                self.config['style'] = command[1]
                 bot.reply(info, f'已切换为 {self.style}')
 
     # 进群处理
@@ -596,7 +605,8 @@ class qbot(object):
         # 判断是否绑定
         if  str(info.user_id) not in self.data.keys():
             # 提示绑定
-            bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
+            if self.config.data.get("bound_notice", True):
+                bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
             return 
         # 如果开启违禁词
         if self.config['command']['ban_word'] and (ban_response := self.ban_word.check_ban(info.content)):
@@ -639,7 +649,9 @@ class qbot(object):
                 if str(qq_id) in self.data:
                     return self.find_game_name(qq_id, bot, info.source_id)
                 # 是机器人
-                elif str(qq_id) == str(bot.get_login_info()['data']['user_id']) and previous_message is not None:
+                elif str(qq_id) == str(bot.get_login_info()['data']['user_id']) and previous_message_content is not None:
+                    if self.server_name:
+                        previous_message_content = previous_message_content.replace(f"|{self.server_name}| ", "", 1)
                     pattern = r"^\((.*?)\)|^\[(.*?)\]|^(.*?) 说：|^(.*?) : |^冒着爱心眼的(.*?)说："
                     match = re.search(pattern, previous_message_content)
                     if match:
@@ -726,6 +738,11 @@ class qbot(object):
     ################################################################################
     # 辅助functions
     ################################################################################
+    # 添加服务器名字
+    def add_server_name(self, message):
+        if self.server_name != "":
+            return f"|{self.server_name}| {message}"
+        return message
     
     # 通过QQ号找到绑定的游戏ID
     def find_game_name(self, qq_id:str, bot, group_id:str=None) -> str:
@@ -787,6 +804,8 @@ class qbot(object):
 
     # 转发消息到所有群
     def send_msg_to_all_qq(self, msg:str):
+        msg = self.add_server_name(msg)
+
         for group in self.config['group_id']:
             self.send_group_msg(msg, group)
 
