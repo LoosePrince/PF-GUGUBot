@@ -212,6 +212,9 @@ class qbot(object):
                 if self.config["command"]["whitelist"]:
                     server.execute(f"whitelist remove {self.data[user_id]}")
                     bot.reply(info, f"{self.data[user_id]}已退群，白名单同步删除")
+                    # 重载白名单
+                    time.sleep(5)
+                    self.loading_whitelist()
                 
     # 通用QQ 指令   
     @addTextToImage
@@ -372,11 +375,13 @@ class qbot(object):
                 if command[1] == '添加':
                     server.execute(f'/whitelist add {command[2]}')
                     bot.reply(info, style[self.style]['add_success'])
-                    time.sleep(5)
+                    time.sleep(2)
+                    self.loading_whitelist()
                     self.match_id()
                 elif command[1] in ['删除','移除']:
                     server.execute(f'/whitelist remove {command[2]}')
                     bot.reply(info ,style[self.style]['delete_success'])
+                    time.sleep(2)
                     self.loading_whitelist()
                 elif command[1] == '开':
                     server.execute(f'/whitelist on')
@@ -559,8 +564,9 @@ class qbot(object):
             if self.config['whitelist_add_with_bound']:
                 server.execute(f'whitelist add {command[1]}')
                 bot.reply(info, f'[CQ:at,qq={user_id}] 已将您添加到服务器白名单')
-                time.sleep(5)
+                time.sleep(2)
                 # 重新匹配
+                self.loading_whitelist()
                 self.match_id()
             
         # 机器人风格相关
