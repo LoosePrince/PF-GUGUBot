@@ -666,7 +666,7 @@ class qbot(object):
             # 回复 -> 正则匹配
             if "[CQ:reply" in info.content:
                 # 提取回复id
-                pattern = r"(?:\[CQ:reply,id=(-?\d+)\])"
+                pattern = r"(?:\[CQ:reply,id=(-?\d+).*?\])"
                 match_result = re.search(pattern, info.content.replace("CQ:at,qq=","@"), re.DOTALL).groups()
                 # 提取回复消息
                 previous_message = bot.get_msg(match_result[0])['data']
@@ -674,11 +674,11 @@ class qbot(object):
                 receiver_id = previous_message['sender']['user_id']
                 receiver = _get_name(str(receiver_id), previous_message['message'])
                 # 获取转发内容
-                forward_content = re.search(r'\[CQ:reply,id=-?\d+\](?:\[@\d+\])?(.*)', info.content).group(1).strip()
+                forward_content = re.search(r'\[CQ:reply,id=-?\d+.*?\](?:\[@\d+\])?(.*)', info.content).group(1).strip()
                 server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{forward_content}')
                 return 
             # only @ -> 正则替换
-            at_pattern = r"\[@(\d+)\]|\[CQ:at,qq=(\d+)\]"
+            at_pattern = r"\[@(\d+).*?\]|\[CQ:at,qq=(\d+).*?\]"
             sub_string = re.sub(
                 at_pattern, 
                 lambda id: f"§b[@{_get_name(str(id.group(1) or id.group(2)))}]", 
@@ -689,7 +689,7 @@ class qbot(object):
         else: 
             # 提取链接中标题
             if info.content.startswith('[CQ:json'):
-                json_data = re.search(r'\[CQ:json,data=(\{.*\})\]', info.content).group(1)
+                json_data = re.search(r'\[CQ:json,data=(\{.*\}).*?\]', info.content).group(1)
                 json_data = json_data.replace('&#44;', ',').replace('&#91;', '[').replace('&#93;', ']')
                 info.content = '[链接]'+ json.loads(json_data)['meta']['detail_1']['desc']
             server.say(f'§6[QQ] §a[{self.find_game_name(str(user_id), bot, info.source_id)}] §f{info.content}')
