@@ -20,10 +20,6 @@ def on_load(server: PluginServerInterface, old)->None:
     global past_bot, past_info
     global qq_bot
 
-    # 获取参数，绑定列表
-    config = table("./config/GUGUBot/config.json", DEFAULT_CONFIG, yaml=True)
-    data = table("./config/GUGUBot/GUGUBot.json")
-
     # 获取接口机器人
     cq_qq_api_instance = server.get_plugin_instance("cq_qq_api")
     if cq_qq_api_instance is None:
@@ -39,7 +35,7 @@ def on_load(server: PluginServerInterface, old)->None:
         past_bot = False
 
     # gugubot主体
-    qq_bot = qbot(server, config, data, cq_qq_api_bot)
+    qq_bot = qbot(server, cq_qq_api_bot)
 
     # 注册指令
     qq_bot.server.register_command(
