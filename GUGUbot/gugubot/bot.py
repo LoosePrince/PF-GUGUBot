@@ -205,7 +205,7 @@ class qbot(object):
         server.logger.debug(f"收到上报提示：{info}")
         # 指定群里 + 是退群消息
         if info.notice_type == 'group_decrease' \
-            and info.group_id in self.config['group_id']:
+            and info.source_id in self.config['group_id']:
             user_id = str(info.user_id)
             if user_id in self.data.keys():
                 del self.data[user_id]
@@ -554,7 +554,7 @@ class qbot(object):
             self.data[user_id] = command[1]
             bot.reply(info, f'[CQ:at,qq={user_id}] 已成功绑定')
             # 更换群名片
-            bot.set_group_card(info.group_id, user_id, self.data[user_id])
+            bot.set_group_card(info.source_id, user_id, self.data[user_id])
             # 自动加白名单
             if self.config['whitelist_add_with_bound']:
                 server.execute(f'whitelist add {command[1]}')
@@ -582,7 +582,7 @@ class qbot(object):
     def on_qq_request(self,server, info: Info, bot):
         server.logger.debug(f"收到上报请求：{info}")
         if info.message_type == "group" \
-            and info.group_id in self.config["group_id"] \
+            and info.source_id in self.config["group_id"] \
             and self.config["command"]["shenhe"]:
             # 获取名称
             stranger_name = bot.get_stranger_info(info.user_id)["data"]["nickname"]
