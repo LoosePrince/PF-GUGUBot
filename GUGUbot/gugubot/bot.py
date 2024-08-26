@@ -36,7 +36,7 @@ class qbot(object):
     def __init__(self, server, bot):
         # 添加初始参数
         self.server = server
-
+        
         self.packing_copy()
         
         self.config = table("./config/GUGUBot/config.json", yaml=True)
@@ -547,6 +547,7 @@ class qbot(object):
     # 群指令
     def group_command(self, server, info: Info, bot, command:list):
         if info.content == f"{self.config['command_prefix']}帮助":  # 群帮助
+            server.execute("list")
             bot.reply(info, group_help_msg)
         elif self.config['command']['mc'] and command[0] == 'mc': # qq发送到游戏内消息
             user_id = str(info.user_id)
