@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from .base_system import base_system
 from .data.text import *
+from .utils import get_style_template
 from mcdreforged.api.types import PluginServerInterface, Info
 
 class start_command_system(base_system):
@@ -15,7 +16,7 @@ class start_command_system(base_system):
         # need a server kargs
         if parameter and parameter[0] in ['执行', 'exe']:                                          
             self.exec(kargs['server'])
-            bot.reply(info, style[reply_style]['command_success'])
+            bot.reply(info, get_style_template('command_success', reply_style))
 
     def exec(self, server:PluginServerInterface)->None:
         for _, command in self.data.items():

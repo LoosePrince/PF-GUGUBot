@@ -56,6 +56,8 @@ command_prefix: "#"
 dict_address:
   # 违禁词
   ban_word_dict: .//config//GUGUbot//ban_word.json
+  # 自定义风格文件
+  extra_style_path: ""
   # 字体路径
   font_path: ./plugins/GUGUbot/font/MicrosoftYaHei-01.ttf
   # 关键词
