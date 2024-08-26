@@ -2,7 +2,6 @@
 # The definition of the QQ Chat robot:
 from .ban_word_system import ban_word_system
 from .data.text import (
-    DEFAULT_CONFIG,
     admin_help_msg,
     bound_help,
     group_help_msg,
@@ -40,7 +39,7 @@ class qbot(object):
 
         self.packing_copy()
         
-        self.config = table("./config/GUGUBot/config.json", DEFAULT_CONFIG, yaml=True)
+        self.config = table("./config/GUGUBot/config.json", yaml=True)
         self.data = table("./config/GUGUBot/GUGUBot.json")
         self.bot = bot
 

@@ -1,54 +1,12 @@
 PLUGIN_METADATA = {
     'id': 'gugubot',
-    'version': '1.1.3',
+    'version': '1.1.4',
     'name': 'GUGUbot',
     'description': 'A bot connect mc and QQ',
     'author': 'XueK__',
     'dependencies': {
         'cool_q_api': '*',
     }
-}
-DEFAULT_CONFIG = {
-    'group_id': [1234561, 1234562],
-    'admin_id': [1234563, 1234564],
-    'admin_group_id': [123321, 456654],
-    'server_name': '',
-    'is_main_server': True,
-    'bound_notice': True,
-    'whitelist_add_with_bound': False,
-    'whitelist_remove_with_leave': True,
-    'game_ip':'',
-    'game_port':'',
-    'font_limit':150,
-    'command_prefix': "#",
-    'style': '正常',
-    'forward': {
-        'mc_to_qq': True,
-        'qq_to_mc': True
-        },
-    'command': {
-        'list': True,
-        'mc': True,
-        'qq': True,
-        'ban_word': True,
-        'key_word': True,
-        'ingame_key_word': True,
-        'name':True,
-        'whitelist':True,
-        'shenhe':True
-        },
-    'dict_address' : {
-        "bound_image_path": ".//config//GUGUbot//bound.jpg",
-        'font_path': ".//config//GUGUbot//MicrosoftYaHei-01.ttf",
-        "start_command_dict": './/config//GUGUbot//start_commands.json',
-        "key_word_dict": './/config//GUGUbot//key_word.json',
-        "ban_word_dict": './/config//GUGUbot//ban_word.json',
-        "key_word_ingame_dict": './/config//GUGUbot//key_word_ingame.json',
-        "uuid_qqid": './/config//GUGUbot//uuid_qqid.json',
-        "whitelist": './/server//whitelist.json',
-        "shenheman":'.//config//GUGUbot//shenheman.json',
-        'shenhe_log':'.//config//GUGUbot//shenhe_log.txt'
-        }
 }
 
 group_help_msg = '''命令帮助如下:
