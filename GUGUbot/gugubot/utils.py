@@ -16,9 +16,8 @@ def read_extra_style(extra_style_path)->dict:
         return extra_style
     return {}
 
-style = get_style()
-
 def get_style_template(template_name:str, current_style:str)->str:
+    style = get_style()
     style_template = style[current_style].get(template_name, None)
     normal_template = style['正常'][template_name]
 

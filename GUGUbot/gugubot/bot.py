@@ -815,7 +815,7 @@ class qbot(object):
                 f.write(message)
         __copyFile("gugubot/data/config_default.yml", "./config/GUGUbot/config.yml")        # 绑定图片
         __copyFile("gugubot/data/bound.jpg", "./config/GUGUbot/bound.jpg")        # 绑定图片
-        __copyFile("gugubot/font/MicrosoftYaHei-01.ttf", "./config/GUGUbot/MicrosoftYaHei-01.ttf") # 默认字体
+        __copyFile("gugubot/font/MicrosoftYaHei-01.ttf", "./config/GUGUbot/font/MicrosoftYaHei-01.ttf") # 默认字体
 
     # 转发消息到指定群
     def send_group_msg(self, msg, group):
