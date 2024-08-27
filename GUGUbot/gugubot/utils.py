@@ -1,10 +1,10 @@
-from .data.text import style, DEFAULT_CONFIG
+from .data.text import style
 from .table import table
 import json
 import os
 
 def get_style()->dict:
-    config = table("./config/GUGUBot/config.json", DEFAULT_CONFIG, yaml=True)
+    config = table("./config/GUGUBot/config.json", yaml=True)
     extra_style = read_extra_style(config['dict_address'].get('extra_style_path', ""))
     style.update(extra_style)
     return style
