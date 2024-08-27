@@ -12,33 +12,44 @@
 [![最新发布下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/latest/total?style=flat-square&label=最新版本下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest)
 
 本插件修改自： 
-[QQChat的旧版](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/qq_chat) <br>
+[QQChat新版 - 修改自它的旧版](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/qq_chat) | [原作者：AnzhiZhang](https://github.com/AnzhiZhang) <br>
 技术支持：XueK__ [前往主页](https://github.com/XueK66)
+<br></br>
 
 > #### 这是基于原插件的修改版本，但是由于经过多次修改和重构，我们并不确定是否仍存在原本的代码
 
-## 使用方式：
 
-**提示：如果您是通过`插件仓库或其它来源`访问的此文档内容，那么请点击[PF-GUGUBot](https://github.com/LoosePrince/PF-GUGUBot)访问我们的仓库，并通过[Release](https://github.com/LoosePrince/PF-GUGUBot/releases/latest)下载最新的版本并查看对应版本的说明（`因为我们的文档更新并不及时`），而不是直接下载提供的文件（`有时可能不只有一份文件`）**
+使用方式-MCDR快捷安装：
+* MCDR服务端输入 `!!MCDR plugin install gugubot`
+* 加载后，在`/config/cq_qq_api/config.json`中配置接收api
+* 加载后，在`/config/GUGUbot/config.yml`中配置机器人
+* 重载 cq_qq_api: `!!MCDR plugin reload cq_qq_api`
 
-**提示2：部分时候在使用时可能需要您具备一定的Python和插件相关的基础内容，因为有时我们上传的只是测试通过的版本，但它可能并不适配您的环境，同时请确保您看完了此文档关于配置的部分**
+使用方式-github下载安装：
+* 下载[PF-cq_qq_api前置插件](https://github.com/XueK66/PF-cq_qq_api/releases)并放入`/plugins`
+* 将[Release](https://github.com/LoosePrince/PF-GUGUBot/releases)里面的GUGUbot.mcdr放入`/plugins`
+* 加载后，在`/config/cq_qq_api/config.json`中配置服务
+* 加载后，在`/config/GUGUbot/config.yml`中配置机器人
+* 重载 cq_qq_api: `!!MCDR plugin reload cq_qq_api`
 
-流程：
-* 下载[PF-cq_qq_api前置插件](https://github.com/XueK66/PF-cq_qq_api/releases)并放入plugin
-  
-  cq_qq_api MCDR一键安装指令：
-  > !!MCDR plugin install cq_qq_api
+  注：如果您在安装完成后启动提示没有配置文件请下载[config_default.yml](https://github.com/LoosePrince/PF-GUGUBot/blob/main/config_default.yml)重名名为`config.yml`放入`/config/GUGUbot/config.yml`再运行
 
-* 加载后，在`/config/cq_qq_api/config.json`中[配置服务](https://github.com/XueK66/PF-cq_qq_api#配置)
-* 将Release里面的GUGUbot.mcdr放入`/plugins`
-
-  gugubot MCDR一键安装指令：
-  > !!MCDR plugin install gugubot
-
-* 加载后，在`/config/GUGUbot/config.yml`中[配置机器人](#功能列表)
-* 如果您在安装完成后启动提示没有配置文件请下载[config_default.yml](https://github.com/LoosePrince/PF-GUGUBot/blob/main/config_default.yml)重名名为`config.yml`放入`/config/GUGUbot/config.yml`再运行
-
-* 有任何安装问题或是新的想法，欢迎[联系我们](#有BUG或是新的IDEA)
+## 目录
+- [PF-QQchat](#pf-qqchat)
+  - [目录](#目录)
+  - [依赖](#依赖)
+      - [Python包](#python包)
+      - [Python模块](#python模块)
+      - [前置插件](#前置插件)
+  - [功能列表](#功能列表)
+    - [基本功能：聊天互相转发](#基本功能聊天互相转发)
+    - [群聊功能](#群聊功能)
+    - [管理功能](#管理功能)
+  - [配置](#配置)
+    - [前置cq\_qq\_api配置](#前置cq_qq_api配置)
+    - [GUGUbot机器人配置](#gugubot机器人配置)
+- [有BUG或是新的IDEA](#有bug或是新的idea)
+- [TODO](#todo)
 
 ## 依赖
 #### Python包
@@ -51,58 +62,53 @@
 ## 功能列表
 > QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮助`
 
-基本功能：聊天互相转发
+### 基本功能：聊天互相转发
 
-#### 1.绑定游戏ID到QQ号
-> 请注意，本插件的绑定功能不可关闭
+### 群聊功能
 
-#### 2.获取玩家和假人的在线情况
-#### 3.QQ管理群
-设定的QQ群内所有人都有管理员权限
-```yml
-admin_group_id:
-- 123321
-- 456654
-```
-
-#### 4.在QQ管理服务器白名单
-同时支持正版和离线，详查[#36](https://github.com/LoosePrince/PF-GUGUBot/issues/36)
-```yml
-#配置文件
-whitelist: true/false #（开启/关闭）
-```
-#### 5.服务器启动指令
-在服务器启动时自动执行的指令。在某些特殊情况下会用到，可能可以救你一命
-```yml
-#配置文件
-start_command: true/false #（开启/关闭）
-```
-#### 6.违禁词撤回
-需要机器人有管理员
-#### 7.群内&游戏内关键词回复
-群内和游戏内关键词是分开设置的，群内关键词支持图片回复
-#### 8.UUID管理
-#### 9.机器人名字显示在线人数
-通过机器人进行修改！
-```yml
-#配置文件
-name: true/false #（开启/关闭）
-```
-#### 10.协助审核
-添加协助审核功能，这通常是提供给有一套审核方案的服务器使用的<br>通过机器人添加审核员和对应别名，当有人申请加群时会将申请信息发送到审核员私信（如果绑定了游戏ID的同时还在线那么还会发送到游戏内），此时回复同意即可快速通过，也可以仅当作提醒功能
-```yml
-#配置文件
-shenhe: true/false #（开启/关闭）
-```
-#### 11.机器人对话风格自定义
-#### 12.在QQ删除服务器内假人
-
-## 帮助提示
-> 部分功能在群聊和私聊都能使用，以下内容较长请展开查看
-#### 管理员部分，请私聊机器人
 <details>
-  
+  <summary>群聊功能帮助</summary>
+
 ```
+命令帮助如下:
+#玩家                -> 获取在线玩家列表
+#假人                -> 获取在线假人列表
+#服务器              -> 同时获取在线玩家和假人列表
+#绑定 <游戏ID>       -> 绑定你的游戏ID
+#mc <消息>           -> 向游戏内发送消息（可以触发游戏内关键词）
+#风格                -> 机器人风格帮助
+#游戏关键词 列表     -> 显示现有游戏内关键词列表
+#删除假人 <假人名字> -> 删除游戏内指定假人
+
+关键词相关：
+#添加 <关键词> <回复> -> 添加游戏内关键词回复
+#添加图片 <关键词>    -> 添加关键词图片
+#删除 <关键词>        -> 删除关键词
+#列表                 -> 获取关键词回复列表
+#帮助                 -> 查看关键词相关帮助
+```
+
+> <details>
+>  <summary>机器人回复风格</summary>
+> 
+> 机器人回复风格切换 `#风格`
+> ```
+> #风格 列表   -> 风格列表
+> #风格 <风格> -> 切换至指定风格
+> ```
+> 内置模式：`正常` `傲娇`
+> AI生成后内置的模式：`雌小鬼` `御姐` `萝莉` `波奇酱` `病娇` `中二病`
+> 
+> </details>
+
+</details>
+
+### 管理功能
+<details>
+  <summary>群聊功能帮助</summary>
+
+```
+管理员命令帮助如下
 #绑定   -> 查看绑定相关帮助
 #白名单 -> 查看白名单相关帮助
 #启动指令 -> 查看启动指令相关帮助
@@ -114,190 +120,375 @@ shenhe: true/false #（开启/关闭）
 #审核   -> 协助审核功能
 ```
 
-> <details>
+><details>
+>  <summary>绑定详细指令</summary>
 > 
-> 游戏ID与QQ绑定 
-> - `#绑定`
-> ```
-> #绑定 列表 -> 查看绑定列表
-> #绑定 查询 <QQ号> -> 查询绑定ID
-> #绑定 解绑 <QQ号> -> 解除绑定
-> #绑定 <QQ号> <游戏ID> -> 绑定新ID
-> ```
-> 白名单管理 
-> - `#白名单`
-> ```
-> #白名单 添加 <target> -> 添加白名单成员
-> #白名单 列表 -> 列出白名单成员
-> #白名单 关   -> 关闭白名单
-> #白名单 开   -> 开启白名单
-> #白名单 重载 -> 重载白名单
-> #白名单 删除 <target> -> 删除白名单成员
-> <target> 可以是玩家名/目标选择器/UUID
-> ```
-> 服务器启动时执行指令 
-> - `#启动指令`
-> ```
-> 启动指令 添加 <名称> <指令> -> 添加启动指令
-> #启动指令 列表 -> 查看现有启动指令
-> #启动指令 删除 <名称> -> 删除指定启动指令
-> #启动指令 开   -> 开启开服指令
-> #启动指令 关   -> 关闭开服指令
-> #启动指令 执行 -> 执行一遍开服指令
-> #启动指令 重载 -> 重载开服指令
-> ```
-> 触发(包含模式)违禁词自动撤回 
-> - `#违禁词`
-> ```
-> #违禁词 添加 <违禁词> <违禁理由> -> 添加违禁词
-> #违禁词 列表 -> 显示违禁词列表及理由
-> #违禁词 删除 <违禁词> -> 删除指定违禁词
-> #违禁词 开   -> 开启违禁词
-> #违禁词 关   -> 关闭违禁词
-> #违禁词 重载 -> 重载违禁词
-> ```
-> 发送关键词（完全匹配模式）自动回复，支持图片 
-> - `#关键词`
-> ```
-> #关键词 开   -> 开启关键词
-> #关键词 关   -> 关闭关键词
-> #关键词 重载 -> 重载关键词
-> > #关键词 列表 -> 显示关键词列表
-> #添加 <关键词> <回复> -> 添加关键词
-> #删除 <关键词> -> 删除指定关键词
-> ```
-> 游戏内关键词 
-> ```
-> #不再提供开关
-> ```
-> uuid 匹配 游戏ID，如果有时游戏内现实ID不匹配，可以尝试重新匹配一下uuid 
-> - `#uuid`
-> ```
-> #uuid 列表   -> 查看uuid绑定表
-> #uuid 重载 -> 重新匹配uuid
-> #uuid 更新 <老ID> <新ID> -> 改白名单的名字
-> /uuid name 查看白名单名字 #此功能已失去
-> ```
-> 让机器人昵称显示为在线人数 
-> - `#名字`
-> ```
-> #名字 开 -> 机器人名字显示为在线人数,需要在配置文件内配置服务器公网或IP域名和端口(一直显示会占用少许服务器资源)
-> #名字 关 -> 机器人名字为特殊空白名字，如果不支持请关闭此功能，然后你就可以自己给机器人命名了
-> ```
-> 协助审核（请将问题设置为"你的邀请人？"或"你的邀请人?"）
-> - `#审核`
-> ```
-> #审核 开 -> 开启自动审核
-> #审核 关 -> 关闭自动审核
-> #审核 添加 <QQ号> <别名> -> 添加审核员的别名(匹配用)
-> #审核 删除 <QQ号> -> 删除审核员
-> #审核 列表 -> 审核员列表
-> ```
+>```
+>#绑定 列表            -> 查看绑定列表
+>#绑定 查询 <QQ号>     -> 查询绑定ID
+>#绑定 解绑 <QQ号>     -> 解除绑定
+>#绑定 <QQ号> <游戏ID> -> 绑定新ID
+>```
+> </details>
+
+><details>
+>  <summary>白名单详细指令</summary>
+> 
+>```
+>#白名单 添加 <target> -> 添加白名单成员
+>#白名单 列表 -> 列出白名单成员
+>#白名单 关   -> 关闭白名单
+>#白名单 开   -> 开启白名单
+>#白名单 重载 -> 重载白名单
+>#白名单 删除 <target> -> 删除白名单成员 <target> 可以是玩家名/目标选择器/UUID
+>```
+> </details>
+
+><details>
+>  <summary>启动指令详细指令</summary>
+> 
+>```
+>#启动指令 添加 <名称> <指令> -> 添加启动指令
+>#启动指令 删除 <名称>        -> 删除指定启动指令
+>#启动指令 列表 -> 查看现有启动指令
+>#启动指令 开   -> 开启开服指令
+>#启动指令 关   -> 关闭开服指令
+>#启动指令 执行 -> 执行一遍开服指令
+>#启动指令 重载 -> 重载开服指令
+>```
+> </details>
+
+><details>
+>  <summary>违禁词详细指令</summary>
+> 
+>```
+>#违禁词 添加 <违禁词> <违禁理由> -> 添加违禁词
+>#违禁词 列表 -> 显示违禁词列表及理由
+>#违禁词 删除 <违禁词> -> 删除指定违禁词
+>#违禁词 开   -> 开启违禁词
+>#违禁词 关   -> 关闭违禁词
+>#违禁词 重载 -> 重载违禁词
+>```
+> </details>
+
+><details>
+>  <summary>关键词详细指令</summary>
+> 
+>```
+>#关键词 开   -> 开启关键词
+>#关键词 关   -> 关闭关键词
+>#关键词 重载 -> 重载关键词
+>#关键词 列表 -> 显示关键词列表
+>#添加 <关键词> <回复> -> 添加关键词
+>#删除 <关键词> -> 删除指定关键词
+>```
+> </details>
+
+><details>
+>  <summary>游戏内关键词详细指令</summary>
+> 
+>```
+>#游戏关键词 开   -> 开启游戏内关键词
+>#游戏关键词 关   -> 关闭游戏内关键词
+>#游戏关键词 重载 -> 重载游戏内关键词
+>#游戏关键词 列表 -> 显示游戏内关键词列表
+>#游戏关键词添加 <关键词> <回复> -> 添加游戏内关键词
+>#游戏关键词删除 <关键词> -> 删除指定游戏内关键词
+>```
+> </details>
+
+><details>
+>  <summary>风格详细指令</summary>
+> 
+>```
+>#风格        -> 风格帮助
+>#风格 列表   -> 风格列表
+>#风格 <风格> -> 切换至指定风格
+>```
+> </details>
+
+><details>
+>  <summary>uuid匹配详细指令</summary>
+> 
+>```
+>#uuid        -> 查看uuid相关帮助
+>#uuid 列表   -> 查看uuid绑定表
+>#uuid 重载 -> 重新匹配uuid
+>#uuid 更新 <老ID> <新ID> -> 改白名单的名字
+>```
+> </details>
+
+><details>
+>  <summary>机器人名字详细指令</summary>
+> 
+>```
+>#名字 -> 查看名字相关帮助
+>#名字 开 -> 机器人名字显示为在线人数
+>#名字 关 -> 机器人名字为特殊空白名字
+>```
+> </details>
+
+><details>
+>  <summary>审核名单详细指令</summary>
+> 
+>```
+>#审核 开 -> 开启自动审核
+>#审核 关 -> 关闭自动审核
+>#审核 添加 <QQ号> <别名> -> 添加审核员的别名(匹配用)
+>#审核 删除 <QQ号> -> 删除审核员
+>#审核 列表 -> 审核员列表
+>```
 > </details>
 
 </details>
-
-#### 群聊部分，请在群内使用
 
 <details>
+  <summary>详细功能说明</summary>
 
-```
-#玩家 -> 获取在线玩家列表
-#假人 -> 获取在线假人列表
-#服务器 -> 同时获取在线玩家和假人列表
-#绑定 <游戏ID> -> 绑定你的游戏ID
-#mc <消息> -> 向游戏内发送消息（可以触发游戏内关键词）
-#风格 -> 机器人风格帮助
-#游戏关键词 列表 -> 显示现有游戏内关键词列表
-#删除假人 <假人名字> -> 删除游戏内指定假人
+><details>
+>  <summary>绑定 功能说明</summary>
+> 记录玩家mc内ID,转发到游戏内会显示绑定时的ID
+> 
+> 在群聊中使用 `#绑定 xxx` 来绑定
+> 在管理员/管理群中,可以对玩家绑定进行 增删查改 操作
+> </details>
 
-关键词相关：
-#添加 <关键词> <回复> -> 添加游戏内关键词回复
-#添加图片 <关键词> -> 添加关键词图片
-#删除 <关键词> -> 删除关键词
-#列表 -> 获取关键词回复列表
-```
+><details>
+>  <summary>白名单 功能说明</summary>
+> 管理员权限专属,可以通过此功能 增删查改 服务器白名单
+> </details>
 
+><details>
+>  <summary>启动指令 功能说明</summary>
+> 有些指令想服务器启动时自动执行? 添加启动指令!
+> 
+> 机器人会在服务器启动时,自动指令添加的指令.
+> </details>
+
+><details>
+>  <summary>违禁词 功能说明</summary>
+> 熊孩子多?容易吵架?腐竹天天被催女装?
+> 
+> 聊天中出现违禁词(句中一部分也算),机器人自动撤回 + 提示
+> 注: 需要机器人有群管理员权限
+> </details>
+
+><details>
+>  <summary>关键词 功能说明</summary>
+> 想要复读机?关键信息记录(服务器种子)?
+> 
+> 添加关键词! 发送绑定的关键词就会回复记录的内容.
+> 支持图片,请使用 `#添加图片 <关键词>` 进行添加
+> </details>
+
+><details>
+>  <summary>游戏内关键词 功能说明</summary>
+> MC游戏内可触发的关键词
+> 
+> 记录坐标小帮手
+> </details>
+
+><details>
+>  <summary>风格 功能说明</summary>
+> 机器人回复风格
+> 
+> 可以给机器人换一个性格
+>
+> 支持自定义风格:
+> * 在`./config/GUGUbot/` 中创建 `extra_style.json`
+> * 在`./config/GUGUbot/config.yml` 中设定上一步的路径 `extra_style_path`
+> * 重载gugubot `!!MCDR plugin reload gugubot`
+> 开始切换叭!
+>
 > <details>
-> 
-> 机器人回复风格切换 `#风格`
+>  <summary>自定义说明</summary>
+>  **{} 的数量需要一致**
+>  **缺少的回复会自动使用正常格式回复**
+> ```  
+>{
+>  '正常' : {
+>    'add_existed': '已存在该关键词~',
+>    'add_image_instruction': '请发送要添加的图片~',
+>    'add_image_fail': '图片保存失败~',
+>    'add_image_previous_no_done': '上一个关键词还未绑定，添加哒咩！',
+>    'add_success':'添加成功！',
+>    'authorization_pass': '已通过{}的申请awa',
+>    'authorization_reject': '已拒绝{}的申请awa',
+>    'authorization_request': '{} 申请进群, 请审核',
+>    'ban_word_find':'回复包含违禁词请修改后重发，维护和谐游戏人人有责。\n违禁理由：{}',
+>    'bound_add_whitelist': '已将您添加到服务器白名单',
+>    'bound_exist': '您已绑定ID: {}, 请联系管理员修改',
+>    'bound_success': '已成功绑定',
+>    'command_success' : '指令执行成功',
+>    'delete_success':'删除成功！',
+>    'del_no_exist': '该关键词不存在',
+>    'del_whitelist_when_quit': '{}已退群，白名单同步删除',
+>    'key_word_exist': '已有指定关键词,请删除(#删除 <关键词>)后重试 awa',
+>    'lack_parameter': '缺少参数，请参考 #帮助 里的说明',
+>    'list': '列表如下: \n{}',
+>    'no_player_ingame': f"现在没人游玩服务器",
+>    'no_word': '列表空空的',
+>    'player_api_fail': '未能捕获服务器日志（推荐开启rcon精准获取玩家信息）',
+>    'player_list':'在线玩家共{}人，{}列表: {}',
+>    'reload_success': '重载成功',
+>    'server_start':'服务器已启动',
+>  }
+>}
 > ```
-> #风格 列表   -> 风格列表
-> #风格 <风格> -> 切换至指定风格
-> ```
-> 内置模式：`普通` `傲娇`
-> AI生成后内置的模式：`雌小鬼` `御姐` `萝莉` `波奇酱` `病娇` `中二病`
 > 
+> </details>
+> 
+> </details>
+
+><details>
+>  <summary>uuid匹配 功能说明</summary>
+> 在白名单开启时,自动使用更新的mc名称进行转发
+> </details>
+
+><details>
+>  <summary>机器人名字 功能说明</summary>
+> 机器人群内名字自动显示服务器内人数
+> 
+> 仅限单服使用,多服会随机显示其中一个服务器的人数
+> </details>
+
+><details>
+>  <summary>审核名单 功能说明</summary>
+> 敬请期待(才不是咕咕咕)
 > </details>
 
 </details>
 
-## 管理员
-> 配置机器人管理
-#### 1. 基础管理员
-写在配置文件里的管理员，无论什么情况下都拥有管理员权限
-- config.yml
-```yml
-admin_id:
-- 123456
-- 234567
+
+## 配置
+### 前置cq_qq_api配置
+> [cq_qq_api](https://github.com/XueK66/PF-cq_qq_api)是前置插件不可忽略
+
+<details>
+  <summary>cq_qq_api服务端配置</summary>  
+
+- config.json
+
+> | 配置项 | 默认值 | 说明 |
+> | - | - | - |
+> | host | `127.0.0.1` | 接收数据上报的地址 |
+> | port | `8080` | 对应数据上报的端口 | 
+> | post_path | "" | 对应数据上报的终点名 |
+> | token | "" | 对应数据上报的token，用于加密信息 |
+
+```
+{
+    "host": "127.0.0.1",
+    "port": 8080,
+    "post_path": "",
+    "token": ""
+}
 ```
 
-#### 2.机器人好友管理员
-只要有机器人的好友就能拥有管理员权限，请关闭机器人的好友申请功能
-- 未来计划中...
-
-#### 3.管理群
-在管理群内的人都拥有管理员的权限，离群即失去管理员权限，仅限在群内生效
-- config.yml
-```yml
-admin_group_id:
-- 123456
+最终websocket url为：
 ```
-
-## RCON的说明
-
-> 基于指令并获取返回结果，后续可能会取消！
-
-### 配置
-#### 作用
-1. 获取真实的在线情况
-2. 获取添加白名单的反馈数据
-#### 服务端配置 - Server
-- server.properties
+ws://host:port/post_path/
 ```
-rcon.port=12345
-enable-rcon=true
-rcon.password=123456
-```
-#### MCDR配置 - MCDR
-- config.yml
-```
-rcon:
-  enable: true
-  address: 127.0.0.1
-  port: 12345
-  password: 123456
-```
+</details>
 
-## GUGUbot配置文件
-> 非常建议看看
+<details>
+<summary>QQ机器人配置</summary>
 
-[点击查看配置文件说明](https://github.com/LoosePrince/PF-GUGUBot/blob/main/config_default.yml)
-<br></br>
+**以下为必要配置！**
+> | 配置项 | 默认值 | 说明 |
+> | - | - | - |
+> | 正向websocket服务端口 | `8080` | 接收数据上报的端口 |
+> | 消息上报格式 | CQ码 | 机器人基于CQ码进行解析 |
+</details>
 
-# cq_qq_api配置
 
-> cq_qq_api是前置插件不可忽略
+### GUGUbot机器人配置
+> 非常建议看看[默认的配置文件](https://github.com/LoosePrince/PF-GUGUBot/blob/main/config_default.yml) [点击查看配置文件说明](https://github.com/LoosePrince/PF-GUGUBot/blob/main/config_default.yml)
+ 
+<details>
+ <summary>必要项</summary>
 
-### 请前往 [cq_qq_api](https://github.com/XueK66/PF-cq_qq_api) 库查看,该库由我们进行维护
+><details>
+> <summary>QQ相关设置</summary>
+>
+>- admin_id: 管理员QQ号 默认拥有GUGUbot管理员权限(仅私聊)
+>- group_id: 聊天转发的群
+>
+></details>
+
+</details>
+
+<details>
+ <summary>可选项</summary>
+
+><details>
+> <summary>QQ相关设置</summary>
+>
+>- admin_group_id: 管理群群号,群内所有人都有管理权限(仅限该群内)
+>- is_main_server: 是否为主服务器,分服请设置成`false`
+>- server_name: 服务器名称前缀, mc转发到QQ时显示
+>
+></details>
+
+><details>
+> <summary>指令开关</summary>
+>
+>- bound_notice: 是否进行绑定提示
+>- ban_word: 违禁词撤回开关
+>- ingame_key_word: 游戏内关键词开关
+>- key_word: 群聊关键词开关
+>- list: 玩家列表查询开关
+>- mc: #mc指令开关(非转发开关)
+>- name: 机器人名字显示为服务器在线人数开关
+>- qq: !!qq指令开关(非转发开关)
+>- start_command: 启动指令系统开关
+>- whitelist: 白名单开关
+>- shenhe: 审核功能开关(咕咕咕)
+>- mc_to_qq: MC转发到QQ开关
+>- qq_to_mc: QQ转发到mc开关
+>- whitelist_add_with_bound: 绑定时是否自动添加白名单
+>- whitelist_remove_with_leave: 退群时是否自动移除白名单
+>
+></details>
+
+><details>
+> <summary>路径</summary>
+>
+>- command_prefix: 群聊指令前缀识别
+>
+> **在dict_address底下**
+> **都是路径,不要跟上面的搞混了**
+> 
+>- ban_word_dict: 违禁词储存路径
+>- bound_image_path: 绑定图片储存路径
+>- extra_style_path: 自定义风格储存路径
+>- font_path: 字体储存路径
+>- key_word_dict: 群聊关键词储存路径
+>- key_word_ingame_dict: 游戏内关键词储存路径
+>- shenhe_log: 审核日志储存路径
+>- shenheman: 审核管理员储存路径
+>- start_command_dict: 启动指令储存路径
+>- uuid_qqid: uuid储存路径
+>- whitelist: 服务器白名单路径
+>
+></details>
+
+><details>
+> <summary>其他设置</summary>
+>
+>- font_limit: 文字超长转图片 （默认大于150字转图片, 设置-1关闭）
+>- style: （可选）机器人回复风格 #风格 查看风格帮助
+>
+></details>
+
+</details>
+
 
 # 有BUG或是新的IDEA
 如果需要更多联动或提交想法和问题请提交 [issues](https://github.com/LoosePrince/PF-GUGUBot/issues) 或 QQ [1377820366](http://wpa.qq.com/msgrd?v=3&uin=1377820366&site=qq&menu=yes) 提交！ <br />
 视情况添加，请勿联系他人（开发者：[雪开](https://github.com/XueK66)）
 
 # TODO
-- [ ] 修复功能异常或缺失的问题
 - [ ] ~~更多的rcon功能接入~~
-- [ ] [#39](https://github.com/LoosePrince/PF-GUGUBot/issues/39)
 - [ ] [#45](https://github.com/LoosePrince/PF-GUGUBot/issues/45)
+
