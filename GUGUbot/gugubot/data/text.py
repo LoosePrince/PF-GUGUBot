@@ -139,7 +139,7 @@ style = {
         'list': '列表如下: \n{}',
         'no_player_ingame': f"现在没人游玩服务器",
         'no_word': '列表空空的',
-        'player_api_fail': '未能通过api.miri.site获取到服务器信息，请检查服务器参数设置！（推荐开启rcon精准获取玩家信息）',
+        'player_api_fail': '未能捕获服务器日志（推荐开启rcon精准获取玩家信息）',
         'player_list':'在线玩家共{}人，{}列表: {}',
         'reload_success': '重载成功',
         'server_start':'服务器已启动',

@@ -56,6 +56,8 @@ class qbot(object):
         self.loading_dicts()
         self.loading_rcon()
 
+        self._list_callback = []
+
     # 读取文件
     def loading_dicts(self) -> None:
         self.font = pygame.font.Font(self.config["dict_address"]["font_path"], 26)
@@ -268,41 +270,36 @@ class qbot(object):
                         '服务器','server']
         if self.config['command']['list'] and \
             command[0] in list_command:
-            server_status = command[0] in ['服务器', 'server']
-            player_status = command[0] in ['玩家','玩家列表']
-            bound_list    = self.data.values()
-            if self.rcon is not None:
-                result = self.rcon.send_command('list')
-                instance_list = [i.strip() for i in result.split(": ")[-1].split(", ")]
-                server.logger.info(f"rcon获取列表如下：{instance_list}")
-            else:
-                try:
-                    content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
-                    instance_list = [i['name'].strip() for i in content['sample']]
-                    server.logger.info(f"API获取列表如下：{instance_list}")
-                except:
-                    bot.reply(info, get_style_template('player_api_fail', self.style))
-                    return True
-            
-            player_list = [i for i in instance_list if i in bound_list]
-            bot_list    = [i for i in instance_list if i not in bound_list]
 
-            respond = ""
-            count   = 0
-            if player_status or server_status:
-                respond += f"\n---玩家---\n" + '\n'.join(sorted(player_list)) if len(player_list) != 0 else get_style_template('no_player_ingame', self.style)
-                count   += len(player_list)
-            if not player_status:
-                respond += f"\n---假人---\n" + '\n'.join(sorted(bot_list))    if len(bot_list)    != 0 else '\n没有假人在线哦!'
-                count   += len(bot_list)
-            
-            if count != 0:
-                respond = get_style_template('player_list', self.style).format(
-                    count,
-                    '玩家' if player_status else '假人' if not server_status else '人员',
-                    '\n'+ respond)
-            respond = self.add_server_name(respond)
-            bot.reply(info, respond, force_reply = True)
+            def list_callback(content:str):
+                server_status = command[0] in ['服务器', 'server']
+                player_status = command[0] in ['玩家','玩家列表']
+                bound_list    = self.data.values()
+                
+
+                instance_list = [i.strip() for i in content.split(": ")[-1].split(", ")]
+                player_list = [i for i in instance_list if i in bound_list]
+                bot_list    = [i for i in instance_list if i not in bound_list and i]
+
+                respond = ""
+                count   = 0
+                if player_status or server_status:
+                    respond += f"\n---玩家---\n" + '\n'.join(sorted(player_list)) if len(player_list) != 0 else get_style_template('no_player_ingame', self.style)
+                    count   += len(player_list)
+                if not player_status:
+                    respond += f"\n\n---假人---\n" + '\n'.join(sorted(bot_list))    if len(bot_list)    != 0 else '\n\n没有假人在线哦!'
+                    count   += len(bot_list)
+                
+                if count != 0:
+                    respond = get_style_template('player_list', self.style).format(
+                        count,
+                        '玩家' if player_status else '假人' if not server_status else '人员',
+                        '\n'+ respond)
+                respond = self.add_server_name(respond)
+                bot.reply(info, respond, force_reply = True)
+
+            self._list_callback.append(list_callback)
+            server.execute("list")
 
         # 添加关键词
         elif self.config['command']['key_word'] and command[0] in ["列表", 'list', '添加', 'add', '删除', '移除', 'del']:
@@ -547,7 +544,6 @@ class qbot(object):
     # 群指令
     def group_command(self, server, info: Info, bot, command:list):
         if info.content == f"{self.config['command_prefix']}帮助":  # 群帮助
-            server.execute("list")
             bot.reply(info, group_help_msg)
         elif self.config['command']['mc'] and command[0] == 'mc': # qq发送到游戏内消息
             user_id = str(info.user_id)
@@ -835,23 +831,22 @@ class qbot(object):
     # 机器人名称显示游戏内人数
     def set_number_as_name(self, server:PluginServerInterface):
         bound_list = self.data.values()
+
+        def list_callback(content:str):
+            number = len([i for i in content.split(": ")[-1].split(", ") if i in bound_list])
+
+            name = " "
+            if number != 0:     
+                name = "在线人数: {}".format(number)
+            # 更新名字
+            for gid in self.config['group_id']:
+                self.bot.set_group_card(gid, self.bot.get_login_info()["data"]['user_id'], name)
+
         if self.rcon: # rcon 命令获取（准确）
-            number = len([i for i in self.rcon.send_command("list").split(": ")[-1].split(", ") if i in bound_list])
-            server.logger.debug(f'rcon获取列表如下：{self.rcon.send_command("list").split(": ")[-1].split(", ")}')
+            list_callback(self.rcon.send_command("list"))
         else:
-            try:      # 使用API获取，高版本可能无效
-                content = requests.get(f'https://api.miri.site/mcPlayer/get.php?ip={self.config["game_ip"]}&port={self.config["game_port"]}').json()
-                number = len([i["name"] for i in content['sample'] if i["name"] in bound_list])
-                server.logger.debug(f"API获取列表如下：{[i['name'] for i in content['sample']]}")
-            except:
-                server.logger.info("API接口错误/请配置game_ip & game_port参数")
-                number = 0
-        name = " "
-        if number != 0:     
-            name = "在线人数: {}".format(number)
-        # 更新名字
-        for gid in self.config['group_id']:
-            self.bot.set_group_card(gid, self.bot.get_login_info()["data"]['user_id'], name)
+            self._list_callback.append(list_callback)
+            server.execute("list")
 #+---------------------------------------------------------------------+
 # 文字转图片函数，一定程度防止风控？
 def text2image(font, input_string:str)->str:
