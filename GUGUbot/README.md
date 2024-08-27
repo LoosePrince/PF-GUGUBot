@@ -1,3 +1,4 @@
+[![PF-GUGUBot](https://socialify.git.ci/LoosePrince/PF-GUGUBot/image?description=1&font=Inter&issues=1&language=1&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Light)](https://github.com/LoosePrince/PF-GUGUBot)
 # PF-QQchat
 > PFingan服务器MCDRQQ机器人插件
 
@@ -11,9 +12,8 @@
 [![最新发布下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/latest/total?style=flat-square&label=最新版本下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest)
 
 本插件修改自： 
-[QQChat新版 - 修改自它的旧版](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/qq_chat) | [原作者：AnzhiZhang](https://github.com/AnzhiZhang) <br>
+[QQChat的旧版](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/qq_chat) <br>
 技术支持：XueK__ [前往主页](https://github.com/XueK66)
-<br></br>
 
 > #### 这是基于原插件的修改版本，但是由于经过多次修改和重构，我们并不确定是否仍存在原本的代码
 
@@ -49,6 +49,8 @@
     - [GUGUbot机器人配置](#gugubot机器人配置)
 - [有BUG或是新的IDEA](#有bug或是新的idea)
 - [TODO](#todo)
+
+* 有任何安装问题或是新的想法，欢迎[联系我们](#有BUG或是新的IDEA)
 
 ## 依赖
 #### Python包

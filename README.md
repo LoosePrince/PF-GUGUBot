@@ -1,3 +1,4 @@
+[![PF-GUGUBot](https://socialify.git.ci/LoosePrince/PF-GUGUBot/image?description=1&font=Inter&issues=1&language=1&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Light)](https://github.com/LoosePrince/PF-GUGUBot)
 # PF-QQchat
 > PFingan服务器MCDRQQ机器人插件
 
@@ -11,18 +12,33 @@
 [![最新发布下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/latest/total?style=flat-square&label=最新版本下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest)
 
 本插件修改自： 
-[QQChat新版 - 修改自它的旧版](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/qq_chat) | [原作者：AnzhiZhang](https://github.com/AnzhiZhang) <br>
+[QQChat的旧版](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/qq_chat) <br>
 技术支持：XueK__ [前往主页](https://github.com/XueK66)
-<br></br>
 
 > #### 这是基于原插件的修改版本，但是由于经过多次修改和重构，我们并不确定是否仍存在原本的代码
 
-使用方式：
+## 使用方式：
+
+**提示：如果您是通过`插件仓库或其它来源`访问的此文档内容，那么请点击[PF-GUGUBot](https://github.com/LoosePrince/PF-GUGUBot)访问我们的仓库，并通过[Release](https://github.com/LoosePrince/PF-GUGUBot/releases/latest)下载最新的版本并查看对应版本的说明（`因为我们的文档更新并不及时`），而不是直接下载提供的文件（`有时可能不只有一份文件`）**
+
+**提示2：部分时候在使用时可能需要您具备一定的Python和插件相关的基础内容，因为有时我们上传的只是测试通过的版本，但它可能并不适配您的环境，同时请确保您看完了此文档关于配置的部分**
+
+流程：
 * 下载[PF-cq_qq_api前置插件](https://github.com/XueK66/PF-cq_qq_api/releases)并放入plugin
+  
+  cq_qq_api MCDR一键安装指令：
+  > !!MCDR plugin install cq_qq_api
+
+* 加载后，在`/config/cq_qq_api/config.json`中[配置服务](https://github.com/XueK66/PF-cq_qq_api#配置)
 * 将Release里面的GUGUbot.mcdr放入`/plugins`
-* 加载后，在`/config/GUGUbot/config.yml`中配置机器人
-* 加载后，在`/config/cq_qq_api/config.json`中配置服务
+
+  gugubot MCDR一键安装指令：
+  > !!MCDR plugin install gugubot
+
+* 加载后，在`/config/GUGUbot/config.yml`中[配置机器人](#功能列表)
 * 如果您在安装完成后启动提示没有配置文件请下载[config_default.yml](https://github.com/LoosePrince/PF-GUGUBot/blob/main/config_default.yml)重名名为`config.yml`放入`/config/GUGUbot/config.yml`再运行
+
+* 有任何安装问题或是新的想法，欢迎[联系我们](#有BUG或是新的IDEA)
 
 ## 依赖
 #### Python包
