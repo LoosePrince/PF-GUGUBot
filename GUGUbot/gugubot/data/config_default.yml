@@ -16,6 +16,7 @@ is_main_server: true
 # （可选）服务器名字 -> 会在转发前面显示服务器名字
 server_name: ""
 ################### 指令开关（可以通过机器人调整）########################
+# 是否进行绑定提示
 bound_notice: true
 command:
   # ban_word:违禁词撤回
