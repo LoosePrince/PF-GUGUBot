@@ -56,6 +56,10 @@ command_prefix: "#"
 dict_address:
   # 违禁词
   ban_word_dict: .//config//GUGUbot//ban_word.json
+  # 绑定提示图
+  bound_image_path: .//config//GUGUbot//bound.jpg
+  # 自定义风格文件
+  extra_style_path: ""
   # 字体路径
   font_path: ./plugins/GUGUbot/font/MicrosoftYaHei-01.ttf
   # 关键词
@@ -77,9 +81,4 @@ dict_address:
 font_limit: 150
 # （可选）机器人回复风格 #风格 查看风格帮助
 style: 正常
-#################### （可选）查找玩家人数的备用方案 #####################
-# 服务器IP，请填公网域名，端口号前面那段，例：mcserver.com:25564，
-game_ip: ''
-# 服务器的端口
-game_port: ''
 ########################################################################

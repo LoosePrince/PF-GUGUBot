@@ -1,54 +1,12 @@
 PLUGIN_METADATA = {
     'id': 'gugubot',
-    'version': '1.0.7',
+    'version': '1.1.4',
     'name': 'GUGUbot',
     'description': 'A bot connect mc and QQ',
     'author': 'XueK__',
     'dependencies': {
         'cool_q_api': '*',
     }
-}
-DEFAULT_CONFIG = {
-    'group_id': [1234561, 1234562],
-    'admin_id': [1234563, 1234564],
-    'admin_group_id': [123321, 456654],
-    'server_name': '',
-    'is_main_server': True,
-    'bound_notice': True,
-    'whitelist_add_with_bound': False,
-    'whitelist_remove_with_leave': True,
-    'game_ip':'',
-    'game_port':'',
-    'font_limit':150,
-    'command_prefix': "#",
-    'style': '正常',
-    'forward': {
-        'mc_to_qq': True,
-        'qq_to_mc': True
-        },
-    'command': {
-        'list': True,
-        'mc': True,
-        'qq': True,
-        'ban_word': True,
-        'key_word': True,
-        'ingame_key_word': True,
-        'name':True,
-        'whitelist':True,
-        'shenhe':True
-        },
-    'dict_address' : {
-        "bound_image_path": ".//config//GUGUbot//bound.jpg",
-        'font_path': ".//config//GUGUbot//MicrosoftYaHei-01.ttf",
-        "start_command_dict": './/config//GUGUbot//start_commands.json',
-        "key_word_dict": './/config//GUGUbot//key_word.json',
-        "ban_word_dict": './/config//GUGUbot//ban_word.json',
-        "key_word_ingame_dict": './/config//GUGUbot//key_word_ingame.json',
-        "uuid_qqid": './/config//GUGUbot//uuid_qqid.json',
-        "whitelist": './/server//whitelist.json',
-        "shenheman":'.//config//GUGUbot//shenheman.json',
-        'shenhe_log':'.//config//GUGUbot//shenhe_log.txt'
-        }
 }
 
 group_help_msg = '''命令帮助如下:
@@ -160,19 +118,31 @@ mc2qq_template = [
 
 style = {
     '正常' : {
-        'ban_word_find':'回复包含违禁词请修改后重发，维护和谐游戏人人有责。\n违禁理由：{}',
-        'no_player_ingame': f"现在没人游玩服务器",
-        'player_list':'在线玩家共{}人，{}列表: {}',
-        'server_start':'服务器已启动',
+        'add_existed': '已存在该关键词~',
+        'add_image_instruction': '请发送要添加的图片~',
+        'add_image_fail': '图片保存失败~',
+        'add_image_previous_no_done': '上一个关键词还未绑定，添加哒咩！',
         'add_success':'添加成功！',
+        'authorization_pass': '已通过{}的申请awa',
+        'authorization_reject': '已拒绝{}的申请awa',
+        'authorization_request': '{} 申请进群, 请审核',
+        'ban_word_find':'回复包含违禁词请修改后重发，维护和谐游戏人人有责。\n违禁理由：{}',
+        'bound_add_whitelist': '已将您添加到服务器白名单',
+        'bound_exist': '您已绑定ID: {}, 请联系管理员修改',
+        'bound_success': '已成功绑定',
+        'command_success' : '指令执行成功',
         'delete_success':'删除成功！',
+        'del_no_exist': '该关键词不存在',
+        'del_whitelist_when_quit': '{}已退群，白名单同步删除',
         'key_word_exist': '已有指定关键词,请删除(#删除 <关键词>)后重试 awa',
         'lack_parameter': '缺少参数，请参考 #帮助 里的说明',
-        'del_no_exist': '该关键词不存在',
-        'no_word': '列表空空的',
         'list': '列表如下: \n{}',
+        'no_player_ingame': f"现在没人游玩服务器",
+        'no_word': '列表空空的',
+        'player_api_fail': '未能捕获服务器日志（推荐开启rcon精准获取玩家信息）',
+        'player_list':'在线玩家共{}人，{}列表: {}',
         'reload_success': '重载成功',
-        'command_success' : '指令执行成功'
+        'server_start':'服务器已启动',
     },
     '傲娇': {
         'ban_word_find':"本大小姐不听，才不告诉你是因为 {}",

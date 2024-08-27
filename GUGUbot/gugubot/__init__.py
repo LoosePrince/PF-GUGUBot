@@ -8,8 +8,8 @@ gugu_dir = os.path.dirname(__file__)[:-7] # remove \gugubot
 sys.path.append(gugu_dir)  if gugu_dir not in sys.path  else None
 
 from .bot import qbot
-from .data.text import style, DEFAULT_CONFIG
-from .table import table
+from .utils import get_style_template
+
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.command import *
 import pygame
@@ -85,6 +85,10 @@ def on_info(server:PluginServerInterface, info:Info)->None:
     if isinstance(qq_bot, qbot):
         qq_bot.add_offline_whitelist(server, info)
 
+        while "players online:" in info.content and qq_bot._list_callback:
+            func = qq_bot._list_callback.pop()
+            func(info.content)
+
 # mc游戏消息 -> QQ
 def on_user_info(server:PluginServerInterface, info:Info)->None:
     if isinstance(qq_bot, qbot):
@@ -101,7 +105,7 @@ def on_unload(server:PluginServerInterface)->None:
 def on_server_startup(server:PluginServerInterface)->None:
     if isinstance(qq_bot, qbot):
         # 开服提示
-        qq_bot.send_msg_to_all_qq(style[qq_bot.style]['server_start'])
+        qq_bot.send_msg_to_all_qq(get_style_template('server_start', qq_bot.style))
         # 开服指令
         for _,command in qq_bot.start_command.data.items():
             # 执行指令
