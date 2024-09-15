@@ -126,12 +126,11 @@ class qbot(object):
 
             if font_limit >= 0 and len(message.split("]")[-1]) >= font_limit:
                 image_path = text2image(font, message)
-                message = f"[CQ:image,file={Path(image_path).as_uri()}]"
+                message = f"[CQ:image,file=file:///{os.path.abspath(image_path)}]"
 
             message_types = {
                 'private': self.send_private_msg,
-                'group': self.send_group_msg,
-                'discuss': self.send_discuss_msg
+                'group': self.send_group_msg
             }
             send_func = message_types.get(info.message_type)
             if send_func:
@@ -350,6 +349,8 @@ class qbot(object):
                 '玩家' if player_status else '假人' if not server_status else '人员',
                 '\n' + respond
             )
+        elif count == 0:
+            respond = get_style_template('no_player_ingame', self.style)
 
         return respond
 
