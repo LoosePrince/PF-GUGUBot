@@ -849,7 +849,7 @@ class qbot(object):
             target_data = bot.get_group_member_info(group_id, qq_id)['data']
             target_name = target_data.get('card') or target_data.get('nickname', qq_id)
         except Exception as e:
-            self.server.logger.error(f"获取QQ名片失败：{e}")
+            self.server.logger.error(f"获取QQ名片失败：{e}, 请检查cq_qq_api链接是否断开")
             target_name = qq_id
         
         self.match_id()
