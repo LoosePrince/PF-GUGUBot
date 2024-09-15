@@ -776,6 +776,7 @@ class qbot(object):
                 return self.whitelist[uuid]
         # 未匹配到名字 -> 寻找QQ名片
         target_request = bot.get_group_member_info(group_id, qq_id)
+        # 获取失败
         if target_request is None:
             self.server.logger.error(f"获取QQ名片失败：{target_request}")
             return f'{qq_id}'
