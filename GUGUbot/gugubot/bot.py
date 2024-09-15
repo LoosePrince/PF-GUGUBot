@@ -39,8 +39,8 @@ class qbot(object):
         
         self.packing_copy()
         
-        self.config = table("./config/GUGUBot/config.json", yaml=True)
-        self.data = table("./config/GUGUBot/GUGUBot.json")
+        self.config = table("./config/GUGUbot/config.json", yaml=True)
+        self.data = table("./config/GUGUbot/GUGUbot.json")
         self.bot = bot
 
         self.server_name = self.config.data.get("server_name","")
@@ -775,7 +775,12 @@ class qbot(object):
             if uuid in self.whitelist:
                 return self.whitelist[uuid]
         # 未匹配到名字 -> 寻找QQ名片
-        target_data = bot.get_group_member_info(group_id, qq_id)['data']
+        target_request = bot.get_group_member_info(group_id, qq_id)
+        if target_request is None:
+            self.server.logger.error(f"获取QQ名片失败：{target_request}")
+            return f'{qq_id}'
+        
+        target_data = target_request['data']
         target_name = target_data['card'] or target_data['nickname']
         self.match_id()
         return f'{target_name}'
