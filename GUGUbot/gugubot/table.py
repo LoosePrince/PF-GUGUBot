@@ -59,6 +59,9 @@ class table(object):
     def __len__(self):
         return len(self.data)
 
+    def get(self, key:str, default=None):
+        return self.data.get(key, default)
+
     def keys(self):
         return self.data.keys()
 

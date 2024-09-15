@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #+---------------------------------------------------------------------+
 import os
+import requests
 import sys
 
 # GUGUbot加入系统路径
@@ -65,6 +66,23 @@ def on_load(server: PluginServerInterface, old)->None:
     server.register_event_listener('cq_qq_api.on_qq_message', qq_bot.send_msg_to_mc)
     server.register_event_listener('cq_qq_api.on_qq_request', qq_bot.on_qq_request)
     server.register_event_listener('cq_qq_api.on_qq_notice', qq_bot.notification)
+
+    # 检查插件版本
+    def check_plugin_version():
+        try:
+            response = requests.get("https://api.github.com/repos/LoosePrince/PF-GUGUBot/releases/latest")
+            latest_version = response.json()["tag_name"].replace('v', '')
+            current_version = server.get_self_metadata().version
+            if latest_version != current_version:
+                server.logger.info(f"§e[PF-GUGUBot] §6有新版本可用: §b{latest_version}§6，当前版本: §b{current_version}")
+                server.logger.info("§e[PF-GUGUBot] §6请使用 §b!!MCDR plugin install -U -y gugubot §6来更新插件")
+            else:
+                server.logger.info(f"§e[PF-GUGUBot] §6已是最新版本: §b{current_version}")
+        except Exception as e:
+            server.logger.warning(f"检查插件版本时出错: {e}")
+
+    # 在插件加载完成后异步检查版本
+    server.schedule_task(check_plugin_version)
 
 #+---------------------------------------------------------------------+
 # 防止初始化报错

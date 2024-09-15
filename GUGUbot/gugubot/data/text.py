@@ -1,14 +1,3 @@
-PLUGIN_METADATA = {
-    'id': 'gugubot',
-    'version': '1.1.4',
-    'name': 'GUGUbot',
-    'description': 'A bot connect mc and QQ',
-    'author': 'XueK__',
-    'dependencies': {
-        'cool_q_api': '*',
-    }
-}
-
 group_help_msg = '''命令帮助如下:
 #玩家 -> 获取在线玩家列表
 #假人 -> 获取在线假人列表
