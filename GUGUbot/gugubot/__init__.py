@@ -75,6 +75,7 @@ def on_load(server: PluginServerInterface, old)->None:
             current_version = server.get_self_metadata().version
             if latest_version != current_version:
                 server.logger.info(f"§e[PF-GUGUBot] §6有新版本可用: §b{latest_version}§6，当前版本: §b{current_version}")
+                server.logger.info("§e[PF-GUGUBot] §6请使用 §b!!MCDR plugin install -U -y gugubot §6来更新插件")
             else:
                 server.logger.info(f"§e[PF-GUGUBot] §6已是最新版本: §b{current_version}")
         except Exception as e:
