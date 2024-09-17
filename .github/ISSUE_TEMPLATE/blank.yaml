@@ -1,0 +1,17 @@
+name: "空白模板"
+description: "请填写以下信息。"
+
+body:
+  - type: input
+    id: title
+    attributes:
+      label: "标题"
+      description: "请输入标题。"
+      placeholder: "在此输入标题……"
+
+  - type: input
+    id: content
+    attributes:
+      label: "内容"
+      description: "请输入内容。"
+      placeholder: "在此输入内容……"
