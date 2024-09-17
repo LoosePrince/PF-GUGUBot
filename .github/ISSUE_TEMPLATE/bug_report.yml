@@ -2,7 +2,7 @@ name: "Bug Report"
 description: "请填写以下表单来报告BUG并提供相关信息。"
 
 labels:
-  - bug
+  - "错误（BUG）"
 
 body:
   - type: markdown
@@ -41,7 +41,7 @@ body:
     attributes:
       label: "GUGUbot 版本号"
       description: "请输入你使用的 GUGUbot 版本号。"
-      placeholder: "如：1.5.0"
+      placeholder: "如：1.1.5"
       required: true
 
   - type: input
@@ -58,7 +58,6 @@ body:
       label: "日志内容"
       description: "请粘贴相关的错误日志。"
       placeholder: "请粘贴你的日志内容……"
-      value: 
       required: true
 
   - type: file
@@ -66,4 +65,3 @@ body:
     attributes:
       label: "上传日志文件"
       description: "如有必要，可上传完整的日志文件。"
-      required: false
