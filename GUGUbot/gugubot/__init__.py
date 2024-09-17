@@ -72,8 +72,8 @@ def on_load(server: PluginServerInterface, old)->None:
         try:
             response = requests.get("https://api.github.com/repos/LoosePrince/PF-GUGUBot/releases/latest")
             latest_version = response.json()["tag_name"].replace('v', '')
-            current_version = server.get_self_metadata().version
-            if latest_version != current_version:
+            current_version = str(server.get_self_metadata().version)
+            if latest_version > current_version:
                 server.logger.info(f"§e[PF-GUGUBot] §6有新版本可用: §b{latest_version}§6，当前版本: §b{current_version}")
                 server.logger.info("§e[PF-GUGUBot] §6请使用 §b!!MCDR plugin install -U -y gugubot §6来更新插件")
             else:
