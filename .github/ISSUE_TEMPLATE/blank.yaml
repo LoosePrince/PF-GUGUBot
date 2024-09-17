@@ -1,5 +1,5 @@
 name: "空白模板"
-description: "请填写以下信息。"
+description: "一个空白的模板，自由发挥你想提交的内容"
 
 body:
   - type: input
