@@ -1,5 +1,5 @@
-name: "Bug Report"
-description: "请填写以下表单来报告BUG并提供相关信息。"
+name: "反馈bug"
+description: "请填写此表单来报告BUG并提供相关信息。"
 
 labels:
   - "错误（BUG）"
@@ -52,7 +52,7 @@ body:
     attributes:
       label: "日志内容"
       description: "请粘贴相关的错误日志。"
-      placeholder: "请粘贴你的日志内容……"
+      placeholder: "请粘贴你的日志内容（可以粘贴文件）……"
 
   # 移除 file 类型或改为其他合适的上传解决方案
   # - type: file
