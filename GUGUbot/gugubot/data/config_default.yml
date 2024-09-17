@@ -62,7 +62,7 @@ dict_address:
   # 自定义风格文件
   extra_style_path: ""
   # 字体路径
-  font_path: ./plugins/GUGUbot/font/MicrosoftYaHei-01.ttf
+  font_path: ./config/GUGUbot/font/MicrosoftYaHei-01.ttf
   # 关键词
   key_word_dict: .//config//GUGUbot//key_word.json
   # 游戏内关键词
