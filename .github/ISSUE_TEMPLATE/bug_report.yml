@@ -18,7 +18,6 @@ body:
       label: "当前问题和情况"
       description: "描述你遇到的错误或问题。"
       placeholder: "请描述当前的情况……"
-      required: true
 
   - type: input
     id: expected_result
@@ -26,7 +25,6 @@ body:
       label: "想要的效果或它本该拥有的效果"
       description: "描述你预期的结果或程序本该如何表现。"
       placeholder: "描述你想要的结果……"
-      required: true
 
   - type: input
     id: mcdr_version
@@ -34,7 +32,6 @@ body:
       label: "MCDR 版本号"
       description: "请输入你使用的 MCDR 版本号。"
       placeholder: "如：2.10.2"
-      required: true
 
   - type: input
     id: gugubot_version
@@ -42,7 +39,6 @@ body:
       label: "GUGUbot 版本号"
       description: "请输入你使用的 GUGUbot 版本号。"
       placeholder: "如：1.1.5"
-      required: true
 
   - type: input
     id: cq_qq_api_version
@@ -50,7 +46,6 @@ body:
       label: "cq_qq_api 版本号"
       description: "请输入你使用的 cq_qq_api 版本号。"
       placeholder: "如：1.0.1"
-      required: true
 
   - type: textarea
     id: log_content
@@ -58,10 +53,10 @@ body:
       label: "日志内容"
       description: "请粘贴相关的错误日志。"
       placeholder: "请粘贴你的日志内容……"
-      required: true
 
-  - type: file
-    id: log_file
-    attributes:
-      label: "上传日志文件"
-      description: "如有必要，可上传完整的日志文件。"
+  # 移除 file 类型或改为其他合适的上传解决方案
+  # - type: file
+  #   id: log_file
+  #   attributes:
+  #     label: "上传日志文件"
+  #     description: "如有必要，可上传完整的日志文件。"
