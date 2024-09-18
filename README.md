@@ -386,11 +386,6 @@
     "token": ""
 }
 ```
-
-最终websocket url为：
-```
-ws://host:port/post_path/
-```
 </details>
 
 <details>
