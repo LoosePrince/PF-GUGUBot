@@ -75,6 +75,9 @@ def on_load(server: PluginServerInterface, old)->None:
     def check_plugin_version():
         try:
             response = requests.get("https://api.github.com/repos/LoosePrince/PF-GUGUBot/releases/latest")
+            if response.status_code != 200:
+                server.logger.warning(f"无法检查插件版本，网络代码: {response.status_code}")
+                return
             latest_version = response.json()["tag_name"].replace('v', '')
             current_version = str(server.get_self_metadata().version)
             if latest_version > current_version:
