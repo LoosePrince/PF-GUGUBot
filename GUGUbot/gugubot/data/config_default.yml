@@ -34,9 +34,9 @@ command:
   # 获取QQ聊天内容
   qq: true
   # 开服指令
-  start_command: true, 
+  start_command: true
   # 白名单功能
-  whitelist: true, 
+  whitelist: true
   # 辅助审核功能（开发中）
   shenhe: true
 # 转发设置
