@@ -52,11 +52,4 @@ body:
     attributes:
       label: "日志内容"
       description: "请粘贴相关的错误日志。"
-      placeholder: "请粘贴你的日志内容（可以粘贴文件）……"
-
-  # 移除 file 类型或改为其他合适的上传解决方案
-  # - type: file
-  #   id: log_file
-  #   attributes:
-  #     label: "上传日志文件"
-  #     description: "如有必要，可上传完整的日志文件。"
+      placeholder: "请粘贴你的日志内容……"
