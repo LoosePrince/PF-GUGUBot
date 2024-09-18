@@ -182,7 +182,7 @@ class qbot(object):
 
         try:
             group_raw_info = [self.bot.get_group_member_list(group_id) for group_id in self.config.get('group_id', [])]
-            unpack = [i['data'] for i in group_raw_info if i['status'] == 'ok']
+            unpack = [i['data'] for i in group_raw_info if i and i['status'] == 'ok']
         except Exception as e:
             self.server.logger.warning(f"获取群成员列表失败: {e}")
             unpack = []
