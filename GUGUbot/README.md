@@ -6,7 +6,7 @@
 [![查看次数起始时间](https://img.shields.io/badge/查看次数统计起始于-2023%2F9%2F2-1?style=flat-square)](/)
 [![仓库大小](https://img.shields.io/github/repo-size/LoosePrince/PF-GUGUBot?style=flat-square&label=仓库占用)](/) 
 [![最新版](https://img.shields.io/github/v/release/LoosePrince/PF-GUGUBot?style=flat-square&label=最新版)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest/download/GUGUbot.mcdr)
-[![Issues](https://img.shields.io/github/issues/LoosePrince/PF-GUGUBot?style=flat-square&label=Issues)](https://github.com/LoosePrince/PF-GUGUBot/issues) 
+[![议题](https://img.shields.io/github/issues/LoosePrince/PF-GUGUBot?style=flat-square&label=Issues)](https://github.com/LoosePrince/PF-GUGUBot/issues) 
 [![已关闭issues](https://img.shields.io/github/issues-closed/LoosePrince/PF-GUGUBot?style=flat-square&label=已关闭%20Issues)](https://github.com/LoosePrince/PF-GUGUBot/issues?q=is%3Aissue+is%3Aclosed)
 [![下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/total?style=flat-square&label=下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases)
 [![最新发布下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/latest/total?style=flat-square&label=最新版本下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest)
@@ -375,7 +375,7 @@
 > | - | - | - |
 > | host | `127.0.0.1` | 接收数据上报的地址 |
 > | port | `8080` | 对应数据上报的端口 | 
-> | post_path | "" | 对应数据上报的终点名（一般用不上） |
+> | post_path | "" | 对应数据上报的终点名 |
 > | token | "" | 对应数据上报的token，用于加密信息 |
 
 ```
@@ -387,10 +387,8 @@
 }
 ```
 
-最终*正向*websocket url为(仅供参考，配置或许无需完整链接)：
-```
-ws://host:port/post_path/
-```
+以上为正向websocket
+
 </details>
 
 <details>

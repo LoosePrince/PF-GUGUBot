@@ -1,0 +1,55 @@
+name: "反馈bug"
+description: "请填写此表单来报告BUG并提供相关信息。"
+
+labels:
+  - "错误（BUG）"
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 请遵循以下格式来提交Bug和问题：
+        - **错误**: 当前问题和情况
+        - **想要的效果**: 想要的效果或它本该拥有的效果
+
+  - type: input
+    id: current_issue
+    attributes:
+      label: "当前问题和情况"
+      description: "描述你遇到的错误或问题。"
+      placeholder: "请描述当前的情况……"
+
+  - type: input
+    id: expected_result
+    attributes:
+      label: "想要的效果或它本该拥有的效果"
+      description: "描述你预期的结果或程序本该如何表现。"
+      placeholder: "描述你想要的结果……"
+
+  - type: input
+    id: mcdr_version
+    attributes:
+      label: "MCDR 版本号"
+      description: "请输入你使用的 MCDR 版本号。"
+      placeholder: "如：2.10.2"
+
+  - type: input
+    id: gugubot_version
+    attributes:
+      label: "GUGUbot 版本号"
+      description: "请输入你使用的 GUGUbot 版本号。"
+      placeholder: "如：1.1.5"
+
+  - type: input
+    id: cq_qq_api_version
+    attributes:
+      label: "cq_qq_api 版本号"
+      description: "请输入你使用的 cq_qq_api 版本号。"
+      placeholder: "如：1.0.1"
+
+  - type: textarea
+    id: log_content
+    attributes:
+      label: "日志内容"
+      description: "请粘贴相关的错误日志。"
+      placeholder: "请粘贴你的日志内容……"
