@@ -325,8 +325,8 @@ class qbot(object):
             bound_list = set(self.data.values())
 
             instance_list = [i.strip() for i in content.split(": ")[-1].split(", ") if i.strip()]
-            player_list = [i for i in instance_list if i in bound_list]
-            bot_list = [i for i in instance_list if i not in bound_list]
+            player_list = [i for i in instance_list if i in bound_list or not self.config.get('bound_notice', True)]
+            bot_list = [i for i in instance_list if i not in bound_list and self.config.get('bound_notice', True)]
 
             respond = self.format_list_response(player_list, bot_list, player_status, server_status)
             respond = self.add_server_name(respond)
@@ -604,7 +604,7 @@ class qbot(object):
     def handle_mc_command(self, server, info: Info, bot):
         user_id = str(info.user_id)
         message = info.content.replace(f"{self.config['command_prefix']}mc ", "", 1)
-        if user_id in self.data:
+        if user_id in self.data or not self.config.get('bound_notice', True):
             self.forward_message_to_game(server, user_id, message)
             self.check_ingame_keyword(server, bot, info, message)
         elif self.config.data.get("bound_notice", True):
@@ -682,10 +682,8 @@ class qbot(object):
             server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_message}")
 
         # 判断是否绑定
-        if  str(info.user_id) not in self.data.keys():
-            # 提示绑定
-            if self.config.get("bound_notice", True):
-                bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
+        if self.config.get('bound_notice', True) and str(info.user_id) not in self.data.keys():
+            bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
             return 
         # 如果开启违禁词
         if self.config['command']['ban_word'] and (ban_response := self.ban_word.check_ban(info.content)):
@@ -737,7 +735,7 @@ class qbot(object):
                     return bot.get_login_info()['data']['nickname']
                 # 未绑定
                 target_data = bot.get_group_member_info(info.source_id, qq_id)['data']
-                return f"{target_data['card'] or target_data['nickname']}(未绑定)"
+                return f"{target_data['card'] or target_data['nickname']}"
 
             sender = _get_name(str(info.user_id))
             
@@ -916,7 +914,7 @@ class qbot(object):
         bound_list = self.data.values()
 
         def list_callback(content:str):
-            number = len([i for i in content.split(": ")[-1].split(", ") if i in bound_list])
+            number = len([i for i in content.split(": ")[-1].split(", ") if i in bound_list or not self.config.get('bound_notice', True)])
 
             name = " "
             if number != 0:     
