@@ -16,6 +16,7 @@ is_main_server: true
 # （可选）服务器名字 -> 会在转发前面显示服务器名字
 server_name: ""
 ################### 指令开关（可以通过机器人调整）########################
+# 是否进行绑定提示
 bound_notice: true
 command:
   # ban_word:违禁词撤回
@@ -33,15 +34,17 @@ command:
   # 获取QQ聊天内容
   qq: true
   # 开服指令
-  start_command: true, 
+  start_command: true
   # 白名单功能
-  whitelist: true, 
+  whitelist: true
   # 辅助审核功能（开发中）
   shenhe: true
 # 转发设置
 forward:
   # 服务器往QQ群转发
   mc_to_qq: true
+  # 服务器指令 转发
+  mc_to_qq_command: false
   # QQ群往服务器转发 
   qq_to_mc: true
 # 绑定ID自动绑定服务器白名单
@@ -61,7 +64,7 @@ dict_address:
   # 自定义风格文件
   extra_style_path: ""
   # 字体路径
-  font_path: ./plugins/GUGUbot/font/MicrosoftYaHei-01.ttf
+  font_path: ./config/GUGUbot/font/MicrosoftYaHei-01.ttf
   # 关键词
   key_word_dict: .//config//GUGUbot//key_word.json
   # 游戏内关键词
@@ -79,6 +82,8 @@ dict_address:
 ############################# 其他设置 ##################################
 # 文字超长转图片 （默认大于150字转图片, 设置-1关闭）
 font_limit: 150
+# 展示上报消息
+show_group_message: true
 # （可选）机器人回复风格 #风格 查看风格帮助
 style: 正常
 ########################################################################
