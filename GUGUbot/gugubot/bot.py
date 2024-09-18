@@ -181,7 +181,7 @@ class qbot(object):
         suggest_content = set(self.data.values())
 
         try:
-            group_raw_info = [self.bot.get_group_member_list(group_id) for group_id in self.config['group_id']]
+            group_raw_info = [self.bot.get_group_member_list(group_id) for group_id in self.config.get('group_id', [])]
             unpack = [i['data'] for i in group_raw_info if i['status'] == 'ok']
         except Exception as e:
             self.server.logger.warning(f"获取群成员列表失败: {e}")
@@ -243,7 +243,7 @@ class qbot(object):
         server.logger.debug(f"收到上报提示：{info}")
         # 指定群里 + 是退群消息
         if info.notice_type == 'group_decrease' \
-            and info.source_id in self.config['group_id']:
+            and info.source_id in self.config.get('group_id', []):
             user_id = str(info.user_id)
             if user_id in self.data.keys():
                 del self.data[user_id]
@@ -255,9 +255,9 @@ class qbot(object):
                     self.loading_whitelist()
 
     def is_valid_command_source(self, info: Info) -> bool:
-        return (info.source_id in self.config['group_id'] or
-                info.source_id in self.config['admin_group_id'] or
-                info.source_id in self.config['admin_id'])                
+        return (info.source_id in self.config.get('group_id', []) or
+                info.source_id in self.config.get('admin_group_id', []) or
+                info.source_id in self.config.get('admin_id', []))                
 
     # 通用QQ 指令   
     @addTextToImage
@@ -267,13 +267,16 @@ class qbot(object):
         # 检查消息是否来自关注的来源和是否以命令前缀开头
         if not self.is_valid_command_source(info) or not info.content.startswith(self.config['command_prefix']):
             return
+        
+        if info.content == self.config['command_prefix']:
+            info.content = '#帮助'
 
         command = info.content[len(self.config['command_prefix']):].split()
         
         if self.common_command(server, info, bot, command):
             return
         
-        if info.message_type == 'private' or info.source_id in self.config['admin_group_id']:
+        if info.message_type == 'private' or info.source_id in self.config.get('admin_group_id', []):
             self.private_command(server, info, bot, command)
         elif info.message_type == 'group':
             self.group_command(server, info, bot, command)
@@ -281,7 +284,7 @@ class qbot(object):
     # 公共指令
     def common_command(self, server: PluginServerInterface, info: Info, bot, command: list) -> bool:
         # 检测违禁词
-        if self.config['command']['ban_word'] and info.message_type == 'group' and info.source_id not in self.config['admin_group_id']:
+        if self.config['command']['ban_word'] and info.message_type == 'group' and info.source_id not in self.config.get('admin_group_id', []):
             if ban_response := self.ban_word.check_ban(' '.join(command)):
                 bot.delete_msg(info.message_id)
                 bot.reply(info, get_style_template('ban_word_find', self.style).format(ban_response[1]))
@@ -550,7 +553,7 @@ class qbot(object):
             elif len(command)>1 and command[1] == '关':
                 self.config['command']['name'] = False
 
-                for gid in self.config['group_id']:
+                for gid in self.config.get('group_id', []):
                     bot.set_group_card(gid, int(bot.get_login_info()["data"]['user_id']), " ")
                 bot.reply(info, "显示游戏内人数已关闭")     
 
@@ -653,7 +656,7 @@ class qbot(object):
     def on_qq_request(self, server, info: Info, bot):
         server.logger.debug(f"收到上报请求：{info}")
         if info.message_type == "group" \
-            and info.source_id in self.config["group_id"] \
+            and info.source_id in self.config.get("group_id", []) \
             and self.config["command"]["shenhe"]:
             # 获取名称
             stranger_name = bot.get_stranger_info(info.user_id)["data"]["nickname"]
@@ -671,12 +674,12 @@ class qbot(object):
         if len(info.content) == 0 or \
             info.content.startswith(self.config['command_prefix']) or \
             not self.config['forward']['qq_to_mc'] or \
-            info.source_id not in self.config['group_id']:
+            info.source_id not in self.config.get('group_id', []):
             return 
         # 判断是否绑定
         if  str(info.user_id) not in self.data.keys():
             # 提示绑定
-            if self.config.data.get("bound_notice", True):
+            if self.config.get("bound_notice", True):
                 bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
             return 
         # 如果开启违禁词
@@ -833,7 +836,7 @@ class qbot(object):
     
     # 通过QQ号找到绑定的游戏ID
     def find_game_name(self, qq_id: str, bot, group_id: str = None) -> str:
-        group_id = group_id if group_id in self.config['group_id'] else self.config['group_id'][0]
+        group_id = group_id if group_id in self.config.get('group_id', []) else self.config.get('group_id', [])[0]
         
         # 未启用白名单，直接返回绑定的游戏ID
         if not self.config['command']['whitelist']:
@@ -900,7 +903,7 @@ class qbot(object):
     def send_msg_to_all_qq(self, msg:str):
         msg = self.add_server_name(msg)
 
-        for group in self.config['group_id']:
+        for group in self.config.get('group_id', []):
             self.send_group_msg(msg, group)
 
     # 机器人名称显示游戏内人数
@@ -914,7 +917,7 @@ class qbot(object):
             if number != 0:     
                 name = "在线人数: {}".format(number)
             # 更新名字
-            for gid in self.config['group_id']:
+            for gid in self.config.get('group_id', []):
                 self.bot.set_group_card(gid, self.bot.get_login_info()["data"]['user_id'], name)
 
         if self.rcon: # rcon 命令获取（准确）
