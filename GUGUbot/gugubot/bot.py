@@ -262,12 +262,13 @@ class qbot(object):
     # 通用QQ 指令   
     @addTextToImage
     def on_qq_command(self, server: PluginServerInterface, info: Info, bot):
-        server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_message}")
-        
         # 检查消息是否来自关注的来源和是否以命令前缀开头
         if not self.is_valid_command_source(info) or not info.content.startswith(self.config['command_prefix']):
             return
         
+        if self.config.get('show_group_message', True):
+            server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_message}")
+
         if info.content == self.config['command_prefix']:
             info.content = '#帮助'
 
@@ -676,6 +677,10 @@ class qbot(object):
             not self.config['forward']['qq_to_mc'] or \
             info.source_id not in self.config.get('group_id', []):
             return 
+        
+        if self.config.get('show_group_message', True):
+            server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_message}")
+
         # 判断是否绑定
         if  str(info.user_id) not in self.data.keys():
             # 提示绑定
