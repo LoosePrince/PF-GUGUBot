@@ -266,7 +266,7 @@ class qbot(object):
         if not self.is_valid_command_source(info) or not info.content.startswith(self.config['command_prefix']):
             return
         
-        if self.config.get('show_group_message', True):
+        if self.config.get('show_message_in_console', True):
             server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_message}")
 
         if info.content == self.config['command_prefix']:
@@ -678,7 +678,7 @@ class qbot(object):
             info.source_id not in self.config.get('group_id', []):
             return 
         
-        if self.config.get('show_group_message', True):
+        if self.config.get('show_message_in_console', True):
             server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_message}")
 
         # 判断是否绑定
