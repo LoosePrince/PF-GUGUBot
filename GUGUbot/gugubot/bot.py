@@ -778,7 +778,7 @@ class qbot(object):
                 return
 
         # 转发消息
-        if info.content[:2] not in ['@ ', '!!']:
+        if info.content[:2] not in ['@ ', '!!'] or self.config['forward'].get('mc_to_qq_command', False):
             self._forward_message(server, info)
 
     def _handle_banned_message(self, server, info, ban_response):
