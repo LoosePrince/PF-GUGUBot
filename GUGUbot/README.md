@@ -445,6 +445,7 @@
 >- whitelist: 白名单开关
 >- shenhe: 审核功能开关(咕咕咕)
 >- mc_to_qq: MC转发到QQ开关
+>- mc_to_qq_command: 服务器指令(!!/@)转发到QQ
 >- qq_to_mc: QQ转发到mc开关
 >- whitelist_add_with_bound: 绑定时是否自动添加白名单
 >- whitelist_remove_with_leave: 退群时是否自动移除白名单
@@ -477,6 +478,7 @@
 > <summary>其他设置</summary>
 >
 >- font_limit: 文字超长转图片 （默认大于150字转图片, 设置-1关闭）
+>- show_message_in_console: 展示上报消息
 >- style: （可选）机器人回复风格 #风格 查看风格帮助
 >
 ></details>
