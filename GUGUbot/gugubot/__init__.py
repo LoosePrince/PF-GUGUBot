@@ -2,6 +2,7 @@
 #+---------------------------------------------------------------------+
 import os
 import requests
+import shutil
 import sys
 
 # GUGUbot加入系统路径
@@ -34,6 +35,9 @@ def on_load(server: PluginServerInterface, old)->None:
         past_bot = old.past_bot
     else:
         past_bot = False
+
+    # 更新配置文件 -> 1.1.4 -> 1.1.5 config迁移
+    temp_update_version(server)
 
     # gugubot主体
     qq_bot = qbot(server, cq_qq_api_bot)
@@ -71,9 +75,12 @@ def on_load(server: PluginServerInterface, old)->None:
     def check_plugin_version():
         try:
             response = requests.get("https://api.github.com/repos/LoosePrince/PF-GUGUBot/releases/latest")
+            if response.status_code != 200:
+                server.logger.warning(f"无法检查插件版本，网络代码: {response.status_code}")
+                return
             latest_version = response.json()["tag_name"].replace('v', '')
-            current_version = server.get_self_metadata().version
-            if latest_version != current_version:
+            current_version = str(server.get_self_metadata().version)
+            if latest_version > current_version:
                 server.logger.info(f"§e[PF-GUGUBot] §6有新版本可用: §b{latest_version}§6，当前版本: §b{current_version}")
                 server.logger.info("§e[PF-GUGUBot] §6请使用 §b!!MCDR plugin install -U -y gugubot §6来更新插件")
             else:
@@ -135,3 +142,20 @@ def set_sys_path()->None:
     if file_dir not in sys.path:
         sys.path.append(file_dir)
 #+---------------------------------------------------------------------+
+def temp_update_version(server:PluginServerInterface)->None:
+    config_dir = "./config/GUGUbot"
+    old_config_dir = "./config/GUGUBot"
+    
+    files_to_check = ["config.json", "GUGUbot.json"]
+    
+    for file in files_to_check:
+        new_path = os.path.join(config_dir, file)
+        old_path = os.path.join(old_config_dir, file)
+        
+        if not os.path.exists(new_path) and os.path.exists(old_path):
+            try:
+                os.makedirs(config_dir, exist_ok=True)
+                shutil.copy2(old_path, new_path)
+                server.logger.info(f"Copied {file} from {old_config_dir} to {config_dir}")
+            except Exception as e:
+                server.logger.error(f"Error copying {file}: {str(e)}")
