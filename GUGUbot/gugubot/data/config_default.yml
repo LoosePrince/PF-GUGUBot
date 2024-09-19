@@ -39,6 +39,9 @@ command:
   whitelist: true
   # 辅助审核功能（开发中）
   shenhe: true
+  # 执行服务器指令
+  execute_command: false
+
 # 转发设置
 forward:
   # 服务器往QQ群转发

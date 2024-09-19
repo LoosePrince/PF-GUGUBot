@@ -325,8 +325,8 @@ class qbot(object):
             bound_list = set(self.data.values())
 
             instance_list = [i.strip() for i in content.split(": ")[-1].split(", ") if i.strip()]
-            player_list = [i for i in instance_list if i in bound_list or not self.config.get('bound_notice', True)]
-            bot_list = [i for i in instance_list if i not in bound_list and self.config.get('bound_notice', True)]
+            player_list = [i for i in instance_list if i in bound_list]
+            bot_list = [i for i in instance_list if i not in bound_list]
 
             respond = self.format_list_response(player_list, bot_list, player_status, server_status)
             respond = self.add_server_name(respond)
@@ -587,6 +587,14 @@ class qbot(object):
                 for name,qq_id in self.shenheman.items():
                     temp[qq_id].append(name)
                 bot.reply(info, "有如下审核员：\n"+"\n".join([k+'-'+",".join(v) for k,v in temp.items()]))
+        
+        # 执行指令
+        elif info.content.startswith(f"{self.config['command_prefix']}执行"):
+            if self.config['command'].get('execute_command', False) and self.rcon:
+                content = self.rcon.send_command(info.content.replace(f"{self.config['command_prefix']}执行", ""))
+                bot.reply(info, content)
+            else:
+                bot.reply(info, "服务器未开启RCON")
 
     # 群指令
     def group_command(self, server, info: Info, bot, command: list):
