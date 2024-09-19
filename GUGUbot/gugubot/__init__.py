@@ -99,6 +99,9 @@ qq_bot = None
 def on_player_joined(server:PluginServerInterface, player:str, info:Info)->None:
     if isinstance(qq_bot, qbot) and qq_bot.config["command"]["name"]:
         qq_bot.set_number_as_name(server)
+        
+    if isinstance(qq_bot, qbot) and qq_bot.config["forward"].get("player_notice", False):
+        qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player))
 
 # 更新机器人名字 <- 显示在线人数功能
 # 对违规名字无效
@@ -119,6 +122,11 @@ def on_info(server:PluginServerInterface, info:Info)->None:
         # 更新机器人名字 <- 显示在线人数功能
         if "lost connection:" in info.content and qq_bot.config["command"]["name"]:
             qq_bot.set_number_as_name(server)
+
+        # 玩家下线通知
+        if "left the game" in info.content and qq_bot.config["forward"].get("player_notice", False):
+            player_name = info.content.replace("left the game", "").strip()
+            qq_bot.send_msg_to_all_qq(get_style_template('player_notice_leave', qq_bot.style).format(player_name))
 
 # mc游戏消息 -> QQ
 def on_user_info(server:PluginServerInterface, info:Info)->None:

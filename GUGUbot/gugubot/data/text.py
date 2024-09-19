@@ -134,6 +134,8 @@ style = {
         'no_word': '列表空空的',
         'player_api_fail': '未能捕获服务器日志（推荐开启rcon精准获取玩家信息）',
         'player_list':'在线玩家共{}人，{}列表: {}',
+        'player_notice_join': '{} 加入了游戏',
+        'player_notice_leave': '{} 离开了游戏',
         'reload_success': '重载成功',
         'server_start':'服务器已启动',
         'server_stop': '服务器已关闭'
