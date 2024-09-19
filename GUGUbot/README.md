@@ -118,6 +118,7 @@
 #uuid   -> 查看uuid 匹配相关帮助
 #名字   -> 查看机器人名字相关帮助
 #审核   -> 协助审核功能
+#指令 <command> -> 执行指令
 ```
 
 ><details>
@@ -240,6 +241,14 @@
 >```
 > </details>
 
+><details>
+>  <summary>指令详细指令</summary>
+> 
+>```
+>#指令 <command> -> 执行指令
+>```
+> </details>
+
 </details>
 
 <details>
@@ -359,6 +368,14 @@
 > 敬请期待(才不是咕咕咕)
 > </details>
 
+><details>
+>  <summary>指令 功能说明</summary>
+> 执行服务器指令
+> 
+> 在私聊或者管理群中使用 `#指令 <command>` 来执行
+> 机器人会返回执行结果
+> </details>
+
 </details>
 
 
@@ -435,6 +452,7 @@
 >
 >- bound_notice: 是否进行绑定提示
 >- ban_word: 违禁词撤回开关
+>- execute_command: 执行指令开关
 >- ingame_key_word: 游戏内关键词开关
 >- key_word: 群聊关键词开关
 >- list: 玩家列表查询开关
