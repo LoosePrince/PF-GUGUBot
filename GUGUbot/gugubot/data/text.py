@@ -136,6 +136,7 @@ style = {
         'player_list':'在线玩家共{}人，{}列表: {}',
         'reload_success': '重载成功',
         'server_start':'服务器已启动',
+        'server_stop': '服务器已关闭'
     },
     '傲娇': {
         'ban_word_find':"本大小姐不听，才不告诉你是因为 {}",
