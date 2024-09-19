@@ -101,18 +101,24 @@ def on_player_joined(server:PluginServerInterface, player:str, info:Info)->None:
         qq_bot.set_number_as_name(server)
 
 # 更新机器人名字 <- 显示在线人数功能
-def on_player_left(server:PluginServerInterface, player:str)->None:
-    if isinstance(qq_bot, qbot) and qq_bot.config["command"]["name"]:
-        qq_bot.set_number_as_name(server)
+# 对违规名字无效
+# def on_player_left(server:PluginServerInterface, player:str)->None:
+#     if isinstance(qq_bot, qbot) and qq_bot.config["command"]["name"]:
+#         qq_bot.set_number_as_name(server)
 
 # 离线玩家添加白名单功能
 def on_info(server:PluginServerInterface, info:Info)->None:
     if isinstance(qq_bot, qbot):
         qq_bot.add_offline_whitelist(server, info)
 
+        # list function
         while "players online:" in info.content and qq_bot._list_callback:
             func = qq_bot._list_callback.pop()
             func(info.content)
+
+        # 更新机器人名字 <- 显示在线人数功能
+        if "lost connection:" in info.content and qq_bot.config["command"]["name"]:
+            qq_bot.set_number_as_name(server)
 
 # mc游戏消息 -> QQ
 def on_user_info(server:PluginServerInterface, info:Info)->None:
