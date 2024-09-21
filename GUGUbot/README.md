@@ -486,6 +486,7 @@
 >- mc_to_qq_command: 服务器指令(!!/@)转发到QQ
 >- qq_to_mc: QQ转发到mc开关
 >- keep_raw_image_link: 转发图片链接开关（一般搭配ChatImage使用）
+>- show_group_notice: 上线显示最新群公告开关
 >- whitelist_add_with_bound: 绑定时是否自动添加白名单
 >- whitelist_remove_with_leave: 退群时是否自动移除白名单
 >

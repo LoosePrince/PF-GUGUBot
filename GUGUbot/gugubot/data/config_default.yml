@@ -52,6 +52,8 @@ forward:
   player_notice: false
   # 转发图片链接
   keep_raw_image_link: false
+  # 上线显示最新群公告
+  show_group_notice: false
   # QQ群往服务器转发 
   qq_to_mc: true
 # 绑定ID自动绑定服务器白名单
