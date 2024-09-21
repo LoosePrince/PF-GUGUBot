@@ -938,7 +938,12 @@ class qbot(object):
         bound_list = self.data.values()
 
         def list_callback(content:str):
-            number = len([i for i in content.split(": ")[-1].split(", ") if i in bound_list or not self.config.get('bound_notice', True)])
+            instance_list = [i.strip() for i in content.split(": ")[-1].split(", ") if i.strip()]
+            instance_list = [i.split(']')[-1].split('】')[-1].strip() for i in instance_list] # 针对 [123] 玩家 和 【123】玩家 这种人名
+
+            # 获取玩家列表  
+            player = [i for i in instance_list if i in bound_list or not bound_list]
+            number = len(player)
 
             name = " "
             if number != 0:     
