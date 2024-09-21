@@ -325,8 +325,16 @@ class qbot(object):
             bound_list = set(self.data.values())
 
             instance_list = [i.strip() for i in content.split(": ")[-1].split(", ") if i.strip()]
-            player_list = [i for i in instance_list if i in bound_list]
-            bot_list = [i for i in instance_list if i not in bound_list]
+            instance_list = [i.split(']')[-1].split('】')[-1].strip() for i in instance_list] # 针对 [123] 玩家 和 【123】玩家 这种人名
+            
+            # 有人绑定 -> 识别假人
+            if bound_list:
+                player_list = [i for i in instance_list if i in bound_list]
+                bot_list = [i for i in instance_list if i not in bound_list]
+            # 无人绑定 -> 不识别假人 ==> 下版本使用 ip_logging 来识别假人
+            else:
+                player_list = instance_list
+                bot_list = []
 
             respond = self.format_list_response(player_list, bot_list, player_status, server_status)
             respond = self.add_server_name(respond)
