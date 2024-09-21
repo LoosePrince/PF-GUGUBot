@@ -16,7 +16,7 @@ from .data.text import (
 from .key_word_system import key_word_system
 from .start_command_system import start_command_system
 from .table import table
-from .utils import get_style_template, get_style
+from .utils import get_style_template, get_style, beautify_message
 from collections import defaultdict
 from functools import partial
 from mcdreforged.api.types import PluginServerInterface, Info
@@ -619,6 +619,7 @@ class qbot(object):
             self.send_binding_notice(bot, info, user_id)
 
     def forward_message_to_game(self, server, user_id, message):
+        message = beautify_message(message, self.config.get('forward', {}).get('keep_raw_image_link', False))
         server.say(f'§6[QQ] §a[{self.find_game_name(user_id, server, None)}] §f{message}')
 
     def check_ingame_keyword(self, server, bot, info, message):
@@ -764,11 +765,7 @@ class qbot(object):
             )
             server.say(f'§6[QQ] §a[{sender}]§f {sub_string}')
         else: 
-            if info.content.startswith('[CQ:json'):
-                json_match = re.search(r'\[CQ:json,data=(\{.*\}).*?\]', info.content)
-                if json_match:
-                    json_data = json_match.group(1).replace('&#44;', ',').replace('&#91;', '[').replace('&#93;', ']')
-                    info.content = '[链接]' + json.loads(json_data)['meta']['detail_1']['desc']
+            info.content = beautify_message(info.content, self.config.get('forward', {}).get('keep_raw_image_link', False))
             server.say(f'§6[QQ] §a[{self.find_game_name(str(info.user_id), bot, info.source_id)}] §f{info.content}')
             
     # 转发消息

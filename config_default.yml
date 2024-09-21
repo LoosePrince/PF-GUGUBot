@@ -50,6 +50,8 @@ forward:
   mc_to_qq_command: false
   # 玩家上下线通知
   player_notice: false
+  # 转发图片链接
+  keep_raw_image_link: false
   # QQ群往服务器转发 
   qq_to_mc: true
 # 绑定ID自动绑定服务器白名单
