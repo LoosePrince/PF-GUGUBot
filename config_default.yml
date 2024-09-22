@@ -39,12 +39,21 @@ command:
   whitelist: true
   # 辅助审核功能（开发中）
   shenhe: true
+  # 执行服务器指令
+  execute_command: false
+  
 # 转发设置
 forward:
   # 服务器往QQ群转发
   mc_to_qq: true
   # 服务器指令 转发
   mc_to_qq_command: false
+  # 玩家上下线通知
+  player_notice: false
+  # 转发图片链接
+  keep_raw_image_link: false
+  # 上线显示最新群公告
+  show_group_notice: false
   # QQ群往服务器转发 
   qq_to_mc: true
 # 绑定ID自动绑定服务器白名单

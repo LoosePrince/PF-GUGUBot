@@ -26,6 +26,7 @@ admin_help_msg = '''管理员命令帮助如下
 #uuid   -> 查看uuid 匹配相关帮助
 #名字   -> 查看机器人名字相关帮助
 #审核   -> 协助审核功能
+#指令 <command> -> 执行指令
 '''
 
 bound_help = '''#绑定 列表 -> 查看绑定列表
@@ -133,8 +134,11 @@ style = {
         'no_word': '列表空空的',
         'player_api_fail': '未能捕获服务器日志（推荐开启rcon精准获取玩家信息）',
         'player_list':'在线玩家共{}人，{}列表: {}',
+        'player_notice_join': '{} 加入了游戏',
+        'player_notice_leave': '{} 离开了游戏',
         'reload_success': '重载成功',
         'server_start':'服务器已启动',
+        'server_stop': '服务器已关闭'
     },
     '傲娇': {
         'ban_word_find':"本大小姐不听，才不告诉你是因为 {}",

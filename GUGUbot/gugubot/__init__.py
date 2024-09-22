@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #+---------------------------------------------------------------------+
+import json
 import os
 import requests
 import shutil
@@ -99,20 +100,43 @@ qq_bot = None
 def on_player_joined(server:PluginServerInterface, player:str, info:Info)->None:
     if isinstance(qq_bot, qbot) and qq_bot.config["command"]["name"]:
         qq_bot.set_number_as_name(server)
+        
+    if isinstance(qq_bot, qbot) and qq_bot.config["forward"].get("player_notice", False):
+        qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player))
+
+    # 推迟至 1.1.8 
+    # if isinstance(qq_bot, qbot) and qq_bot.config["forward"].get("show_group_notice", False):
+    #     respond_warning = {
+    #         "text": f"群公告：{qq_bot.get_group_notice()}",
+    #         "color": "gray",
+    #         "italic": False
+    #     }
+    #     server.execute(f'tellraw {player} {json.dumps(respond_warning)}')
 
 # 更新机器人名字 <- 显示在线人数功能
-def on_player_left(server:PluginServerInterface, player:str)->None:
-    if isinstance(qq_bot, qbot) and qq_bot.config["command"]["name"]:
-        qq_bot.set_number_as_name(server)
+# 对违规名字无效
+# def on_player_left(server:PluginServerInterface, player:str)->None:
+#     if isinstance(qq_bot, qbot) and qq_bot.config["command"]["name"]:
+#         qq_bot.set_number_as_name(server)
 
 # 离线玩家添加白名单功能
 def on_info(server:PluginServerInterface, info:Info)->None:
     if isinstance(qq_bot, qbot):
         qq_bot.add_offline_whitelist(server, info)
 
+        # list function
         while "players online:" in info.content and qq_bot._list_callback:
             func = qq_bot._list_callback.pop()
             func(info.content)
+
+        # 更新机器人名字 <- 显示在线人数功能
+        if "lost connection:" in info.content and qq_bot.config["command"]["name"]:
+            qq_bot.set_number_as_name(server)
+
+        # 玩家下线通知
+        if "left the game" in info.content and qq_bot.config["forward"].get("player_notice", False):
+            player_name = info.content.replace("left the game", "").strip()
+            qq_bot.send_msg_to_all_qq(get_style_template('player_notice_leave', qq_bot.style).format(player_name))
 
 # mc游戏消息 -> QQ
 def on_user_info(server:PluginServerInterface, info:Info)->None:
@@ -135,6 +159,12 @@ def on_server_startup(server:PluginServerInterface)->None:
         for _,command in qq_bot.start_command.data.items():
             # 执行指令
             server.execute(command)
+
+# 关服
+def on_server_stop(server: PluginServerInterface, server_return_code: int)->None:
+    if isinstance(qq_bot, qbot):
+        # 关服提示
+        qq_bot.send_msg_to_all_qq(get_style_template('server_stop', qq_bot.style))
 
 # 设置系统路径
 def set_sys_path()->None:

@@ -16,7 +16,7 @@ from .data.text import (
 from .key_word_system import key_word_system
 from .start_command_system import start_command_system
 from .table import table
-from .utils import get_style_template, get_style
+from .utils import get_style_template, get_style, beautify_message
 from collections import defaultdict
 from functools import partial
 from mcdreforged.api.types import PluginServerInterface, Info
@@ -68,6 +68,8 @@ class qbot(object):
         self.uuid_qqid       = table(self.config["dict_address"]['uuid_qqid'])                                             # uuid - qqid 表
         self.loading_whitelist()                                                                # 白名单
         self.shenheman = table(self.config["dict_address"]['shenheman'])                        # 群审核人员
+
+        self.add_missing_config()
 
     def loading_rcon(self) -> None:
         self.rcon = None
@@ -325,8 +327,16 @@ class qbot(object):
             bound_list = set(self.data.values())
 
             instance_list = [i.strip() for i in content.split(": ")[-1].split(", ") if i.strip()]
-            player_list = [i for i in instance_list if i in bound_list or not self.config.get('bound_notice', True)]
-            bot_list = [i for i in instance_list if i not in bound_list and self.config.get('bound_notice', True)]
+            instance_list = [i.split(']')[-1].split('】')[-1].strip() for i in instance_list] # 针对 [123] 玩家 和 【123】玩家 这种人名
+            
+            # 有人绑定 -> 识别假人
+            if bound_list:
+                player_list = [i for i in instance_list if i in bound_list]
+                bot_list = [i for i in instance_list if i not in bound_list]
+            # 无人绑定 -> 不识别假人 ==> 下版本使用 ip_logging 来识别假人
+            else:
+                player_list = instance_list
+                bot_list = []
 
             respond = self.format_list_response(player_list, bot_list, player_status, server_status)
             respond = self.add_server_name(respond)
@@ -587,6 +597,14 @@ class qbot(object):
                 for name,qq_id in self.shenheman.items():
                     temp[qq_id].append(name)
                 bot.reply(info, "有如下审核员：\n"+"\n".join([k+'-'+",".join(v) for k,v in temp.items()]))
+        
+        # 执行指令
+        elif info.content.startswith(f"{self.config['command_prefix']}执行"):
+            if self.config['command'].get('execute_command', False) and self.rcon:
+                content = self.rcon.send_command(info.content.replace(f"{self.config['command_prefix']}执行", "").strip())
+                bot.reply(info, content)
+            else:
+                bot.reply(info, "服务器未开启RCON")
 
     # 群指令
     def group_command(self, server, info: Info, bot, command: list):
@@ -611,6 +629,7 @@ class qbot(object):
             self.send_binding_notice(bot, info, user_id)
 
     def forward_message_to_game(self, server, user_id, message):
+        message = beautify_message(message, self.config.get('forward', {}).get('keep_raw_image_link', False))
         server.say(f'§6[QQ] §a[{self.find_game_name(user_id, server, None)}] §f{message}')
 
     def check_ingame_keyword(self, server, bot, info, message):
@@ -756,11 +775,7 @@ class qbot(object):
             )
             server.say(f'§6[QQ] §a[{sender}]§f {sub_string}')
         else: 
-            if info.content.startswith('[CQ:json'):
-                json_match = re.search(r'\[CQ:json,data=(\{.*\}).*?\]', info.content)
-                if json_match:
-                    json_data = json_match.group(1).replace('&#44;', ',').replace('&#91;', '[').replace('&#93;', ']')
-                    info.content = '[链接]' + json.loads(json_data)['meta']['detail_1']['desc']
+            info.content = beautify_message(info.raw_message, self.config.get('forward', {}).get('keep_raw_image_link', False))
             server.say(f'§6[QQ] §a[{self.find_game_name(str(info.user_id), bot, info.source_id)}] §f{info.content}')
             
     # 转发消息
@@ -831,6 +846,24 @@ class qbot(object):
     ################################################################################
     # 辅助functions
     ################################################################################
+    # 添加缺失的配置
+    def add_missing_config(self):
+        try:
+            with self.server.open_bundled_file("gugubot/data/config_default.yml") as file_handler:
+                message = file_handler.read()
+                message_unicode = message.decode('utf-8')
+                yaml_data = yaml.safe_load(message_unicode)
+                
+                for key, value in yaml_data.items():
+                    if key not in self.config:
+                        self.config[key] = value
+                    elif isinstance(value, dict):
+                        for sub_key, sub_value in value.items():
+                            if sub_key not in self.config[key]:
+                                self.config[key][sub_key] = sub_value
+        except Exception as e:
+            self.server.logger.error(f"Error loading default config: {e}")
+
     # 添加服务器名字
     def add_server_name(self, message):
         if self.server_name != "":
@@ -860,6 +893,18 @@ class qbot(object):
         
         self.match_id()
         return target_name
+    
+    # 推迟至 1.1.8 
+    # 获取最新群公告
+    # def get_group_notice(self):
+    #     group_id = self.config.get('group_id', [])[0]
+    #     if group_id:
+    #         notices = self.bot._get_group_notice(group_id)
+    #         print(notices)
+    #         if notices:
+    #             latest_notice = max(notices, key=lambda x: json.loads(x).get('publish_time', 0))
+    #             return latest_notice.get('message', {}).get('text', '')
+    #     return ''
 
     # 游戏内关键词列表显示
     def ingame_key_list(self):
@@ -894,10 +939,11 @@ class qbot(object):
                 message = file_handler.read()
             with open(target_path, 'wb') as f:                        # 复制文件
                 f.write(message)
-        __copyFile("gugubot/data/config_default.yml", "./config/GUGUbot/config.yml")        # 绑定图片
+        
+        __copyFile("gugubot/data/config_default.yml", "./config/GUGUbot/config.yml")        # 默认设置
         __copyFile("gugubot/data/bound.jpg", "./config/GUGUbot/bound.jpg")        # 绑定图片
         __copyFile("gugubot/font/MicrosoftYaHei-01.ttf", "./config/GUGUbot/font/MicrosoftYaHei-01.ttf") # 默认字体
-
+            
     # 转发消息到指定群
     def send_group_msg(self, msg, group):
         self.bot.send_group_msg(group, msg)
@@ -914,7 +960,12 @@ class qbot(object):
         bound_list = self.data.values()
 
         def list_callback(content:str):
-            number = len([i for i in content.split(": ")[-1].split(", ") if i in bound_list or not self.config.get('bound_notice', True)])
+            instance_list = [i.strip() for i in content.split(": ")[-1].split(", ") if i.strip()]
+            instance_list = [i.split(']')[-1].split('】')[-1].strip() for i in instance_list] # 针对 [123] 玩家 和 【123】玩家 这种人名
+
+            # 获取玩家列表  
+            player = [i for i in instance_list if i in bound_list or not bound_list]
+            number = len(player)
 
             name = " "
             if number != 0:     
