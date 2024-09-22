@@ -32,7 +32,8 @@ def process_json(match):
     json_data = match.group(1).replace('&#44;', ',').replace('&#91;', '[').replace('&#93;', ']')
     parsed_data = json.loads(json_data)
     desc = parsed_data.get('meta', {}).get('detail_1', {}).get('desc', '')
-    return '[链接]' + desc
+    group_notice = parsed_data.get('prompt', '')
+    return '[链接]' + desc if desc else group_notice if group_notice else ''
 
 def extract_url(match):
     cq_code = match.group(0)
@@ -64,7 +65,7 @@ def beautify_message(content:str, keep_raw_image_link:bool=False)->str:
     content = content.replace('CQ:at,qq=', '@')
 
     # process json
-    content = re.sub(r'\[CQ:json,data=(\{.*?\}).*?\]', process_json, content)
+    content = re.sub(r'\[CQ:json,.*?data=(\{[^,]*\}).*?\]', process_json, content)
 
     # process image link
     if keep_raw_image_link:
