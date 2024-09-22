@@ -718,8 +718,10 @@ class qbot(object):
                 server.say(f'§6[QQ] §a[{self.find_game_name(user_id, bot, info.source_id)}] §f{info.content}')
                 bot.reply(info,self.key_word[info.content])
                 # 过滤图片
-                is_picture = self.key_word[info.content].startswith('[CQ:image')
-                server.say(f'§6[QQ] §a[机器人] §f{self.key_word[info.content] if not is_picture else "图片"}')
+                reply_message = self.key_word[info.content]
+                if reply_message.startswith('[CQ:image'):
+                    reply_message = beautify_message(reply_message, self.config.get('forward', {}).get('keep_raw_image_link', False))
+                server.say(f'§6[QQ] §a[机器人] §f{reply_message}')
                 return
             # 添加图片
             if info.user_id in self.picture_record_dict and \
