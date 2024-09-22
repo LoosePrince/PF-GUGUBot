@@ -876,15 +876,15 @@ class qbot(object):
     
     # 推迟至 1.1.8 
     # 获取最新群公告
-    def get_group_notice(self):
-        group_id = self.config.get('group_id', [])[0]
-        if group_id:
-            notices = self.bot._get_group_notice(group_id)
-            print(notices)
-            if notices:
-                latest_notice = max(notices, key=lambda x: json.loads(x).get('publish_time', 0))
-                return latest_notice.get('message', {}).get('text', '')
-        return ''
+    # def get_group_notice(self):
+    #     group_id = self.config.get('group_id', [])[0]
+    #     if group_id:
+    #         notices = self.bot._get_group_notice(group_id)
+    #         print(notices)
+    #         if notices:
+    #             latest_notice = max(notices, key=lambda x: json.loads(x).get('publish_time', 0))
+    #             return latest_notice.get('message', {}).get('text', '')
+    #     return ''
 
     # 游戏内关键词列表显示
     def ingame_key_list(self):
