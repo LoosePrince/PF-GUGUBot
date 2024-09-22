@@ -857,7 +857,7 @@ class qbot(object):
                 yaml_data = yaml.safe_load(message_unicode)
                 
                 for key, value in yaml_data.items():
-                    if key not in self.config:
+                    if key not in self.config and key not in ['group_id', 'admin_id', 'admin_group_id']:
                         self.config[key] = value
                     elif isinstance(value, dict):
                         for sub_key, sub_value in value.items():
