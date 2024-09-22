@@ -6,7 +6,7 @@ import os
 import re
 
 def get_style()->dict:
-    config = table("./config/GUGUBot/config.json", yaml=True)
+    config = table("./config/GUGUbot/config.json", yaml=True)
     extra_style = read_extra_style(config['dict_address'].get('extra_style_path', ""))
     style.update(extra_style)
     return style
