@@ -104,13 +104,14 @@ def on_player_joined(server:PluginServerInterface, player:str, info:Info)->None:
     if isinstance(qq_bot, qbot) and qq_bot.config["forward"].get("player_notice", False):
         qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player))
 
-    if isinstance(qq_bot, qbot) and qq_bot.config["forward"].get("show_group_notice", False):
-        respond_warning = {
-            "text": f"群公告：{qq_bot.get_group_notice()}",
-            "color": "gray",
-            "italic": False
-        }
-        server.execute(f'tellraw {player} {json.dumps(respond_warning)}')
+    # 推迟至 1.1.8 
+    # if isinstance(qq_bot, qbot) and qq_bot.config["forward"].get("show_group_notice", False):
+    #     respond_warning = {
+    #         "text": f"群公告：{qq_bot.get_group_notice()}",
+    #         "color": "gray",
+    #         "italic": False
+    #     }
+    #     server.execute(f'tellraw {player} {json.dumps(respond_warning)}')
 
 # 更新机器人名字 <- 显示在线人数功能
 # 对违规名字无效

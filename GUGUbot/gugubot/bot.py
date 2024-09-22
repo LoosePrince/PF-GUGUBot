@@ -599,7 +599,7 @@ class qbot(object):
         # 执行指令
         elif info.content.startswith(f"{self.config['command_prefix']}执行"):
             if self.config['command'].get('execute_command', False) and self.rcon:
-                content = self.rcon.send_command(info.content.replace(f"{self.config['command_prefix']}执行", ""))
+                content = self.rcon.send_command(info.content.replace(f"{self.config['command_prefix']}执行", "").strip())
                 bot.reply(info, content)
             else:
                 bot.reply(info, "服务器未开启RCON")
@@ -773,7 +773,7 @@ class qbot(object):
             )
             server.say(f'§6[QQ] §a[{sender}]§f {sub_string}')
         else: 
-            info.content = beautify_message(info.content, self.config.get('forward', {}).get('keep_raw_image_link', False))
+            info.content = beautify_message(info.raw_message, self.config.get('forward', {}).get('keep_raw_image_link', False))
             server.say(f'§6[QQ] §a[{self.find_game_name(str(info.user_id), bot, info.source_id)}] §f{info.content}')
             
     # 转发消息
@@ -874,16 +874,17 @@ class qbot(object):
         self.match_id()
         return target_name
     
+    # 推迟至 1.1.8 
     # 获取最新群公告
     def get_group_notice(self):
         group_id = self.config.get('group_id', [])[0]
         if group_id:
             notices = self.bot._get_group_notice(group_id)
+            print(notices)
             if notices:
-                latest_notice = max(notices, key=lambda x: x.get('publish_time', 0))
+                latest_notice = max(notices, key=lambda x: json.loads(x).get('publish_time', 0))
                 return latest_notice.get('message', {}).get('text', '')
         return ''
-
 
     # 游戏内关键词列表显示
     def ingame_key_list(self):
