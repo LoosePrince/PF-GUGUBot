@@ -33,7 +33,7 @@ def process_json(match):
     parsed_data = json.loads(json_data)
     desc = parsed_data.get('meta', {}).get('detail_1', {}).get('desc', '')
     group_notice = parsed_data.get('prompt', '')
-    return '[链接]' + desc if desc else group_notice if group_notice else ''
+    return ('[链接]' + desc) if desc else group_notice if group_notice else ''
 
 def extract_url(match):
     cq_code = match.group(0)
