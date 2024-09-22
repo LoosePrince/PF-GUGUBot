@@ -69,6 +69,8 @@ class qbot(object):
         self.loading_whitelist()                                                                # 白名单
         self.shenheman = table(self.config["dict_address"]['shenheman'])                        # 群审核人员
 
+        self.add_missing_config()
+
     def loading_rcon(self) -> None:
         self.rcon = None
         try:
@@ -844,6 +846,24 @@ class qbot(object):
     ################################################################################
     # 辅助functions
     ################################################################################
+    # 添加缺失的配置
+    def add_missing_config(self):
+        try:
+            with self.server.open_bundled_file("gugubot/data/config_default.yml") as file_handler:
+                message = file_handler.read()
+                message_unicode = message.decode('utf-8')
+                yaml_data = yaml.safe_load(message_unicode)
+                
+                for key, value in yaml_data.items():
+                    if key not in self.config:
+                        self.config[key] = value
+                    elif isinstance(value, dict):
+                        for sub_key, sub_value in value.items():
+                            if sub_key not in self.config[key]:
+                                self.config[key][sub_key] = sub_value
+        except Exception as e:
+            self.server.logger.error(f"Error loading default config: {e}")
+
     # 添加服务器名字
     def add_server_name(self, message):
         if self.server_name != "":
@@ -919,10 +939,11 @@ class qbot(object):
                 message = file_handler.read()
             with open(target_path, 'wb') as f:                        # 复制文件
                 f.write(message)
-        __copyFile("gugubot/data/config_default.yml", "./config/GUGUbot/config.yml")        # 绑定图片
+        
+        __copyFile("gugubot/data/config_default.yml", "./config/GUGUbot/config.yml")        # 默认设置
         __copyFile("gugubot/data/bound.jpg", "./config/GUGUbot/bound.jpg")        # 绑定图片
         __copyFile("gugubot/font/MicrosoftYaHei-01.ttf", "./config/GUGUbot/font/MicrosoftYaHei-01.ttf") # 默认字体
-
+            
     # 转发消息到指定群
     def send_group_msg(self, msg, group):
         self.bot.send_group_msg(group, msg)
