@@ -349,11 +349,8 @@
 >    'no_word': '列表空空的',
 >    'player_api_fail': '未能捕获服务器日志（推荐开启rcon精准获取玩家信息）',
 >    'player_list':'在线玩家共{}人，{}列表: {}',
->    'player_notice_join': '{} 加入了游戏',
->    'player_notice_leave': '{} 离开了游戏',
 >    'reload_success': '重载成功',
 >    'server_start':'服务器已启动',
->    'server_stop': '服务器已关闭'
 >  }
 >}
 > ```
@@ -469,17 +466,13 @@
 >- list: 玩家列表查询开关
 >- mc: #mc指令开关(非转发开关)
 >- name: 机器人名字显示为服务器在线人数开关
->- player_notice: 玩家上下线通知开关
 >- qq: !!qq指令开关(非转发开关)
 >- start_command: 启动指令系统开关
 >- whitelist: 白名单开关
 >- shenhe: 审核功能开关(咕咕咕)
->- 
 >- mc_to_qq: MC转发到QQ开关
 >- mc_to_qq_command: 服务器指令(!!/@)转发到QQ
 >- qq_to_mc: QQ转发到mc开关
->- keep_raw_image_link: 转发图片链接开关（一般搭配ChatImage使用）
->- show_group_notice: 上线显示最新群公告开关
 >- whitelist_add_with_bound: 绑定时是否自动添加白名单
 >- whitelist_remove_with_leave: 退群时是否自动移除白名单
 >
