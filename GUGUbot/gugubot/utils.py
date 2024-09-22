@@ -37,11 +37,16 @@ def process_json(match):
 
 def extract_url(match):
     cq_code = match.group(0)
-    pattern = r'url=([^,\]]+)'
+    pattern = r'url=([^\s,\]]+)'
+    pattern2 = r'file=([^\s,\]]+)'
     url_match = re.search(pattern, cq_code)
+    url_match2 = re.search(pattern2, cq_code)
     if url_match:
         url = url_match.group(1)
-        return re.sub('&amp;', "&", url)
+        return f'[[CICode,url={re.sub("&amp;", "&", url)},name=图片]]'
+    if url_match2:
+        url = url_match2.group(1)
+        return f'[[CICode,url={re.sub("&amp;", "&", url)},name=图片]]'
     return cq_code
 
 def beautify_message(content:str, keep_raw_image_link:bool=False)->str:
