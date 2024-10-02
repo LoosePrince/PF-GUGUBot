@@ -101,8 +101,8 @@ def on_player_joined(server:PluginServerInterface, player:str, info:Info)->None:
     if isinstance(qq_bot, qbot) and qq_bot.config["command"]["name"]:
         qq_bot.set_number_as_name(server)
         
-    if isinstance(qq_bot, qbot) and qq_bot.config["forward"].get("player_notice", False):
-        qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player))
+    # if isinstance(qq_bot, qbot) and qq_bot.config["forward"].get("player_notice", False):
+    #     qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player))
 
     # 推迟至 1.1.8 
     # if isinstance(qq_bot, qbot) and qq_bot.config["forward"].get("show_group_notice", False):
@@ -130,8 +130,13 @@ def on_info(server:PluginServerInterface, info:Info)->None:
             func(info.content)
 
         # 更新机器人名字 <- 显示在线人数功能
-        if "lost connection:" in info.content and qq_bot.config["command"]["name"]:
+        if ("logged in with entity id" in info.content or "lost connection:" in info.content) and qq_bot.config["command"]["name"]:
             qq_bot.set_number_as_name(server)
+
+        # 玩家上线通知
+        if "logged in with entity id" in info.content and qq_bot.config["forward"].get("player_notice", False):
+            player_name = info.content.split("[/")[0]
+            qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player_name))
 
         # 玩家下线通知
         if "left the game" in info.content and qq_bot.config["forward"].get("player_notice", False):
