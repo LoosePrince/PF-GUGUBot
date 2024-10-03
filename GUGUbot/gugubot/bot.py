@@ -701,7 +701,10 @@ class qbot(object):
             server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_message}")
 
         # 判断是否绑定
-        if self.config.get('bound_notice', True) and str(info.user_id) not in self.data.keys():
+        if self.config.get('bound_notice', True) \
+            and str(info.user_id) not in self.data.keys() \
+            and not is_robot(bot, info.source_id, info.user_id):
+            
             bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
             return 
         # 如果开启违禁词
@@ -983,6 +986,14 @@ class qbot(object):
             self._list_callback.append(list_callback)
             server.execute("list")
 #+---------------------------------------------------------------------+
+
+# 判断是否是机器人
+def is_robot(bot, group_id, user_id)->bool:
+    user_info = bot.get_group_member_info(group_id, user_id)
+    if user_info and user_info.get('data', {}).get('is_robot', False):
+        return True
+    return False
+
 # 文字转图片函数，一定程度防止风控
 def text2image(font, input_string: str) -> str:
     # 分割成行并渲染每行文字
