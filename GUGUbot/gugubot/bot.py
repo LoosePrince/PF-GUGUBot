@@ -869,6 +869,8 @@ class qbot(object):
                         for sub_key, sub_value in value.items():
                             if sub_key not in self.config[key]:
                                 self.config[key][sub_key] = sub_value
+                
+                self.config.save()
         except Exception as e:
             self.server.logger.error(f"Error loading default config: {e}")
 
