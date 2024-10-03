@@ -21,6 +21,8 @@ bound_notice: true
 command:
   # ban_word:违禁词撤回
   ban_word: true
+  # 执行服务器指令
+  execute_command: false
   # ingame_key_word:游戏内关键词回复
   ingame_key_word: true
   # key_word:群内关键词回复
@@ -33,29 +35,29 @@ command:
   name: true
   # 获取QQ聊天内容
   qq: true
+  # 辅助审核功能（开发中）
+  shenhe: true
   # 开服指令
   start_command: true
   # 白名单功能
   whitelist: true
-  # 辅助审核功能（开发中）
-  shenhe: true
-  # 执行服务器指令
-  execute_command: false
+
 
 # 转发设置
 forward:
+  # 转发官方机器人回复
+  farward_other_bot: false
+  # 转发图片链接
+  keep_raw_image_link: false
   # 服务器往QQ群转发
   mc_to_qq: true
   # 服务器指令 转发
   mc_to_qq_command: false
   # 玩家上下线通知
   player_notice: false
-  # 转发图片链接
-  keep_raw_image_link: false
-  # 上线显示最新群公告
-  show_group_notice: false
   # QQ群往服务器转发 
   qq_to_mc: true
+  
 # 绑定ID自动绑定服务器白名单
 whitelist_add_with_bound: false
 # 退群时移除白名单

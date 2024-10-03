@@ -675,8 +675,8 @@ class qbot(object):
     @addTextToImage
     def on_qq_request(self, server, info: Info, bot):
         server.logger.debug(f"收到上报请求：{info}")
-        if info.message_type == "group" \
-            and info.source_id in self.config.get("group_id", []) \
+        if info.request_type == "group" \
+            and info.group_id in self.config.get("group_id", []) \
             and self.config["command"]["shenhe"]:
             # 获取名称
             stranger_name = bot.get_stranger_info(info.user_id)["data"]["nickname"]
@@ -685,23 +685,29 @@ class qbot(object):
             # 通知
             bot.reply(info, f"[CQ:at,qq={at_id}] {get_style_template('authorization_request', self.style).format(stranger_name)}")
             server.say(f'§6[QQ] §b[@{at_id}] {get_style_template("authorization_request", self.style).format("§f" + stranger_name)}')
-            self.shenhe[at_id].append((stranger_name, info.flag, info.message_type))
+            self.shenhe[at_id].append((stranger_name, info.flag, info.request_type))
 
     # 转发消息
     @addTextToImage
     def send_msg_to_mc(self, server:PluginServerInterface, info: Info, bot):
         # 判断是否转发
-        if len(info.content) == 0 or \
-            info.content.startswith(self.config['command_prefix']) or \
-            not self.config['forward']['qq_to_mc'] or \
-            info.source_id not in self.config.get('group_id', []):
+        if len(info.content) == 0 \
+            or info.content.startswith(self.config['command_prefix']) \
+            or not self.config['forward']['qq_to_mc'] \
+            or info.source_id not in self.config.get('group_id', []) \
+            or (
+                is_robot(bot, info.source_id, info.user_id) \
+                and not self.config['forward'].get('farward_other_bot', False)
+            ):
             return 
         
         if self.config.get('show_message_in_console', True):
             server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_message}")
 
         # 判断是否绑定
-        if self.config.get('bound_notice', True) and str(info.user_id) not in self.data.keys():
+        if self.config.get('bound_notice', True) \
+            and str(info.user_id) not in self.data.keys() \
+            and not is_robot(bot, info.source_id, info.user_id):
             bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
             return 
         # 如果开启违禁词
@@ -741,7 +747,7 @@ class qbot(object):
                     server.logger.warning(f"保存图片失败：{info.raw_message}\n报错如下： {e}")
                 return
         # @ 模块
-        if '@' in info.content:
+        if 'CQ:at' in info.raw_message:
             def _get_name(qq_id: str, previous_message_content=None):
                 if str(qq_id) in self.data:
                     return self.find_game_name(qq_id, bot, info.source_id)
@@ -765,7 +771,7 @@ class qbot(object):
                 if match_result:
                     previous_message = bot.get_msg(match_result.group(1))['data']
                     receiver = _get_name(str(previous_message['sender']['user_id']), previous_message['message'])
-                    forward_content = re.search(r'\[CQ:reply,id=-?\d+.*?\](?:\[@\d+\])?(.*)', info.content).group(1).strip()
+                    forward_content = re.search(r'\[CQ:reply,id=-?\d+.*?\](?:\[@\d+[^\]]*?\])?(.*)', info.content).group(1).strip()
                     server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{forward_content}')
                     return 
             
@@ -863,6 +869,8 @@ class qbot(object):
                         for sub_key, sub_value in value.items():
                             if sub_key not in self.config[key]:
                                 self.config[key][sub_key] = sub_value
+                
+                self.config.save()
         except Exception as e:
             self.server.logger.error(f"Error loading default config: {e}")
 
@@ -876,18 +884,19 @@ class qbot(object):
     def find_game_name(self, qq_id: str, bot, group_id: str = None) -> str:
         group_id = group_id if group_id in self.config.get('group_id', []) else self.config.get('group_id', [])[0]
         
-        # 未启用白名单，直接返回绑定的游戏ID
-        if not self.config['command']['whitelist']:
-            return self.data.get(qq_id, qq_id)
+        # 启用白名单，返回绑定的游戏ID
+        if self.config['command']['whitelist']:
+            # 检查是否绑定且在白名单中
+            uuid = self.uuid_qqid.get(qq_id)
+            if uuid and uuid in self.whitelist:
+                return self.whitelist[uuid]
         
-        # 检查是否绑定且在白名单中
-        uuid = self.uuid_qqid.get(qq_id)
-        if uuid and uuid in self.whitelist:
-            return self.whitelist[uuid]
+        if str(qq_id) in self.data:
+            return self.data[str(qq_id)]
         
         # 未匹配到名字，尝试获取QQ名片
         try:
-            target_data = bot.get_group_member_info(group_id, qq_id)['data']
+            target_data = bot.get_group_member_info(group_id, qq_id).get('data', {})
             target_name = target_data.get('card') or target_data.get('nickname', qq_id)
         except Exception as e:
             self.server.logger.error(f"获取QQ名片失败：{e}, 请检查cq_qq_api链接是否断开")
@@ -982,6 +991,14 @@ class qbot(object):
             self._list_callback.append(list_callback)
             server.execute("list")
 #+---------------------------------------------------------------------+
+
+# 判断是否是机器人
+def is_robot(bot, group_id, user_id)->bool:
+    user_info = bot.get_group_member_info(group_id, user_id)
+    if user_info and user_info.get('data', {}).get('is_robot', False):
+        return True
+    return False
+
 # 文字转图片函数，一定程度防止风控
 def text2image(font, input_string: str) -> str:
     # 分割成行并渲染每行文字
