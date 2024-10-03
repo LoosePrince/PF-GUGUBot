@@ -467,12 +467,25 @@
 >- mc: #mc指令开关(非转发开关)
 >- name: 机器人名字显示为服务器在线人数开关
 >- qq: !!qq指令开关(非转发开关)
+>- shenhe: 审核功能开关(咕咕咕)
 >- start_command: 启动指令系统开关
 >- whitelist: 白名单开关
->- shenhe: 审核功能开关(咕咕咕)
+></details>
+
+><details>
+> <summary>转发设置</summary>
+>
+>- farward_other_bot: 转发官方机器人回复
+>- keep_raw_image_link: 转发图片链接(适用于ChatImage)
 >- mc_to_qq: MC转发到QQ开关
 >- mc_to_qq_command: 服务器指令(!!/@)转发到QQ
+>- player_notice: 玩家上下线通知
 >- qq_to_mc: QQ转发到mc开关
+></details>
+
+><details>
+> <summary>白名单设置</summary>
+>
 >- whitelist_add_with_bound: 绑定时是否自动添加白名单
 >- whitelist_remove_with_leave: 退群时是否自动移除白名单
 >

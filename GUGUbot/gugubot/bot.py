@@ -691,17 +691,23 @@ class qbot(object):
     @addTextToImage
     def send_msg_to_mc(self, server:PluginServerInterface, info: Info, bot):
         # 判断是否转发
-        if len(info.content) == 0 or \
-            info.content.startswith(self.config['command_prefix']) or \
-            not self.config['forward']['qq_to_mc'] or \
-            info.source_id not in self.config.get('group_id', []):
+        if len(info.content) == 0 \
+            or info.content.startswith(self.config['command_prefix']) \
+            or not self.config['forward']['qq_to_mc'] \
+            or info.source_id not in self.config.get('group_id', []) \
+            or (
+                is_robot(bot, info.source_id, info.user_id) \
+                and not self.config['forward'].get('farward_other_bot', False)
+            ):
             return 
         
         if self.config.get('show_message_in_console', True):
             server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_message}")
 
         # 判断是否绑定
-        if self.config.get('bound_notice', True) and str(info.user_id) not in self.data.keys():
+        if self.config.get('bound_notice', True) \
+            and str(info.user_id) not in self.data.keys() \
+            and not is_robot(bot, info.source_id, info.user_id):
             bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
             return 
         # 如果开启违禁词
@@ -741,7 +747,7 @@ class qbot(object):
                     server.logger.warning(f"保存图片失败：{info.raw_message}\n报错如下： {e}")
                 return
         # @ 模块
-        if '@' in info.content:
+        if 'CQ:at' in info.raw_message:
             def _get_name(qq_id: str, previous_message_content=None):
                 if str(qq_id) in self.data:
                     return self.find_game_name(qq_id, bot, info.source_id)
