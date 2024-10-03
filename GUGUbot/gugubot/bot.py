@@ -675,8 +675,8 @@ class qbot(object):
     @addTextToImage
     def on_qq_request(self, server, info: Info, bot):
         server.logger.debug(f"收到上报请求：{info}")
-        if info.message_type == "group" \
-            and info.source_id in self.config.get("group_id", []) \
+        if info.request_type == "group" \
+            and info.group_id in self.config.get("group_id", []) \
             and self.config["command"]["shenhe"]:
             # 获取名称
             stranger_name = bot.get_stranger_info(info.user_id)["data"]["nickname"]
@@ -685,7 +685,7 @@ class qbot(object):
             # 通知
             bot.reply(info, f"[CQ:at,qq={at_id}] {get_style_template('authorization_request', self.style).format(stranger_name)}")
             server.say(f'§6[QQ] §b[@{at_id}] {get_style_template("authorization_request", self.style).format("§f" + stranger_name)}')
-            self.shenhe[at_id].append((stranger_name, info.flag, info.message_type))
+            self.shenhe[at_id].append((stranger_name, info.flag, info.request_type))
 
     # 转发消息
     @addTextToImage
@@ -701,10 +701,7 @@ class qbot(object):
             server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_message}")
 
         # 判断是否绑定
-        if self.config.get('bound_notice', True) \
-            and str(info.user_id) not in self.data.keys() \
-            and not is_robot(bot, info.source_id, info.user_id):
-            
+        if self.config.get('bound_notice', True) and str(info.user_id) not in self.data.keys():
             bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
             return 
         # 如果开启违禁词
