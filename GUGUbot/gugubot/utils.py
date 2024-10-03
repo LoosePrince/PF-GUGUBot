@@ -39,14 +39,17 @@ def extract_url(match):
     cq_code = match.group(0)
     pattern = r'url=([^\s,\]]+)'
     pattern2 = r'file=([^\s,\]]+)'
+    summary_pattern = r'summary=(?:&#91;)?(.*?)(?:&#93;)?,'
     url_match = re.search(pattern, cq_code)
     url_match2 = re.search(pattern2, cq_code)
+    summary_match = re.search(summary_pattern, cq_code)
+    summary_match = f"表情: {summary_match.group(1)}" if summary_match else '图片'
     if url_match:
         url = url_match.group(1)
-        return f'[[CICode,url={re.sub("&amp;", "&", url)},name=图片]]'
+        return f'[[CICode,url={re.sub("&amp;", "&", url)},name={summary_match}]]'
     if url_match2:
         url = url_match2.group(1)
-        return f'[[CICode,url={re.sub("&amp;", "&", url)},name=图片]]'
+        return f'[[CICode,url={re.sub("&amp;", "&", url)},name={summary_match}]]'
     return cq_code
 
 def beautify_message(content:str, keep_raw_image_link:bool=False)->str:
@@ -78,8 +81,8 @@ def beautify_message(content:str, keep_raw_image_link:bool=False)->str:
         content = re.sub(r'\[CQ:image,.*?\]|\[CQ:mface,.*?\]', extract_url, content)
     else:
         content = re.sub(r'\[CQ:image,file=.*?\]', '[图片]', content)
-        content = re.sub(r'\[CQ:mface,.*?\]', '[表情]', content)
+        content = re.sub(r'\[CQ:mface,summary=(?:&#91;)?(.*?)(?:&#93;)?,.*?\]', r'[表情: \1]', content)
 
     return content
-              
+
     
