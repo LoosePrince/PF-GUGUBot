@@ -66,11 +66,12 @@ def beautify_message(content:str, keep_raw_image_link:bool=False)->str:
     content = re.sub(r'\[CQ:forward,id=.*?\]', '[转发消息]', content)
     content = re.sub(r'\[CQ:file(?:,.*?)*\]', '[文件]', content)
     content = re.sub(r'\[CQ:redbag,title=.*?\]', '[红包]', content)
+    content = re.sub(r'\[CQ:markdown,content=.*?\]', '', content)
     
     content = content.replace('CQ:at,qq=', '@')
 
     # process json
-    content = re.sub(r'\[CQ:json,.*?data=(\{[^,]*\}).*?\]', process_json, content)
+    content = re.sub(r'\[CQ:json,.*?data=(\{[^,]*\}).*?\s*\]', process_json, content)
 
     # process image link
     if keep_raw_image_link:
