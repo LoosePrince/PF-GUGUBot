@@ -121,7 +121,7 @@ style = {
         'authorization_request': '{} 申请进群, 请审核',
         'ban_word_find':'回复包含违禁词请修改后重发，维护和谐游戏人人有责。\n违禁理由：{}',
         'bound_add_whitelist': '已将您添加到服务器白名单',
-        'bound_exist': '您已绑定ID: {}, 请联系管理员修改',
+        'bound_exist': '您已绑定ID: {}, 绑定已达上限, 请联系管理员修改',
         'bound_success': '已成功绑定',
         'command_success' : '指令执行成功',
         'delete_success':'删除成功！',

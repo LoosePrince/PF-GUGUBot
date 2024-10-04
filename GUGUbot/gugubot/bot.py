@@ -97,7 +97,7 @@ class qbot(object):
             return
 
         uuid, name = result.groups()[:2]
-        if name not in self.data.values():
+        if name not in [item for sublist in self.data.values() for item in sublist]:
             return
 
         self.loading_whitelist()
@@ -179,8 +179,8 @@ class qbot(object):
     # 游戏内@ 推荐
     def ingame_at_suggestion(self):
         # 初始化成员字典和建议内容
-        self.member_dict = {v: k for k, v in self.data.items()}
-        suggest_content = set(self.data.values())
+        self.member_dict = {v: k for k, v_list in self.data.items() for v in v_list}
+        suggest_content = set(self.member_dict.keys())
 
         try:
             group_raw_info = [self.bot.get_group_member_list(group_id) for group_id in self.config.get('group_id', [])]
@@ -234,10 +234,11 @@ class qbot(object):
         self.uuid_qqid = {}
         whitelist_dict = {game_name: uuid for uuid, game_name in self.whitelist.items()}
         
-        for qq_id, qq_name in self.data.items():
-            clean_name = qq_name.split('(')[0].split('（')[0]
-            if clean_name in whitelist_dict:
-                self.uuid_qqid[whitelist_dict[clean_name]] = qq_id
+        for qq_id, qq_names in self.data.items():
+            for qq_name in qq_names:
+                clean_name = qq_name.split('(')[0].split('（')[0]
+                if clean_name in whitelist_dict:
+                    self.uuid_qqid[whitelist_dict[clean_name]] = qq_id
 
     # 退群处理
     @addTextToImage
@@ -248,13 +249,14 @@ class qbot(object):
             and info.source_id in self.config.get('group_id', []):
             user_id = str(info.user_id)
             if user_id in self.data.keys():
-                del self.data[user_id]
                 if self.config["command"]["whitelist"]:
-                    server.execute(f"whitelist remove {self.data[user_id]}")
-                    bot.reply(info, get_style_template('del_whitelist_when_quit', self.style).format(self.data[user_id]))
+                    for player_name in self.data[user_id]:
+                        server.execute(f"whitelist remove {player_name}")
+                    bot.reply(info, get_style_template('del_whitelist_when_quit', self.style).format(self.data[user_id][0]))
                     # 重载白名单
                     time.sleep(5)
                     self.loading_whitelist()
+                del self.data[user_id]
 
     def is_valid_command_source(self, info: Info) -> bool:
         return (info.source_id in self.config.get('group_id', []) or
@@ -324,7 +326,7 @@ class qbot(object):
         def list_callback(content: str):
             server_status = command[0] in ['服务器', 'server']
             player_status = command[0] in ['玩家', '玩家列表']
-            bound_list = set(self.data.values())
+            bound_list = {i for player_names in self.data.values() for i in player_names}
 
             instance_list = [i.strip() for i in content.split(": ")[-1].split(", ") if i.strip()]
             instance_list = [i.split(']')[-1].split('】')[-1].strip() for i in instance_list] # 针对 [123] 玩家 和 【123】玩家 这种人名
@@ -411,7 +413,7 @@ class qbot(object):
                 bot.reply(info, bound_help)
             # 已绑定的名单    
             elif len(command) == 2 and command[1] == '列表':
-                bound_list = [f'{qqid} - {name}' for qqid, name in self.data.items()]
+                bound_list = [f'{qqid} - {", ".join(name)}' for qqid, name in self.data.items()]
                 reply_msg = "\n".join(f'{i + 1}. {name}' for i, name in enumerate(bound_list))
                 reply_msg = '还没有人绑定' if reply_msg == '' else reply_msg
                 bot.reply(info, reply_msg)
@@ -427,11 +429,24 @@ class qbot(object):
                 if command[2] in self.data:
                     del self.data[command[2]]
                     bot.reply(info, f'已解除 {command[2]} 绑定的ID')
+                elif command[2] in set(name for names in self.data.values() for name in names):
+                    for qq_id, game_name in self.data.items():
+                        if command[2] in game_name and len(game_name) == 1:
+                            del self.data[qq_id]
+                            break
+                        if command[2] in game_name:
+                            self.data[qq_id].remove(command[2])
+                            break
+                    self.data.save()
+                    bot.reply(info, f'已解除 {command[2]} 绑定的ID')
                 else:
                     bot.reply(info, f'{command[2]} 未绑定')
             # 绑定ID
             elif len(command) == 3 and command[1].isdigit():
-                self.data[command[1]] = command[2]
+                if len(self.data.get(command[1], []) ) >= self.config.get("max_bound", 2):
+                    bot.reply(info, '绑定数量已达上限')
+                    return
+                self.data[command[1]] = self.data.get(command[1], []).append(command[2])
                 bot.reply(info, '已成功绑定')
 
         # 白名单
@@ -523,7 +538,7 @@ class qbot(object):
             # 查看uuid 匹配表
             elif len(command)>1 and command[1] == '列表':
                 bot.reply(info, "uuid匹配如下：\n"+ \
-                        '\n'.join([str(k)+'-'+str(v)+'-'+self.data[v] for k,v in self.uuid_qqid.items() if v in self.data]))
+                        '\n'.join([str(k)+'-'+str(v)+'-'+str(self.data[v]) for k,v in self.uuid_qqid.items() if v in self.data]))
             # 更新匹配表
             elif len(command)>1 and command[1] == '重载':
                 self.loading_whitelist()
@@ -644,10 +659,13 @@ class qbot(object):
 
     def handle_binding(self, server, info: Info, bot, game_id):
         user_id = str(info.user_id)
-        if user_id in self.data:
+        if user_id in self.data and len(self.data[user_id]) >= self.config.get("max_bound", 2):
             bot.reply(info, f'[CQ:at,qq={user_id}] {get_style_template("bound_exist", self.style).format(self.data[user_id])}')
             return
-        self.data[user_id] = game_id
+        if game_id in {name for names in self.data.values() for name in names}:
+            bot.reply(info, f'[CQ:at,qq={user_id}] 该名称已被绑定')
+            return
+        self.data[user_id] = self.data.get(user_id, []).append(game_id)
         bot.reply(info, f'[CQ:at,qq={user_id}] {get_style_template("bound_success", self.style)}')
         bot.set_group_card(info.source_id, user_id, game_id)
         if self.config['whitelist_add_with_bound']:
@@ -892,7 +910,7 @@ class qbot(object):
                 return self.whitelist[uuid]
         
         if str(qq_id) in self.data:
-            return self.data[str(qq_id)]
+            return self.data[str(qq_id)][0]
         
         # 未匹配到名字，尝试获取QQ名片
         try:
@@ -968,7 +986,7 @@ class qbot(object):
 
     # 机器人名称显示游戏内人数
     def set_number_as_name(self, server:PluginServerInterface):
-        bound_list = self.data.values()
+        bound_list = [name for names in self.data.values() for name in names]
 
         def list_callback(content:str):
             instance_list = [i.strip() for i in content.split(": ")[-1].split(", ") if i.strip()]

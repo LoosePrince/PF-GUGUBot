@@ -38,6 +38,7 @@ def on_load(server: PluginServerInterface, old)->None:
         past_bot = False
 
     # 更新配置文件 -> 1.1.4 -> 1.1.5 config迁移
+    # 更新data格式 -> 1.7.x -> 1.8.0 
     temp_update_version(server)
 
     # gugubot主体
@@ -186,3 +187,11 @@ def temp_update_version(server:PluginServerInterface)->None:
                 server.logger.info(f"Copied {file} from {old_config_dir} to {config_dir}")
             except Exception as e:
                 server.logger.error(f"Error copying {file}: {str(e)}")
+
+    # update user data format
+    from .table import table
+    data = table("./config/GUGUbot/GUGUbot.json")
+    for k, v in data:
+        if isinstance(v, str):
+            data[k] = [v]
+    data.save()

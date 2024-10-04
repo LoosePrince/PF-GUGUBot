@@ -36,7 +36,7 @@ class table(object):
     def __getitem__(self, key:str): # 获取储存内容
         return self.data[key]    
 
-    def __setitem__(self, key:str, value:str): # 增加，修改
+    def __setitem__(self, key:str, value): # 增加，修改
         self.data[key] = value
         self.save()   
 

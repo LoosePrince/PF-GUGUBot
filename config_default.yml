@@ -42,7 +42,6 @@ command:
   # 白名单功能
   whitelist: true
 
-
 # 转发设置
 forward:
   # 转发官方机器人回复
@@ -57,11 +56,9 @@ forward:
   player_notice: false
   # QQ群往服务器转发 
   qq_to_mc: true
-  
-# 绑定ID自动绑定服务器白名单
-whitelist_add_with_bound: false
-# 退群时移除白名单
-whitelist_remove_with_leave: true
+  # 上线显示最新群公告
+  show_group_notice: false
+
 ########################################################################
 # 命令前缀
 command_prefix: "#"
@@ -93,8 +90,14 @@ dict_address:
 ############################# 其他设置 ##################################
 # 文字超长转图片 （默认大于150字转图片, 设置-1关闭）
 font_limit: 150
+# 一个玩家可以绑定多少个名称
+max_bound: 1
 # 展示上报消息
 show_message_in_console: true
 # （可选）机器人回复风格 #风格 查看风格帮助
 style: 正常
+# 绑定ID自动绑定服务器白名单
+whitelist_add_with_bound: false
+# 退群时移除白名单
+whitelist_remove_with_leave: true
 ########################################################################
