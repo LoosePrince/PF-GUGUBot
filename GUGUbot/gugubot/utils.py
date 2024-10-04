@@ -1,4 +1,4 @@
-from .data.text import style
+from .data.text import style, qq_face_name
 from .table import table
 
 import json
@@ -52,8 +52,12 @@ def extract_url(match):
         return f'[[CICode,url={re.sub("&amp;", "&", url)},name={summary_match}]]'
     return cq_code
 
+def replace_emoji(match):
+    emoji_id = match.group(1)
+    emoji_display = qq_face_name.get(str(emoji_id))
+    return f'[表情: {emoji_display}]' if emoji_display else '[表情]'
+
 def beautify_message(content:str, keep_raw_image_link:bool=False)->str:
-    content = re.sub(r'\[CQ:face,id=.*?\]', '[表情]', content)
     content = re.sub(r'\[CQ:record,file=.*?\]', '[语音]', content)
     content = re.sub(r'\[CQ:video,file=.*?\]', '[视频]', content)
     content = re.sub(r'\[CQ:rps\]', '[猜拳]', content)
@@ -72,6 +76,9 @@ def beautify_message(content:str, keep_raw_image_link:bool=False)->str:
     content = re.sub(r'\[CQ:markdown,content=.*?\]', '', content)
     
     content = content.replace('CQ:at,qq=', '@')
+
+    # process emoji
+    content = re.sub(r'\[CQ:face,id=(\d+?)\]', replace_emoji, content)
 
     # process json
     content = re.sub(r'\[CQ:json,.*?data=(\{[^,]*\}).*?\s*\]', process_json, content)
