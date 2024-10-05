@@ -103,25 +103,36 @@ def on_info(server:PluginServerInterface, info:Info)->None:
 
     if not isinstance(qq_bot, qbot):
         return 
-    
+
+    # offline white list    
     qq_bot.add_offline_whitelist(server, info)
 
-    # list function
+    # player list
     while "players online:" in info.content and qq_bot._list_callback:
         func = qq_bot._list_callback.pop()
         func(info.content)
 
-    # 更新机器人名字 <- 显示在线人数功能
-    if ("logged in with entity id" in info.content or "lost connection:" in info.content) and qq_bot.config["command"]["name"]:
-        qq_bot.set_number_as_name(server)
-
     is_player_login = "logged in with entity id" in info.content
+    is_player_left = "left the game" in info.content
+
+    if is_player_login:
+        _on_player_join(server, info)
+    
+    if is_player_left:
+        _on_player_left(server, info)
+
+def _on_player_join(server:PluginServerInterface, info:Info):
+    # 机器人名字更新
+    if qq_bot.config["command"]["name"]:
+        qq_bot.set_number_as_name(server)
+    
     # 玩家上线通知
-    if is_player_login and qq_bot.config["forward"].get("player_notice", False):
+    if qq_bot.config["forward"].get("player_notice", False):
         player_name = "[".join(info.content.split(" logged in with entity id")[0].split("[")[:-1])
         qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player_name))
+
     # 玩家上线显示群公告
-    if is_player_login and qq_bot.config["forward"].get("show_group_notice", False):
+    if qq_bot.config["forward"].get("show_group_notice", False):
         player_name = "[".join(info.content.split(" logged in with entity id")[0].split("[")[:-1])
         
         latest_notice = get_latest_group_notice(qq_bot, server)
@@ -133,8 +144,13 @@ def on_info(server:PluginServerInterface, info:Info)->None:
         }
         server.execute(f'tellraw {player_name} {json.dumps(latest_notice_json)}')
 
+def _on_player_left(server:PluginServerInterface, info:Info):
+    # 机器人名字更新
+    if qq_bot.config["command"]["name"]:
+        qq_bot.set_number_as_name(server)
+
     # 玩家下线通知
-    if "left the game" in info.content and qq_bot.config["forward"].get("player_notice", False):
+    if qq_bot.config["forward"].get("player_notice", False):
         player_name = info.content.replace("left the game", "").strip()
         qq_bot.send_msg_to_all_qq(get_style_template('player_notice_leave', qq_bot.style).format(player_name))
 
