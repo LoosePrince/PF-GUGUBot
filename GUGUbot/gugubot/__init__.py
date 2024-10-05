@@ -209,7 +209,7 @@ def temp_update_version(server:PluginServerInterface)->None:
     # update user data format
     from .table import table
     data = table("./config/GUGUbot/GUGUbot.json")
-    for k, v in data:
+    for k, v in data.items():
         if isinstance(v, str):
             data[k] = [v]
     data.save()

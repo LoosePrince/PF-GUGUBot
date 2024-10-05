@@ -446,7 +446,10 @@ class qbot(object):
                 if len(self.data.get(command[1], []) ) >= self.config.get("max_bound", 2):
                     bot.reply(info, '绑定数量已达上限')
                     return
-                self.data[command[1]] = self.data.get(command[1], []).append(command[2])
+                if command[2] in {name for names in self.data.values() for name in names}:
+                    bot.reply(info, f'该名称已被绑定')
+                    return
+                self.data[command[1]] = self.data.get(command[1], []) + [command[2]]
                 bot.reply(info, '已成功绑定')
 
         # 白名单
@@ -665,9 +668,10 @@ class qbot(object):
         if game_id in {name for names in self.data.values() for name in names}:
             bot.reply(info, f'[CQ:at,qq={user_id}] 该名称已被绑定')
             return
-        self.data[user_id] = self.data.get(user_id, []).append(game_id)
+        self.data[user_id] = self.data.get(user_id, []) + [game_id]
         bot.reply(info, f'[CQ:at,qq={user_id}] {get_style_template("bound_success", self.style)}')
-        bot.set_group_card(info.source_id, user_id, game_id)
+        if len(self.data[user_id]) == 1:
+            bot.set_group_card(info.source_id, user_id, game_id)
         if self.config['whitelist_add_with_bound']:
             self.add_to_whitelist(server, bot, info, user_id, game_id)
 
