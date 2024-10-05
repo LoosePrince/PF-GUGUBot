@@ -11,7 +11,7 @@ gugu_dir = os.path.dirname(__file__)[:-7] # remove \gugubot
 sys.path.append(gugu_dir)  if gugu_dir not in sys.path  else None
 
 from .bot import qbot
-from .utils import get_style_template
+from .utils import get_latest_group_notice, get_style_template
 
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.command import *
@@ -97,44 +97,46 @@ def on_load(server: PluginServerInterface, old)->None:
 # 防止初始化报错
 qq_bot = None
 
-# 更新机器人名字 <- 显示在线人数功能
-def on_player_joined(server:PluginServerInterface, player:str, info:Info)->None:
-    if isinstance(qq_bot, qbot) and qq_bot.config["command"]["name"]:
-        qq_bot.set_number_as_name(server)
-        
-    # if isinstance(qq_bot, qbot) and qq_bot.config["forward"].get("player_notice", False):
-    #     qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player))
-
-# 更新机器人名字 <- 显示在线人数功能
-# 对违规名字无效
-# def on_player_left(server:PluginServerInterface, player:str)->None:
-#     if isinstance(qq_bot, qbot) and qq_bot.config["command"]["name"]:
-#         qq_bot.set_number_as_name(server)
-
-# 离线玩家添加白名单功能
 def on_info(server:PluginServerInterface, info:Info)->None:
-    if isinstance(qq_bot, qbot):
-        qq_bot.add_offline_whitelist(server, info)
+    # Why I don't use on_player_join & on_player_left?
+    # -> Some player with illegal name will not trigger the those events.
 
-        # list function
-        while "players online:" in info.content and qq_bot._list_callback:
-            func = qq_bot._list_callback.pop()
-            func(info.content)
+    if not isinstance(qq_bot, qbot):
+        return 
+    
+    qq_bot.add_offline_whitelist(server, info)
 
-        # 更新机器人名字 <- 显示在线人数功能
-        if ("logged in with entity id" in info.content or "lost connection:" in info.content) and qq_bot.config["command"]["name"]:
-            qq_bot.set_number_as_name(server)
+    # list function
+    while "players online:" in info.content and qq_bot._list_callback:
+        func = qq_bot._list_callback.pop()
+        func(info.content)
 
-        # 玩家上线通知
-        if "logged in with entity id" in info.content and qq_bot.config["forward"].get("player_notice", False):
-            player_name = info.content.split(" logged in with entity id")[0].split("[")[:-1]
-            player_name = "[".join(player_name)
-            qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player_name))
+    # 更新机器人名字 <- 显示在线人数功能
+    if ("logged in with entity id" in info.content or "lost connection:" in info.content) and qq_bot.config["command"]["name"]:
+        qq_bot.set_number_as_name(server)
 
-        # 玩家下线通知
-        if "left the game" in info.content and qq_bot.config["forward"].get("player_notice", False):
-            player_name = info.content.replace("left the game", "").strip()
-            qq_bot.send_msg_to_all_qq(get_style_template('player_notice_leave', qq_bot.style).format(player_name))
+    is_player_login = "logged in with entity id" in info.content
+    # 玩家上线通知
+    if is_player_login and qq_bot.config["forward"].get("player_notice", False):
+        player_name = "[".join(info.content.split(" logged in with entity id")[0].split("[")[:-1])
+        qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player_name))
+    # 玩家上线显示群公告
+    if is_player_login and qq_bot.config["forward"].get("show_group_notice", False):
+        player_name = "[".join(info.content.split(" logged in with entity id")[0].split("[")[:-1])
+        
+        latest_notice = get_latest_group_notice(qq_bot, server)
+
+        latest_notice_json = {
+            "text": f"群公告：{latest_notice}",
+            "color": "gray",
+            "italic": False
+        }
+        server.execute(f'tellraw {player_name} {json.dumps(latest_notice_json)}')
+
+    # 玩家下线通知
+    if "left the game" in info.content and qq_bot.config["forward"].get("player_notice", False):
+        player_name = info.content.replace("left the game", "").strip()
+        qq_bot.send_msg_to_all_qq(get_style_template('player_notice_leave', qq_bot.style).format(player_name))
 
 # mc游戏消息 -> QQ
 def on_user_info(server:PluginServerInterface, info:Info)->None:

@@ -5,6 +5,9 @@ import json
 import os
 import re
 
+#==================================================================#
+#                         Style template                           #
+#==================================================================#
 def get_style()->dict:
     config = table("./config/GUGUbot/config.json", yaml=True)
     extra_style = read_extra_style(config['dict_address'].get('extra_style_path', ""))
@@ -28,6 +31,9 @@ def get_style_template(template_name:str, current_style:str)->str:
         return style_template
     return normal_template
 
+#==================================================================#
+#                        Beautify message                          #
+#==================================================================#
 def process_json(match):
     json_data = match.group(1).replace('&#44;', ',').replace('&#91;', '[').replace('&#93;', ']')
     parsed_data = json.loads(json_data)
@@ -92,4 +98,18 @@ def beautify_message(content:str, keep_raw_image_link:bool=False)->str:
 
     return content
 
-    
+#==================================================================#
+#                             Helper                               #
+#==================================================================#
+def get_latest_group_notice(qq_bot, server):
+    group_notices = qq_bot._get_group_notice(qq_bot.config["group_id"][0])
+
+    if not group_notices:
+        server.logger.warning("无法获取群公告，建议尝试增加 cq_qq_api 的 max_wait_time 参数")
+    if not group_notices['data']:
+        server.logger.warning("无群公告可供展示")
+
+    latest_notice = max(group_notices['data'], key = lambda x: x['publish_time'])
+    latest_notice_text = latest_notice['message']['text']
+
+    return latest_notice_text
