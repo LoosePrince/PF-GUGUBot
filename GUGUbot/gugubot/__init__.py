@@ -126,7 +126,8 @@ def on_info(server:PluginServerInterface, info:Info)->None:
 
         # 玩家上线通知
         if "logged in with entity id" in info.content and qq_bot.config["forward"].get("player_notice", False):
-            player_name = info.content.split("[/")[0]
+            player_name = info.content.split(" logged in with entity id")[0].split("[")[:-1]
+            player_name = "[".join(player_name)
             qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player_name))
 
         # 玩家下线通知
