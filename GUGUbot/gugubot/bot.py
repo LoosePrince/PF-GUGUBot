@@ -97,7 +97,7 @@ class qbot(object):
             return
 
         uuid, name = result.groups()[:2]
-        if name not in [item for sublist in self.data.values() for item in sublist]:
+        if name not in [name for sublist in self.data.values() for name in sublist]:
             return
 
         self.loading_whitelist()
@@ -179,7 +179,7 @@ class qbot(object):
     # 游戏内@ 推荐
     def ingame_at_suggestion(self):
         # 初始化成员字典和建议内容
-        self.member_dict = {v: k for k, v_list in self.data.items() for v in v_list}
+        self.member_dict = {name: qq_id for qq_id, name_list in self.data.items() for name in name_list}
         suggest_content = set(self.member_dict.keys())
 
         try:
@@ -234,9 +234,9 @@ class qbot(object):
         self.uuid_qqid = {}
         whitelist_dict = {game_name: uuid for uuid, game_name in self.whitelist.items()}
         
-        for qq_id, qq_names in self.data.items():
-            for qq_name in qq_names:
-                clean_name = qq_name.split('(')[0].split('（')[0]
+        for qq_id, names in self.data.items():
+            for name in names:
+                clean_name = name.split('(')[0].split('（')[0]
                 if clean_name in whitelist_dict:
                     self.uuid_qqid[whitelist_dict[clean_name]] = qq_id
 
@@ -252,7 +252,7 @@ class qbot(object):
                 if self.config["command"]["whitelist"]:
                     for player_name in self.data[user_id]:
                         server.execute(f"whitelist remove {player_name}")
-                    bot.reply(info, get_style_template('del_whitelist_when_quit', self.style).format(self.data[user_id][0]))
+                    bot.reply(info, get_style_template('del_whitelist_when_quit', self.style).format(self.data[user_id]))
                     # 重载白名单
                     time.sleep(5)
                     self.loading_whitelist()
@@ -429,7 +429,7 @@ class qbot(object):
                 if command[2] in self.data:
                     del self.data[command[2]]
                     bot.reply(info, f'已解除 {command[2]} 绑定的ID')
-                elif command[2] in set(name for names in self.data.values() for name in names):
+                elif command[2] in {name for names in self.data.values() for name in names}:
                     for qq_id, game_name in self.data.items():
                         if command[2] in game_name and len(game_name) == 1:
                             del self.data[qq_id]
