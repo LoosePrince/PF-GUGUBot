@@ -83,7 +83,7 @@ class qbot_helper:
         self.key_word_ingame = key_word_system(self.config["dict_address"]['key_word_ingame_dict'], ingame_key_word_help)  # MC 关键词
         self.ban_word        = ban_word_system(self.config["dict_address"]['ban_word_dict'])                               # 违禁词
         self.uuid_qqid       = table(self.config["dict_address"]['uuid_qqid'])                                             # uuid - qqid 表
-        self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'])                                                                # 白名单
+        self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'], self.server.logger)                                                                # 白名单
         self.shenheman = table(self.config["dict_address"]['shenheman'])                        # 群审核人员
 
     def _loading_rcon(self) -> None:
@@ -329,8 +329,8 @@ class qbot_helper:
                 (info.raw_message.startswith('[CQ:image') \
                     or info.raw_message.startswith("[CQ:mface")):
             if  time.time() - self.picture_record_dict[info.user_id][1] >= 30:
-                del self.picture_record_dict[info.user_id]
                 bot.reply(f"添加图片 <{self.picture_record_dict[info.user_id][0]}> 已超时")
+                del self.picture_record_dict[info.user_id]
             else:
                 try:
                     url = re.search(r'url=([^,\]]+)|file=([^\s,\]]+)', info.raw_message)
@@ -474,7 +474,7 @@ class qbot_helper:
                 if self._empty_double_check == None:
                     self._empty_double_check = str(random_6_digit())
                     bot.reply(info, 
-                              f'请输入 {self.config['command_prefix']}绑定 清空 {self._empty_double_check} 来清空')
+                              f'请输入 {self.config["command_prefix"]}绑定 清空 {self._empty_double_check} 来清空')
                 elif self._empty_double_check == command[2]:
                     self.data.data = {}
                     self.data.save() # 清空绑定
@@ -620,9 +620,11 @@ class qbot_helper:
         return False   
     
     def _handle_reload_command(self, server, info, bot):
-        bot.reply(info, "重启中...")
-        server.reload_plugin("gugubot")
-        return True
+        if info.content == f"{self.config['command_prefix']}重启":
+            bot.reply(info, "重启中...(请等待10秒)")
+            server.reload_plugin("gugubot")
+            return True
+        return False
 
     def _handle_shenhe(self, info, bot, action: str):
         if self.shenhe[info.user_id]:
@@ -691,10 +693,11 @@ class qbot_helper:
             bot.reply(info, "现有如下风格：\n" + '\n'.join(style.keys()))
         elif command[1] in style:
             # 普通成员冷却
-            time_remain = int(time.time() - self.last_style_change)
-            if  time_remain <= self.config.get("style_cooldown", 0) \
+            time_diff = int(time.time() - self.last_style_change)
+            cooldown = self.config.get("style_cooldown", 0)
+            if  time_diff <= cooldown \
                 and info.user_id not in self.config['admin_id']:
-                bot.reply(info, f"{time_remain}秒后才能换风格哦！")
+                bot.reply(info, f"{cooldown - time_diff}秒后才能换风格哦！")
                 return
             self.style = command[1]
             self.config['style'] = command[1]
@@ -952,7 +955,7 @@ class qbot(qbot_helper):
         # 禁止群员执行指令
         if self.config['command'].get("group_admin", False) \
             and info.user_id not in self.config['admin_id'] \
-            and info.source_id not in self.config.get(['admin_group_id'], []):
+            and info.source_id not in self.config.get('admin_group_id', []):
             return True
 
         # 关键词操作
@@ -1012,10 +1015,10 @@ class qbot(qbot_helper):
         if self._handle_shenhe_command(info, bot, command): return
         
         # execute command
-        if self._handle_execute_command(self, info, bot): return 
+        if self._handle_execute_command(info, bot): return 
 
         # reload plugin
-        if self._handle_reload_command(self, server, info, bot): return
+        if self._handle_reload_command(server, info, bot): return
 
 
     # group command

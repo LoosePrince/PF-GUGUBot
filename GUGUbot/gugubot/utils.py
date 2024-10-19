@@ -200,7 +200,7 @@ def is_forward_to_mc_msg(info, bot, config):
 # 判断是否是机器人
 def is_robot(bot, group_id, user_id)->bool:
     user_info = bot.get_group_member_info(group_id, user_id)
-    if user_info and user_info.get('data', {}).get('is_robot', False):
+    if user_info and user_info.get('data', {}) and user_info.get('data', {}).get('is_robot', False):
         return True
     return False
 
