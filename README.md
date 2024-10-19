@@ -326,6 +326,7 @@
 > ```  
 >{
 >  '正常' : {
+>    'add_cancel': '图片保存已取消',
 >    'add_existed': '已存在该关键词~',
 >    'add_image_instruction': '请发送要添加的图片~',
 >    'add_image_fail': '图片保存失败~',
@@ -461,6 +462,7 @@
 >- bound_notice: 是否进行绑定提示
 >- ban_word: 违禁词撤回开关
 >- execute_command: 执行指令开关
+>- group_admin: 群指令（只能被咱们的管理员执行）
 >- ingame_key_word: 游戏内关键词开关
 >- key_word: 群聊关键词开关
 >- list: 玩家列表查询开关
@@ -481,13 +483,7 @@
 >- mc_to_qq_command: 服务器指令(!!/@)转发到QQ
 >- player_notice: 玩家上下线通知
 >- qq_to_mc: QQ转发到mc开关
-></details>
-
-><details>
-> <summary>白名单设置</summary>
->
->- whitelist_add_with_bound: 绑定时是否自动添加白名单
->- whitelist_remove_with_leave: 退群时是否自动移除白名单
+>- show_group_notice: 上线显示最新群公告
 >
 ></details>
 
@@ -517,8 +513,12 @@
 > <summary>其他设置</summary>
 >
 >- font_limit: 文字超长转图片 （默认大于150字转图片, 设置-1关闭）
+>- max_bound: 一个玩家可以绑定多少个名称
 >- show_message_in_console: 展示上报消息
 >- style: （可选）机器人回复风格 #风格 查看风格帮助
+>- style_cooldown: 风格切换冷却(单位: 秒)
+>- whitelist_add_with_bound: 绑定时是否自动添加白名单
+>- whitelist_remove_with_leave: 退群时是否自动移除白名单
 >
 ></details>
 

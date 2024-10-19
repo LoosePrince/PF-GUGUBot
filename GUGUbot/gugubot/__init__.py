@@ -11,7 +11,7 @@ gugu_dir = os.path.dirname(__file__)[:-7] # remove \gugubot
 sys.path.append(gugu_dir)  if gugu_dir not in sys.path  else None
 
 from .bot import qbot
-from .utils import get_style_template
+from .utils import get_latest_group_notice, get_style_template
 
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.command import *
@@ -20,7 +20,6 @@ import pygame
 def on_load(server: PluginServerInterface, old)->None:
     # 设置系统路径
     set_sys_path()
-    global past_bot, past_info
     global qq_bot
 
     # 获取接口机器人
@@ -29,31 +28,24 @@ def on_load(server: PluginServerInterface, old)->None:
         server.logger.error("~~ 未找到前置插件 ~~")
     cq_qq_api_bot = cq_qq_api_instance.get_bot()
 
-    # 继承重载前参数
-    if old is not None and hasattr(old, 'past_bot') and \
-       old is not None and hasattr(old, 'past_info'):
-        past_info = old.past_info
-        past_bot = old.past_bot
-    else:
-        past_bot = False
-
     # 更新配置文件 -> 1.1.4 -> 1.1.5 config迁移
+    # 更新data格式 -> 1.7.x -> 1.8.0 
     temp_update_version(server)
 
     # gugubot主体
     qq_bot = qbot(server, cq_qq_api_bot)
 
     # 注册指令
-    qq_bot.server.register_command(
+    server.register_command(
         Literal('!!klist').runs(qq_bot.ingame_key_list)
     )
-    qq_bot.server.register_command(
+    server.register_command(
         Literal('!!qq').
             then(
                 GreedyText('message').runs(qq_bot.ingame_command_qq)
             )
     )
-    qq_bot.server.register_command(
+    server.register_command(
         Literal('@').then(
             Text('QQ(name/id)').suggests(lambda: qq_bot.suggestion).then(
                 GreedyText('message').runs(qq_bot.ingame_at)
@@ -68,9 +60,9 @@ def on_load(server: PluginServerInterface, old)->None:
     server.register_help_message('@ <QQ名/号> <消息>','让机器人在qq里@')
     # 注册监听任务
     server.register_event_listener('cq_qq_api.on_qq_command', qq_bot.on_qq_command)
-    server.register_event_listener('cq_qq_api.on_qq_message', qq_bot.send_msg_to_mc)
+    server.register_event_listener('cq_qq_api.on_qq_message', qq_bot.on_qq_message)
     server.register_event_listener('cq_qq_api.on_qq_request', qq_bot.on_qq_request)
-    server.register_event_listener('cq_qq_api.on_qq_notice', qq_bot.notification)
+    server.register_event_listener('cq_qq_api.on_qq_notice', qq_bot.on_qq_notice)
 
     # 检查插件版本
     def check_plugin_version():
@@ -96,49 +88,67 @@ def on_load(server: PluginServerInterface, old)->None:
 # 防止初始化报错
 qq_bot = None
 
-# 更新机器人名字 <- 显示在线人数功能
-def on_player_joined(server:PluginServerInterface, player:str, info:Info)->None:
-    if isinstance(qq_bot, qbot) and qq_bot.config["command"]["name"]:
-        qq_bot.set_number_as_name(server)
-        
-    # if isinstance(qq_bot, qbot) and qq_bot.config["forward"].get("player_notice", False):
-    #     qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player))
-
-# 更新机器人名字 <- 显示在线人数功能
-# 对违规名字无效
-# def on_player_left(server:PluginServerInterface, player:str)->None:
-#     if isinstance(qq_bot, qbot) and qq_bot.config["command"]["name"]:
-#         qq_bot.set_number_as_name(server)
-
-# 离线玩家添加白名单功能
 def on_info(server:PluginServerInterface, info:Info)->None:
-    if isinstance(qq_bot, qbot):
-        qq_bot.add_offline_whitelist(server, info)
+    # Why I don't use on_player_join & on_player_left?
+    # -> Some player with illegal name will not trigger the those events.
 
-        # list function
-        while "players online:" in info.content and qq_bot._list_callback:
-            func = qq_bot._list_callback.pop()
-            func(info.content)
+    if not isinstance(qq_bot, qbot):
+        return 
 
-        # 更新机器人名字 <- 显示在线人数功能
-        if ("logged in with entity id" in info.content or "lost connection:" in info.content) and qq_bot.config["command"]["name"]:
-            qq_bot.set_number_as_name(server)
+    # offline white list    
+    qq_bot.add_offline_whitelist(server, info)
 
-        # 玩家上线通知
-        if "logged in with entity id" in info.content and qq_bot.config["forward"].get("player_notice", False):
-            player_name = info.content.split(" logged in with entity id")[0].split("[")[:-1]
-            player_name = "[".join(player_name)
-            qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player_name))
+    # player list
+    while "players online:" in info.content and qq_bot._list_callback:
+        func = qq_bot._list_callback.pop()
+        func(info.content)
 
-        # 玩家下线通知
-        if "left the game" in info.content and qq_bot.config["forward"].get("player_notice", False):
-            player_name = info.content.replace("left the game", "").strip()
-            qq_bot.send_msg_to_all_qq(get_style_template('player_notice_leave', qq_bot.style).format(player_name))
+    is_player_login = "logged in with entity id" in info.content
+    is_player_left = "left the game" in info.content
+
+    if is_player_login:
+        _on_player_join(server, info)
+    
+    if is_player_left:
+        _on_player_left(server, info)
+
+def _on_player_join(server:PluginServerInterface, info:Info):
+    # 机器人名字更新
+    if qq_bot.config["command"]["name"]:
+        qq_bot.set_number_as_name(server)
+    
+    # 玩家上线通知
+    if qq_bot.config["forward"].get("player_notice", False):
+        player_name = "[".join(info.content.split(" logged in with entity id")[0].split("[")[:-1])
+        qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player_name))
+
+    # 玩家上线显示群公告
+    if qq_bot.config["forward"].get("show_group_notice", False):
+        player_name = "[".join(info.content.split(" logged in with entity id")[0].split("[")[:-1])
+        
+        latest_notice = get_latest_group_notice(qq_bot, logger=server.logger)
+
+        latest_notice_json = {
+            "text": f"群公告：{latest_notice}",
+            "color": "gray",
+            "italic": False
+        }
+        server.execute(f'tellraw {player_name} {json.dumps(latest_notice_json)}')
+
+def _on_player_left(server:PluginServerInterface, info:Info):
+    # 机器人名字更新
+    if qq_bot.config["command"]["name"]:
+        qq_bot.set_number_as_name(server)
+
+    # 玩家下线通知
+    if qq_bot.config["forward"].get("player_notice", False):
+        player_name = info.content.replace("left the game", "").strip()
+        qq_bot.send_msg_to_all_qq(get_style_template('player_notice_leave', qq_bot.style).format(player_name))
 
 # mc游戏消息 -> QQ
 def on_user_info(server:PluginServerInterface, info:Info)->None:
     if isinstance(qq_bot, qbot):
-        qq_bot.send_msg_to_qq(server, info)
+        qq_bot.on_mc_message(server, info)
 
 # 卸载
 def on_unload(server:PluginServerInterface)->None:
@@ -153,7 +163,7 @@ def on_server_startup(server:PluginServerInterface)->None:
         # 开服提示
         qq_bot.send_msg_to_all_qq(get_style_template('server_start', qq_bot.style))
         # 开服指令
-        for _,command in qq_bot.start_command.data.items():
+        for _, command in qq_bot.start_command.items():
             # 执行指令
             server.execute(command)
 
@@ -186,3 +196,11 @@ def temp_update_version(server:PluginServerInterface)->None:
                 server.logger.info(f"Copied {file} from {old_config_dir} to {config_dir}")
             except Exception as e:
                 server.logger.error(f"Error copying {file}: {str(e)}")
+
+    # update user data format
+    from .table import table
+    data = table("./config/GUGUbot/GUGUbot.json")
+    for k, v in data.items():
+        if isinstance(v, str):
+            data[k] = [v]
+    data.save()

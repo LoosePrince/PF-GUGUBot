@@ -14,11 +14,10 @@ class table(object):
 
     def load(self) -> None: # 读取
         if os.path.isfile(self.path) and os.path.getsize(self.path) != 0:
-            if self.yaml:
-                with open(self.path,'r', encoding='UTF-8') as f:
+            with open(self.path, 'r', encoding='UTF-8') as f:
+                if self.yaml:
                     self.data = yaml.load(f, Loader=yaml.FullLoader)
-            else:
-                with open(self.path,'r', encoding='UTF-8') as f:
+                else:
                     self.data = json.load(f)
         else:
             self.data = self.default_content if self.default_content else {}
@@ -36,7 +35,7 @@ class table(object):
     def __getitem__(self, key:str): # 获取储存内容
         return self.data[key]    
 
-    def __setitem__(self, key:str, value:str): # 增加，修改
+    def __setitem__(self, key:str, value): # 增加，修改
         self.data[key] = value
         self.save()   
 
