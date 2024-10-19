@@ -169,7 +169,11 @@ class qbot_helper:
             instance_list = [i.split(']')[-1].split('】')[-1].strip() for i in instance_list] # for [123] player_name & 【123】player_name
 
             # Obtain the real player name list  
-            player = [i for i in instance_list if i in bound_list or not bound_list]
+            ip_logger = server.get_plugin_instance("player_ip_logger")
+            if ip_logger:
+                player = [i for i in instance_list if ip_logger.is_player(i)]
+            else:
+                player = [i for i in instance_list if i in bound_list or not bound_list]
             number = len(player)
 
             name = " "
