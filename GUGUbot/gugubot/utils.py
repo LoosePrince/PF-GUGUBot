@@ -174,7 +174,7 @@ def format_bot_list(bot_list):
     return '\n\n没有假人在线哦!'
 
 def get_latest_group_notice(qq_bot, logger):
-    group_notices = qq_bot._get_group_notice(qq_bot.config["group_id"][0])
+    group_notices = qq_bot.bot._get_group_notice(qq_bot.config["group_id"][0])
 
     if not group_notices:
         logger.warning("无法获取群公告，建议尝试增加 cq_qq_api 的 max_wait_time 参数")
