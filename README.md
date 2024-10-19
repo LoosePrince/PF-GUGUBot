@@ -462,6 +462,7 @@
 >- bound_notice: 是否进行绑定提示
 >- ban_word: 违禁词撤回开关
 >- execute_command: 执行指令开关
+>- group_admin: 群指令（只能被咱们的管理员执行）
 >- ingame_key_word: 游戏内关键词开关
 >- key_word: 群聊关键词开关
 >- list: 玩家列表查询开关
@@ -515,6 +516,7 @@
 >- max_bound: 一个玩家可以绑定多少个名称
 >- show_message_in_console: 展示上报消息
 >- style: （可选）机器人回复风格 #风格 查看风格帮助
+>- style_cooldown: 风格切换冷却(单位: 秒)
 >- whitelist_add_with_bound: 绑定时是否自动添加白名单
 >- whitelist_remove_with_leave: 退群时是否自动移除白名单
 >
