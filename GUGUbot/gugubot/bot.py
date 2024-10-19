@@ -566,7 +566,11 @@ class qbot_helper:
             instance_list = [i.split(']')[-1].split('】')[-1].strip() for i in instance_list] # 针对 [123] 玩家 和 【123】玩家 这种人名
             
             # 有人绑定 -> 识别假人
-            if bound_list:
+            ip_logger = self.server.get_plugin_instance("player_ip_logger")
+            if ip_logger:
+                player_list = [i for i in instance_list if ip_logger.is_player(i)]
+                bot_list = [i for i in instance_list if not ip_logger.is_player(i)]
+            elif bound_list:
                 player_list = [i for i in instance_list if i in bound_list]
                 bot_list = [i for i in instance_list if i not in bound_list]
             # 无人绑定 -> 不识别假人 ==> 下版本使用 ip_logging 来识别假人
