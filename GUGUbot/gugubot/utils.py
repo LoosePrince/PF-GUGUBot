@@ -1,10 +1,18 @@
-from .data.text import style, qq_face_name
-from .table import table
-
 import json
 import os
+import random
 import re
+import time
+import types
 
+from functools import partial
+
+import pygame
+
+from mcdreforged.api.types import PluginServerInterface
+
+from .data.text import style, qq_face_name
+from .table import table
 #==================================================================#
 #                         Style template                           #
 #==================================================================#
@@ -101,15 +109,140 @@ def beautify_message(content:str, keep_raw_image_link:bool=False)->str:
 #==================================================================#
 #                             Helper                               #
 #==================================================================#
-def get_latest_group_notice(qq_bot, server):
+# 文字转图片-装饰器
+def addTextToImage(func):
+    def _newReply(font, font_limit: int, is_main_server, self, info, message: str, force_reply: bool = False):
+        if not is_main_server and not force_reply:
+            return 
+
+        if font_limit >= 0 and len(message.split("]")[-1]) >= font_limit:
+            image_path = text2image(font, message)
+            message = f"[CQ:image,file=file:///{os.path.abspath(image_path)}]"
+
+        message_types = {
+            'private': self.send_private_msg,
+            'group': self.send_group_msg
+        }
+        send_func = message_types.get(info.message_type)
+        if send_func:
+            send_func(info.source_id, message)
+
+        try:
+            time.sleep(2)
+            os.remove(image_path)
+        except Exception:
+            pass
+
+    def _addTextToImage(self, server: PluginServerInterface, info, bot):
+        _newReplyWithFont = partial(_newReply, self.font, int(self.config["font_limit"]), self.is_main_server)
+        bot.reply = types.MethodType(_newReplyWithFont, bot)
+        return func(self, server, info, bot)
+
+    return _addTextToImage
+
+def format_list_response(player_list, bot_list, player_status, server_status, style):
+        respond = ""
+        count = 0
+
+        if player_status or server_status:
+            respond += format_player_list(player_list, style)
+            count += len(player_list)
+
+        if not player_status:
+            respond += format_bot_list(bot_list)
+            count += len(bot_list)
+
+        if count != 0:
+            respond = get_style_template('player_list', style).format(
+                count,
+                '玩家' if player_status else '假人' if not server_status else '人员',
+                '\n' + respond
+            )
+        elif count == 0:
+            respond = get_style_template('no_player_ingame', style)
+
+        return respond
+
+def format_player_list(player_list, style):
+    if player_list:
+        return f"\n---玩家---\n" + '\n'.join(sorted(player_list))
+    return get_style_template('no_player_ingame', style)
+
+def format_bot_list(bot_list):
+    if bot_list:
+        return f"\n\n---假人---\n" + '\n'.join(sorted(bot_list))
+    return '\n\n没有假人在线哦!'
+
+def get_latest_group_notice(qq_bot, logger):
     group_notices = qq_bot._get_group_notice(qq_bot.config["group_id"][0])
 
     if not group_notices:
-        server.logger.warning("无法获取群公告，建议尝试增加 cq_qq_api 的 max_wait_time 参数")
+        logger.warning("无法获取群公告，建议尝试增加 cq_qq_api 的 max_wait_time 参数")
     if not group_notices['data']:
-        server.logger.warning("无群公告可供展示")
+        logger.warning("无群公告可供展示")
 
     latest_notice = max(group_notices['data'], key = lambda x: x['publish_time'])
     latest_notice_text = latest_notice['message']['text']
 
     return latest_notice_text
+
+def is_forward_to_mc_msg(info, bot, config):
+    condition = [
+        config['forward']['qq_to_mc'],                                # config 设置转发
+        info.content,                                                 # 不是空内容
+        not info.content.startswith(config['command_prefix']),        # 不是指令
+        info.source_id in config.get('group_id', []),                 # 是指定群消息
+        not is_robot(bot, info.source_id, info.user_id)               # 不是机器人  
+            or config['forward'].get('farward_other_bot', False)      # 是机器人 + 转发机器人
+    ]
+    return all(condition)
+
+# 判断是否是机器人
+def is_robot(bot, group_id, user_id)->bool:
+    user_info = bot.get_group_member_info(group_id, user_id)
+    if user_info and user_info.get('data', {}).get('is_robot', False):
+        return True
+    return False
+
+# 读取白名单
+def loading_whitelist(whitelist_path, logger)->None:
+    try:
+        with open(whitelist_path, 'r') as f:
+            temp = json.load(f)
+        whitelist = {i['uuid']:i['name'] for i in temp} # 解压白名单表
+        return whitelist
+    except Exception as e:
+        logger.warning(f"读取白名单出错：{e}")           # debug信息
+        return {}
+    
+# 生成随机6位数pin
+def random_6_digit()->int:
+    return random.randint(100000, 999999)
+
+# 文字转图片函数，一定程度防止风控
+def text2image(font, input_string: str) -> str:
+    # 分割成行并渲染每行文字
+    lines = input_string.split("\n")
+    line_images = [font.render(text, True, (0, 0, 0), (255, 255, 255)) for text in lines]
+    
+    # 计算图片尺寸
+    max_width = max(image.get_width() for image in line_images)
+    total_height = len(lines) * 33
+    
+    # 创建图片表面并填充白色背景
+    surface = pygame.Surface((max_width, total_height))
+    surface.fill((255, 255, 255))
+    
+    # 将每行文字绘制到图片表面上
+    for i, image in enumerate(line_images):
+        surface.blit(image, (0, i * 33))
+    
+    # 确保输出目录存在
+    output_dir = "./config/GUGUbot/image"
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # 生成唯一的文件名并保存图片
+    image_path = os.path.join(output_dir, f"{int(time.time())}.jpg")
+    pygame.image.save(surface, image_path)
+    
+    return image_path

@@ -69,3 +69,6 @@ class base_system(object):
     def __getitem__(self, key:str)->str: 
         return self.data[key] 
     
+    def __setitem__(self, key:str, value):
+        self.data[key] = value   
+    

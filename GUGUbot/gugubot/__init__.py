@@ -20,7 +20,6 @@ import pygame
 def on_load(server: PluginServerInterface, old)->None:
     # 设置系统路径
     set_sys_path()
-    global past_bot, past_info
     global qq_bot
 
     # 获取接口机器人
@@ -28,14 +27,6 @@ def on_load(server: PluginServerInterface, old)->None:
     if cq_qq_api_instance is None:
         server.logger.error("~~ 未找到前置插件 ~~")
     cq_qq_api_bot = cq_qq_api_instance.get_bot()
-
-    # 继承重载前参数
-    if old is not None and hasattr(old, 'past_bot') and \
-       old is not None and hasattr(old, 'past_info'):
-        past_info = old.past_info
-        past_bot = old.past_bot
-    else:
-        past_bot = False
 
     # 更新配置文件 -> 1.1.4 -> 1.1.5 config迁移
     # 更新data格式 -> 1.7.x -> 1.8.0 
@@ -45,16 +36,16 @@ def on_load(server: PluginServerInterface, old)->None:
     qq_bot = qbot(server, cq_qq_api_bot)
 
     # 注册指令
-    qq_bot.server.register_command(
+    server.register_command(
         Literal('!!klist').runs(qq_bot.ingame_key_list)
     )
-    qq_bot.server.register_command(
+    server.register_command(
         Literal('!!qq').
             then(
                 GreedyText('message').runs(qq_bot.ingame_command_qq)
             )
     )
-    qq_bot.server.register_command(
+    server.register_command(
         Literal('@').then(
             Text('QQ(name/id)').suggests(lambda: qq_bot.suggestion).then(
                 GreedyText('message').runs(qq_bot.ingame_at)
@@ -69,9 +60,9 @@ def on_load(server: PluginServerInterface, old)->None:
     server.register_help_message('@ <QQ名/号> <消息>','让机器人在qq里@')
     # 注册监听任务
     server.register_event_listener('cq_qq_api.on_qq_command', qq_bot.on_qq_command)
-    server.register_event_listener('cq_qq_api.on_qq_message', qq_bot.send_msg_to_mc)
+    server.register_event_listener('cq_qq_api.on_qq_message', qq_bot.on_qq_message)
     server.register_event_listener('cq_qq_api.on_qq_request', qq_bot.on_qq_request)
-    server.register_event_listener('cq_qq_api.on_qq_notice', qq_bot.notification)
+    server.register_event_listener('cq_qq_api.on_qq_notice', qq_bot.on_qq_notice)
 
     # 检查插件版本
     def check_plugin_version():
@@ -135,7 +126,7 @@ def _on_player_join(server:PluginServerInterface, info:Info):
     if qq_bot.config["forward"].get("show_group_notice", False):
         player_name = "[".join(info.content.split(" logged in with entity id")[0].split("[")[:-1])
         
-        latest_notice = get_latest_group_notice(qq_bot, server)
+        latest_notice = get_latest_group_notice(qq_bot, logger=server.logger)
 
         latest_notice_json = {
             "text": f"群公告：{latest_notice}",
@@ -157,7 +148,7 @@ def _on_player_left(server:PluginServerInterface, info:Info):
 # mc游戏消息 -> QQ
 def on_user_info(server:PluginServerInterface, info:Info)->None:
     if isinstance(qq_bot, qbot):
-        qq_bot.send_msg_to_qq(server, info)
+        qq_bot.on_mc_message(server, info)
 
 # 卸载
 def on_unload(server:PluginServerInterface)->None:
@@ -172,7 +163,7 @@ def on_server_startup(server:PluginServerInterface)->None:
         # 开服提示
         qq_bot.send_msg_to_all_qq(get_style_template('server_start', qq_bot.style))
         # 开服指令
-        for _,command in qq_bot.start_command.data.items():
+        for _, command in qq_bot.start_command.items():
             # 执行指令
             server.execute(command)
 
