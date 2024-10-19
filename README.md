@@ -326,6 +326,7 @@
 > ```  
 >{
 >  '正常' : {
+>    'add_cancel': '图片保存已取消',
 >    'add_existed': '已存在该关键词~',
 >    'add_image_instruction': '请发送要添加的图片~',
 >    'add_image_fail': '图片保存失败~',

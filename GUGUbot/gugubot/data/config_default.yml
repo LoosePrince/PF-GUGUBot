@@ -18,11 +18,13 @@ server_name: ""
 ################### 指令开关（可以通过机器人调整）########################
 # 是否进行绑定提示
 bound_notice: true
-command:
+:
   # ban_word:违禁词撤回
   ban_word: true
   # 执行服务器指令
   execute_command: false
+  # 群指令（只能被咱们的管理员执行）
+  group_admin: false
   # ingame_key_word:游戏内关键词回复
   ingame_key_word: true
   # key_word:群内关键词回复
@@ -96,6 +98,8 @@ max_bound: 1
 show_message_in_console: true
 # （可选）机器人回复风格 #风格 查看风格帮助
 style: 正常
+# 风格切换冷却
+style_cooldown: 0
 # 绑定ID自动绑定服务器白名单
 whitelist_add_with_bound: false
 # 退群时移除白名单
