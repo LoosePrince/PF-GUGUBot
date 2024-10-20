@@ -163,7 +163,7 @@ def on_server_startup(server:PluginServerInterface)->None:
         # 开服提示
         qq_bot.send_msg_to_all_qq(get_style_template('server_start', qq_bot.style))
         # 开服指令
-        for _, command in qq_bot.start_command.items():
+        for _, command in qq_bot.start_command.data.items():
             # 执行指令
             server.execute(command)
 
