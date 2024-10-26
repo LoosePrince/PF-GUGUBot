@@ -52,6 +52,8 @@
 - 已存储在插件对应的文件夹内的 [requirements.txt](requirements.txt) 中, 可以使用 `pip install -r requirements.txt` 安装
 #### 前置插件
 - [cq_qq_api](https://github.com/XueK66/PF-cq_qq_api/releases)
+- [player_ip_logger](https://github.com/LoosePrince/PF-player_ip_logger)
+- [online_player_api](https://github.com/AnzhiZhang/MCDReforgedPlugins)
 
 ## 功能列表
 > QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮助`
@@ -127,6 +129,7 @@
 #名字   -> 查看机器人名字相关帮助
 #审核   -> 协助审核功能
 #执行 <command> -> 执行指令
+#重启 -> 重载机器人
 ```
 
 ><details>
@@ -137,6 +140,7 @@
 >#绑定 查询 <QQ号>     -> 查询绑定ID
 >#绑定 解绑 <QQ号>     -> 解除绑定
 >#绑定 <QQ号> <游戏ID> -> 绑定新ID
+>#绑定 清空 -> 清空绑定名单 + 白名单（需二次确认）
 >```
 > </details>
 
@@ -350,8 +354,11 @@
 >    'no_word': '列表空空的',
 >    'player_api_fail': '未能捕获服务器日志（推荐开启rcon精准获取玩家信息）',
 >    'player_list':'在线玩家共{}人，{}列表: {}',
+>    'player_notice_join': '{} 加入了游戏',
+>    'player_notice_leave': '{} 离开了游戏',
 >    'reload_success': '重载成功',
 >    'server_start':'服务器已启动',
+>    'server_stop': '服务器已关闭'
 >  }
 >}
 > ```

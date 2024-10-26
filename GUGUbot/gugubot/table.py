@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 import json
 import os
-import yaml
+
 from pathlib import Path
+from ruamel.yaml import YAML
+
+yaml = YAML()
+yaml.preserve_quotes = True
 class table(object):    
 
     def __init__(self,path:str="./default.json", default_content:dict=None, yaml:bool=False) -> None: # 初始化，记录系统路径
@@ -16,7 +20,7 @@ class table(object):
         if os.path.isfile(self.path) and os.path.getsize(self.path) != 0:
             with open(self.path, 'r', encoding='UTF-8') as f:
                 if self.yaml:
-                    self.data = yaml.load(f, Loader=yaml.FullLoader)
+                    self.data = yaml.load(f)
                 else:
                     self.data = json.load(f)
         else:
@@ -27,7 +31,7 @@ class table(object):
         self.path.parents[0].mkdir(parents=True, exist_ok=True)
         if self.yaml:
             with open(self.path, 'w', encoding='UTF-8') as f:
-                yaml.dump(self.data, f, allow_unicode=True)        
+                yaml.dump(self.data, f)        
         else:
             with open(self.path, 'w', encoding='UTF-8') as f:
                 json.dump(self.data, f, ensure_ascii= False)        

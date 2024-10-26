@@ -1,4 +1,4 @@
-﻿#encoding=utf-8
+﻿# -*- coding: utf-8 -*-
 #+----------------------------------------------------------------------+
 import json
 import os
@@ -10,10 +10,10 @@ from collections import defaultdict
 from pathlib import Path
 
 import pygame
-import yaml
 
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.minecraft.rcon.rcon_connection import RconConnection
+from ruamel.yaml import YAML
 
 from .ban_word_system import ban_word_system
 from .data.text import (
@@ -32,6 +32,9 @@ from .key_word_system import key_word_system
 from .start_command_system import start_command_system
 from .table import table
 from .utils import *
+
+yaml = YAML()
+yaml.preserve_quotes = True
 #+----------------------------------------------------------------------+
 
 class qbot_helper:
@@ -91,7 +94,7 @@ class qbot_helper:
         self.rcon = None
         try:
             with open("./config.yml", 'r', encoding='UTF-8') as f:
-                config = yaml.safe_load(f)
+                config = yaml.load(f)
             
             rcon_config = config.get('rcon', {})
             if rcon_config.get('enable'):
@@ -168,6 +171,13 @@ class qbot_helper:
             instance_list = [i.strip() for i in content.split(": ")[-1].split(", ") if i.strip()]
             instance_list = [i.split(']')[-1].split('】')[-1].strip() for i in instance_list] # for [123] player_name & 【123】player_name
 
+            online_player_api = self.server.get_plugin_instance("online_player_api")
+            if any(["players online" in i for i in instance_list]) and online_player_api: # multiline_return
+                instance_list = online_player_api.get_player_list()
+            elif any(["players online" in i for i in instance_list]):
+                server.logger.warning("无法解析多行返回，开启 rcon 或下载 online_player_api 来解析")
+                server.logger.warning("下载命令: !!MCDR plugin install online_player_api")
+
             # Obtain the real player name list  
             ip_logger = server.get_plugin_instance("player_ip_logger")
             if ip_logger:
@@ -207,17 +217,21 @@ class qbot_helper:
         try:
             with self.server.open_bundled_file("gugubot/data/config_default.yml") as file_handler:
                 message = file_handler.read()
-                message_unicode = message.decode('utf-8')
-                yaml_data = yaml.safe_load(message_unicode)
-                
-            for key, value in yaml_data.items():
-                if key not in self.config and key not in ['group_id', 'admin_id', 'admin_group_id']:
-                    self.config[key] = value
-                elif isinstance(value, dict):
-                    for sub_key, sub_value in value.items():
-                        if sub_key not in self.config[key]:
-                            self.config[key][sub_key] = sub_value
-            
+                message_unicode = message.decode('utf-8').replace('\r\n', '\n')
+                yaml_data = yaml.load(message_unicode)
+
+            for key, value in self.config.items():
+                if isinstance(value, dict):
+                    for sub_k, sub_v in value.items():
+                        yaml_data[key][sub_k] = sub_v
+                else:
+                    yaml_data[key] = value
+
+            for key in ['group_id', 'admin_id', 'admin_group_id']:
+                if key not in self.config:
+                    del yaml_data[key]
+
+            self.config.data = yaml_data
             self.config.save()
         except Exception as e:
             self.server.logger.error(f"Error loading default config: {e}")
@@ -388,10 +402,12 @@ class qbot_helper:
         if info.content.startswith(f"{self.config['command_prefix']}违禁词"):
             if len(command)>1 and command[1] == '开':
                 self.config['command']['ban_word'] = True
+                self.config.save()
                 bot.reply(info, '已开启违禁词！')
             # 关闭违禁词
             elif len(command)>1 and command[1] == '关':
                 self.config['command']['ban_word'] = False
+                self.config.save()
                 bot.reply(info, '已关闭违禁词！')
             else:
                 self.ban_word.handle_command(info.content, info, bot, reply_style=self.style)
@@ -518,10 +534,12 @@ class qbot_helper:
             # 开启游戏关键词
             if len(command)>1 and command[1] == '开':
                 self.config['command']['ingame_key_word'] = True
+                self.config.save()
                 bot.reply(info, '已开启游戏关键词！')
             # 关闭游戏关键词
             elif len(command)>1 and command[1] == '关':
                 self.config['command']['ingame_key_word'] = False
+                self.config.save()
                 bot.reply(info, '已关闭游戏关键词！')
             else:
                 self.key_word_ingame.handle_command(info.content, info, bot, reply_style=self.style)
@@ -550,10 +568,12 @@ class qbot_helper:
             # 开启关键词
             if len(command)>1 and command[1] in ['开','on']:
                 self.config['command']['key_word'] = True
+                self.config.save()
                 bot.reply(info, '已开启关键词！')
             # 关闭关键词
             elif len(command)>1 and command[1] in ['关', 'off']:
                 self.config['command']['key_word'] = False
+                self.config.save()
                 bot.reply(info, '已关闭关键词！')
             else:
                 self.key_word.handle_command(info.content, info, bot, reply_style=self.style)
@@ -566,11 +586,19 @@ class qbot_helper:
             player_status = command[0] in ['玩家', '玩家列表']
             bound_list = {i for player_names in self.data.values() for i in player_names}
 
-            instance_list = [i.strip() for i in content.split(": ")[-1].split(", ") if i.strip()]
+            instance_list = [i.strip() for i in content.split(": ", 1)[-1].split(", ") if i.strip()]
             instance_list = [i.split(']')[-1].split('】')[-1].strip() for i in instance_list] # 针对 [123] 玩家 和 【123】玩家 这种人名
             
+            online_player_api = self.server.get_plugin_instance("online_player_api")
+            if any(["players online" in i for i in instance_list]) and online_player_api: # multiline_return
+                instance_list = online_player_api.get_player_list()
+            elif any(["players online" in i for i in instance_list]):
+                server.logger.warning("无法解析多行返回，开启 rcon 或下载 online_player_api 来解析")
+                server.logger.warning("下载命令: !!MCDR plugin install online_player_api")
+
             # 有人绑定 -> 识别假人
             ip_logger = self.server.get_plugin_instance("player_ip_logger")
+            
             if ip_logger:
                 player_list = [i for i in instance_list if ip_logger.is_player(i)]
                 bot_list = [i for i in instance_list if not ip_logger.is_player(i)]
@@ -586,8 +614,11 @@ class qbot_helper:
             respond = self._add_server_name(respond)
             bot.reply(info, respond, force_reply=True)
 
-        self._list_callback.append(list_callback)
-        server.execute("list")
+        if self.rcon: # use rcon to get command return 
+            list_callback(self.rcon.send_command("list"))
+        else:
+            self._list_callback.append(list_callback)
+            server.execute("list")
 
     def _handle_mc_command(self, server, info, bot):
         user_id = str(info.user_id)
@@ -606,13 +637,13 @@ class qbot_helper:
 
             elif len(command)>1 and command[1] == '开':
                 self.config['command']['name'] = True
-    
+                self.config.save()
                 self.set_number_as_name(server)
                 bot.reply(info, "显示游戏内人数已开启")
 
             elif len(command)>1 and command[1] == '关':
                 self.config['command']['name'] = False
-
+                self.config.save()
                 for gid in self.config.get('group_id', []):
                     bot.set_group_card(gid, int(bot.get_login_info()["data"]['user_id']), " ")
                 bot.reply(info, "显示游戏内人数已关闭")
@@ -643,9 +674,11 @@ class qbot_helper:
                 bot.reply(info, shenhe_help)
             elif len(command)>1 and command[1] == '开':
                 self.config['command']['shenhe'] = True
+                self.config.save()
                 bot.reply(info, '自动审核开启')
             elif len(command)>1 and command[1] == '关':
                 self.config['command']['shenhe'] = False
+                self.config.save()
                 bot.reply(info, '自动审核关闭')
             elif len(command)>=4 and command[1] == '添加':
                 if command[3] not in self.shenheman:
@@ -675,10 +708,12 @@ class qbot_helper:
             # 开启开服指令
             if len(command)>1 and command[1] == '开':
                 self.config['command']['start_command'] = True
+                self.config.save()
                 bot.reply(info, '已开启开服指令！')
             # 关闭开服指令
             elif len(command)>1 and command[1] == '关':
                 self.config['command']['start_command'] = False
+                self.config.save()
                 bot.reply(info, '已关闭开服指令！')
             else:
                 self.start_command.handle_command(info.content, info, bot, reply_style=self.style)
@@ -758,9 +793,13 @@ class qbot_helper:
                     time.sleep(2)
                     self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'])
                 elif command[1] == '开':
+                    self.config['command']['whitelist'] = True
+                    self.config.save()
                     server.execute(f'/whitelist on')
                     bot.reply(info, '白名单已开启！')
                 elif command[1] == '关':
+                    self.config['command']['whitelist'] = False
+                    self.config.save()
                     server.execute(f'/whitelist off')
                     bot.reply(info, '白名单已关闭！')
                 elif command[1] == '重载':
