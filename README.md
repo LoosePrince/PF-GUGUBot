@@ -52,6 +52,8 @@
 - 已存储在插件对应的文件夹内的 [requirements.txt](requirements.txt) 中, 可以使用 `pip install -r requirements.txt` 安装
 #### 前置插件
 - [cq_qq_api](https://github.com/XueK66/PF-cq_qq_api/releases)
+- [player_ip_logger](https://github.com/LoosePrince/PF-player_ip_logger)
+- [online_player_api](https://github.com/AnzhiZhang/MCDReforgedPlugins)
 
 ## 功能列表
 > QQ部分帮助，向QQ机器人发送，可以私聊也可以群聊发送 `#帮助`
