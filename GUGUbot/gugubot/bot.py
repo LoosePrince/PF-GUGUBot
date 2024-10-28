@@ -590,9 +590,9 @@ class qbot_helper:
             instance_list = [i.split(']')[-1].split('】')[-1].strip() for i in instance_list] # 针对 [123] 玩家 和 【123】玩家 这种人名
             
             online_player_api = self.server.get_plugin_instance("online_player_api")
-            if any(["players online" in i for i in instance_list]) and online_player_api: # multiline_return
+            if "online: " not in content and online_player_api: # multiline_return
                 instance_list = online_player_api.get_player_list()
-            elif any(["players online" in i for i in instance_list]):
+            elif "online: " not in content:
                 server.logger.warning("无法解析多行返回，开启 rcon 或下载 online_player_api 来解析")
                 server.logger.warning("下载命令: !!MCDR plugin install online_player_api")
 
