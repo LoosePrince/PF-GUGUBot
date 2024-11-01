@@ -818,7 +818,7 @@ class qbot_helper:
         suggest_content = set(self.member_dict.keys())
 
         try:
-            group_raw_info = [self.bot.get_group_member_list(group_id) for group_id in self.config.get('group_id', [])]
+            group_raw_info = [self.bot.get_group_member_list(group_id) for group_id in self.config.get('group_id', []) if group_id]
             unpack = [i['data'] for i in group_raw_info if i and i['status'] == 'ok']
         except Exception as e:
             self.server.logger.warning(f"获取群成员列表失败: {e}")
@@ -837,7 +837,7 @@ class qbot_helper:
 
     def _is_valid_command_source(self, info) -> bool:
         return (info.source_id in self.config.get('group_id', []) or
-                info.source_id in self.config.get('admin_group_id', []) or
+                (self.config.get('admin_group_id') is None or info.source_id in self.config.get('admin_group_id')) or
                 info.source_id in self.config.get('admin_id', [])) 
 
     # 匹配uuid和qqid
@@ -973,7 +973,7 @@ class qbot(qbot_helper):
         if self.common_command(server, info, bot, command):
             return
         
-        if info.message_type == 'private' or info.source_id in self.config.get('admin_group_id', []):
+        if info.message_type == 'private' or (self.config.get('admin_group_id') and info.source_id in self.config.get('admin_group_id', [])):
             self.private_command(server, info, bot, command)
         elif info.message_type == 'group':
             self.group_command(server, info, bot, command)
