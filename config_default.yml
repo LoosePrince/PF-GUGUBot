@@ -1,107 +1,74 @@
 ########################### QQ相关设置 ##################################
-# 管理员QQ号
-admin_id:
+
+admin_id: # 管理员QQ号
 - 1234563
 - 1234564
-# (可选)管理群群号 -> 群内所有成员拥有管理权限
-admin_group_id: 
-- 123321
-- 456654
-# 要监听，转发的qq群号
-group_id:
-- 1234561
-- 1234562
-# 是否为主服务器（机器人群指令等功能开启）
-is_main_server: true
-# （可选）服务器名字 -> 会在转发前面显示服务器名字
-server_name: ""
+
+admin_group_id: # 管理群群号 :: (可选)群内所有成员拥有管理权限
+-
+-
+
+group_id: # qq群号 :: 要监听，转发的qq群号
+- 1234561 
+- 
+
+is_main_server: true # 主服务器 :: 机器人群指令等功能开启
+server_name: "" # 服务器名字 :: （可选）会在转发前面显示服务器名字
+
 ################### 指令开关（可以通过机器人调整）########################
-# 是否进行绑定提示
-bound_notice: true
-command:
-  # ban_word:违禁词撤回
-  ban_word: true
-  # 执行服务器指令
-  execute_command: false
-  # 群指令（只能被咱们的管理员执行）
-  group_admin: false
-  # ingame_key_word:游戏内关键词回复
-  ingame_key_word: true
-  # key_word:群内关键词回复
-  key_word: true
-  # list:在线查询
-  list: true
-  # 获取服务器内聊天内容
-  mc: true
-  # 机器人昵称
-  name: true
-  # 获取QQ聊天内容
-  qq: true
-  # 辅助审核功能（开发中）
-  shenhe: true
-  # 开服指令
-  start_command: true
-  # 白名单功能
-  whitelist: true
 
-# 转发设置
-forward:
-  # 转发官方机器人回复
-  farward_other_bot: false
-  # 转发图片链接
-  keep_raw_image_link: false
-  # 服务器往QQ群转发
-  mc_to_qq: true
-  # 服务器指令 转发
-  mc_to_qq_command: false
-  # 玩家上下线通知
-  player_notice: false
-  # QQ群往服务器转发 
-  qq_to_mc: true
-  # 上线显示最新群公告
-  show_group_notice: false
+bound_notice: true # 绑定提示 :: 是否进行绑定提示
+
+command: # 指令相关
+  ban_word: true # 违禁词撤回
+  execute_command: false # 执行服务器指令
+  group_admin: false # 群指令 :: 只能被咱们的管理员执行
+  ingame_key_word: true # 游戏内关键词回复
+  key_word: true # 群内关键词回复
+  list: true # 在线查询
+  mc: true # 获取服务器内聊天内容
+  name: true # 机器人昵称
+  qq: true # 获取QQ聊天内容
+  shenhe: true # 辅助审核功能 :: 开发中
+  start_command: true # 开服指令
+  whitelist: true # 白名单功能
+
+forward: # 转发设置
+  farward_other_bot: false # 转发官方机器人回复
+  keep_raw_image_link: false # 转发图片链接
+  mc_to_qq: true # 服务器往QQ群转发
+  mc_to_qq_command: false # 服务器指令转发
+  player_notice: false # 玩家上下线通知
+  qq_to_mc: true # QQ群往服务器转发 
+  show_group_notice: false # 上线显示最新群公告
 
 ########################################################################
-# 命令前缀
-command_prefix: "#"
+
+command_prefix: "#" # 命令前缀
+
 ########################################################################
-# 字体路径，各种数据储存路径
-dict_address:
-  # 违禁词
-  ban_word_dict: .//config//GUGUbot//ban_word.json
-  # 绑定提示图
-  bound_image_path: .//config//GUGUbot//bound.jpg
-  # 自定义风格文件
-  extra_style_path: ""
-  # 字体路径
-  font_path: ./config/GUGUbot/font/MicrosoftYaHei-01.ttf
-  # 关键词
-  key_word_dict: .//config//GUGUbot//key_word.json
-  # 游戏内关键词
-  key_word_ingame_dict: .//config//GUGUbot//key_word_ingame.json
-  # 审核日志
-  shenhe_log: .//config//GUGUbot//shenhe_log.txt
-  # 审核员
-  shenheman: .//config//GUGUbot//shenheman.json
-  # 开服指令
-  start_command_dict: .//config//GUGUbot//start_commands.json
-  # uuid 列表
-  uuid_qqid: .//config//GUGUbot//uuid_qqid.json
-  # 白名单
-  whitelist: .//server//whitelist.json
+
+dict_address: # 储存路径 :: 字体路径，各种数据储存路径
+  ban_word_dict: .//config//GUGUbot//ban_word.json # 违禁词
+  bound_image_path: .//config//GUGUbot//bound.jpg # 绑定提示图
+  extra_style_path: "" # 自定义风格文件
+  font_path: ./config/GUGUbot/font/MicrosoftYaHei-01.ttf # 字体路径
+  key_word_dict: .//config//GUGUbot//key_word.json # 关键词
+  key_word_ingame_dict: .//config//GUGUbot//key_word_ingame.json # 游戏内关键词
+  shenhe_log: .//config//GUGUbot//shenhe_log.txt # 审核日志
+  shenheman: .//config//GUGUbot//shenheman.json # 审核员
+  start_command_dict: .//config//GUGUbot//start_commands.json # 开服指令
+  uuid_qqid: .//config//GUGUbot//uuid_qqid.json # uuid 列表
+  whitelist: .//server//whitelist.json # 白名单
+
 ############################# 其他设置 ##################################
-# 文字超长转图片 （默认大于150字转图片, 设置-1关闭）
-font_limit: 150
-# 一个玩家可以绑定多少个名称
-max_bound: 1
-# 展示上报消息
-show_message_in_console: true
-# （可选）机器人回复风格 #风格 查看风格帮助
-style: 正常
-# 风格切换冷却
-style_cooldown: 0
-# 绑定ID自动绑定服务器白名单
-whitelist_add_with_bound: false
-# 退群时移除白名单
-whitelist_remove_with_leave: true
+
+font_limit: 150 # 文字超长转图片 :: 默认大于150字转图片, 设置-1关闭
+max_bound: 1 # 绑定上限 :: 一个玩家可以绑定多少个名称
+show_message_in_console: true # 展示上报消息
+style: 正常 # 机器人回复风格 :: （可选） #风格 查看风格帮助
+style_cooldown: 0 # 风格切换冷却
+whitelist_add_with_bound: false # 绑定ID自动绑定服务器白名单
+whitelist_remove_with_leave: true # 退群时移除白名单
+
 ########################################################################
