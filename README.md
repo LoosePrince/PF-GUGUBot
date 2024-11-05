@@ -11,6 +11,8 @@
 [![下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/total?style=flat-square&label=下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases)
 [![最新发布下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/latest/total?style=flat-square&label=最新版本下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest)
 
+> 目前我们正在为 MCDR 开发一个 WebUI ，将来您可以使用 WebUI 来配置和管理 MCDR 插件和配置，包括 GUGUbot 和 cq-qq-api ，如需了解开发进度，请访问：[PF-MCDR-WebUI](https://github.com/LoosePrince/PF-MCDR-WebUI)
+
 使用方式-MCDR快捷安装：
 * MCDR服务端输入 `!!MCDR plugin install gugubot`
 * 加载后，在`/config/cq_qq_api/config.json`中配置接收api
