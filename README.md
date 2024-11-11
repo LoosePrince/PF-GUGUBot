@@ -1,5 +1,5 @@
 [![PF-GUGUBot](https://socialify.git.ci/LoosePrince/PF-GUGUBot/image?description=1&font=Inter&issues=1&language=1&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Light)](https://github.com/LoosePrince/PF-GUGUBot)
-# PF-QQchat
+# PF-QQchat（支持离线服务器）
 > PFingan服务器MCDRQQ机器人插件
 
 [![页面浏览量计数](https://badges.toozhao.com/badges/01H98QXADB4DYZBRC2EHSEJ4HW/green.svg)](/) 
