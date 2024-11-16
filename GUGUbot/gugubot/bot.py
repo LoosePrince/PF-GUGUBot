@@ -97,7 +97,7 @@ class qbot_helper:
                 config = yaml.load(f)
             
             rcon_config = config.get('rcon', {})
-            if rcon_config.get('enable'):
+            if rcon_config.get('enable') and self.server.is_rcon_running():
                 address = str(rcon_config['address'])
                 port = int(rcon_config['port'])
                 password = str(rcon_config['password'])
@@ -193,7 +193,7 @@ class qbot_helper:
             for gid in self.config.get('group_id', []):
                 self.bot.set_group_card(gid, self.bot.get_login_info()["data"]['user_id'], name)
 
-        if self.rcon: # use rcon to get command return 
+        if server.is_rcon_running(): # use rcon to get command return 
             list_callback(self.rcon.send_command("list"))
         else:         # use MCDR's on_info to get command return
             self._list_callback.append(list_callback)
@@ -307,7 +307,7 @@ class qbot_helper:
         server.say(f'§6[QQ] §a[{sender}] §f{message}')
 
     def _get_previous_sender_name(self, qq_id: str, group_id: str, bot, previous_message_content):
-        bot_info = bot.get_login_info()['data']['user_id']
+        bot_info = bot.get_login_info()['data']
         if str(qq_id) == str(bot_info['user_id']):
             # remove server_name in reply
             if self.server_name:
@@ -513,7 +513,7 @@ class qbot_helper:
     
     def _handle_execute_command(self, info, bot):
         if info.content.startswith(f"{self.config['command_prefix']}执行"):
-            if self.config['command'].get('execute_command', False) and self.rcon:
+            if self.config['command'].get('execute_command', False) and self.server.is_rcon_running():
                 content = self.rcon.send_command(info.content.replace(f"{self.config['command_prefix']}执行", "").strip())
                 bot.reply(info, content)
             else:
@@ -614,7 +614,7 @@ class qbot_helper:
             respond = self._add_server_name(respond)
             bot.reply(info, respond, force_reply=True)
 
-        if self.rcon: # use rcon to get command return 
+        if server.is_rcon_running(): # use rcon to get command return 
             list_callback(self.rcon.send_command("list"))
         else:
             self._list_callback.append(list_callback)
@@ -963,7 +963,7 @@ class qbot(qbot_helper):
             return
         
         if self.config.get('show_message_in_console', True):
-            server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_message}")
+            server.logger.info(f"收到命令上报：{info.user_id}:{info.raw_message}")
 
         if info.content == self.config['command_prefix']:
             info.content += '帮助'
