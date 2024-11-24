@@ -382,9 +382,7 @@ AI生成后内置的模式: `雌小鬼` `御姐` `萝莉` `波奇酱` `病娇` `
 - admin_id: 管理员QQ号 默认拥有GUGUbot管理员权限(仅私聊)
 - group_id: 聊天转发的群
 
-<details>
- <summary>可选项</summary>
-
+**QQ相关设置 - 可选项**
 ><details>
 > <summary>QQ相关设置</summary>
 >
@@ -459,8 +457,6 @@ AI生成后内置的模式: `雌小鬼` `御姐` `萝莉` `波奇酱` `病娇` `
 >- whitelist_remove_with_leave: 退群时是否自动移除白名单
 >
 ></details>
-
-</details>
 
 
 # 有BUG或是新的IDEA
