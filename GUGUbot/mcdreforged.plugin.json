@@ -1,10 +1,10 @@
 {
 	"id": "gugubot",
-	"version": "1.8.4",
+	"version": "1.8.5",
 	"name": "GUGUbot",
 	"description": {
 		"en_us": "A QQ bot connect MC and QQ",
-		"zh_cn": "一个QQ和MC互通的机器人"
+		"zh_cn": "一个QQ和MC互通的机器人（支持离线服务器）"
 	},
 	"author": [
 		"XueK__",
