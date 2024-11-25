@@ -837,7 +837,7 @@ class qbot_helper:
 
     def _is_valid_command_source(self, info) -> bool:
         return (info.source_id in self.config.get('group_id', []) or
-                (self.config.get('admin_group_id') is None or info.source_id in self.config.get('admin_group_id')) or
+                (self.config.get('admin_group_id') and info.source_id in self.config.get('admin_group_id')) or
                 info.source_id in self.config.get('admin_id', [])) 
 
     # 匹配uuid和qqid
@@ -980,9 +980,10 @@ class qbot(qbot_helper):
 
     # 公共指令
     def common_command(self, server: PluginServerInterface, info, bot, command: list) -> bool:
+        admin_group_id = self.config.get('admin_group_id') if self.config.get('admin_group_id') else []
         # 检测违禁词
         if info.message_type == 'group' \
-            and info.source_id not in self.config.get('admin_group_id', []) \
+            and info.source_id not in admin_group_id \
             and self._handle_banned_word_qq(info, bot):
             return True
 
@@ -994,7 +995,7 @@ class qbot(qbot_helper):
         # 禁止群员执行指令
         if self.config['command'].get("group_admin", False) \
             and info.user_id not in self.config['admin_id'] \
-            and info.source_id not in self.config.get('admin_group_id', []):
+            and info.source_id not in admin_group_id:
             return True
 
         # 关键词操作
