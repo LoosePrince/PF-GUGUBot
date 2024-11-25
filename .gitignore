@@ -1,5 +1,6 @@
 proxy_command.txt
-task.ipynb
 /GUGUBot/lang/
 **/test.py
 **/__pycache__/
+**.mcdr
+**.docx

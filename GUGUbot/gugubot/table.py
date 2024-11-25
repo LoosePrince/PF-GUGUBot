@@ -1,31 +1,37 @@
 # -*- coding: utf-8 -*-
 import json
 import os
-import yaml
+
+from pathlib import Path
+from ruamel.yaml import YAML
+
+yaml = YAML()
+yaml.preserve_quotes = True
 class table(object):    
 
     def __init__(self,path:str="./default.json", default_content:dict=None, yaml:bool=False) -> None: # 初始化，记录系统路径
         self.yaml = yaml
         self.path = path if not self.yaml else path.replace(".json", ".yml")
+        self.path = Path(self.path)
         self.default_content = default_content
         self.load()    
 
     def load(self) -> None: # 读取
         if os.path.isfile(self.path) and os.path.getsize(self.path) != 0:
-            if self.yaml:
-                with open(self.path,'r', encoding='UTF-8') as f:
-                    self.data = yaml.load(f, Loader=yaml.FullLoader)
-            else:
-                with open(self.path,'r', encoding='UTF-8') as f:
+            with open(self.path, 'r', encoding='UTF-8') as f:
+                if self.yaml:
+                    self.data = yaml.load(f)
+                else:
                     self.data = json.load(f)
         else:
             self.data = self.default_content if self.default_content else {}
             self.save()
 
     def save(self) -> None: # 储存
+        self.path.parents[0].mkdir(parents=True, exist_ok=True)
         if self.yaml:
             with open(self.path, 'w', encoding='UTF-8') as f:
-                yaml.dump(self.data, f, allow_unicode=True)        
+                yaml.dump(self.data, f)        
         else:
             with open(self.path, 'w', encoding='UTF-8') as f:
                 json.dump(self.data, f, ensure_ascii= False)        
@@ -33,7 +39,7 @@ class table(object):
     def __getitem__(self, key:str): # 获取储存内容
         return self.data[key]    
 
-    def __setitem__(self, key:str, value:str): # 增加，修改
+    def __setitem__(self, key:str, value): # 增加，修改
         self.data[key] = value
         self.save()   
 
@@ -55,6 +61,9 @@ class table(object):
 
     def __len__(self):
         return len(self.data)
+
+    def get(self, key:str, default=None):
+        return self.data.get(key, default)
 
     def keys(self):
         return self.data.keys()

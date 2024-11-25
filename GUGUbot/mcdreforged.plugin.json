@@ -1,16 +1,19 @@
 {
 	"id": "gugubot",
-	"version": "1.0.4",
+	"version": "1.8.4",
 	"name": "GUGUbot",
 	"description": {
 		"en_us": "A QQ bot connect MC and QQ",
-		"zh_cn": "一个QQ和MC互通的机器人"
+		"zh_cn": "一个QQ和MC互通的机器人（支持离线服务器）"
 	},
 	"author": [
-		"XueK__"
+		"XueK__",
+		"LoosePrince"
 	],
 	"link": "https://github.com/LoosePrince/PF-GUGUBot",
 	"dependencies": {
-		"mcdreforged": ">=2.1.2"
+		"cq_qq_api": ">=1.0.0",
+		"online_player_api": ">=1.0.0",
+		"player_ip_logger": ">=1.1.0"
 	}
 }
