@@ -187,9 +187,8 @@ def get_latest_group_notice(qq_bot, logger):
 
     return latest_notice_text
 
-def is_forward_to_mc_msg(info, bot, config):
+def is_valid_message(info, bot, config):
     condition = [
-        config['forward']['qq_to_mc'],                                # config 设置转发
         info.content,                                                 # 不是空内容
         not info.content.startswith(config['command_prefix']),        # 不是指令
         info.source_id in config.get('group_id', []),                 # 是指定群消息

@@ -546,20 +546,24 @@ class qbot_helper:
             return True
         return False
 
-    def _handle_keyword(self, server, info, bot):
+    def _handle_keyword(self, server, info, bot, is_forward_to_mc:bool):
         # 检测到关键词 -> 转发原文 + 转发回复
         if info.content in self.key_word:
             sender_name = self._find_game_name(str(info.user_id), bot, info.source_id)
-            server.say(f'§6[QQ] §a[{sender_name}] §f{info.content}')
+
+            if is_forward_to_mc:
+                server.say(f'§6[QQ] §a[{sender_name}] §f{info.content}')
 
             key_word_reply = self.key_word[info.content]
             bot.reply(info, key_word_reply)
             
-            # 过滤图片
-            if key_word_reply.startswith('[CQ:image'):
-                key_word_reply = beautify_message(key_word_reply, self.config.get('forward', {}).get('keep_raw_image_link', False))
+            if is_forward_to_mc:
+                # 过滤图片
+                if key_word_reply.startswith('[CQ:image'):
+                    key_word_reply = beautify_message(key_word_reply, self.config.get('forward', {}).get('keep_raw_image_link', False))
+                    
+                server.say(f'§6[QQ] §a[机器人] §f{key_word_reply}')
 
-            server.say(f'§6[QQ] §a[机器人] §f{key_word_reply}')
             return True
         return False
     
@@ -1102,7 +1106,7 @@ class qbot(qbot_helper):
     @addTextToImage
     def on_qq_message(self, server:PluginServerInterface, info, bot):
         # 判断是否转发
-        if not is_forward_to_mc_msg(info, bot, self.config): return
+        if not is_valid_message(info, bot, self.config): return
         
         if self.config.get('show_message_in_console', True):
             server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_message}")
@@ -1113,18 +1117,26 @@ class qbot(qbot_helper):
         # 违禁词
         if self._handle_banned_word_qq(info, bot): return 
         
+        # 是否转发消息
+        is_forward_to_mc = self.config['forward']['qq_to_mc']
+
         # 检测关键词
         if self.config['command']['key_word']:
+
             # 检测关键词 -> 转发原文 + 转发回复
-            if self._handle_keyword(server, info, bot): return
+            if self._handle_keyword(server, info, bot, is_forward_to_mc): return
+
             # 添加图片
             if self._handle_adding_image(server, info, bot): return
 
-        # @ 模块（回复 + @人）
-        if self._handle_at(server, info, bot): return
-    
-        # 普通转发
-        self._forward_message_to_game(server, info, bot, info.raw_message)
+        # 转发消息
+        if is_forward_to_mc:
+
+            # @ 模块（回复 + @人）
+            if self._handle_at(server, info, bot): return
+        
+            # 普通转发
+            self._forward_message_to_game(server, info, bot, info.raw_message)
 
     #===================================================================#
     #                          on_mc_message                            #
