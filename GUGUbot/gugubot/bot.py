@@ -343,21 +343,27 @@ class qbot_helper:
                 (info.raw_message.startswith('[CQ:image') \
                     or info.raw_message.startswith("[CQ:mface")):
             if  time.time() - self.picture_record_dict[info.user_id][1] >= 30:
-                bot.reply(f"添加图片 <{self.picture_record_dict[info.user_id][0]}> 已超时")
+                bot.reply(info, f"添加图片 <{self.picture_record_dict[info.user_id][0]}> 已超时")
                 del self.picture_record_dict[info.user_id]
             else:
                 try:
-                    url = re.search(r'url=([^,\]]+)|file=([^\s,\]]+)', info.raw_message)
-                    url = url.group(1) or url.group(2) if url else None
+                    url_match = re.search(r'url=([^,\]]+)', info.raw_message)
+                    url = url_match.group(1) if url_match else None
+
+                    if not url:
+                        file_match = re.search(r'file=([^\s,\]]+)', info.raw_message)
+                        url = file_match.group(1) if file_match else None
+                        
                     url = re.sub('&amp;', "&", url)
                     
                     self.key_word[self.picture_record_dict[info.user_id][0]]=f"[CQ:image,file={url}]"
                     
                     bot.reply(info, get_style_template('add_success', self.style))
+                    del self.picture_record_dict[info.user_id] # 缓存中移除用户
                 except Exception as e:
                     bot.reply(info, get_style_template('add_image_fail', self.style))
                     server.logger.warning(f"保存图片失败：{info.raw_message}\n报错如下： {e}")
-                            # 缓存中移除用户
+                            
             return True
         return False
 
