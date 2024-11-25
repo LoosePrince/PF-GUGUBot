@@ -102,7 +102,7 @@ def beautify_message(content:str, keep_raw_image_link:bool=False)->str:
     if keep_raw_image_link:
         content = re.sub(r'\[CQ:image,.*?\]|\[CQ:mface,.*?\]', extract_url, content)
     else:
-        content = re.sub(r'\[CQ:image,file=.*?\]', '[图片]', content)
+        content = re.sub(r'\[CQ:image,.*?\]', '[图片]', content)
         content = re.sub(r'\[CQ:mface,summary=(?:&#91;)?(.*?)(?:&#93;)?,.*?\]', r'[表情: \1]', content)
 
     return content
