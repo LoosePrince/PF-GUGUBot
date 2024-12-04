@@ -32,7 +32,7 @@
 
 ## 依赖配置
 
-**Python 包:** 请确保已安装 [Python™](https://www.python.org/)。
+**Python 包:** 请确保已安装 [Python™](https://www.python.org/) 和 [pip](https://pypi.org/project/pip/) (pip通常在安装完python后会默认安装)。
 
 **Python 模块:** 参考插件目录内的 `requirements.txt` 文件，使用命令 `pip install -r requirements.txt` 进行安装。
 
