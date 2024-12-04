@@ -465,7 +465,8 @@ AI生成后内置的模式: `雌小鬼` `御姐` `萝莉` `波奇酱` `病娇` `
 视情况添加，请勿联系他人（开发者: [雪开](https://github.com/XueK66)）
 
 # TODO
-- [x] 暂无
+- [ ] [多服聚合](https://github.com/LoosePrince/PF-GUGUBot/issues/106)
+- [ ] [联动WebUI](https://github.com/LoosePrince/PF-GUGUBot/issues/107) & [WebUI的饼](https://github.com/LoosePrince/PF-MCDR-WebUI/issues/8)
 
 # 贡献
 
