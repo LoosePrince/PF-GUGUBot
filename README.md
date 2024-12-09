@@ -14,6 +14,10 @@
 > [!TIP]
 > 目前我们正在为 **MCDR** 开发一个 **WebUI** ，目前以发布正式版本，您可以使用 **WebUI** 来配置和管理 **MCDR** 插件和配置，包括 **GUGUbot** 和 **cq-qq-api** ，如需了使用 **WebUI** ，请访问: [PF-MCDR-WebUI](https://github.com/LoosePrince/PF-MCDR-WebUI)
 
+> [!NOTE]
+> 由于 **GUGUbot** 和 **WebUI** 项目庞大，但迄今为止仅有开发者一名，所以我们从现在开始招募有志者加入我们！<br>
+> 有意者请加 QQ1377820366 或 QQ群726741344
+
 ## 快速导航
 
 - [依赖配置](#依赖配置)
