@@ -126,7 +126,7 @@ class qbot_helper:
         if name not in [name for sublist in self.data.values() for name in sublist]:
             return
         # If name already in the whitelist -> DO NOTHING
-        self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'])
+        self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'], self.server.logger)
         if name in self.whitelist.values():
             return
 
@@ -246,7 +246,7 @@ class qbot_helper:
         server.execute(f'whitelist add {game_id}')
         bot.reply(info, f'[CQ:at,qq={user_id}] {get_style_template("bound_add_whitelist", self.style)}')
         time.sleep(2)
-        self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'])
+        self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'], self.server.logger)
         self._match_id()
 
     def _check_ingame_keyword(self, server, info, bot, message):
@@ -760,7 +760,7 @@ class qbot_helper:
                         '\n'.join([str(k)+'-'+str(v)+'-'+str(self.data[v]) for k,v in self.uuid_qqid.items() if v in self.data]))
             # 更新匹配表
             elif len(command)>1 and command[1] == '重载':
-                self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'])
+                self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'], self.server.logger)
                 self._match_id()
                 bot.reply(info, '已重新匹配~')
             # 更改白名单名字
@@ -795,13 +795,13 @@ class qbot_helper:
                     server.execute(f'/whitelist add {command[2]}')
                     bot.reply(info, get_style_template('add_success', self.style))
                     time.sleep(2)
-                    self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'])
+                    self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'], self.server.logger)
                     self._match_id()
                 elif command[1] in ['删除','移除']:
                     server.execute(f'/whitelist remove {command[2]}')
                     bot.reply(info, get_style_template('delete_success', self.style))
                     time.sleep(2)
-                    self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'])
+                    self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'], self.server.logger)
                 elif command[1] == '开':
                     self.config['command']['whitelist'] = True
                     self.config.save()
@@ -814,7 +814,7 @@ class qbot_helper:
                     bot.reply(info, '白名单已关闭！')
                 elif command[1] == '重载':
                     server.execute(f'/whitelist reload')
-                    self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'])
+                    self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'], self.server.logger)
                     bot.reply(info, '白名单已重载~')
                 else:
                     bot.reply(info,'白名单如下：\n'+'\n'.join(sorted(self.whitelist.values())))
@@ -958,7 +958,7 @@ class qbot(qbot_helper):
                     bot.reply(info, get_style_template('del_whitelist_when_quit', self.style).format(",".join(self.data[user_id])))
                     # 重载白名单
                     time.sleep(5)
-                    self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'])
+                    self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'], self.server.logger)
                 del self.data[user_id]
 
     #===================================================================#
