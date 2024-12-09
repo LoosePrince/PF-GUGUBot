@@ -32,7 +32,7 @@
 
 ## 依赖配置
 
-**Python 包:** 请确保已安装 [Python™](https://www.python.org/)。
+**Python 包:** 请确保已安装 [Python™](https://www.python.org/) 和 [pip](https://pypi.org/project/pip/) (pip通常在安装完python后会默认安装)。
 
 **Python 模块:** 参考插件目录内的 `requirements.txt` 文件，使用命令 `pip install -r requirements.txt` 进行安装。
 
@@ -465,7 +465,8 @@ AI生成后内置的模式: `雌小鬼` `御姐` `萝莉` `波奇酱` `病娇` `
 视情况添加，请勿联系他人（开发者: [雪开](https://github.com/XueK66)）
 
 # TODO
-- [x] 暂无
+- [ ] [多服聚合](https://github.com/LoosePrince/PF-GUGUBot/issues/106)
+- [ ] [联动WebUI](https://github.com/LoosePrince/PF-GUGUBot/issues/107) & [WebUI的饼](https://github.com/LoosePrince/PF-MCDR-WebUI/issues/8)
 
 # 贡献
 
