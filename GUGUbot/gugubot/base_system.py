@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-from .table import table
+from .config import autoSaveDict
 from .utils import get_style_template
 from mcdreforged.api.types import Info
 
 class base_system(object):
     def __init__(self, path:str, help_msg='帮助文件缺失'):
         self.path = path
-        self.data = table(self.path)
+        self.data = autoSaveDict(self.path)
         self.help_msg = help_msg
 
     def handle_command(self, raw_command:str, info:Info, bot, reply_style:str='正常', *arg, **kargs):

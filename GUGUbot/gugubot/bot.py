@@ -30,7 +30,7 @@ from .data.text import (
 )
 from .key_word_system import key_word_system
 from .start_command_system import start_command_system
-from .table import table
+from .config import autoSaveDict, botConfig
 from .utils import *
 
 yaml = YAML()
@@ -56,13 +56,14 @@ class qbot_helper:
         self._packing_copy()
         
         # read config & bound data
-        self.config = table("./config/GUGUbot/config.json", yaml=True)
-        self.data = table("./config/GUGUbot/GUGUbot.json")
+        self.config = botConfig("./config/GUGUbot/config.json", yaml=True, logger=server.logger)
+        self.config.addNewConfig(server)
+        self.data = autoSaveDict("./config/GUGUbot/GUGUbot.json")
 
-        self.server_name = self.config.data.get("server_name")
+        self.server_name = self.config.get("server_name")
         self.server_name = self.server_name if self.server_name else ""
-        self.is_main_server = self.config.data.get("is_main_server", True)
-        self.style = self.config.data.get("style") if self.config.data.get("style") != "" else "正常"
+        self.is_main_server = self.config.get("is_main_server", True)
+        self.style = self.config.get("style") if self.config.get("style") != "" else "正常"
         # init params
         self.picture_record_dict = {}
         self.shenhe = defaultdict(list)
@@ -71,7 +72,6 @@ class qbot_helper:
         
         pygame.init()              # for text to image
         self._loading_dicts()      # read data for qqbot functions
-        self._add_missing_config() # Add missing config
         self._loading_rcon()       # connecting the rcon
 
         self._list_callback = [] # used for list & qqbot's name function
@@ -85,9 +85,9 @@ class qbot_helper:
         self.key_word        = key_word_system(self.config["dict_address"]['key_word_dict'])                               # QQ 关键词
         self.key_word_ingame = key_word_system(self.config["dict_address"]['key_word_ingame_dict'], ingame_key_word_help)  # MC 关键词
         self.ban_word        = ban_word_system(self.config["dict_address"]['ban_word_dict'])                               # 违禁词
-        self.uuid_qqid       = table(self.config["dict_address"]['uuid_qqid'])                                             # uuid - qqid 表
+        self.uuid_qqid       = autoSaveDict(self.config["dict_address"]['uuid_qqid'])                                             # uuid - qqid 表
         self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'], self.server.logger)                                                                # 白名单
-        self.shenheman = table(self.config["dict_address"]['shenheman'])                        # 群审核人员
+        self.shenheman = autoSaveDict(self.config["dict_address"]['shenheman'])                        # 群审核人员
 
     def _loading_rcon(self) -> None:
         """ connecting the rcon server for command execution """
@@ -211,30 +211,6 @@ class qbot_helper:
         else:
             server.say('关键词重复或者指令无效~')
         return True
-    
-    # 添加缺失的配置
-    def _add_missing_config(self):
-        try:
-            with self.server.open_bundled_file("gugubot/data/config_default.yml") as file_handler:
-                message = file_handler.read()
-                message_unicode = message.decode('utf-8').replace('\r\n', '\n')
-                yaml_data = yaml.load(message_unicode)
-
-            for key, value in self.config.items():
-                if isinstance(value, dict):
-                    for sub_k, sub_v in value.items():
-                        yaml_data[key][sub_k] = sub_v
-                else:
-                    yaml_data[key] = value
-
-            for key in ['group_id', 'admin_id', 'admin_group_id']:
-                if key not in self.config:
-                    del yaml_data[key]
-
-            self.config.data = yaml_data
-            self.config.save()
-        except Exception as e:
-            self.server.logger.error(f"Error loading default config: {e}")
 
     # 添加服务器名字
     def _add_server_name(self, message):

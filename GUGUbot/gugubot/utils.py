@@ -13,12 +13,12 @@ import pygame
 from mcdreforged.api.types import PluginServerInterface
 
 from .data.text import style, qq_face_name
-from .table import table
+from .config import autoSaveDict
 #==================================================================#
 #                         Style template                           #
 #==================================================================#
 def get_style()->dict:
-    config = table("./config/GUGUbot/config.json", yaml=True)
+    config = autoSaveDict("./config/GUGUbot/config.json", yaml=True)
     extra_style = read_extra_style(config['dict_address'].get('extra_style_path', ""))
     style.update(extra_style)
     return style
