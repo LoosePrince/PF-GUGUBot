@@ -146,7 +146,7 @@ class botConfig(autoSaveDict):
             if not self["admin_group_id"]:
                 self["admin_group_id"] = []
             
-            elif isinstance(self["admin_group_id"], list):
+            elif not isinstance(self["admin_group_id"], list):
                 self["admin_group_id"] = [self["admin_group_id"]]
 
         self.save()
