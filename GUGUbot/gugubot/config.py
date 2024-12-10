@@ -141,9 +141,13 @@ class botConfig(autoSaveDict):
             if any(value):
                 self[config_name] = [i for i in value if i]
     
-        # prevent None value
-        if "admin_group_id" in self and not self["admin_group_id"]:
-            self["admin_group_id"] = []
+        # prevent None value/not list type
+        if "admin_group_id" in self:
+            if not self["admin_group_id"]:
+                self["admin_group_id"] = []
+            
+            elif isinstance(self["admin_group_id"], list):
+                self["admin_group_id"] = [self["admin_group_id"]]
 
         self.save()
 
