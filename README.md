@@ -45,9 +45,10 @@
 #### 前置插件
 - [cq_qq_api](https://github.com/XueK66/PF-cq_qq_api/releases)
 - [player_ip_logger](https://github.com/LoosePrince/PF-player_ip_logger)
-- [online_player_api](https://github.com/AnzhiZhang/MCDReforgedPlugins)
+- [online_player_api](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/online_player_api)
+- [whitelist_api](https://github.com/Aimerny/MCDRPlugins/tree/main/src/whitelist_api)
 #### 可选插件
-- [PF-MCDR-WebUI](https://github.com/LoosePrince/PF-MCDR-WebUI)
+- [PF-MCDR-WebUI](https://github.com/LoosePrince/PF-MCDR-WebUI) : 在 xxx 版本后将是必选前置插件
 
 ## 安装
 #### MCDR快捷安装: 
