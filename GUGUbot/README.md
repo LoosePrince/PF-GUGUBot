@@ -48,7 +48,7 @@
 - [online_player_api](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/online_player_api)
 - [whitelist_api](https://github.com/Aimerny/MCDRPlugins/tree/main/src/whitelist_api)
 #### 可选插件
-- [PF-MCDR-WebUI](https://github.com/LoosePrince/PF-MCDR-WebUI) : 在 xxx 版本后将是必选前置插件
+- [PF-MCDR-WebUI](https://github.com/LoosePrince/PF-MCDR-WebUI) : 在 2.0.0 版本后将是必选前置插件
 
 ## 安装
 #### MCDR快捷安装: 
