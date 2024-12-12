@@ -32,6 +32,7 @@ from .key_word_system import key_word_system
 from .start_command_system import start_command_system
 from .config import autoSaveDict, botConfig
 from .utils import *
+from .whitelist import whitelist
 
 yaml = YAML()
 yaml.preserve_quotes = True
@@ -60,8 +61,7 @@ class qbot_helper:
         self.config.addNewConfig(server)
         self.data = autoSaveDict("./config/GUGUbot/GUGUbot.json")
 
-        self.server_name = self.config.get("server_name")
-        self.server_name = self.server_name if self.server_name else ""
+        self.server_name = self.config.get("server_name", "")
         self.is_main_server = self.config.get("is_main_server", True)
         self.style = self.config.get("style") if self.config.get("style") != "" else "正常"
         # init params
@@ -85,8 +85,8 @@ class qbot_helper:
         self.key_word        = key_word_system(self.config["dict_address"]['key_word_dict'])                               # QQ 关键词
         self.key_word_ingame = key_word_system(self.config["dict_address"]['key_word_ingame_dict'], ingame_key_word_help)  # MC 关键词
         self.ban_word        = ban_word_system(self.config["dict_address"]['ban_word_dict'])                               # 违禁词
-        self.uuid_qqid       = autoSaveDict(self.config["dict_address"]['uuid_qqid'])                                             # uuid - qqid 表
-        self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'], self.server.logger)                                                                # 白名单
+        self.uuid_qqid       = autoSaveDict(self.config["dict_address"]['uuid_qqid'])                                      # uuid - qqid 表
+        self.whitelist = whitelist(self.server)                                                        # 白名单
         self.shenheman = autoSaveDict(self.config["dict_address"]['shenheman'])                        # 群审核人员
 
     def _loading_rcon(self) -> None:
@@ -111,40 +111,6 @@ class qbot_helper:
     #===================================================================#
     #                        Helper functions                           #
     #===================================================================#
-
-    def add_offline_whitelist(self, server: PluginServerInterface, info: Info):
-        """ Adding offline player to the whitelist """
-
-        # catch the failture for first entering
-        pattern = r".*\[id=([a-z0-9\-]*),name=([^=]+),.*\].*You are not white-listed on this server!$"
-        result = re.match(pattern, info.content)
-        if not (result and self.config['command']['whitelist'] and self.config['whitelist_add_with_bound']):
-            return
-
-        uuid, name = result.groups()[:2]
-        # If name not found in bound list -> DO NOTHING
-        if name not in [name for sublist in self.data.values() for name in sublist]:
-            return
-        # If name already in the whitelist -> DO NOTHING
-        self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'], self.server.logger)
-        if name in self.whitelist.values():
-            return
-
-        self.whitelist[uuid] = name
-        whitelist_storage = [{'uuid': u, 'name': n} for u, n in self.whitelist.items()]
-
-        for _ in range(3):
-            try:
-                with open(self.config["dict_address"]['whitelist'], 'w') as f:
-                    json.dump(whitelist_storage, f)
-                server.logger.info(f"离线玩家：{name}添加成功！")
-                server.execute('/whitelist reload')
-                break
-            except Exception as e:
-                server.logger.debug(f"离线玩家：{name}添加失败 -> {e}")
-                time.sleep(5)
-        else:
-            server.logger.error(f"离线玩家：{name}添加失败，已重试3次")
 
     def send_msg_to_all_qq(self, msg:str)->None:
         """
@@ -219,11 +185,8 @@ class qbot_helper:
         return message
 
     def _add_to_whitelist(self, server, info, bot, user_id, game_id):
-        server.execute(f'whitelist add {game_id}')
+        self.whitelist.add(game_id)
         bot.reply(info, f'[CQ:at,qq={user_id}] {get_style_template("bound_add_whitelist", self.style)}')
-        time.sleep(2)
-        self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'], self.server.logger)
-        self._match_id()
 
     def _check_ingame_keyword(self, server, info, bot, message):
         if self.config["command"]["ingame_key_word"]:
@@ -736,28 +699,23 @@ class qbot_helper:
                         '\n'.join([str(k)+'-'+str(v)+'-'+str(self.data[v]) for k,v in self.uuid_qqid.items() if v in self.data]))
             # 更新匹配表
             elif len(command)>1 and command[1] == '重载':
-                self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'], self.server.logger)
+                self.whitelist.load()
                 self._match_id()
                 bot.reply(info, '已重新匹配~')
             # 更改白名单名字
             elif len(command)>=4 and command[1] in ['修改','更改','更新']:
                 pre_name = command[2]
                 cur_name = command[3]
-                with open(self.config["dict_address"]['whitelist'],'r') as f:
-                    whitelist = json.load(f) # [{uuid:value,name:value}]
-                changed = False
-                for index in range(len(whitelist)):
-                    if pre_name == whitelist[index]['name']:
-                        changed = True
-                        whitelist[index]['name'] = cur_name
-                        bot.reply(info,'已将 {} 改名为 {}'.format(pre_name,cur_name))
-                        with open(self.config["dict_address"]['whitelist'],'w') as f:
-                            whitelist = json.dump(whitelist,f) # [{uuid:value,name:value}]
-                        self._match_id()
-                        bot.reply(info, '已重新匹配~')
-                        break
-                if not changed:
+
+                if pre_name not in self.whitelist.values():
                     bot.reply(info, '未找到对应名字awa！')      
+                else:
+                    self.whitelist.remove(pre_name)
+                    self.whitelist.add(cur_name)
+                
+                    bot.reply(info,'已将 {} 改名为 {}'.format(pre_name,cur_name))
+                        
+                    self._match_id()
             return True
         return False          
 
@@ -766,32 +724,24 @@ class qbot_helper:
             if len(command) == 1:
                 bot.reply(info, whitelist_help)
             # 执行指令
-            elif len(command)>1 and command[1] in ['添加', '删除','移除', '列表', '开', '关', '重载']:
+            elif len(command)>1 and command[1] in ['添加', '删除','移除', '列表', '开', '关']:
                 if command[1] == '添加':
-                    server.execute(f'/whitelist add {command[2]}')
+                    self.whitelist.add(command[2])
                     bot.reply(info, get_style_template('add_success', self.style))
-                    time.sleep(2)
-                    self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'], self.server.logger)
                     self._match_id()
                 elif command[1] in ['删除','移除']:
-                    server.execute(f'/whitelist remove {command[2]}')
+                    self.whitelist.remove(command[2])
                     bot.reply(info, get_style_template('delete_success', self.style))
-                    time.sleep(2)
-                    self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'], self.server.logger)
                 elif command[1] == '开':
                     self.config['command']['whitelist'] = True
                     self.config.save()
-                    server.execute(f'/whitelist on')
+                    self.whitelist.enable()
                     bot.reply(info, '白名单已开启！')
                 elif command[1] == '关':
                     self.config['command']['whitelist'] = False
                     self.config.save()
-                    server.execute(f'/whitelist off')
+                    self.whitelist.disable()
                     bot.reply(info, '白名单已关闭！')
-                elif command[1] == '重载':
-                    server.execute(f'/whitelist reload')
-                    self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'], self.server.logger)
-                    bot.reply(info, '白名单已重载~')
                 else:
                     bot.reply(info,'白名单如下：\n'+'\n'.join(sorted(self.whitelist.values())))
             return True
@@ -930,11 +880,8 @@ class qbot(qbot_helper):
             if user_id in self.data.keys():
                 if self.config["command"]["whitelist"]:
                     for player_name in self.data[user_id]:
-                        server.execute(f"whitelist remove {player_name}")
+                        self.whitelist.remove(player_name)
                     bot.reply(info, get_style_template('del_whitelist_when_quit', self.style).format(",".join(self.data[user_id])))
-                    # 重载白名单
-                    time.sleep(5)
-                    self.whitelist = loading_whitelist(self.config["dict_address"]['whitelist'], self.server.logger)
                 del self.data[user_id]
 
     #===================================================================#

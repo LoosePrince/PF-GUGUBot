@@ -95,9 +95,6 @@ def on_info(server:PluginServerInterface, info:Info)->None:
     if not isinstance(qq_bot, qbot):
         return 
 
-    # offline white list    
-    qq_bot.add_offline_whitelist(server, info)
-
     # player list
     while "players online:" in info.content and qq_bot._list_callback:
         func = qq_bot._list_callback.pop()

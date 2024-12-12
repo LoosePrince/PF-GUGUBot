@@ -203,17 +203,6 @@ def is_robot(bot, group_id, user_id)->bool:
     if user_info and user_info.get('data', {}) and user_info.get('data', {}).get('is_robot', False):
         return True
     return False
-
-# 读取白名单
-def loading_whitelist(whitelist_path, logger)->None:
-    try:
-        with open(whitelist_path, 'r') as f:
-            temp = json.load(f)
-        whitelist = {i['uuid']:i['name'] for i in temp} # 解压白名单表
-        return whitelist
-    except Exception as e:
-        logger.warning(f"读取白名单出错：{e}")           # debug信息
-        return {}
     
 # 生成随机6位数pin
 def random_6_digit()->int:
