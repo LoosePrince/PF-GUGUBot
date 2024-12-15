@@ -15,24 +15,25 @@ from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.minecraft.rcon.rcon_connection import RconConnection
 from ruamel.yaml import YAML
 
-from .ban_word_system import ban_word_system
 from .data.text import (
     admin_help_msg,
-    bound_help,
     group_help_msg,
-    ingame_key_word_help,
     name_help,
-    shenhe_help,
     style_help,
     uuid_help,
-    whitelist_help,
     mc2qq_template
 )
-from .key_word_system import key_word_system
-from .start_command_system import start_command_system
 from .config import autoSaveDict, botConfig
 from .utils import *
-from .whitelist import whitelist
+from .system import (
+    ban_word_system,
+    bound_system,
+    ingame_key_word_system,
+    key_word_system,
+    shenhe_system,
+    start_command_system,
+    whitelist
+)
 
 yaml = YAML()
 yaml.preserve_quotes = True
@@ -59,7 +60,9 @@ class qbot_helper:
         # read config & bound data
         self.config = botConfig("./config/GUGUbot/config.json", yaml=True, logger=server.logger)
         self.config.addNewConfig(server)
-        self.data = autoSaveDict("./config/GUGUbot/GUGUbot.json")
+        self.whitelist = whitelist(self.server, self.config) # 白名单
+        self.data = bound_system("./config/GUGUbot/GUGUbot.json", 
+                                 server, self.config, self.whitelist)
 
         self.server_name = self.config.get("server_name", "")
         self.is_main_server = self.config.get("is_main_server", True)
@@ -72,41 +75,21 @@ class qbot_helper:
         
         pygame.init()              # for text to image
         self._loading_dicts()      # read data for qqbot functions
-        self._loading_rcon()       # connecting the rcon
+        self.rcon = rcon_connector(server)       # connecting the rcon
 
         self._list_callback = [] # used for list & qqbot's name function
-        self._empty_double_check = None # used for empty boundlist and whitelist function
         self.last_style_change = 0
 
     def _loading_dicts(self) -> None:
         """ Loading the data for qqbot functions """
         self.font = pygame.font.Font(self.config["dict_address"]["font_path"], 26)
-        self.start_command   = start_command_system(self.config["dict_address"]["start_command_dict"])                     # 开服指令
-        self.key_word        = key_word_system(self.config["dict_address"]['key_word_dict'])                               # QQ 关键词
-        self.key_word_ingame = key_word_system(self.config["dict_address"]['key_word_ingame_dict'], ingame_key_word_help)  # MC 关键词
-        self.ban_word        = ban_word_system(self.config["dict_address"]['ban_word_dict'])                               # 违禁词
-        self.uuid_qqid       = autoSaveDict(self.config["dict_address"]['uuid_qqid'])                                      # uuid - qqid 表
-        self.whitelist = whitelist(self.server)                                                        # 白名单
-        self.shenheman = autoSaveDict(self.config["dict_address"]['shenheman'])                        # 群审核人员
-
-    def _loading_rcon(self) -> None:
-        """ connecting the rcon server for command execution """
-        self.rcon = None
-        try:
-            with open("./config.yml", 'r', encoding='UTF-8') as f:
-                config = yaml.load(f)
-            
-            rcon_config = config.get('rcon', {})
-            if rcon_config.get('enable') and self.server.is_rcon_running():
-                address = str(rcon_config['address'])
-                port = int(rcon_config['port'])
-                password = str(rcon_config['password'])
-                
-                self.server.logger.info(f"尝试连接rcon，rcon地址：{address}:{port}")
-                self.rcon = RconConnection(address, port, password)
-                self.rcon.connect()
-        except Exception as e:
-            self.server.logger.warning(f"Rcon 加载失败：{e}")
+        
+        self.key_word = key_word_system(self.config["dict_address"]['key_word_dict'], self.server, self.config) # QQ 关键词
+        self.key_word_ingame = ingame_key_word_system(self.config["dict_address"]['key_word_ingame_dict'], self.server, self.config) # MC 关键词
+        self.ban_word = ban_word_system(self.config["dict_address"]['ban_word_dict'], self.server, self.config) # 违禁词
+        self.start_command = start_command_system(self.config["dict_address"]["start_command_dict"], self.server, self.config) # 开服指令
+        self.shenheman = shenhe_system(self.config["dict_address"]['shenheman'], self.server, self.config) # 群审核人员
+        self.uuid_qqid = autoSaveDict(self.config["dict_address"]['uuid_qqid']) # uuid - qqid 表
 
     #===================================================================#
     #                        Helper functions                           #
@@ -168,41 +151,12 @@ class qbot_helper:
     #===================================================================#
     #                    Helper functions (inclass)                     #
     #===================================================================#
-    
-    def _add_ingame_keyword(self, server, info):
-        temp = info.content.replace("!!add ", "", 1).split(maxsplit=1)
-        if len(temp) == 2 and temp[0] not in self.key_word_ingame.data:
-            self.key_word_ingame.data[temp[0]] = temp[1]
-            server.say(get_style_template('add_success', self.style))
-        else:
-            server.say('关键词重复或者指令无效~')
-        return True
 
     # 添加服务器名字
     def _add_server_name(self, message):
         if self.server_name != "":
             return f"|{self.server_name}| {message}"
         return message
-
-    def _add_to_whitelist(self, server, info, bot, user_id, game_id):
-        self.whitelist.add(game_id)
-        bot.reply(info, f'[CQ:at,qq={user_id}] {get_style_template("bound_add_whitelist", self.style)}')
-
-    def _check_ingame_keyword(self, server, info, bot, message):
-        if self.config["command"]["ingame_key_word"]:
-            response = self.key_word_ingame.check_response(message)
-            if response:
-                bot.reply(info, response)
-                server.say(f'§a[机器人] §f{response}')
-
-    def _delete_ingame_keyword(self, server, info):
-        key_word = info.content.replace("!!del ", "", 1).strip()
-        if key_word in self.key_word_ingame.data:
-            del self.key_word_ingame.data[key_word]
-            server.say(get_style_template('delete_success', self.style))
-        else:
-            server.say('未找到对应关键词~')
-        return True
     
     # 通过QQ号找到绑定的游戏ID
     def _find_game_name(self, qq_id: str, bot, group_id: str = None) -> str:
@@ -328,133 +282,6 @@ class qbot_helper:
                 server.say(f'§6[QQ] §a[{sender}] §f{forward_content}')
             return True
         return False
-
-    # 检查违禁词
-    def _handle_banned_word(self, server, player, message):
-        if self.config['command']['ban_word']:
-            ban_response = self.ban_word.check_ban(message)
-            if ban_response:
-                temp = json.dumps({
-                    "text": f"消息包含违禁词无法转发到群聊请修改后重发，维护和谐游戏人人有责。\n违禁理由：{ban_response[1]}",
-                    "color": "gray",
-                    "italic": True
-                })
-                server.execute(f'tellraw {player} {temp}')
-                return True
-        return False
-
-    def _handle_bannedword_command(self, info, bot, command):
-        if info.content.startswith(f"{self.config['command_prefix']}违禁词"):
-            if len(command)>1 and command[1] == '开':
-                self.config['command']['ban_word'] = True
-                self.config.save()
-                bot.reply(info, '已开启违禁词！')
-            # 关闭违禁词
-            elif len(command)>1 and command[1] == '关':
-                self.config['command']['ban_word'] = False
-                self.config.save()
-                bot.reply(info, '已关闭违禁词！')
-            else:
-                self.ban_word.handle_command(info.content, info, bot, reply_style=self.style)
-            return True
-        
-        return False
-
-    def _handle_banned_word_qq(self, info, bot):
-        if self.config['command']['ban_word'] and (ban_response := self.ban_word.check_ban(info.content)):
-            # 包含违禁词 -> 撤回 + 提示 + 不转发
-            bot.delete_msg(info.message_id)
-            bot.reply(info, get_style_template('ban_word_find', self.style).format(ban_response[1]))
-            return True
-        return False
-
-    def _handle_binding(self, server, info, bot, game_id):
-        user_id = str(info.user_id)
-        # reach maximum number of bound
-        if user_id in self.data and len(self.data[user_id]) >= self.config.get("max_bound", 2):
-            bot.reply(info, f'[CQ:at,qq={user_id}] {get_style_template("bound_exist", self.style).format(self.data[user_id])}')
-            return
-        # duplicated name
-        if game_id in {name for names in self.data.values() for name in names}:
-            bot.reply(info, f'[CQ:at,qq={user_id}] 该名称已被绑定')
-            return
-        # bound logic
-        self.data[user_id] = self.data.get(user_id, []) + [game_id]
-        bot.reply(info, f'[CQ:at,qq={user_id}] {get_style_template("bound_success", self.style)}')
-        if len(self.data[user_id]) == 1:                                   # change name when first bound
-            bot.set_group_card(info.source_id, user_id, game_id)
-        if self.config['whitelist_add_with_bound']:                        # bound with adding whitelist
-            self._add_to_whitelist(server, info, bot, user_id, game_id)
-
-    def _handle_bound_command(self, info, bot, command):
-        if info.content.startswith(f"{self.config['command_prefix']}绑定"):
-            if len(command) == 1:
-                bot.reply(info, bound_help)
-            # 已绑定的名单    
-            elif len(command) == 2 and command[1] == '列表':
-                bound_list = [f'{qqid} - {", ".join(name)}' for qqid, name in self.data.items()]
-                reply_msg = "\n".join(f'{i + 1}. {name}' for i, name in enumerate(bound_list))
-                reply_msg = '还没有人绑定' if reply_msg == '' else reply_msg
-                bot.reply(info, reply_msg)
-            # 查寻绑定的ID
-            elif len(command) == 3 and command[1] == '查询':
-                if command[2] in self.data:
-                    bot.reply(info,
-                            f'{command[2]} 绑定的ID是{self.data[command[2]]}')
-                else:
-                    bot.reply(info, f'{command[2]} 未绑定')
-            # 解除绑定
-            elif len(command) == 3 and command[1] == '解绑':
-                if command[2] in self.data:
-                    del self.data[command[2]]
-                    bot.reply(info, f'已解除 {command[2]} 绑定的ID')
-                elif command[2] in {name for names in self.data.values() for name in names}:
-                    for qq_id, game_name in self.data.items():
-                        if command[2] in game_name and len(game_name) == 1:
-                            del self.data[qq_id]
-                            break
-                        if command[2] in game_name:
-                            self.data[qq_id].remove(command[2])
-                            break
-                    self.data.save()
-                    bot.reply(info, f'已解除 {command[2]} 绑定的ID')
-                else:
-                    bot.reply(info, f'{command[2]} 未绑定')
-            # 绑定ID
-            elif len(command) == 3 and command[1].isdigit():
-                if len(self.data.get(command[1], []) ) >= self.config.get("max_bound", 2):
-                    bot.reply(info, '绑定数量已达上限')
-                    return
-                if command[2] in {name for names in self.data.values() for name in names}:
-                    bot.reply(info, f'该名称已被绑定')
-                    return
-                self.data[command[1]] = self.data.get(command[1], []) + [command[2]]
-                bot.reply(info, '已成功绑定')
-            # 清空
-            elif len(command) >= 2 and command[1] == "清空":
-                if self._empty_double_check == None:
-                    self._empty_double_check = str(random_6_digit())
-                    bot.reply(info, 
-                              f'请输入 {self.config["command_prefix"]}绑定 清空 {self._empty_double_check} 来清空')
-                elif self._empty_double_check == command[2]:
-                    self.data.data = {}
-                    self.data.save() # 清空绑定
-
-                    with open(self.config["dict_address"]['whitelist'],'w') as f:
-                        json.dump({}, f) # 清空白名单
-
-                    bot.reply(info, '已成功清除')
-                    self._empty_double_check = None
-            return True
-        return False
-
-    def _handle_bound_notice(self, info, bot)->bool:
-        if self.config.get('bound_notice', True) \
-            and str(info.user_id) not in self.data.keys() \
-            and not is_robot(bot, info.source_id, info.user_id):
-            bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
-            return True
-        return False
     
     def _handle_execute_command(self, info, bot):
         if info.content.startswith(f"{self.config['command_prefix']}执行"):
@@ -463,31 +290,6 @@ class qbot_helper:
                 bot.reply(info, content)
             else:
                 bot.reply(info, "服务器未开启RCON")
-            return True
-        return False
-
-    def _handle_ingame_keyword(self, server, info):
-        if self.config['command']['ingame_key_word']:
-            if info.content.startswith('!!add '):
-                return self._add_ingame_keyword(server, info)
-            elif info.content.startswith('!!del '):
-                return self._delete_ingame_keyword(server, info)
-        return False
-    
-    def _handle_ingame_keyword_command(self, info, bot, command):
-        if info.content.startswith(f"{self.config['command_prefix']}游戏关键词"):
-            # 开启游戏关键词
-            if len(command)>1 and command[1] == '开':
-                self.config['command']['ingame_key_word'] = True
-                self.config.save()
-                bot.reply(info, '已开启游戏关键词！')
-            # 关闭游戏关键词
-            elif len(command)>1 and command[1] == '关':
-                self.config['command']['ingame_key_word'] = False
-                self.config.save()
-                bot.reply(info, '已关闭游戏关键词！')
-            else:
-                self.key_word_ingame.handle_command(info.content, info, bot, reply_style=self.style)
             return True
         return False
 
@@ -509,23 +311,6 @@ class qbot_helper:
                     
                 server.say(f'§6[QQ] §a[机器人] §f{key_word_reply}')
 
-            return True
-        return False
-    
-    def _handle_keyword_command(self, info, bot, command):
-        if info.content.startswith(f"{self.config['command_prefix']}关键词"):
-            # 开启关键词
-            if len(command)>1 and command[1] in ['开','on']:
-                self.config['command']['key_word'] = True
-                self.config.save()
-                bot.reply(info, '已开启关键词！')
-            # 关闭关键词
-            elif len(command)>1 and command[1] in ['关', 'off']:
-                self.config['command']['key_word'] = False
-                self.config.save()
-                bot.reply(info, '已关闭关键词！')
-            else:
-                self.key_word.handle_command(info.content, info, bot, reply_style=self.style)
             return True
         return False
     
@@ -574,7 +359,7 @@ class qbot_helper:
         message = info.content.replace(f"{self.config['command_prefix']}mc ", "", 1).strip()
         if user_id in self.data or not self.config.get('bound_notice', True):
             self._forward_message_to_game(server, info, bot, message)
-            self._check_ingame_keyword(server, info, bot, message)
+            self.key_word_ingame.check_ingame_keyword(server, info, bot, message)
         elif self.config.get("bound_notice", True):
             bot.reply(info, f'[CQ:at,qq={user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
 
@@ -617,58 +402,6 @@ class qbot_helper:
             template = 'authorization_pass' if action == '同意' else 'authorization_reject'
             bot.reply(info, get_style_template(template, self.style).format(request[0]))
 
-    def _handle_shenhe_command(self, info, bot, command):
-        if info.content.startswith(f"{self.config['command_prefix']}审核"):
-            if len(command)==1:
-                bot.reply(info, shenhe_help)
-            elif len(command)>1 and command[1] == '开':
-                self.config['command']['shenhe'] = True
-                self.config.save()
-                bot.reply(info, '自动审核开启')
-            elif len(command)>1 and command[1] == '关':
-                self.config['command']['shenhe'] = False
-                self.config.save()
-                bot.reply(info, '自动审核关闭')
-            elif len(command)>=4 and command[1] == '添加':
-                if command[3] not in self.shenheman:
-                    self.shenheman[command[3]] = command[2] # 别名：QQ号
-                    bot.reply(info, get_style_template('add_success', self.style))
-                elif command[3] in self.shenheman:
-                    bot.reply(info,'已存在该别名')
-            elif command[1] == '删除' and len(command) >= 3:
-                
-                if command[2] in self.shenheman.values():
-                    for k,v in self.shenheman.items():
-                        if v == command[2]:
-                            del self.shenheman[k]
-                    bot.reply(info, get_style_template('delete_success', self.style))
-                else:
-                    bot.reply(info,'审核员不存在哦！')
-            elif len(command)>=2 and command[1] == '列表':
-                temp = defaultdict(list)
-                for name,qq_id in self.shenheman.items():
-                    temp[qq_id].append(name)
-                bot.reply(info, "有如下审核员：\n"+"\n".join([k+'-'+",".join(v) for k,v in temp.items()]))
-            return True
-        return False
-
-    def _handle_startcommand_command(self, info, bot, command):
-        if info.content.startswith(f"{self.config['command_prefix']}启动指令"):
-            # 开启开服指令
-            if len(command)>1 and command[1] == '开':
-                self.config['command']['start_command'] = True
-                self.config.save()
-                bot.reply(info, '已开启开服指令！')
-            # 关闭开服指令
-            elif len(command)>1 and command[1] == '关':
-                self.config['command']['start_command'] = False
-                self.config.save()
-                bot.reply(info, '已关闭开服指令！')
-            else:
-                self.start_command.handle_command(info.content, info, bot, reply_style=self.style)
-            return True
-        return False
-
     def _handle_style_command(self, info, bot, command):
         style = get_style()
         if len(command) == 1:
@@ -699,53 +432,10 @@ class qbot_helper:
                         '\n'.join([str(k)+'-'+str(v)+'-'+str(self.data[v]) for k,v in self.uuid_qqid.items() if v in self.data]))
             # 更新匹配表
             elif len(command)>1 and command[1] == '重载':
-                self.whitelist.load()
                 self._match_id()
                 bot.reply(info, '已重新匹配~')
-            # 更改白名单名字
-            elif len(command)>=4 and command[1] in ['修改','更改','更新']:
-                pre_name = command[2]
-                cur_name = command[3]
-
-                if pre_name not in self.whitelist.values():
-                    bot.reply(info, '未找到对应名字awa！')      
-                else:
-                    self.whitelist.remove(pre_name)
-                    self.whitelist.add(cur_name)
-                
-                    bot.reply(info,'已将 {} 改名为 {}'.format(pre_name,cur_name))
-                        
-                    self._match_id()
             return True
         return False          
-
-    def _handle_whitelist_command(self, server, info, bot, command):
-        if info.content.startswith(f"{self.config['command_prefix']}白名单"):
-            if len(command) == 1:
-                bot.reply(info, whitelist_help)
-            # 执行指令
-            elif len(command)>1 and command[1] in ['添加', '删除','移除', '列表', '开', '关']:
-                if command[1] == '添加':
-                    self.whitelist.add(command[2])
-                    bot.reply(info, get_style_template('add_success', self.style))
-                    self._match_id()
-                elif command[1] in ['删除','移除']:
-                    self.whitelist.remove(command[2])
-                    bot.reply(info, get_style_template('delete_success', self.style))
-                elif command[1] == '开':
-                    self.config['command']['whitelist'] = True
-                    self.config.save()
-                    self.whitelist.enable()
-                    bot.reply(info, '白名单已开启！')
-                elif command[1] == '关':
-                    self.config['command']['whitelist'] = False
-                    self.config.save()
-                    self.whitelist.disable()
-                    bot.reply(info, '白名单已关闭！')
-                else:
-                    bot.reply(info,'白名单如下：\n'+'\n'.join(sorted(self.whitelist.values())))
-            return True
-        return False
     
      # 游戏内@ 推荐
     def _ingame_at_suggestion(self):
@@ -823,7 +513,7 @@ class qbot(qbot_helper):
         message = ctx['message']
         
         # 检查违禁词
-        if self._handle_banned_word(self.server, player, message): return
+        if self.ban_word.handle_banned_word_mc(player, message): return
         
         qq_user_id = ctx['QQ(name/id)'] if ctx['QQ(name/id)'].isdigit() else self.member_dict.get(ctx['QQ(name/id)'])
         if qq_user_id:
@@ -845,7 +535,7 @@ class qbot(qbot_helper):
         message = ctx['message']
 
         # 检查违禁词
-        if self._handle_banned_word(self.server, player, message): return
+        if self.ban_word.handle_banned_word_mc(player, message): return
 
         # 正常转发
         self.send_msg_to_all_qq(f'[{player}] {message}')
@@ -880,7 +570,7 @@ class qbot(qbot_helper):
             if user_id in self.data.keys():
                 if self.config["command"]["whitelist"]:
                     for player_name in self.data[user_id]:
-                        self.whitelist.remove(player_name)
+                        self.whitelist.remove_player(player_name)
                     bot.reply(info, get_style_template('del_whitelist_when_quit', self.style).format(",".join(self.data[user_id])))
                 del self.data[user_id]
 
@@ -917,42 +607,37 @@ class qbot(qbot_helper):
         # 检测违禁词
         if info.message_type == 'group' \
             and info.source_id not in admin_group_id \
-            and self._handle_banned_word_qq(info, bot):
+            and self.ban_word.handle_banned_word_qq(info, bot, self.style):
             return True
-
         # 玩家列表
-        if self.config['command']['list'] and command[0] in ['玩家列表', '玩家', 'player', '假人列表', '假人', 'fakeplayer', '服务器', 'server']:
+        elif self.config['command']['list'] and command[0] in ['玩家列表', '玩家', 'player', '假人列表', '假人', 'fakeplayer', '服务器', 'server']:
             self._handle_list_command(server, info, bot, command)
-            return True
 
         # 禁止群员执行指令
-        if self.config['command'].get("group_admin", False) \
+        elif self.config['command'].get("group_admin", False) \
             and info.user_id not in self.config['admin_id'] \
             and info.source_id not in admin_group_id:
             return True
-
         # 关键词操作
-        if self.config['command']['key_word'] and command[0] in ["列表", 'list', '添加', 'add', '删除', '移除', 'del']:
-            self.key_word.handle_command(f"{self.config['command_prefix']}关键词 {' '.join(command)}", info, bot, reply_style=self.style)
-            return True
+        elif self.config['command']['key_word'] and command[0] in ["列表", 'list', '添加', 'add', '删除', '移除', 'del']:
+            self.key_word.handle_command(f"关键词 {' '.join(command)}", info, bot, admin=False)
 
         # 游戏内关键词
-        if self.config['command']['ingame_key_word'] and command[0] == '游戏关键词':
+        elif self.config['command']['ingame_key_word'] and command[0] == '游戏关键词':
             self.key_word_ingame.handle_command(info.content, info, bot, reply_style=self.style)
-            return True
 
         # 添加关键词图片
-        if self.config['command']['key_word'] and command[0] == '添加图片' and len(command) > 1:
+        elif self.config['command']['key_word'] and command[0] == '添加图片' and len(command) > 1:
             self._handle_add_image_keyword(info, bot)
-            return True
 
         # 审核操作
-        if self.config['command']['shenhe'] and command[0] in ['同意', '拒绝'] and self.shenhe[info.user_id]:
+        elif self.config['command']['shenhe'] and command[0] in ['同意', '拒绝'] and self.shenhe[info.user_id]:
             self._handle_shenhe(info, bot, command[0])
-            return True
 
-        return False
-    
+        else:
+            return False
+
+        return True
 
     # 管理员指令
     def private_command(self, server, info, bot, command:list):
@@ -960,32 +645,29 @@ class qbot(qbot_helper):
         if info.content == f"{self.config['command_prefix']}帮助":
             bot.reply(info, admin_help_msg)
 
-        # bound 
-        if self._handle_bound_command(info, bot, command): return
+        raw_command = info.content
+        admin = True
 
-        # whitelist
-        if self._handle_whitelist_command(server, info, bot, command): return
-                    
-        # startup command
-        if self._handle_startcommand_command(info, bot, command): return
-            
-        # ban word
-        if self._handle_bannedword_command(info, bot, command): return
+        function_list = [
+            self.data, # bound
+            self.whitelist,
+            self.start_command,
+            self.ban_word,
+            self.ban_word, 
+            self.key_word_ingame,
+            self.shenheman # review invite request
+        ]
 
-        # key word
-        if self._handle_keyword_command(info, bot, command): return
-            
-        # ingame key word
-        if self._handle_ingame_keyword_command(info, bot, command): return
-            
+        for func in function_list:
+            if func.handle_command(
+                raw_command, info, bot, admin
+            ): return
+
         # uuid
         if self._handle_uuid_command(info, bot, command): return
 
         # bot's name
         if self._handle_name_command(server, info, bot, command): return 
-
-        # 审核
-        if self._handle_shenhe_command(info, bot, command): return
         
         # execute command
         if self._handle_execute_command(info, bot): return 
@@ -1003,7 +685,9 @@ class qbot(qbot_helper):
             self._handle_mc_command(server, info, bot)
         
         elif len(command) == 2 and command[0] == '绑定':            # 绑定功能
-            self._handle_binding(server, info, bot, command[1])
+            self.data.handle_command(
+                info.content, info, bot, admin = info.user_id in self.config['admin_id']
+            )
         
         elif command[0] == '风格':                                  # 机器人风格相关
             self._handle_style_command(info, bot, command)
@@ -1041,10 +725,10 @@ class qbot(qbot_helper):
             server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_message}")
 
         # 绑定提示
-        if self._handle_bound_notice(info, bot): return
+        if self.data.handle_bound_notice(info, bot): return
         
         # 违禁词
-        if self._handle_banned_word_qq(info, bot): return 
+        if self.ban_word.handle_banned_word_qq(info, bot, self.style): return 
         
         # 是否转发消息
         is_forward_to_mc = self.config['forward']['qq_to_mc']
@@ -1077,11 +761,11 @@ class qbot(qbot_helper):
             return
 
         # 检查违禁词
-        if self._handle_banned_word(server, info.player, info.content):
+        if self.ban_word.handle_banned_word_mc(info.player, info.content):
             return
 
         # 处理游戏内关键词
-        if self._handle_ingame_keyword(server, info):
+        if self.key_word_ingame.handle_ingame_keyword(server, info):
             return
 
         # 转发消息
