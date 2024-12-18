@@ -125,12 +125,14 @@ def _on_player_join(server:PluginServerInterface, info:Info):
         
         latest_notice = get_latest_group_notice(qq_bot, logger=server.logger)
 
-        latest_notice_json = {
-            "text": f"群公告：{latest_notice}",
-            "color": "gray",
-            "italic": False
-        }
-        server.execute(f'tellraw {player_name} {json.dumps(latest_notice_json)}')
+        if latest_notice:
+
+            latest_notice_json = {
+                "text": f"群公告：{latest_notice}",
+                "color": "gray",
+                "italic": False
+            }
+            server.execute(f'tellraw {player_name} {json.dumps(latest_notice_json)}')
 
 def _on_player_left(server:PluginServerInterface, info:Info):
     # 机器人名字更新

@@ -20,7 +20,6 @@ from .data.text import (
     group_help_msg,
     name_help,
     style_help,
-    uuid_help,
     mc2qq_template
 )
 from .config import autoSaveDict, botConfig
@@ -32,6 +31,7 @@ from .system import (
     key_word_system,
     shenhe_system,
     start_command_system,
+    uuid_system,
     whitelist
 )
 
@@ -55,45 +55,52 @@ class qbot_helper:
         self.server = server
         self.bot = bot
 
-        self._packing_copy()
+        packing_copy(server)
         
         # read config & bound data
         self.config = botConfig("./config/GUGUbot/config.json", yaml=True, logger=server.logger)
         self.config.addNewConfig(server)
-        self.whitelist = whitelist(self.server, self.config) # 白名单
-        self.data = bound_system("./config/GUGUbot/GUGUbot.json", 
-                                 server, self.config, self.whitelist)
-
+        
         self.server_name = self.config.get("server_name", "")
         self.is_main_server = self.config.get("is_main_server", True)
         self.style = self.config.get("style") if self.config.get("style") != "" else "正常"
+
         # init params
-        self.picture_record_dict = {}
-        self.shenhe = defaultdict(list)
         self.member_dict = None
         self.suggestion = self._ingame_at_suggestion()
-        
-        pygame.init()              # for text to image
-        self._loading_dicts()      # read data for qqbot functions
-        self.rcon = rcon_connector(server)       # connecting the rcon
-
         self._list_callback = [] # used for list & qqbot's name function
         self.last_style_change = 0
+        
+        pygame.init()              # for text to image
+        self.__loading_systems()      # read data for qqbot functions
 
-    def _loading_dicts(self) -> None:
+    def __loading_systems(self) -> None:
         """ Loading the data for qqbot functions """
         self.font = pygame.font.Font(self.config["dict_address"]["font_path"], 26)
         
+        self.whitelist = whitelist(self.server, self.config) # 白名单
+        self.data = bound_system("./config/GUGUbot/GUGUbot.json", self.server, self.config, self.whitelist)
         self.key_word = key_word_system(self.config["dict_address"]['key_word_dict'], self.server, self.config) # QQ 关键词
         self.key_word_ingame = ingame_key_word_system(self.config["dict_address"]['key_word_ingame_dict'], self.server, self.config) # MC 关键词
         self.ban_word = ban_word_system(self.config["dict_address"]['ban_word_dict'], self.server, self.config) # 违禁词
         self.start_command = start_command_system(self.config["dict_address"]["start_command_dict"], self.server, self.config) # 开服指令
         self.shenheman = shenhe_system(self.config["dict_address"]['shenheman'], self.server, self.config) # 群审核人员
-        self.uuid_qqid = autoSaveDict(self.config["dict_address"]['uuid_qqid']) # uuid - qqid 表
+        self.uuid_qqid = uuid_system(self.config["dict_address"]['uuid_qqid'], self.server, self.config, self.data, self.whitelist) # uuid - qqid 表
+        self.rcon = rcon_connector(self.server) # connecting the rcon
 
     #===================================================================#
     #                        Helper functions                           #
     #===================================================================#
+
+    # 添加服务器名字
+    def _add_server_name(self, message):
+        if self.server_name != "":
+            return f"|{self.server_name}| {message}"
+        return message
+
+    # 转发消息到指定群
+    def _send_group_msg(self, msg, group):
+        self.bot.send_group_msg(group, msg)
 
     def send_msg_to_all_qq(self, msg:str)->None:
         """
@@ -106,82 +113,6 @@ class qbot_helper:
 
         for group in self.config.get('group_id', []):
             self._send_group_msg(msg, group)
-
-    def set_number_as_name(self, server:PluginServerInterface)->None:
-        """
-        Set the number of online player as bot's groupcard
-
-        Args:
-            server (mcdreforged.api.types.PluginServerInterface): The MCDR game interface.
-        """
-        bound_list = [name for names in self.data.values() for name in names]
-
-        def list_callback(content:str):
-            instance_list = [i.strip() for i in content.split(": ")[-1].split(", ") if i.strip()]
-            instance_list = [i.split(']')[-1].split('】')[-1].strip() for i in instance_list] # for [123] player_name & 【123】player_name
-
-            online_player_api = self.server.get_plugin_instance("online_player_api")
-            if any(["players online" in i for i in instance_list]) and online_player_api: # multiline_return
-                instance_list = online_player_api.get_player_list()
-            elif any(["players online" in i for i in instance_list]):
-                server.logger.warning("无法解析多行返回，开启 rcon 或下载 online_player_api 来解析")
-                server.logger.warning("下载命令: !!MCDR plugin install online_player_api")
-
-            # Obtain the real player name list  
-            ip_logger = server.get_plugin_instance("player_ip_logger")
-            if ip_logger:
-                player = [i for i in instance_list if ip_logger.is_player(i)]
-            else:
-                player = [i for i in instance_list if i in bound_list or not bound_list]
-            number = len(player)
-
-            name = " "
-            if number != 0:     
-                name = "在线人数: {}".format(number)
-            # Call update API
-            for gid in self.config.get('group_id', []):
-                self.bot.set_group_card(gid, self.bot.get_login_info()["data"]['user_id'], name)
-
-        if server.is_rcon_running(): # use rcon to get command return 
-            list_callback(self.rcon.send_command("list"))
-        else:         # use MCDR's on_info to get command return
-            self._list_callback.append(list_callback)
-            server.execute("list")
-
-    #===================================================================#
-    #                    Helper functions (inclass)                     #
-    #===================================================================#
-
-    # 添加服务器名字
-    def _add_server_name(self, message):
-        if self.server_name != "":
-            return f"|{self.server_name}| {message}"
-        return message
-    
-    # 通过QQ号找到绑定的游戏ID
-    def _find_game_name(self, qq_id: str, bot, group_id: str = None) -> str:
-        group_id = group_id if group_id in self.config.get('group_id', []) else self.config.get('group_id', [])[0]
-        
-        # 启用白名单，返回绑定的游戏ID
-        if self.config['command']['whitelist']:
-            # 检查是否绑定且在白名单中
-            uuid = self.uuid_qqid.get(qq_id)
-            if uuid and uuid in self.whitelist:
-                return self.whitelist[uuid]
-        
-        if str(qq_id) in self.data:
-            return self.data[str(qq_id)][0]
-        
-        # 未匹配到名字，尝试获取QQ名片
-        try:
-            target_data = bot.get_group_member_info(group_id, qq_id).get('data', {})
-            target_name = target_data.get('card') or target_data.get('nickname', qq_id)
-        except Exception as e:
-            self.server.logger.error(f"获取QQ名片失败：{e}, 请检查cq_qq_api链接是否断开")
-            target_name = qq_id
-        
-        self._match_id()
-        return target_name
 
     def _forward_message(self, server, info):
         roll_number = random.randint(0, 10000)
@@ -199,6 +130,58 @@ class qbot_helper:
         message = beautify_message(message, self.config.get('forward', {}).get('keep_raw_image_link', False))
         server.say(f'§6[QQ] §a[{sender}] §f{message}')
 
+    def set_number_as_name(self, server:PluginServerInterface)->None:
+        """
+        Set the number of online player as bot's groupcard
+
+        Args:
+            server (mcdreforged.api.types.PluginServerInterface): The MCDR game interface.
+        """
+
+        def list_callback(content:str):
+            player_list, _ = parse_list_content(self.data, server, content)
+
+            number = len(player_list)
+
+            name = " "
+            if number != 0:     
+                name = "在线人数: {}".format(number)
+            # Call update API
+            for gid in self.config.get('group_id', []):
+                self.bot.set_group_card(gid, self.bot.get_login_info()["data"]['user_id'], name)
+
+        if self.rcon: # use rcon to get command return 
+            list_callback(self.rcon.send_command("list"))
+        else:         # use MCDR's on_info to get command return
+            self._list_callback.append(list_callback)
+            server.execute("list")
+
+    #===================================================================#
+    #                    Helper functions (inclass)                     #
+    #===================================================================#
+
+    # 通过QQ号找到绑定的游戏ID
+    def _find_game_name(self, qq_id: str, bot, group_id: str = None) -> str:
+        group_id = group_id if group_id in self.config.get('group_id', []) else self.config.get('group_id', [])[0]
+        
+        # 启用白名单，返回绑定的游戏ID
+        if self.config['command']['whitelist']: 
+            uuid = self.uuid_qqid.get(qq_id)
+            if uuid and uuid in self.whitelist: # 检查是否绑定且在白名单中
+                return self.whitelist[uuid]
+        
+        if str(qq_id) in self.data:
+            return self.data[str(qq_id)][0]
+        
+        try:  # 未匹配到名字，尝试获取QQ名片
+            target_data = bot.get_group_member_info(group_id, qq_id).get('data', {})
+            target_name = target_data.get('card') or target_data.get('nickname', qq_id)
+        except Exception as e:
+            self.server.logger.error(f"获取QQ名片失败：{e}, 请检查cq_qq_api链接是否断开")
+            target_name = qq_id
+        
+        return target_name
+
     def _get_previous_sender_name(self, qq_id: str, group_id: str, bot, previous_message_content):
         bot_info = bot.get_login_info()['data']
         if str(qq_id) == str(bot_info['user_id']):
@@ -209,56 +192,14 @@ class qbot_helper:
             # find player name
             pattern = r"^\((.*?)\)|^\[(.*?)\]|^(.*?) 说：|^(.*?) : |^冒着爱心眼的(.*?)说："
             match = re.search(pattern, previous_message_content)
+
             if match:
                 receiver_name = next(group for group in match.groups() if group is not None)
                 return receiver_name
+            
             return bot_info['nickname']
         
         return self._find_game_name(qq_id, bot, group_id)
-
-    def _handle_add_image_keyword(self, info, bot):
-        image_key_word = info.content.split(maxsplit=1)[-1].strip()
-        if image_key_word == "取消" and info.user_id in self.picture_record_dict:
-            del self.picture_record_dict[info.user_id]
-            respond = get_style_template('add_cancel', self.style)
-        elif image_key_word in self.key_word:
-            respond = get_style_template('add_existed', self.style)
-        elif info.user_id not in self.picture_record_dict:
-            self.picture_record_dict[info.user_id] = (image_key_word, time.time())
-            respond = get_style_template('add_image_instruction', self.style)
-        else:
-            respond = get_style_template('add_image_previous_no_done', self.style)
-        bot.reply(info, respond)
-
-    def _handle_adding_image(self, server, info, bot):
-        # 添加图片
-        if info.user_id in self.picture_record_dict and \
-                (info.raw_message.startswith('[CQ:image') \
-                    or info.raw_message.startswith("[CQ:mface")):
-            if  time.time() - self.picture_record_dict[info.user_id][1] >= 30:
-                bot.reply(info, f"添加图片 <{self.picture_record_dict[info.user_id][0]}> 已超时")
-                del self.picture_record_dict[info.user_id]
-            else:
-                try:
-                    url_match = re.search(r'url=([^,\]]+)', info.raw_message)
-                    url = url_match.group(1) if url_match else None
-
-                    if not url:
-                        file_match = re.search(r'file=([^\s,\]]+)', info.raw_message)
-                        url = file_match.group(1) if file_match else None
-                        
-                    url = re.sub('&amp;', "&", url)
-                    
-                    self.key_word[self.picture_record_dict[info.user_id][0]]=f"[CQ:image,file={url}]"
-                    
-                    bot.reply(info, get_style_template('add_success', self.style))
-                    del self.picture_record_dict[info.user_id] # 缓存中移除用户
-                except Exception as e:
-                    bot.reply(info, get_style_template('add_image_fail', self.style))
-                    server.logger.warning(f"保存图片失败：{info.raw_message}\n报错如下： {e}")
-                            
-            return True
-        return False
 
     def _handle_at(self, server, info, bot):
         sender = self._find_game_name(str(info.user_id), bot, str(info.source_id))
@@ -282,16 +223,6 @@ class qbot_helper:
                 server.say(f'§6[QQ] §a[{sender}] §f{forward_content}')
             return True
         return False
-    
-    def _handle_execute_command(self, info, bot):
-        if info.content.startswith(f"{self.config['command_prefix']}执行"):
-            if self.config['command'].get('execute_command', False) and self.server.is_rcon_running():
-                content = self.rcon.send_command(info.content.replace(f"{self.config['command_prefix']}执行", "").strip())
-                bot.reply(info, content)
-            else:
-                bot.reply(info, "服务器未开启RCON")
-            return True
-        return False
 
     def _handle_keyword(self, server, info, bot, is_forward_to_mc:bool):
         # 检测到关键词 -> 转发原文 + 转发回复
@@ -313,46 +244,70 @@ class qbot_helper:
 
             return True
         return False
-    
+
     def _handle_list_command(self, server, info, bot, command):
         def list_callback(content: str):
             server_status = command[0] in ['服务器', 'server']
             player_status = command[0] in ['玩家', '玩家列表']
-            bound_list = {i for player_names in self.data.values() for i in player_names}
-
-            instance_list = [i.strip() for i in content.split(": ", 1)[-1].split(", ") if i.strip()]
-            instance_list = [i.split(']')[-1].split('】')[-1].strip() for i in instance_list] # 针对 [123] 玩家 和 【123】玩家 这种人名
             
-            online_player_api = self.server.get_plugin_instance("online_player_api")
-            if "online: " not in content and online_player_api: # multiline_return
-                instance_list = online_player_api.get_player_list()
-            elif "online: " not in content:
-                server.logger.warning("无法解析多行返回，开启 rcon 或下载 online_player_api 来解析")
-                server.logger.warning("下载命令: !!MCDR plugin install online_player_api")
-
-            # 有人绑定 -> 识别假人
-            ip_logger = self.server.get_plugin_instance("player_ip_logger")
-            
-            if ip_logger:
-                player_list = [i for i in instance_list if ip_logger.is_player(i)]
-                bot_list = [i for i in instance_list if not ip_logger.is_player(i)]
-            elif bound_list:
-                player_list = [i for i in instance_list if i in bound_list]
-                bot_list = [i for i in instance_list if i not in bound_list]
-            # 无人绑定 -> 不识别假人 ==> 下版本使用 ip_logging 来识别假人
-            else:
-                player_list = instance_list
-                bot_list = []
+            player_list, bot_list = parse_list_content(self.data, server, content)
 
             respond = format_list_response(player_list, bot_list, player_status, server_status, self.style)
             respond = self._add_server_name(respond)
             bot.reply(info, respond, force_reply=True)
 
-        if server.is_rcon_running(): # use rcon to get command return 
+        if self.rcon: # use rcon to get command return 
             list_callback(self.rcon.send_command("list"))
         else:
             self._list_callback.append(list_callback)
             server.execute("list")
+    
+     # 游戏内@ 推荐
+    def _ingame_at_suggestion(self):
+        # 初始化成员字典和建议内容
+        self.member_dict = {name: qq_id for qq_id, name_list in self.data.items() for name in name_list}
+        suggest_content = set(self.member_dict.keys())
+
+        try:
+            group_raw_info = [self.bot.get_group_member_list(group_id) for group_id in self.config.get('group_id', []) if group_id]
+            unpack = [i['data'] for i in group_raw_info if i and i['status'] == 'ok']
+        except Exception as e:
+            self.server.logger.warning(f"获取群成员列表失败: {e}")
+            unpack = [] 
+
+        for group in unpack:
+            for member in group:
+                user_id = str(member['user_id'])
+                self.member_dict.update({
+                    member['nickname']: user_id,
+                    member['card']: user_id
+                })
+                suggest_content.update([member['card'], member['nickname'], user_id])
+
+        return list(suggest_content)
+    
+    #===================================================================#
+    #                      group command helper                         #
+    #===================================================================#
+
+    def _handle_style_command(self, info, bot, command):
+        style = get_style()
+        if len(command) == 1:
+            bot.reply(info, style_help)
+        elif command[1] == '列表':
+            bot.reply(info, "现有如下风格：\n" + '\n'.join(style.keys()))
+        elif command[1] in style:
+            # 普通成员冷却
+            time_diff = int(time.time() - self.last_style_change)
+            cooldown = self.config.get("style_cooldown", 0)
+            if  time_diff <= cooldown \
+                and info.user_id not in self.config['admin_id']:
+                bot.reply(info, f"{cooldown - time_diff}秒后才能换风格哦！")
+                return
+            self.style = command[1]
+            self.config['style'] = command[1]
+            bot.reply(info, f'已切换为 {self.style}')
+            self.last_style_change = time.time()   
 
     def _handle_mc_command(self, server, info, bot):
         user_id = str(info.user_id)
@@ -362,6 +317,10 @@ class qbot_helper:
             self.key_word_ingame.check_ingame_keyword(server, info, bot, message)
         elif self.config.get("bound_notice", True):
             bot.reply(info, f'[CQ:at,qq={user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
+
+    #===================================================================#
+    #                     private command helper                        #
+    #===================================================================#
 
     def _handle_name_command(self, server, info, bot, command):
         if info.content.startswith(f"{self.config['command_prefix']}名字"):
@@ -384,118 +343,31 @@ class qbot_helper:
             return True
         return False   
     
-    def _handle_reload_command(self, server, info, bot):
-        if info.content == f"{self.config['command_prefix']}重启":
-            bot.reply(info, "重启中...(请等待10秒)")
-            server.reload_plugin("gugubot")
-            return True
+    def _handle_execute_command(self, info, bot):
+        """ execute command handler """
+        for exec_keyword in ["exec", "执行"]:
+            if info.content.startswith(f"{self.config['command_prefix']}{exec_keyword}"):
+                # check switch & rcon status
+                if self.config['command'].get('execute_command', False) and self.rcon:
+                    content = self.rcon.send_command(info.content.replace(f"{self.config['command_prefix']}{exec_keyword}", "").strip())
+                    bot.reply(info, content)
+                # switch = off
+                elif not self.config['command'].get('execute_command', False):
+                    bot.reply(info, "执行指令已关闭")
+                # rcon disconnect
+                else:
+                    bot.reply(info, "服务器未开启RCON")
+                return True
         return False
 
-    def _handle_shenhe(self, info, bot, action: str):
-        if self.shenhe[info.user_id]:
-            request = self.shenhe[info.user_id].pop(0)
-            bot.set_group_add_request(request[1], request[2], action == '同意')
-            
-            with open(self.config["dict_address"]['shenhe_log'], 'a+', encoding='utf-8') as f:
-                f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())} {request[0]} {info.user_id} {'通过' if action == '同意' else '拒绝'}\n")
-            
-            template = 'authorization_pass' if action == '同意' else 'authorization_reject'
-            bot.reply(info, get_style_template(template, self.style).format(request[0]))
-
-    def _handle_style_command(self, info, bot, command):
-        style = get_style()
-        if len(command) == 1:
-            bot.reply(info, style_help)
-        elif command[1] == '列表':
-            bot.reply(info, "现有如下风格：\n" + '\n'.join(style.keys()))
-        elif command[1] in style:
-            # 普通成员冷却
-            time_diff = int(time.time() - self.last_style_change)
-            cooldown = self.config.get("style_cooldown", 0)
-            if  time_diff <= cooldown \
-                and info.user_id not in self.config['admin_id']:
-                bot.reply(info, f"{cooldown - time_diff}秒后才能换风格哦！")
-                return
-            self.style = command[1]
-            self.config['style'] = command[1]
-            bot.reply(info, f'已切换为 {self.style}')
-            self.last_style_change = time.time()
-
-    def _handle_uuid_command(self, info, bot, command):
-        if info.content.startswith(f"{self.config['command_prefix']}uuid"):
-            # uuid 帮助
-            if len(command)==1:
-                bot.reply(info, uuid_help)
-            # 查看uuid 匹配表
-            elif len(command)>1 and command[1] == '列表':
-                bot.reply(info, "uuid匹配如下：\n"+ \
-                        '\n'.join([str(k)+'-'+str(v)+'-'+str(self.data[v]) for k,v in self.uuid_qqid.items() if v in self.data]))
-            # 更新匹配表
-            elif len(command)>1 and command[1] == '重载':
-                self._match_id()
-                bot.reply(info, '已重新匹配~')
-            return True
-        return False          
-    
-     # 游戏内@ 推荐
-    def _ingame_at_suggestion(self):
-        # 初始化成员字典和建议内容
-        self.member_dict = {name: qq_id for qq_id, name_list in self.data.items() for name in name_list}
-        suggest_content = set(self.member_dict.keys())
-
-        try:
-            group_raw_info = [self.bot.get_group_member_list(group_id) for group_id in self.config.get('group_id', []) if group_id]
-            unpack = [i['data'] for i in group_raw_info if i and i['status'] == 'ok']
-        except Exception as e:
-            self.server.logger.warning(f"获取群成员列表失败: {e}")
-            unpack = []
-
-        for group in unpack:
-            for member in group:
-                user_id = str(member['user_id'])
-                self.member_dict.update({
-                    member['nickname']: user_id,
-                    member['card']: user_id
-                })
-                suggest_content.update([member['card'], member['nickname'], user_id])
-
-        return list(suggest_content)
-
-    def _is_valid_command_source(self, info) -> bool:
-        return (info.source_id in self.config.get('group_id', []) or
-                (self.config.get('admin_group_id') and info.source_id in self.config.get('admin_group_id')) or
-                info.source_id in self.config.get('admin_id', [])) 
-
-    # 匹配uuid和qqid
-    def _match_id(self) -> None:
-        self.uuid_qqid = {}
-        whitelist_dict = {game_name: uuid for uuid, game_name in self.whitelist.items()}
-        
-        for qq_id, names in self.data.items():
-            for name in names:
-                clean_name = name.split('(')[0].split('（')[0]
-                if clean_name in whitelist_dict:
-                    self.uuid_qqid[whitelist_dict[clean_name]] = qq_id
-
-    # 转发消息到指定群
-    def _send_group_msg(self, msg, group):
-        self.bot.send_group_msg(group, msg)
-
-    # 解包字体，绑定图片
-    def _packing_copy(self) -> None:
-        def __copyFile(path, target_path):            
-            if os.path.exists(target_path):
-                return
-            target_path = Path(target_path)
-            target_path.parent.mkdir(parents=True, exist_ok=True)
-            with self.server.open_bundled_file(path) as file_handler: # 从包内解包文件
-                message = file_handler.read()
-            with open(target_path, 'wb') as f:                        # 复制文件
-                f.write(message)
-        
-        __copyFile("gugubot/data/config_default.yml", "./config/GUGUbot/config.yml")        # 默认设置
-        __copyFile("gugubot/data/bound.jpg", "./config/GUGUbot/bound.jpg")        # 绑定图片
-        __copyFile("gugubot/font/MicrosoftYaHei-01.ttf", "./config/GUGUbot/font/MicrosoftYaHei-01.ttf") # 默认字体
+    def _handle_reload_command(self, server, info, bot):
+        """ reload command handler """
+        for restart_keyword in ["restart", "重启"]:
+            if info.content == f"{self.config['command_prefix']}{restart_keyword}":
+                bot.reply(info, "重启中...(请等待10秒)")
+                server.reload_plugin("gugubot")
+                return True
+        return False
 
 #+----------------------------------------------------------------------+
 
@@ -582,7 +454,7 @@ class qbot(qbot_helper):
     @addTextToImage
     def on_qq_command(self, server: PluginServerInterface, info, bot):
         # 检查消息是否来自关注的来源和是否以命令前缀开头
-        if not self._is_valid_command_source(info) or not info.content.startswith(self.config['command_prefix']):
+        if not is_valid_command_source(info, self.config) or not info.content.startswith(self.config['command_prefix']):
             return
         
         if self.config.get('show_message_in_console', True):
@@ -619,20 +491,16 @@ class qbot(qbot_helper):
             and info.source_id not in admin_group_id:
             return True
         # 关键词操作
-        elif self.config['command']['key_word'] and command[0] in ["列表", 'list', '添加', 'add', '删除', '移除', 'del']:
+        elif self.config['command']['key_word'] and command[0] in ["列表", 'list', '添加', 'add', '删除', '移除', 'del', '添加图片', '取消']:
             self.key_word.handle_command(f"关键词 {' '.join(command)}", info, bot, admin=False)
 
         # 游戏内关键词
         elif self.config['command']['ingame_key_word'] and command[0] == '游戏关键词':
             self.key_word_ingame.handle_command(info.content, info, bot, reply_style=self.style)
 
-        # 添加关键词图片
-        elif self.config['command']['key_word'] and command[0] == '添加图片' and len(command) > 1:
-            self._handle_add_image_keyword(info, bot)
-
         # 审核操作
-        elif self.config['command']['shenhe'] and command[0] in ['同意', '拒绝'] and self.shenhe[info.user_id]:
-            self._handle_shenhe(info, bot, command[0])
+        elif self.config['command']['shenhe'] and not self.shenheman.respond(info.content, info, bot, self.style):
+            return True
 
         else:
             return False
@@ -655,16 +523,14 @@ class qbot(qbot_helper):
             self.ban_word,
             self.ban_word, 
             self.key_word_ingame,
-            self.shenheman # review invite request
+            self.shenheman, # review invite request
+            self.uuid_qqid
         ]
 
         for func in function_list:
             if func.handle_command(
                 raw_command, info, bot, admin
             ): return
-
-        # uuid
-        if self._handle_uuid_command(info, bot, command): return
 
         # bot's name
         if self._handle_name_command(server, info, bot, command): return 
@@ -740,7 +606,7 @@ class qbot(qbot_helper):
             if self._handle_keyword(server, info, bot, is_forward_to_mc): return
 
             # 添加图片
-            if self._handle_adding_image(server, info, bot): return
+            if not self.key_word.add_image_handler(info, bot, self.style): return
 
         # 转发消息
         if is_forward_to_mc:

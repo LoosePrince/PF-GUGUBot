@@ -256,6 +256,11 @@ class base_system(object):
             del self.data[key]
             self.data.save()
 
+    def get(self, key, default=None):
+        if key in self:
+            return self[key]
+        return default
+
     def keys(self):
         if self.data is not None:
             return self.data.keys()
