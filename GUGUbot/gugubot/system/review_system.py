@@ -152,7 +152,7 @@ class shenhe_system(base_system):
         if qq_id not in self or not self.review_queue[qq_id]: # no admin or not this admin
             return
         
-        flag, sub_type, *_ = self.review_queue[qq_id].pop(0)
+        request_name, flag, sub_type = self.review_queue[qq_id].pop(0)
         bot.set_group_add_request(flag, sub_type, action) # send command to bot
         
         with open(self.config["dict_address"]['shenhe_log'], 'a+', encoding='utf-8') as f:  # record log
@@ -160,3 +160,19 @@ class shenhe_system(base_system):
         
         template = 'authorization_pass' if action else 'authorization_reject'
         bot.reply(info, get_style_template(template, reply_style).format(flag)) # bot reply 
+
+    def get_id(self, name:str)->str:
+        """Return admin qq_id
+
+        Args:
+            name (str): admin name
+
+        Returns:
+            str: qq_id
+        """
+
+        for k, v in self.items():
+            if name in v:
+                return k
+        
+        return "" if not self.data else list(self.keys())[0]

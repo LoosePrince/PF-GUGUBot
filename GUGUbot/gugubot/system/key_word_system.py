@@ -31,12 +31,12 @@ class key_word_system(base_system):
         ]
 
         if admin:
-            function_list += [
+            function_list = [
                 self.help,
                 self.enable,
                 self.disable,
                 self.reload
-            ]
+            ] + function_list
         return function_list
 
     def check_response(self, key_word:str):                                                

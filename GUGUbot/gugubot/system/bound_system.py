@@ -27,11 +27,10 @@ class bound_system(base_system):
         """ Return allowed function """
         function_list = [
             self.add_group,
-            self.add
         ]
 
         if admin:
-            function_list += [
+            function_list = [
                 self.help,
                 self.add,
                 self.remove,
@@ -39,7 +38,7 @@ class bound_system(base_system):
                 self.show_list,
                 self.reload,
                 self.clean
-            ]
+            ] + function_list
         return function_list
 
     def get_qq_id(self, player_name:str):
@@ -54,6 +53,31 @@ class bound_system(base_system):
         for qq_id, name in self.items():
             if player_name in name:
                 return qq_id
+            
+    def add_whitelist_switch(self, parameter, info, bot, reply_style, admin:bool)->bool:
+        """Turn on the bound with whitelist
+
+        Args:
+            parameter (list[str]): command parameters
+            info: message info 
+            bot: qqbot
+            reply_style (str): reply template style
+            admin (bool): Admin mode
+        Output:
+            break_signal (bool, None)
+        """
+        # command: boundwhitelist on
+        if parameter[0] not in ["whitelist", "白名单"]:
+            return True
+        
+        on = ["on", "开"]
+        off = ["off", "关"]
+        if parameter[1] not in on + off:
+            bot.reply(info, get_style_template('lack_parameter', reply_style))
+            return 
+        
+        self.bot_config["whitelist_add_with_bound"] = parameter[1] in on
+
 
     def add_group(self, parameter, info, bot, reply_style, admin:bool)->bool:
         """Add word into the system
@@ -68,12 +92,14 @@ class bound_system(base_system):
             break_signal (bool, None)
         """
         # command: bound <player_name>
+        if len(parameter) >= 2: # pass to add
+            return True
 
-        if len(parameter) < 2: # lack of parameters                                                     
+        if len(parameter) < 1: # lack of parameters                                                     
             bot.reply(info, get_style_template('lack_parameter', reply_style))
             return 
         
-        qq_id, player_name = str(info.user_id), parameter[1]
+        qq_id, player_name = str(info.user_id), parameter[0]
         if len(self.data.get(qq_id, [])) >= self.bot_config.get("max_bound", 2): # maximum reaches
             bot.reply(info, '绑定数量已达上限')
             return 
@@ -86,6 +112,7 @@ class bound_system(base_system):
         if qq_id not in self:
             self.data[qq_id] = []
         self.data[qq_id].append(player_name)
+        self.data.save()
         bot.reply(info, f'[CQ:at,qq={qq_id}] {get_style_template("bound_success", reply_style)}')
 
         if len(self.data[qq_id]) == 1: # change name when first bound
@@ -111,15 +138,15 @@ class bound_system(base_system):
         # command: bound <qq_id> <player_name>
         if not admin: # disallow groupmember to use it
             return True
-
-        if not parameter[1].isdigit() or not parameter[1].startswith("[@"):
+        
+        if not parameter[0].isdigit() and not parameter[0].startswith("[@"):
             return True
 
-        if len(parameter) < 3: # lack of parameters                                                     
+        if len(parameter) < 2: # lack of parameters                                                     
             bot.reply(info, get_style_template('lack_parameter', reply_style))
             return 
-        
-        qq_id, player_name = parameter[1], parameter[2]
+
+        qq_id, player_name = parameter[0], parameter[1]
         if qq_id.startswith("[@"): 
             qq_id = qq_id[2:-1]
         if len(self.data.get(qq_id, [])) >= self.bot_config.get("max_bound", 2): # maximum reaches
@@ -134,6 +161,7 @@ class bound_system(base_system):
         if qq_id not in self:
             self.data[qq_id] = []
         self.data[qq_id].append(player_name)
+        self.data.save()
         bot.reply(info, '已成功绑定')
         # Add whitelist
         if self.bot_config.get("whitelist_add_with_bound", False):
@@ -172,6 +200,7 @@ class bound_system(base_system):
             self.data[qq_id].remove(word)
             if not self.data[qq_id]: # remove if empty
                 del self.data[qq_id]
+        self.data.save()
         bot.reply(info, f'已解除 {word} 绑定的ID')
 
     def search(self, parameter, info, bot, reply_style, admin):

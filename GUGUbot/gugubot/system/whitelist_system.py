@@ -178,7 +178,7 @@ class whitelist(base_system):
         if parameter[0] not in ['列表','list']:
             return True
 
-        if len(self.data) == 0: # not word                            
+        if len(self.keys()) == 0: # not word                            
             bot.reply(info, get_style_template('no_word', reply_style))
             return         
            

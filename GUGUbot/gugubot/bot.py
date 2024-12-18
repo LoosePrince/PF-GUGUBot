@@ -65,14 +65,14 @@ class qbot_helper:
         self.is_main_server = self.config.get("is_main_server", True)
         self.style = self.config.get("style") if self.config.get("style") != "" else "正常"
 
+        pygame.init()              # for text to image
+        self.__loading_systems()      # read data for qqbot functions
+
         # init params
         self.member_dict = None
         self.suggestion = self._ingame_at_suggestion()
         self._list_callback = [] # used for list & qqbot's name function
         self.last_style_change = 0
-        
-        pygame.init()              # for text to image
-        self.__loading_systems()      # read data for qqbot functions
 
     def __loading_systems(self) -> None:
         """ Loading the data for qqbot functions """
@@ -496,7 +496,7 @@ class qbot(qbot_helper):
 
         # 游戏内关键词
         elif self.config['command']['ingame_key_word'] and command[0] == '游戏关键词':
-            self.key_word_ingame.handle_command(info.content, info, bot, reply_style=self.style)
+            self.key_word_ingame.handle_command(info.content, info, bot)
 
         # 审核操作
         elif self.config['command']['shenhe'] and not self.shenheman.respond(info.content, info, bot, self.style):
@@ -521,7 +521,7 @@ class qbot(qbot_helper):
             self.whitelist,
             self.start_command,
             self.ban_word,
-            self.ban_word, 
+            self.key_word,
             self.key_word_ingame,
             self.shenheman, # review invite request
             self.uuid_qqid
@@ -550,7 +550,7 @@ class qbot(qbot_helper):
         elif self.config['command']['mc'] and command[0] == 'mc':   # qq发送到游戏内消息
             self._handle_mc_command(server, info, bot)
         
-        elif len(command) == 2 and command[0] == '绑定':            # 绑定功能
+        elif len(command) >= 2 and command[0] == '绑定':            # 绑定功能
             self.data.handle_command(
                 info.content, info, bot, admin = info.user_id in self.config['admin_id']
             )
@@ -572,11 +572,11 @@ class qbot(qbot_helper):
             # 获取名称
             stranger_name = bot.get_stranger_info(info.user_id)["data"]["nickname"]
             # 审核人
-            at_id = self.shenheman.get(info.comment, list(self.shenheman.keys())[0])
+            at_id = self.shenheman.get_id(info.comment, list(self.shenheman.keys())[0])
             # 通知
             bot.reply(info, f"[CQ:at,qq={at_id}] {get_style_template('authorization_request', self.style).format(stranger_name)}")
             server.say(f'§6[QQ] §b[@{at_id}] {get_style_template("authorization_request", self.style).format("§f" + stranger_name)}')
-            self.shenhe[at_id].append((stranger_name, info.flag, info.request_type))
+            self.shenheman.review_queue[at_id].append((stranger_name, info.flag, info.request_type))
 
     #===================================================================#
     #                           on_qq_message                           #

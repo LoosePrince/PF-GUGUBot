@@ -40,7 +40,7 @@ class rcon_connector:
             self.server.logger.warning(f"Rcon 连接失败")
             return 
 
-        self.rcon.send_command(command)
+        return self.rcon.send_command(command)
 
     def __bool__(self):
         if self.rcon is None and self.server.is_rcon_running():
