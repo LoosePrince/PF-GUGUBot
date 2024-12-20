@@ -118,8 +118,8 @@ def _on_player_join(server:PluginServerInterface, info:Info):
     if qq_bot.config["forward"].get("player_notice", False):
         player_name = "[".join(info.content.split(" logged in with entity id")[0].split("[")[:-1])
 
-        if (qq_bot.config['forward'].get("player_notice", False) and is_player(player_name)) or \
-            (qq_bot.config['forward'].get("bot_notice", False) and not is_player(player_name)):
+        if (qq_bot.config['forward'].get("player_notice", False) and is_player(server, qq_bot, player_name)) or \
+            (qq_bot.config['forward'].get("bot_notice", False) and not is_player(server, qq_bot, player_name)):
             
             qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player_name))
 
@@ -147,8 +147,8 @@ def _on_player_left(server:PluginServerInterface, info:Info):
     if qq_bot.config["forward"].get("player_notice", False):
         player_name = info.content.replace("left the game", "").strip()
 
-        if (qq_bot.config['forward'].get("player_notice", False) and is_player(player_name)) or \
-            (qq_bot.config['forward'].get("bot_notice", False) and not is_player(player_name)):
+        if (qq_bot.config['forward'].get("player_notice", False) and is_player(server, qq_bot, player_name)) or \
+            (qq_bot.config['forward'].get("bot_notice", False) and not is_player(server, qq_bot, player_name)):
 
             qq_bot.send_msg_to_all_qq(get_style_template('player_notice_leave', qq_bot.style).format(player_name))
 
