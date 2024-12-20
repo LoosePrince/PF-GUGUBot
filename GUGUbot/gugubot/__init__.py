@@ -11,7 +11,7 @@ gugu_dir = os.path.dirname(__file__)[:-7] # remove \gugubot
 sys.path.append(gugu_dir)  if gugu_dir not in sys.path  else None
 
 from .bot import qbot
-from .utils import get_latest_group_notice, get_style_template
+from .utils import get_latest_group_notice, get_style_template, is_player
 
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.command import *
@@ -117,7 +117,11 @@ def _on_player_join(server:PluginServerInterface, info:Info):
     # 玩家上线通知
     if qq_bot.config["forward"].get("player_notice", False):
         player_name = "[".join(info.content.split(" logged in with entity id")[0].split("[")[:-1])
-        qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player_name))
+
+        if (qq_bot.config['forward'].get("player_notice", False) and is_player(player_name)) or \
+            (qq_bot.config['forward'].get("bot_notice", False) and not is_player(player_name)):
+            
+            qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player_name))
 
     # 玩家上线显示群公告
     if qq_bot.config["forward"].get("show_group_notice", False):
@@ -142,7 +146,11 @@ def _on_player_left(server:PluginServerInterface, info:Info):
     # 玩家下线通知
     if qq_bot.config["forward"].get("player_notice", False):
         player_name = info.content.replace("left the game", "").strip()
-        qq_bot.send_msg_to_all_qq(get_style_template('player_notice_leave', qq_bot.style).format(player_name))
+
+        if (qq_bot.config['forward'].get("player_notice", False) and is_player(player_name)) or \
+            (qq_bot.config['forward'].get("bot_notice", False) and not is_player(player_name)):
+
+            qq_bot.send_msg_to_all_qq(get_style_template('player_notice_leave', qq_bot.style).format(player_name))
 
 # mc游戏消息 -> QQ
 def on_user_info(server:PluginServerInterface, info:Info)->None:

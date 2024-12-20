@@ -132,6 +132,17 @@ def addTextToImage(func):
 #                     list parser Helper                           #
 #==================================================================#
 
+def is_player(server, qbot, player_name):
+    ip_logger = server.get_plugin_instance("player_ip_logger")
+
+    if ip_logger:
+        return ip_logger.is_player(player_name)
+    elif qbot.data:
+        return player_name in [name for i in qbot.data for name in i]
+    else:
+        return True
+
+
 def parse_list_content(bound_list, server, content:str):
     bound_list = {i for player_names in bound_list.values() for i in player_names}
 
