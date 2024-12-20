@@ -117,6 +117,10 @@ class qbot_helper:
     def _forward_message(self, server, info):
         roll_number = random.randint(0, 10000)
         template_index = (roll_number % (len(mc2qq_template) - 1)) if roll_number >= 3 else -1
+
+        if not self.config.get("random_template", True):
+            template_index = 0
+
         message = mc2qq_template[template_index].format(info.player, info.content)
         self.send_msg_to_all_qq(message)
 
