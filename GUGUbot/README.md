@@ -11,8 +11,14 @@
 [![下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/total?style=flat-square&label=下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases)
 [![最新发布下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/latest/total?style=flat-square&label=最新版本下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest)
 
+> [!NOTE]
+> 由于 **GUGUbot** 和 **WebUI** 项目庞大，但迄今为止仅有开发者一名，所以我们从现在开始招募有志者加入我们！<br>
+> 有意者请加 QQ1377820366 或 QQ群726741344
+
 > [!TIP]
-> 目前我们正在为 **MCDR** 开发一个 **WebUI** ，目前以发布正式版本，您可以使用 **WebUI** 来配置和管理 **MCDR** 插件和配置，包括 **GUGUbot** 和 **cq-qq-api** ，如需了使用 **WebUI** ，请访问: [PF-MCDR-WebUI](https://github.com/LoosePrince/PF-MCDR-WebUI)
+> 【腾讯文档】GUGUbot文档
+>
+> 访问文档查看更详细的说明: https://docs.qq.com/aio/DTFlheGZKY0RvYnRi
 
 ## 快速导航
 
@@ -47,9 +53,10 @@
 #### 前置插件
 - [cq_qq_api](https://github.com/XueK66/PF-cq_qq_api/releases)
 - [player_ip_logger](https://github.com/LoosePrince/PF-player_ip_logger)
-- [online_player_api](https://github.com/AnzhiZhang/MCDReforgedPlugins)
+- [online_player_api](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/online_player_api)
+- [whitelist_api](https://github.com/Aimerny/MCDRPlugins/tree/main/src/whitelist_api)
 #### 可选插件
-- [PF-MCDR-WebUI](https://github.com/LoosePrince/PF-MCDR-WebUI)
+- [PF-MCDR-WebUI](https://github.com/LoosePrince/PF-MCDR-WebUI) : 在 2.0.0 版本后将是必选前置插件
 
 ## 安装
 #### MCDR快捷安装: 
