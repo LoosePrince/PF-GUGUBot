@@ -173,8 +173,6 @@ def on_server_startup(server:PluginServerInterface)->None:
         for _, command in qq_bot.start_command.data.items():
             # 执行指令
             server.execute(command)
-        # rcon 启动连接
-        qq_bot._loading_rcon()
 
 # 关服
 def on_server_stop(server: PluginServerInterface, server_return_code: int)->None:
