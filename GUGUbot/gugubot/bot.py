@@ -349,14 +349,34 @@ class qbot_helper:
             if info.content.startswith(f"{self.config['command_prefix']}{exec_keyword}"):
                 # check switch & rcon status
                 if self.config['command'].get('execute_command', False) and self.rcon:
-                    content = self.rcon.send_command(info.content.replace(f"{self.config['command_prefix']}{exec_keyword}", "").strip())
+                    command = info.content.replace(f"{self.config['command_prefix']}{exec_keyword}", "", 1).strip()
+                    content = self.rcon.send_command(command)
                     bot.reply(info, content)
                 # switch = off
                 elif not self.config['command'].get('execute_command', False):
                     bot.reply(info, "执行指令已关闭")
                 # rcon disconnect
                 else:
-                    bot.reply(info, "服务器未开启RCON")
+                    self.server.execute(command)
+                    bot.reply(info, "指令已执行（开启RCON以显示结果）")
+                return True
+        return False
+
+    def _handle_mcdr_command(self, info, bot):
+        """ execute command handler """
+        for exec_keyword in ["MCDR", "mcdr"]:
+            if info.content.startswith(f"{self.config['command_prefix']}{exec_keyword}"):
+
+                command = info.content.replace(f"{self.config['command_prefix']}{exec_keyword}", "", 1).strip()
+                if self.config['command'].get('execute_command', False) and command:  # check switch & valid command
+                    
+                    command = command if command.startswith("!!") else f"!!{command}"
+                    self.server.execute_command(command)
+                    bot.reply(info, f"{command} 指令已执行")
+                
+                else:  # switch = off
+                    bot.reply(info, "执行指令已关闭")
+
                 return True
         return False
 
@@ -537,6 +557,9 @@ class qbot(qbot_helper):
         
         # execute command
         if self._handle_execute_command(info, bot): return 
+
+        # execute command
+        if self._handle_mcdr_command(info, bot): return 
 
         # reload plugin
         if self._handle_reload_command(server, info, bot): return
