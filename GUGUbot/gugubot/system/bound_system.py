@@ -32,6 +32,7 @@ class bound_system(base_system):
         if admin:
             function_list = [
                 self.help,
+                self.add_whitelist_switch,
                 self.add,
                 self.remove,
                 self.search,
