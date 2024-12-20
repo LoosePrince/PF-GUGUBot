@@ -65,6 +65,7 @@ dict_address: # 储存路径 :: 字体路径，各种数据储存路径
 
 font_limit: 150 # 文字超长转图片 :: 默认大于150字转图片, 设置-1关闭
 max_bound: 1 # 绑定上限 :: 一个玩家可以绑定多少个名称
+random_template: true # 随机发言模板 :: 转发使用随机发言模板，防止风控
 show_message_in_console: true # 展示上报消息
 style: 正常 # 机器人回复风格 :: （可选） #风格 查看风格帮助
 style_cooldown: 0 # 风格切换冷却
