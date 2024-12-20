@@ -11,7 +11,7 @@ gugu_dir = os.path.dirname(__file__)[:-7] # remove \gugubot
 sys.path.append(gugu_dir)  if gugu_dir not in sys.path  else None
 
 from .bot import qbot
-from .utils import get_latest_group_notice, get_style_template
+from .utils import get_latest_group_notice, get_style_template, is_player
 
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.command import *
@@ -95,9 +95,6 @@ def on_info(server:PluginServerInterface, info:Info)->None:
     if not isinstance(qq_bot, qbot):
         return 
 
-    # offline white list    
-    qq_bot.add_offline_whitelist(server, info)
-
     # player list
     while "players online:" in info.content and qq_bot._list_callback:
         func = qq_bot._list_callback.pop()
@@ -120,7 +117,11 @@ def _on_player_join(server:PluginServerInterface, info:Info):
     # 玩家上线通知
     if qq_bot.config["forward"].get("player_notice", False):
         player_name = "[".join(info.content.split(" logged in with entity id")[0].split("[")[:-1])
-        qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player_name))
+
+        if (qq_bot.config['forward'].get("player_notice", False) and is_player(player_name)) or \
+            (qq_bot.config['forward'].get("bot_notice", False) and not is_player(player_name)):
+            
+            qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join', qq_bot.style).format(player_name))
 
     # 玩家上线显示群公告
     if qq_bot.config["forward"].get("show_group_notice", False):
@@ -128,12 +129,14 @@ def _on_player_join(server:PluginServerInterface, info:Info):
         
         latest_notice = get_latest_group_notice(qq_bot, logger=server.logger)
 
-        latest_notice_json = {
-            "text": f"群公告：{latest_notice}",
-            "color": "gray",
-            "italic": False
-        }
-        server.execute(f'tellraw {player_name} {json.dumps(latest_notice_json)}')
+        if latest_notice:
+
+            latest_notice_json = {
+                "text": f"群公告：{latest_notice}",
+                "color": "gray",
+                "italic": False
+            }
+            server.execute(f'tellraw {player_name} {json.dumps(latest_notice_json)}')
 
 def _on_player_left(server:PluginServerInterface, info:Info):
     # 机器人名字更新
@@ -143,7 +146,11 @@ def _on_player_left(server:PluginServerInterface, info:Info):
     # 玩家下线通知
     if qq_bot.config["forward"].get("player_notice", False):
         player_name = info.content.replace("left the game", "").strip()
-        qq_bot.send_msg_to_all_qq(get_style_template('player_notice_leave', qq_bot.style).format(player_name))
+
+        if (qq_bot.config['forward'].get("player_notice", False) and is_player(player_name)) or \
+            (qq_bot.config['forward'].get("bot_notice", False) and not is_player(player_name)):
+
+            qq_bot.send_msg_to_all_qq(get_style_template('player_notice_leave', qq_bot.style).format(player_name))
 
 # mc游戏消息 -> QQ
 def on_user_info(server:PluginServerInterface, info:Info)->None:
@@ -166,8 +173,6 @@ def on_server_startup(server:PluginServerInterface)->None:
         for _, command in qq_bot.start_command.data.items():
             # 执行指令
             server.execute(command)
-        # rcon 启动连接
-        qq_bot._loading_rcon()
 
 # 关服
 def on_server_stop(server: PluginServerInterface, server_return_code: int)->None:
@@ -200,8 +205,8 @@ def temp_update_version(server:PluginServerInterface)->None:
                 server.logger.error(f"Error copying {file}: {str(e)}")
 
     # update user data format
-    from .table import table
-    data = table("./config/GUGUbot/GUGUbot.json")
+    from .config import autoSaveDict
+    data = autoSaveDict("./config/GUGUbot/GUGUbot.json")
     for k, v in data.items():
         if isinstance(v, str):
             data[k] = [v]
