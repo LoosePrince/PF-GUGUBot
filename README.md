@@ -18,25 +18,25 @@
 > [!TIP]
 > [腾讯文档] GUGUbot文档<br>
 > 此文档不再维护详细内容，仅保留必要说明<br>
-> 访问文档查看更详细的说明: https://docs.qq.com/aio/DTFlheGZKY0RvYnRi
+> 访问文档查看更详细的说明: https://docs.qq.com/aio/p/sct29j7ammzw142
 
 ## 腾讯文档快速导航
-### [GUGUbot](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=8zf59bKLGJK66HBlVLjqwJ)
-1. [前置依赖](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=5lMm6oYzWp4nMSHHrcR1DG)
-2. [安装（快速开始）](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=zdYp7EVd2d04QBQ0FrD7sX)
-3. [功能列表](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=kKIaQMdRR7IvJ2AMa30Din)
-    - [自定义说明](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=pEQyDIrFanCo9ErEZZPncf)
-        - [群友提供的风格文件](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=9RglSRIzfpemyJ7gKdYVEM)
-4. [配置](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=iXyl6g1K1p1dK2rujfGH7u)
-5. [贡献](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=OreXhO8piOO7Ak7RnpPCMp)
-6. [疑难解答](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=8kJWVjHPK8Zkujhwd73Zbb)
-### [CQ-QQ-API](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=NJ5GySzVisEJ9xQp7iW8P7)
-1. [快速开始](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=5PaUIBXxTwyMouazErWqIT)
-2. [配置](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=vUShdYdligIgQvmxLZu3s8)
-3. [群友提供的机器人食用指南](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=MgrkYFk9OPpK8wZEY8IeBU)
+### [GUGUbot](https://docs.qq.com/aio/p/sct29j7ammzw142?p=8zf59bKLGJK66HBlVLjqwJ)
+1. [前置依赖](https://docs.qq.com/aio/p/sct29j7ammzw142?p=5lMm6oYzWp4nMSHHrcR1DG)
+2. [安装（快速开始）](https://docs.qq.com/aio/p/sct29j7ammzw142?p=zdYp7EVd2d04QBQ0FrD7sX)
+3. [功能列表](https://docs.qq.com/aio/p/sct29j7ammzw142?p=kKIaQMdRR7IvJ2AMa30Din)
+    - [自定义说明](https://docs.qq.com/aio/p/sct29j7ammzw142?p=pEQyDIrFanCo9ErEZZPncf)
+        - [群友提供的风格文件](https://docs.qq.com/aio/p/sct29j7ammzw142?p=9RglSRIzfpemyJ7gKdYVEM)
+4. [配置](https://docs.qq.com/aio/p/sct29j7ammzw142?p=iXyl6g1K1p1dK2rujfGH7u)
+5. [贡献](https://docs.qq.com/aio/p/sct29j7ammzw142?p=OreXhO8piOO7Ak7RnpPCMp)
+6. [疑难解答](https://docs.qq.com/aio/p/sct29j7ammzw142?p=8kJWVjHPK8Zkujhwd73Zbb)
+### [CQ-QQ-API](https://docs.qq.com/aio/p/sct29j7ammzw142?p=NJ5GySzVisEJ9xQp7iW8P7)
+1. [快速开始](https://docs.qq.com/aio/p/sct29j7ammzw142?p=5PaUIBXxTwyMouazErWqIT)
+2. [配置](https://docs.qq.com/aio/p/sct29j7ammzw142?p=vUShdYdligIgQvmxLZu3s8)
+3. [群友提供的机器人食用指南](https://docs.qq.com/aio/p/sct29j7ammzw142?p=MgrkYFk9OPpK8wZEY8IeBU)
     - 例如：
-4. [开发指南](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=kCIVuht8VcP2vDGLqA9VUW)
-5. [致谢](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=w6BO9iUIonwXPN8xBof94F)
+4. [开发指南](https://docs.qq.com/aio/p/sct29j7ammzw142?p=kCIVuht8VcP2vDGLqA9VUW)
+5. [致谢](https://docs.qq.com/aio/p/sct29j7ammzw142?p=w6BO9iUIonwXPN8xBof94F)
 
 ## 本文档快速导航
 
@@ -109,7 +109,7 @@
 
 #### 详细功能
 
-- [GUGUbot - 功能列表 - 腾讯文档](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=kKIaQMdRR7IvJ2AMa30Din)
+- [GUGUbot - 功能列表 - 腾讯文档](https://docs.qq.com/aio/p/sct29j7ammzw142?p=kKIaQMdRR7IvJ2AMa30Din)
 
 #### 游戏内指令
 
@@ -200,7 +200,7 @@
 - group_id: 聊天转发的群
 
 **QQ相关设置 - 可选项**
-- 请前往：[GUGUbot - 功能列表 - 腾讯文档](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=iXyl6g1K1p1dK2rujfGH7u)
+- 请前往：[GUGUbot - 配置 - 腾讯文档](https://docs.qq.com/aio/p/sct29j7ammzw142?p=iXyl6g1K1p1dK2rujfGH7u)
 
 
 # 有BUG或是新的IDEA
