@@ -309,7 +309,7 @@ class bound_system(base_system):
             and str(info.user_id) not in self \
             and not is_robot(bot, info.source_id, info.user_id):
             if bot.can_send_image(): # check if can send message
-                bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
+                bot.reply(info, f'[CQ:at,qq={info.user_id}][CQ:image,file={Path(self.bot_config["dict_address"]["bound_image_path"]).resolve().as_uri()}]')
             else:
                 bot.reply(info, f'[CQ:at,qq={info.user_id}] 请使用  {command_prefix}绑定 玩家名称  来绑定~')
             return True
