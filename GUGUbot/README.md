@@ -1,6 +1,6 @@
 # PF-QQchat（支持离线服务器）
 
-> PFingan服务器MCDRQQ机器人插件
+> PFingan服务器 MCDR的QQ机器人插件，集QQ群管理和白名单管理一体，添加许多功能。
 
 [![页面浏览量计数](https://badges.toozhao.com/badges/01H98QXADB4DYZBRC2EHSEJ4HW/green.svg)](/) 
 [![查看次数起始时间](https://img.shields.io/badge/查看次数统计起始于-2023%2F9%2F2-1?style=flat-square)](/)
@@ -13,25 +13,55 @@
 
 > [!NOTE]
 > 由于 **GUGUbot** 和 **WebUI** 项目庞大，但迄今为止仅有开发者一名，所以我们从现在开始招募有志者加入我们！<br>
-> 有意者请加 QQ1377820366 或 QQ群726741344
+> 有意者请加 QQ[1377820366](http://wpa.qq.com/msgrd?v=3&uin=1377820366&site=qq&menu=yes) 或 QQ群[726741344](https://qm.qq.com/q/TqmRHmTmcU)
 
 > [!TIP]
-> 【腾讯文档】GUGUbot文档
->
+> [腾讯文档] GUGUbot文档<br>
+> 此文档不再维护详细内容，仅保留必要说明<br>
 > 访问文档查看更详细的说明: https://docs.qq.com/aio/DTFlheGZKY0RvYnRi
 
-## 快速导航
+## 腾讯文档快速导航
+### [GUGUbot](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=8zf59bKLGJK66HBlVLjqwJ)
+1. [前置依赖](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=5lMm6oYzWp4nMSHHrcR1DG)
+2. [安装（快速开始）](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=zdYp7EVd2d04QBQ0FrD7sX)
+3. [功能列表](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=kKIaQMdRR7IvJ2AMa30Din)
+    - [自定义说明](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=pEQyDIrFanCo9ErEZZPncf)
+        - [群友提供的风格文件](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=9RglSRIzfpemyJ7gKdYVEM)
+4. [配置](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=iXyl6g1K1p1dK2rujfGH7u)
+5. [贡献](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=OreXhO8piOO7Ak7RnpPCMp)
+6. [疑难解答](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=8kJWVjHPK8Zkujhwd73Zbb)
+### [CQ-QQ-API](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=NJ5GySzVisEJ9xQp7iW8P7)
+1. [快速开始](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=5PaUIBXxTwyMouazErWqIT)
+2. [配置](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=vUShdYdligIgQvmxLZu3s8)
+3. [群友提供的机器人食用指南](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=MgrkYFk9OPpK8wZEY8IeBU)
+    - 例如：
+4. [开发指南](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=kCIVuht8VcP2vDGLqA9VUW)
+5. [致谢](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=w6BO9iUIonwXPN8xBof94F)
 
-- [依赖配置](#依赖配置)
-- [快速开始](#安装)
-- [功能列表](#功能列表)
-  - [基本功能](#基本功能)
-  - [游戏内指令](#游戏内指令)
-  - [群聊功能](#群聊功能)
-  - [管理功能](#管理功能)
-- [详细配置](#配置)
-  - [前置cq\_qq\_api配置](#前置cq_qq_api配置)
-  - [GUGUbot机器人配置](#gugubot机器人配置)
+## 本文档快速导航
+
+- [PF-QQchat（支持离线服务器）](#pf-qqchat支持离线服务器)
+  - [腾讯文档快速导航](#腾讯文档快速导航)
+    - [GUGUbot](#gugubot)
+    - [CQ-QQ-API](#cq-qq-api)
+  - [本文档快速导航](#本文档快速导航)
+  - [依赖配置](#依赖配置)
+      - [前置插件](#前置插件)
+      - [可选插件](#可选插件)
+  - [安装](#安装)
+      - [MCDR快捷安装:](#mcdr快捷安装)
+      - [github下载安装:](#github下载安装)
+    - [必要配置](#必要配置)
+  - [功能列表](#功能列表)
+      - [基本功能](#基本功能)
+      - [详细功能](#详细功能)
+      - [游戏内指令](#游戏内指令)
+      - [群聊功能](#群聊功能)
+      - [管理功能](#管理功能)
+  - [配置](#配置)
+    - [机器人的必要配置](#机器人的必要配置)
+    - [前置cq\_qq\_api配置](#前置cq_qq_api配置)
+    - [GUGUbot机器人配置](#gugubot机器人配置)
 - [有BUG或是新的IDEA](#有bug或是新的idea)
 - [TODO](#todo)
 - [贡献](#贡献)
@@ -89,6 +119,10 @@
 - **聊天互相转发:** 支持 MCDR 与 QQ 群组/私聊之间的消息互通。
 - **白名单绑定:** 支持在QQ群内进行白名单绑定，退群自动解绑；支持离线服务器或者正版与离线的混合服务器。
 
+#### 详细功能
+
+- [GUGUbot - 功能列表 - 腾讯文档](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=kKIaQMdRR7IvJ2AMa30Din)
+
 #### 游戏内指令
 
 ```
@@ -120,18 +154,6 @@
 #帮助                 -> 查看关键词相关帮助
 ```
 
-<details>
-<summary>机器人回复风格</summary>
-  
-机器人回复风格切换 `#风格`
-```
-#风格 列表   -> 风格列表
-#风格 <风格> -> 切换至指定风格
-```
-内置模式: `正常` `傲娇`
-AI生成后内置的模式: `雌小鬼` `御姐` `萝莉` `波奇酱` `病娇` `中二病`
-
-</details>
 
 #### 管理功能
 
@@ -150,207 +172,7 @@ AI生成后内置的模式: `雌小鬼` `御姐` `萝莉` `波奇酱` `病娇` `
 #重启 -> 重载机器人
 ```
 
-><details>
->  <summary>绑定详细说明</summary>
-> 
->```
->#绑定 列表            -> 查看绑定列表
->#绑定 查询 <QQ号>     -> 查询绑定ID
->#绑定 解绑 <QQ号>     -> 解除绑定
->#绑定 <QQ号> <游戏ID> -> 绑定新ID
->#绑定 清空 -> 清空绑定名单 + 白名单（需二次确认）
->```
-> 记录玩家mc内ID,转发到游戏内会显示绑定时的ID<br>
-> 在群聊中使用 `#绑定 xxx` 来绑定<br>
-> 在管理员/管理群中,可以对玩家绑定进行 增删查改 操作
-> </details>
 
-><details>
->  <summary>白名单详细说明</summary>
-> 
->```
->#白名单 添加 <target> -> 添加白名单成员
->#白名单 列表 -> 列出白名单成员
->#白名单 关   -> 关闭白名单
->#白名单 开   -> 开启白名单
->#白名单 重载 -> 重载白名单
->#白名单 删除 <target> -> 删除白名单成员 <target> 可以是玩家名/目标选择器/UUID
->```
-> 管理员权限专属,可以通过此功能 增删查改 服务器白名单
-> </details>
-
-><details>
->  <summary>启动指令详细说明</summary>
-> 
->```
->#启动指令 添加 <名称> <指令> -> 添加启动指令
->#启动指令 删除 <名称>        -> 删除指定启动指令
->#启动指令 列表 -> 查看现有启动指令
->#启动指令 开   -> 开启开服指令
->#启动指令 关   -> 关闭开服指令
->#启动指令 执行 -> 执行一遍开服指令
->#启动指令 重载 -> 重载开服指令
->```
-> 有些指令想服务器启动时自动执行? 添加启动指令!<br>
-> 机器人会在服务器启动时,自动指令添加的指令.<br>
-> 或许会有意想不到的效果捏
-> </details>
-
-><details>
->  <summary>违禁词详细说明</summary>
-> 
->```
->#违禁词 添加 <违禁词> <违禁理由> -> 添加违禁词
->#违禁词 列表 -> 显示违禁词列表及理由
->#违禁词 删除 <违禁词> -> 删除指定违禁词
->#违禁词 开   -> 开启违禁词
->#违禁词 关   -> 关闭违禁词
->#违禁词 重载 -> 重载违禁词
->```
-> 熊孩子多?容易吵架?腐竹天天被催女装?<br>
-> 聊天中出现违禁词(句中一部分也算),机器人自动撤回 + 提示<br>
-> 注: 需要机器人有群管理员权限
-> </details>
-
-><details>
->  <summary>关键词详细说明</summary>
-> 
->```
->#关键词 开   -> 开启关键词
->#关键词 关   -> 关闭关键词
->#关键词 重载 -> 重载关键词
->#关键词 列表 -> 显示关键词列表
->#添加 <关键词> <回复> -> 添加关键词
->#删除 <关键词> -> 删除指定关键词
->```
-> 想要复读机?关键信息记录(服务器种子)?<br>
-> 添加关键词! 发送绑定的关键词就会回复记录的内容.<br>
-> 支持图片,请使用 `#添加图片 <关键词>` 进行添加
-> </details>
-
-><details>
->  <summary>游戏内关键词详细说明</summary>
-> 
->```
->#游戏关键词 开   -> 开启游戏内关键词
->#游戏关键词 关   -> 关闭游戏内关键词
->#游戏关键词 重载 -> 重载游戏内关键词
->#游戏关键词 列表 -> 显示游戏内关键词列表
->#游戏关键词添加 <关键词> <回复> -> 添加游戏内关键词
->#游戏关键词删除 <关键词> -> 删除指定游戏内关键词
->```
-> MC游戏内可触发的关键词<br>
-> 记录坐标小帮手
-> </details>
-
-><details>
->  <summary>风格详细说明</summary>
-> 
->```
->#风格        -> 风格帮助
->#风格 列表   -> 风格列表
->#风格 <风格> -> 切换至指定风格
->```
-> 机器人回复风格<br>
-> 可以给机器人换一个性格
->
-> 支持自定义风格:
-> * 在`./config/GUGUbot/` 中创建 `extra_style.json`
-> * 在`./config/GUGUbot/config.yml` 中设定上一步的路径 `extra_style_path`
-> * 重载gugubot `!!MCDR plugin reload gugubot`
-> 开始切换叭!
->
-> <details>
->  <summary>自定义说明</summary>
->
->  **{} 的数量需要一致**
->
->  **缺少的回复会自动使用正常格式回复**
-> ```  
->{
->  '正常' : {
->    'add_cancel': '图片保存已取消',
->    'add_existed': '已存在该关键词~',
->    'add_image_instruction': '请发送要添加的图片~',
->    'add_image_fail': '图片保存失败~',
->    'add_image_previous_no_done': '上一个关键词还未绑定，添加哒咩！',
->    'add_success':'添加成功！',
->    'authorization_pass': '已通过{}的申请awa',
->    'authorization_reject': '已拒绝{}的申请awa',
->    'authorization_request': '{} 申请进群, 请审核',
->    'ban_word_find':'回复包含违禁词请修改后重发，维护和谐游戏人人有责。\n违禁理由: {}',
->    'bound_add_whitelist': '已将您添加到服务器白名单',
->    'bound_exist': '您已绑定ID: {}, 请联系管理员修改',
->    'bound_success': '已成功绑定',
->    'command_success' : '指令执行成功',
->    'delete_success':'删除成功！',
->    'del_no_exist': '该关键词不存在',
->    'del_whitelist_when_quit': '{}已退群，白名单同步删除',
->    'key_word_exist': '已有指定关键词,请删除(#删除 <关键词>)后重试 awa',
->    'lack_parameter': '缺少参数，请参考 #帮助 里的说明',
->    'list': '列表如下: \n{}',
->    'no_player_ingame': f"现在没人游玩服务器",
->    'no_word': '列表空空的',
->    'player_api_fail': '未能捕获服务器日志（推荐开启rcon精准获取玩家信息）',
->    'player_list':'在线玩家共{}人，{}列表: {}',
->    'player_notice_join': '{} 加入了游戏',
->    'player_notice_leave': '{} 离开了游戏',
->    'reload_success': '重载成功',
->    'server_start':'服务器已启动',
->    'server_stop': '服务器已关闭'
->  }
->}
-> ```
-> </details>
-> </details>
-
-><details>
->  <summary>uuid匹配详细说明</summary>
-> 
->```
->#uuid        -> 查看uuid相关帮助
->#uuid 列表   -> 查看uuid绑定表
->#uuid 重载 -> 重新匹配uuid
->#uuid 更新 <老ID> <新ID> -> 改白名单的名字
->```
-> 在白名单开启时,自动使用更新的mc名称进行转发
-> </details>
-
-><details>
->  <summary>机器人名字详细说明</summary>
-> 
->```
->#名字 -> 查看名字相关帮助
->#名字 开 -> 机器人名字显示为在线人数
->#名字 关 -> 机器人名字为特殊空白名字
->```
-> 机器人群内名字自动显示服务器内人数<br>
-> 仅限单服使用,多服会随机显示其中一个服务器的人数
-> </details>
-
-><details>
->  <summary>审核名单详细说明</summary>
-> 
->```
->#审核 开 -> 开启自动审核
->#审核 关 -> 关闭自动审核
->#审核 添加 <QQ号> <别名> -> 添加审核员的别名(匹配用)
->#审核 删除 <QQ号> -> 删除审核员
->#审核 列表 -> 审核员列表
->```
-> 具体功能效果自行测试(才不是咕咕咕)
-> </details>
-
-><details>
->  <summary>指令详细说明</summary>
-> 
->```
->#指令 <command> -> 执行指令
->```
-> 执行服务器指令<br>
-> 在私聊或者管理群中使用 `#指令 <command>` 来执行<br>
-> 机器人会返回执行结果
-> </details>
 
 
 ## 配置
@@ -390,80 +212,7 @@ AI生成后内置的模式: `雌小鬼` `御姐` `萝莉` `波奇酱` `病娇` `
 - group_id: 聊天转发的群
 
 **QQ相关设置 - 可选项**
-><details>
-> <summary>QQ相关设置</summary>
->
->- admin_group_id: 管理群群号,群内所有人都有管理权限(仅限该群内)
->- is_main_server: 是否为主服务器,分服请设置成`false`
->- server_name: 服务器名称前缀, mc转发到QQ时显示
->
-></details>
-
-><details>
-> <summary>指令开关</summary>
->
->- bound_notice: 是否进行绑定提示
->- ban_word: 违禁词撤回开关
->- execute_command: 执行指令开关
->- group_admin: 群指令（只能被咱们的管理员执行）
->- ingame_key_word: 游戏内关键词开关
->- key_word: 群聊关键词开关
->- list: 玩家列表查询开关
->- mc: #mc指令开关(非转发开关)
->- name: 机器人名字显示为服务器在线人数开关
->- qq: !!qq指令开关(非转发开关)
->- shenhe: 审核功能开关(咕咕咕)
->- start_command: 启动指令系统开关
->- whitelist: 白名单开关
-></details>
-
-><details>
-> <summary>转发设置</summary>
->
->- farward_other_bot: 转发官方机器人回复
->- keep_raw_image_link: 转发图片链接(适用于ChatImage)
->- mc_to_qq: MC转发到QQ开关
->- mc_to_qq_command: 服务器指令(!!/@)转发到QQ
->- player_notice: 玩家上下线通知
->- qq_to_mc: QQ转发到mc开关
->- show_group_notice: 上线显示最新群公告
->
-></details>
-
-><details>
-> <summary>路径</summary>
->
->- command_prefix: 群聊指令前缀识别
->
-> **在dict_address底下**
-> **都是路径,不要跟上面的搞混了**
-> 
->- ban_word_dict: 违禁词储存路径
->- bound_image_path: 绑定图片储存路径
->- extra_style_path: 自定义风格储存路径
->- font_path: 字体储存路径
->- key_word_dict: 群聊关键词储存路径
->- key_word_ingame_dict: 游戏内关键词储存路径
->- shenhe_log: 审核日志储存路径
->- shenheman: 审核管理员储存路径
->- start_command_dict: 启动指令储存路径
->- uuid_qqid: uuid储存路径
->- whitelist: 服务器白名单路径
->
-></details>
-
-><details>
-> <summary>其他设置</summary>
->
->- font_limit: 文字超长转图片 （默认大于150字转图片, 设置-1关闭）
->- max_bound: 一个玩家可以绑定多少个名称
->- show_message_in_console: 展示上报消息
->- style: （可选）机器人回复风格 #风格 查看风格帮助
->- style_cooldown: 风格切换冷却(单位: 秒)
->- whitelist_add_with_bound: 绑定时是否自动添加白名单
->- whitelist_remove_with_leave: 退群时是否自动移除白名单
->
-></details>
+- 请前往：[GUGUbot - 功能列表 - 腾讯文档](https://docs.qq.com/aio/DTFlheGZKY0RvYnRi?p=iXyl6g1K1p1dK2rujfGH7u)
 
 
 # 有BUG或是新的IDEA
