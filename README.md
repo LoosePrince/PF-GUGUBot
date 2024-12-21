@@ -17,8 +17,8 @@
 
 > [!TIP]
 > [腾讯文档] GUGUbot文档<br>
-> 此文档不再维护详细内容，仅保留必要说明<br>
-> 访问文档查看更详细的说明: https://docs.qq.com/aio/p/sct29j7ammzw142
+> 此Github文档不再维护详细内容，仅保留必要说明<br>
+> 访问腾讯文档查看更详细的说明: https://docs.qq.com/aio/p/sct29j7ammzw142
 
 ## 腾讯文档快速导航
 ### [GUGUbot](https://docs.qq.com/aio/p/sct29j7ammzw142?p=8zf59bKLGJK66HBlVLjqwJ)
