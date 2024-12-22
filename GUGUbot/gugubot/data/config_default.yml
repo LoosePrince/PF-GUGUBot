@@ -33,7 +33,7 @@ command: # 指令相关
   whitelist: true # 白名单功能
 
 forward: # 转发设置
-  farward_other_bot: false # 转发官方机器人回复
+  forward_other_bot: false # 转发官方机器人回复
   keep_raw_image_link: false # 转发图片链接
   mc_to_qq: true # 服务器往QQ群转发
   mc_to_qq_command: false # 服务器指令转发
