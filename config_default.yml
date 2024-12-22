@@ -10,6 +10,7 @@ admin_group_id: # 管理群群号 :: (可选)群内所有成员拥有管理权�
 group_id: # qq群号 :: 要监听，转发的qq群号
 - 1234561 
 
+friend_is_admin: false # 好友即是管理 :: 开放管理权限给机器人好友
 is_main_server: true # 主服务器 :: 机器人群指令等功能开启
 server_name: "" # 服务器名字 :: （可选）会在转发前面显示服务器名字
 
@@ -32,7 +33,7 @@ command: # 指令相关
   whitelist: true # 白名单功能
 
 forward: # 转发设置
-  farward_other_bot: false # 转发官方机器人回复
+  forward_other_bot: false # 转发官方机器人回复
   keep_raw_image_link: false # 转发图片链接
   mc_to_qq: true # 服务器往QQ群转发
   mc_to_qq_command: false # 服务器指令转发
@@ -50,6 +51,7 @@ command_prefix: "#" # 命令前缀
 dict_address: # 储存路径 :: 字体路径，各种数据储存路径
   ban_word_dict: .//config//GUGUbot//ban_word.json # 违禁词
   bound_image_path: .//config//GUGUbot//bound.jpg # 绑定提示图
+  customized_help_path: .//config//GUGUbot//help_msg.json # 自定义帮助信息
   extra_style_path: "" # 自定义风格文件
   font_path: ./config/GUGUbot/font/MicrosoftYaHei-01.ttf # 字体路径
   key_word_dict: .//config//GUGUbot//key_word.json # 关键词
