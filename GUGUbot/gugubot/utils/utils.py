@@ -38,9 +38,12 @@ def is_valid_message(info, bot, config):
     return all(condition)
 
 def is_valid_command_source(info, config) -> bool:
-    return (info.source_id in config.get('group_id', []) or
-            (config.get('admin_group_id') and info.source_id in config.get('admin_group_id')) or
-            info.source_id in config.get('admin_id', [])) 
+    return any([
+        info.source_id in config.get('group_id', []),
+        (config.get('admin_group_id') and info.source_id in config.get('admin_group_id')),
+        info.source_id in config.get('admin_id', []),
+        (config.get("friend_is_admin", False) and info.sub_type == "private")
+    ])
 
 # 判断是否是机器人
 def is_robot(bot, group_id, user_id)->bool:
