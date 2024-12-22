@@ -33,14 +33,17 @@ def is_valid_message(info, bot, config):
         not info.content.startswith(config['command_prefix']),        # 不是指令
         info.source_id in config.get('group_id', []),                 # 是指定群消息
         not is_robot(bot, info.source_id, info.user_id)               # 不是机器人  
-            or config['forward'].get('farward_other_bot', False)      # 是机器人 + 转发机器人
+            or config['forward'].get('forward_other_bot', False)      # 是机器人 + 转发机器人
     ]
     return all(condition)
 
 def is_valid_command_source(info, config) -> bool:
-    return (info.source_id in config.get('group_id', []) or
-            (config.get('admin_group_id') and info.source_id in config.get('admin_group_id')) or
-            info.source_id in config.get('admin_id', [])) 
+    return any([
+        info.source_id in config.get('group_id', []),
+        (config.get('admin_group_id') and info.source_id in config.get('admin_group_id')),
+        info.source_id in config.get('admin_id', []),
+        (config.get("friend_is_admin", False) and info.sub_type == "private")
+    ])
 
 # 判断是否是机器人
 def is_robot(bot, group_id, user_id)->bool:
@@ -63,6 +66,17 @@ def get_latest_group_notice(qq_bot, logger):
     latest_notice_text = latest_notice['message']['text']
 
     return latest_notice_text
+
+def get_group_name(bot, group_id_list:list)->dict:
+    group_name_dict = {}
+
+    for group_id in group_id_list:
+        respond = bot.get_group_info(group_id)
+        
+        group_name_dict[group_id] = respond["data"]["group_name"] if respond else "QQ"
+    
+    return group_name_dict
+    
 
 #==================================================================#
 #                      text2image Helper                           #

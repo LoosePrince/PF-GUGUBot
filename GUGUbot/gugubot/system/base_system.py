@@ -97,7 +97,8 @@ class base_system(object):
             return True
 
         help_msg = self.admin_help_msg if admin else self.help_msg
-        bot.reply(info, help_msg)
+        command_prefix = self.bot_config.get("command_prefix", "#")
+        bot.reply(info, help_msg.replace("#", command_prefix))
 
 
     def add(self, parameter, info, bot, reply_style, admin:bool)->bool:
