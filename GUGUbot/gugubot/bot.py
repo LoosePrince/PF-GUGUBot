@@ -1,18 +1,14 @@
 ﻿# -*- coding: utf-8 -*-
 #+----------------------------------------------------------------------+
-import json
-import os
 import random
 import re
 import time
 
-from collections import defaultdict
 from pathlib import Path
 
 import pygame
 
 from mcdreforged.api.types import PluginServerInterface, Info
-from mcdreforged.minecraft.rcon.rcon_connection import RconConnection
 from ruamel.yaml import YAML
 
 from .data.text import (
@@ -67,6 +63,7 @@ class qbot_helper:
 
         pygame.init()              # for text to image
         self.__loading_systems()      # read data for qqbot functions
+        self.customize_help()      # loading customized help msg
 
         # init params
         self.member_dict = None
@@ -87,6 +84,20 @@ class qbot_helper:
         self.shenheman = shenhe_system(self.config["dict_address"]['shenheman'], self.server, self.config) # 群审核人员
         self.uuid_qqid = uuid_system(self.config["dict_address"]['uuid_qqid'], self.server, self.config, self.data, self.whitelist) # uuid - qqid 表
         self.rcon = rcon_connector(self.server) # connecting the rcon
+
+    def customize_help(self)->None:
+        """ Read customized_help """
+        global admin_help_msg, group_help_msg
+        content = {
+            "admin_help_msg": admin_help_msg,
+            "group_help_msg": group_help_msg,
+            "A": "\n是换行的意思（没办法解析成多行，不便之处，敬请谅解！）",
+            "w": "#开头不用换, 机器人会自动转成指定的前缀"
+        }
+        temp = autoSaveDict(self.config["dict_address"].get('customized_help_path', "./config/GUGUbot/help_msg.json"),
+                            default_content=content)
+        admin_help_msg = temp.get("admin_help_msg", admin_help_msg)
+        group_help_msg = temp.get("admin_help_msg", group_help_msg)
 
     #===================================================================#
     #                        Helper functions                           #
@@ -297,7 +308,7 @@ class qbot_helper:
     def _handle_style_command(self, info, bot, command):
         style = get_style()
         if len(command) == 1:
-            bot.reply(info, style_help)
+            bot.reply(info, style_help.replace("#", self.config["command_prefix"]))
         elif command[1] == '列表':
             bot.reply(info, "现有如下风格：\n" + '\n'.join(style.keys()))
         elif command[1] in style:
@@ -327,10 +338,10 @@ class qbot_helper:
     #===================================================================#
 
     def _handle_name_command(self, server, info, bot, command):
-        if info.content.startswith(f"{self.config['command_prefix']}名字"):
-
-            if info.content == f"{self.config['command_prefix']}名字":
-                bot.reply(info, name_help)
+        command_prefix = self.config['command_prefix']
+        if info.content.startswith(f"{command_prefix}名字"):
+            if info.content == f"{command_prefix}名字":
+                bot.reply(info, name_help.replace("#", command_prefix))
 
             elif len(command)>1 and command[1] == '开':
                 self.config['command']['name'] = True
@@ -534,8 +545,9 @@ class qbot(qbot_helper):
     # 管理员指令
     def private_command(self, server, info, bot, command:list):
         # 全部帮助菜单
-        if info.content == f"{self.config['command_prefix']}帮助":
-            bot.reply(info, admin_help_msg)
+        command_prefix = self.config['command_prefix']
+        if info.content == f"{command_prefix}帮助":
+            bot.reply(info, admin_help_msg.replace("#", command_prefix))
 
         raw_command = info.content
         admin = True
@@ -571,8 +583,9 @@ class qbot(qbot_helper):
 
     # group command
     def group_command(self, server, info, bot, command: list):
-        if info.content == f"{self.config['command_prefix']}帮助":  # 群帮助
-            bot.reply(info, group_help_msg)
+        command_prefix = self.config['command_prefix']
+        if info.content == f"{command_prefix}帮助":  # 群帮助
+            bot.reply(info, group_help_msg.replace("#", command_prefix))
 
         elif self.config['command']['mc'] and command[0] == 'mc':   # qq发送到游戏内消息
             self._handle_mc_command(server, info, bot)

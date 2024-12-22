@@ -51,6 +51,7 @@ command_prefix: "#" # 命令前缀
 dict_address: # 储存路径 :: 字体路径，各种数据储存路径
   ban_word_dict: .//config//GUGUbot//ban_word.json # 违禁词
   bound_image_path: .//config//GUGUbot//bound.jpg # 绑定提示图
+  customized_help_path: .//config//GUGUbot//help_msg.json # 自定义帮助信息
   extra_style_path: "" # 自定义风格文件
   font_path: ./config/GUGUbot/font/MicrosoftYaHei-01.ttf # 字体路径
   key_word_dict: .//config//GUGUbot//key_word.json # 关键词
