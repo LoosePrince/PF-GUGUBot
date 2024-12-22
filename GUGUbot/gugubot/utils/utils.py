@@ -67,6 +67,17 @@ def get_latest_group_notice(qq_bot, logger):
 
     return latest_notice_text
 
+def get_group_name(bot, group_id_list:list)->dict:
+    group_name_dict = {}
+
+    for group_id in group_id_list:
+        respond = bot.get_group_info(group_id)
+        
+        group_name_dict[group_id] = respond["data"]["group_name"] if respond else "QQ"
+    
+    return group_name_dict
+    
+
 #==================================================================#
 #                      text2image Helper                           #
 #==================================================================#

@@ -67,9 +67,10 @@ class qbot_helper:
 
         # init params
         self.member_dict = None
-        self.suggestion = self._ingame_at_suggestion()
-        self._list_callback = [] # used for list & qqbot's name function
         self.last_style_change = 0
+        self._list_callback = [] # used for list & qqbot's name function
+        self.suggestion = self._ingame_at_suggestion()
+        self.group_name = get_group_name(bot, self.config['group_id'])
 
     def __loading_systems(self) -> None:
         """ Loading the data for qqbot functions """
@@ -140,10 +141,11 @@ class qbot_helper:
             if response:
                 server.say(f'§a[机器人] §f{response}')
 
-    def _forward_message_to_game(self, server, info, bot, message):
+    def _forward_message_to_game(self, server:PluginServerInterface, info, bot, message):
         sender = self._find_game_name(str(info.user_id), bot, str(info.source_id))
         message = beautify_message(message, self.config.get('forward', {}).get('keep_raw_image_link', False))
-        server.say(f'§6[QQ] §a[{sender}] §f{message}')
+        command = f'/tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender}]","color":"green"}},{{"text":" {message}","color":"white"}}]'
+        server.execute(command)
 
     def set_number_as_name(self, server:PluginServerInterface)->None:
         """
@@ -216,7 +218,7 @@ class qbot_helper:
         
         return self._find_game_name(qq_id, bot, group_id)
 
-    def _handle_at(self, server, info, bot):
+    def _handle_at(self, server:PluginServerInterface, info, bot):
         sender = self._find_game_name(str(info.user_id), bot, str(info.source_id))
         if 'CQ:at' in info.raw_message or 'CQ:reply' in info.raw_message:
             # reply message -> get previous message id -> get previous sender name(receiver)
@@ -225,17 +227,19 @@ class qbot_helper:
                 previous_message = bot.get_msg(previous_message_id.group(1))['data']
                 receiver = self._get_previous_sender_name(str(previous_message['sender']['user_id']), str(info.source_id), bot, previous_message['message'])
                 forward_content = re.search(r'\[CQ:reply,id=-?\d+.*?\](?:\[@\d+[^\]]*?\])?(.*)', info.content).group(1).strip()
-                server.say(f'§6[QQ] §a[{sender}] §b[@{receiver}] §f{forward_content}')
+                command = f'/tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender}]","color":"green"}},{{"text":" [@{receiver}]","color":"aqua"}},{{"text":" {forward_content}","color":"white"}}]'
+                server.execute(command)
                 
             # @ only -> substitute all the @123 to @player_name 
             else:
                 at_pattern = r"\[@(\d+).*?\]|\[CQ:at,qq=(\d+).*?\]"
                 forward_content = re.sub(
                     at_pattern, 
-                    lambda id: f"§b[@{self._find_game_name(str(id.group(1) or id.group(2)), bot, str(info.source_id))}]", 
+                    lambda id: f'","color":"white"}},{{"text":" [@{self._find_game_name(str(id.group(1) or id.group(2)), bot, str(info.source_id))}] ","color":"aqua"}},{{"text":"', 
                     info.content
                 )
-                server.say(f'§6[QQ] §a[{sender}] §f{forward_content}')
+                command = f'/tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender}]","color":"green"}},{{"text":" {forward_content}","color":"white"}}]'
+                server.execute(command)
             return True
         return False
 
@@ -245,7 +249,8 @@ class qbot_helper:
             sender_name = self._find_game_name(str(info.user_id), bot, info.source_id)
 
             if is_forward_to_mc:
-                server.say(f'§6[QQ] §a[{sender_name}] §f{info.content}')
+                command = f'/tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender_name}]","color":"green"}},{{"text":" {info.content}","color":"white"}}]'
+                server.execute(command)
 
             key_word_reply = self.key_word[info.content]
             bot.reply(info, key_word_reply)
@@ -255,7 +260,8 @@ class qbot_helper:
                 if key_word_reply.startswith('[CQ:image'):
                     key_word_reply = beautify_message(key_word_reply, self.config.get('forward', {}).get('keep_raw_image_link', False))
                     
-                server.say(f'§6[QQ] §a[机器人] §f{key_word_reply}')
+                command = f'/tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[机器人]","color":"green"}},{{"text":" {key_word_reply}","color":"white"}}]'
+                server.execute(command)
 
             return True
         return False
@@ -604,7 +610,7 @@ class qbot(qbot_helper):
 
     # 进群处理
     @addTextToImage
-    def on_qq_request(self, server, info, bot):
+    def on_qq_request(self, server:PluginServerInterface, info, bot):
         server.logger.debug(f"收到上报请求：{info}")
         if info.request_type == "group" \
             and info.group_id in self.config.get("group_id", []) \
@@ -615,7 +621,8 @@ class qbot(qbot_helper):
             at_id = self.shenheman.get_id(info.comment, list(self.shenheman.keys())[0])
             # 通知
             bot.reply(info, f"[CQ:at,qq={at_id}] {get_style_template('authorization_request', self.style).format(stranger_name)}")
-            server.say(f'§6[QQ] §b[@{at_id}] {get_style_template("authorization_request", self.style).format("§f" + stranger_name)}')
+            command = f'/tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[@{at_id}]","color":"aqua"}},{{"text":" {get_style_template("authorization_request", self.style).format(stranger_name)}","color":"white"}}]'
+            server.execute(command)
             self.shenheman.review_queue[at_id].append((stranger_name, info.flag, info.request_type))
 
     #===================================================================#
