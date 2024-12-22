@@ -12,6 +12,8 @@ class rcon_connector:
         self.server = server
         self.rcon = None 
 
+        self.connect()
+
     def connect(self):
         """ connecting the rcon server for command execution """
         self.rcon = None
