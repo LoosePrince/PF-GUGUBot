@@ -144,7 +144,7 @@ class qbot_helper:
     def _forward_message_to_game(self, server:PluginServerInterface, info, bot, message):
         sender = self._find_game_name(str(info.user_id), bot, str(info.source_id))
         message = beautify_message(message, self.config.get('forward', {}).get('keep_raw_image_link', False))
-        command = f'/tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender}]","color":"green"}},{{"text":" {message}","color":"white"}}]'
+        command = f'tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender}]","color":"green"}},{{"text":" {message}","color":"white"}}]'
         server.execute(command)
 
     def set_number_as_name(self, server:PluginServerInterface)->None:
