@@ -179,7 +179,7 @@ class qbot_helper:
 
     # 通过QQ号找到绑定的游戏ID
     def _find_game_name(self, qq_id: str, bot, group_id: str = None) -> str:
-        group_id = group_id if group_id in self.config.get('group_id', []) else self.config.get('group_id', [])[0]
+        group_id = group_id if int(group_id) in self.config.get('group_id', []) else self.config.get('group_id', [])[0]
         
         # 启用白名单，返回绑定的游戏ID
         if self.config['command']['whitelist']: 
