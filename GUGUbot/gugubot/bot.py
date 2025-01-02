@@ -206,6 +206,10 @@ class qbot_helper:
             if self.server_name:
                 previous_message_content = previous_message_content.replace(f"|{self.server_name}| ", "", 1)
 
+            if isinstance(previous_message_content, list):
+                self.server.logger.warning("请检查QQ机器人消息格式! 需要: CQ码 或 text")
+                return qq_id
+
             # find player name
             pattern = r"^\((.*?)\)|^\[(.*?)\]|^(.*?) 说：|^(.*?) : |^冒着爱心眼的(.*?)说："
             match = re.search(pattern, previous_message_content)
