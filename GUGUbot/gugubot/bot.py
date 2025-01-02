@@ -618,7 +618,8 @@ class qbot(qbot_helper):
         server.logger.debug(f"收到上报请求：{info}")
         if info.request_type == "group" \
             and info.group_id in self.config.get("group_id", []) \
-            and self.config["command"]["shenhe"]:
+            and self.config["command"]["shenhe"] \
+            and self.shenheman.data:
             # 获取名称
             stranger_name = bot.get_stranger_info(info.user_id)["data"]["nickname"]
             # 审核人
