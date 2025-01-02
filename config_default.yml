@@ -28,7 +28,7 @@ command: # 指令相关
   mc: true # 获取服务器内聊天内容
   name: true # 机器人昵称
   qq: true # 获取QQ聊天内容
-  shenhe: true # 辅助审核功能 :: 开发中
+  shenhe: false # 辅助审核功能 :: 开发中
   start_command: true # 开服指令
   whitelist: true # 白名单功能
 
