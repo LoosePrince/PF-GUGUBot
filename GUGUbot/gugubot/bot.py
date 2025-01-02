@@ -144,7 +144,7 @@ class qbot_helper:
     def _forward_message_to_game(self, server:PluginServerInterface, info, bot, message):
         sender = self._find_game_name(str(info.user_id), bot, str(info.source_id))
         message = beautify_message(message, self.config.get('forward', {}).get('keep_raw_image_link', False))
-        command = f'tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender}]","color":"green"}},{{"text":" {message}","color":"white"}}]'
+        command = f'''tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender}]","color":"green"}},{{"text":" {repr(message)}","color":"white"}}]'''
         server.execute(command)
 
     def set_number_as_name(self, server:PluginServerInterface)->None:
@@ -227,7 +227,7 @@ class qbot_helper:
                 previous_message = bot.get_msg(previous_message_id.group(1))['data']
                 receiver = self._get_previous_sender_name(str(previous_message['sender']['user_id']), str(info.source_id), bot, previous_message['message'])
                 forward_content = re.search(r'\[CQ:reply,id=-?\d+.*?\](?:\[@\d+[^\]]*?\])?(.*)', info.content).group(1).strip()
-                command = f'tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender}]","color":"green"}},{{"text":" [@{receiver}]","color":"aqua"}},{{"text":" {forward_content}","color":"white"}}]'
+                command = f'''tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender}]","color":"green"}},{{"text":" [@{receiver}]","color":"aqua"}},{{"text":" {repr(forward_content)}","color":"white"}}]'''
                 server.execute(command)
                 
             # @ only -> substitute all the @123 to @player_name 
@@ -238,7 +238,7 @@ class qbot_helper:
                     lambda id: f'","color":"white"}},{{"text":" [@{self._find_game_name(str(id.group(1) or id.group(2)), bot, str(info.source_id))}] ","color":"aqua"}},{{"text":"', 
                     info.content
                 )
-                command = f'tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender}]","color":"green"}},{{"text":" {forward_content}","color":"white"}}]'
+                command = f'''tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender}]","color":"green"}},{{"text":" {repr(forward_content)}","color":"white"}}]'''
                 server.execute(command)
             return True
         return False
@@ -249,7 +249,7 @@ class qbot_helper:
             sender_name = self._find_game_name(str(info.user_id), bot, info.source_id)
 
             if is_forward_to_mc:
-                command = f'tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender_name}]","color":"green"}},{{"text":" {info.content}","color":"white"}}]'
+                command = f'''tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender_name}]","color":"green"}},{{"text":" {repr(info.content)}","color":"white"}}]'''
                 server.execute(command)
 
             key_word_reply = self.key_word[info.content]
@@ -260,7 +260,7 @@ class qbot_helper:
                 if key_word_reply.startswith('[CQ:image'):
                     key_word_reply = beautify_message(key_word_reply, self.config.get('forward', {}).get('keep_raw_image_link', False))
                     
-                command = f'tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[机器人]","color":"green"}},{{"text":" {key_word_reply}","color":"white"}}]'
+                command = f'''tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[机器人]","color":"green"}},{{"text":" {repr(key_word_reply)}","color":"white"}}]'''
                 server.execute(command)
 
             return True
@@ -621,7 +621,7 @@ class qbot(qbot_helper):
             at_id = self.shenheman.get_id(info.comment, list(self.shenheman.keys())[0])
             # 通知
             bot.reply(info, f"[CQ:at,qq={at_id}] {get_style_template('authorization_request', self.style).format(stranger_name)}")
-            command = f'tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[@{at_id}]","color":"aqua"}},{{"text":" {get_style_template("authorization_request", self.style).format(stranger_name)}","color":"white"}}]'
+            command = f'''tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[@{at_id}]","color":"aqua"}},{{"text":" {get_style_template("authorization_request", self.style).format(stranger_name)}","color":"white"}}]'''
             server.execute(command)
             self.shenheman.review_queue[at_id].append((stranger_name, info.flag, info.request_type))
 
