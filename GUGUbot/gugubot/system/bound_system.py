@@ -36,6 +36,7 @@ class bound_system(base_system):
                 self.add,
                 self.remove,
                 self.search,
+                self.sync_whitelist,
                 self.show_list,
                 self.reload,
                 self.clean
@@ -230,6 +231,26 @@ class bound_system(base_system):
             return
 
         bot.reply(info, f'{word} 未绑定')
+
+
+    def sync_whitelist(self, parameter, info, bot, reply_style, admin):
+        """Search the bound record
+
+        Args:
+            parameter (list[str]): command parameters
+            info: message info 
+            bot: qqbot
+            reply_style (str): reply template style
+            admin (bool): Admin mode
+        """
+        # command: sync_whitelist
+        if parameter[0] not in ['白名单同步','sync_whitelist']:
+            return True
+
+        for game_name in self.values():
+            self.whitelist.add_player(game_name)
+        
+        bot.reply(info, "白名单同步完成！")
     
 
     def show_list(self, parameter, info, bot, reply_style, admin):
