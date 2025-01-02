@@ -34,7 +34,8 @@
 1. [快速开始](https://docs.qq.com/aio/p/sct29j7ammzw142?p=5PaUIBXxTwyMouazErWqIT)
 2. [配置](https://docs.qq.com/aio/p/sct29j7ammzw142?p=vUShdYdligIgQvmxLZu3s8)
 3. [群友提供的机器人食用指南](https://docs.qq.com/aio/p/sct29j7ammzw142?p=MgrkYFk9OPpK8wZEY8IeBU)
-    - 例如：
+    - [LiteLoaderQQNT + LLOneBot](https://docs.qq.com/aio/p/sct29j7ammzw142?p=uFoW8O80TsvZ1ccJB7Wxum)
+    - [NapCat](https://docs.qq.com/aio/p/sct29j7ammzw142?p=UggIX3zxZcpl4PamYNA1Nd)
 4. [开发指南](https://docs.qq.com/aio/p/sct29j7ammzw142?p=kCIVuht8VcP2vDGLqA9VUW)
 5. [致谢](https://docs.qq.com/aio/p/sct29j7ammzw142?p=w6BO9iUIonwXPN8xBof94F)
 
