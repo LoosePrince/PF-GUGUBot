@@ -144,7 +144,7 @@ class qbot_helper:
     def _forward_message_to_game(self, server:PluginServerInterface, info, bot, message):
         sender = self._find_game_name(str(info.user_id), bot, str(info.source_id))
         message = beautify_message(message, self.config.get('forward', {}).get('keep_raw_image_link', False))
-        command = f'tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender}]","color":"green"}},{{"text":" {message}","color":"white"}}]'
+        command = f'''tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender}]","color":"green"}},{{"text":" {repr(message)}","color":"white"}}]'''
         server.execute(command)
 
     def set_number_as_name(self, server:PluginServerInterface)->None:
@@ -179,7 +179,7 @@ class qbot_helper:
 
     # 通过QQ号找到绑定的游戏ID
     def _find_game_name(self, qq_id: str, bot, group_id: str = None) -> str:
-        group_id = group_id if group_id in self.config.get('group_id', []) else self.config.get('group_id', [])[0]
+        group_id = group_id if int(group_id) in self.config.get('group_id', []) else self.config.get('group_id', [])[0]
         
         # 启用白名单，返回绑定的游戏ID
         if self.config['command']['whitelist']: 
@@ -206,6 +206,10 @@ class qbot_helper:
             if self.server_name:
                 previous_message_content = previous_message_content.replace(f"|{self.server_name}| ", "", 1)
 
+            if isinstance(previous_message_content, list):
+                self.server.logger.warning("请检查QQ机器人消息格式! 需要: CQ码 或 text")
+                return qq_id
+
             # find player name
             pattern = r"^\((.*?)\)|^\[(.*?)\]|^(.*?) 说：|^(.*?) : |^冒着爱心眼的(.*?)说："
             match = re.search(pattern, previous_message_content)
@@ -227,7 +231,7 @@ class qbot_helper:
                 previous_message = bot.get_msg(previous_message_id.group(1))['data']
                 receiver = self._get_previous_sender_name(str(previous_message['sender']['user_id']), str(info.source_id), bot, previous_message['message'])
                 forward_content = re.search(r'\[CQ:reply,id=-?\d+.*?\](?:\[@\d+[^\]]*?\])?(.*)', info.content).group(1).strip()
-                command = f'/tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender}]","color":"green"}},{{"text":" [@{receiver}]","color":"aqua"}},{{"text":" {forward_content}","color":"white"}}]'
+                command = f'''tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender}]","color":"green"}},{{"text":" [@{receiver}]","color":"aqua"}},{{"text":" {repr(forward_content)}","color":"white"}}]'''
                 server.execute(command)
                 
             # @ only -> substitute all the @123 to @player_name 
@@ -238,7 +242,7 @@ class qbot_helper:
                     lambda id: f'","color":"white"}},{{"text":" [@{self._find_game_name(str(id.group(1) or id.group(2)), bot, str(info.source_id))}] ","color":"aqua"}},{{"text":"', 
                     info.content
                 )
-                command = f'/tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender}]","color":"green"}},{{"text":" {forward_content}","color":"white"}}]'
+                command = f'''tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender}]","color":"green"}},{{"text":" {repr(forward_content)}","color":"white"}}]'''
                 server.execute(command)
             return True
         return False
@@ -249,7 +253,7 @@ class qbot_helper:
             sender_name = self._find_game_name(str(info.user_id), bot, info.source_id)
 
             if is_forward_to_mc:
-                command = f'/tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender_name}]","color":"green"}},{{"text":" {info.content}","color":"white"}}]'
+                command = f'''tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[{sender_name}]","color":"green"}},{{"text":" {repr(info.content)}","color":"white"}}]'''
                 server.execute(command)
 
             key_word_reply = self.key_word[info.content]
@@ -260,7 +264,7 @@ class qbot_helper:
                 if key_word_reply.startswith('[CQ:image'):
                     key_word_reply = beautify_message(key_word_reply, self.config.get('forward', {}).get('keep_raw_image_link', False))
                     
-                command = f'/tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[机器人]","color":"green"}},{{"text":" {key_word_reply}","color":"white"}}]'
+                command = f'''tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[机器人]","color":"green"}},{{"text":" {repr(key_word_reply)}","color":"white"}}]'''
                 server.execute(command)
 
             return True
@@ -614,14 +618,15 @@ class qbot(qbot_helper):
         server.logger.debug(f"收到上报请求：{info}")
         if info.request_type == "group" \
             and info.group_id in self.config.get("group_id", []) \
-            and self.config["command"]["shenhe"]:
+            and self.config["command"]["shenhe"] \
+            and self.shenheman.data:
             # 获取名称
             stranger_name = bot.get_stranger_info(info.user_id)["data"]["nickname"]
             # 审核人
             at_id = self.shenheman.get_id(info.comment, list(self.shenheman.keys())[0])
             # 通知
             bot.reply(info, f"[CQ:at,qq={at_id}] {get_style_template('authorization_request', self.style).format(stranger_name)}")
-            command = f'/tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[@{at_id}]","color":"aqua"}},{{"text":" {get_style_template("authorization_request", self.style).format(stranger_name)}","color":"white"}}]'
+            command = f'''tellraw @a ["",{{"text":"[{self.group_name[info.source_id]}] ","color":"gold","hoverEvent":{{"action":"show_text","contents":"{info.source_id}"}},"clickEvent":{{"action":"copy_to_clipboard","value":"{info.source_id}"}}}},{{"text":"[@{at_id}]","color":"aqua"}},{{"text":" {get_style_template("authorization_request", self.style).format(stranger_name)}","color":"white"}}]'''
             server.execute(command)
             self.shenheman.review_queue[at_id].append((stranger_name, info.flag, info.request_type))
 
