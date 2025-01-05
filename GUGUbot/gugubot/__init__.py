@@ -96,7 +96,8 @@ def on_info(server:PluginServerInterface, info:Info)->None:
         return 
 
     # player list
-    while "players online:" in info.content and qq_bot._list_callback:
+    while ("players online:" in info.content or "：" in info.content) and\
+        qq_bot._list_callback:
         func = qq_bot._list_callback.pop()
         func(info.content)
 
