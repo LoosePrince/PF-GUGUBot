@@ -99,7 +99,7 @@ class qbot_helper:
         temp = autoSaveDict(self.config["dict_address"].get('customized_help_path', "./config/GUGUbot/help_msg.json"),
                             default_content=content)
         admin_help_msg = temp.get("admin_help_msg", admin_help_msg)
-        group_help_msg = temp.get("admin_help_msg", group_help_msg)
+        group_help_msg = temp.get("group_help_msg", group_help_msg)
 
     #===================================================================#
     #                        Helper functions                           #
