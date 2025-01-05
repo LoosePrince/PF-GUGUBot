@@ -9,7 +9,7 @@ from pathlib import Path
 import pygame
 
 from mcdreforged.api.types import PluginServerInterface, Info
-from mcdreforged.api.rtext import RText, RColor, RTextHoverEvent, RTextClickEvent
+from mcdreforged.api.rtext import RText, RColor
 from ruamel.yaml import YAML
 
 from .data.text import (
