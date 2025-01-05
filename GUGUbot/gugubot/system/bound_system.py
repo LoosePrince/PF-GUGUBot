@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import random
+import re
 
 from pathlib import Path
 
@@ -149,8 +150,10 @@ class bound_system(base_system):
             return 
 
         qq_id, player_name = parameter[0], parameter[1]
-        if qq_id.startswith("[@"): 
-            qq_id = qq_id[2:-1]
+        match = re.match(r'\[@(\d+).*?\]\s+(\w+)', f"{qq_id} {player_name}")
+        if qq_id.startswith("[@") and match: 
+            qq_id = match.group(1)
+            player_name = match.group(2)
         if len(self.data.get(qq_id, [])) >= self.bot_config.get("max_bound", 2): # maximum reaches
             bot.reply(info, '绑定数量已达上限')
             return 

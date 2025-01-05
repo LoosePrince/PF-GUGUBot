@@ -63,6 +63,8 @@ def on_load(server: PluginServerInterface, old)->None:
     server.register_event_listener('cq_qq_api.on_qq_message', qq_bot.on_qq_message)
     server.register_event_listener('cq_qq_api.on_qq_request', qq_bot.on_qq_request)
     server.register_event_listener('cq_qq_api.on_qq_notice', qq_bot.on_qq_notice)
+    server.register_event_listener("PlayerAdvancementEvent", qq_bot.on_mc_achievement)
+    server.register_event_listener("PlayerDeathEvent", qq_bot.on_mc_death)
 
     # 检查插件版本
     def check_plugin_version():
@@ -96,7 +98,8 @@ def on_info(server:PluginServerInterface, info:Info)->None:
         return 
 
     # player list
-    while "players online:" in info.content and qq_bot._list_callback:
+    while ("players online:" in info.content or "：" in info.content) and\
+        qq_bot._list_callback:
         func = qq_bot._list_callback.pop()
         func(info.content)
 
@@ -108,6 +111,11 @@ def on_info(server:PluginServerInterface, info:Info)->None:
     
     if is_player_left:
         _on_player_left(server, info)
+
+    # forward server msg
+    if qq_bot.config['forward']['mc_to_qq'] and \
+        "[Server]" in info.content:
+        qq_bot.send_msg_to_all_qq(info.content.replace("[Not Secure] ", "", 1))
 
 def _on_player_join(server:PluginServerInterface, info:Info):
     # 机器人名字更新
