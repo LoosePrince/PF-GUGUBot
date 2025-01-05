@@ -9,7 +9,7 @@ from pathlib import Path
 import pygame
 
 from mcdreforged.api.types import PluginServerInterface, Info
-from mcdreforged.api.rtext import RText, RColor
+from mcdreforged.api.rtext import RText, RAction, RColor
 from ruamel.yaml import YAML
 
 from .data.text import (
@@ -146,12 +146,12 @@ class qbot_helper:
         sender = self._find_game_name(str(info.user_id), bot, str(info.source_id))
         message = beautify_message(message, self.config.get('forward', {}).get('keep_raw_image_link', False))
         group_name = self.group_name[info.source_id]
-        rtext = RText() \
-            .append(f"[{group_name}] ", color=RColor.gold) \
-                .set_hover_text(info.source_id) \
-                .set_click_event(action="copy_to_clipboard", value=info.source_id) \
-            .append(f"[{sender}]", color=RColor.green) \
-            .append(f" {message}", color=RColor.white)
+        group_id = str(info.source_id)
+        rtext = RText(f"[{group_name}] ", color=RColor.gold) \
+                .set_hover_text(group_id) \
+                .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
+            + RText(f"[{sender}]", color=RColor.green) \
+            + RText(f" {message}", color=RColor.white)
         server.say(rtext)
 
     def set_number_as_name(self, server:PluginServerInterface)->None:
@@ -239,13 +239,13 @@ class qbot_helper:
                 receiver = self._get_previous_sender_name(str(previous_message['sender']['user_id']), str(info.source_id), bot, previous_message['message'])
                 forward_content = re.search(r'\[CQ:reply,id=-?\d+.*?\](?:\[@\d+[^\]]*?\])?(.*)', info.content).group(1).strip()
                 group_name = self.group_name[info.source_id]
-                rtext = RText() \
-                    .append(f"[{group_name}] ", color=RColor.gold) \
-                        .set_hover_text(info.source_id) \
-                        .set_click_event(action="copy_to_clipboard", value=info.source_id) \
-                    .append(f"[{sender}]", color=RColor.green) \
-                    .append(f"[{receiver}]", color=RColor.aqua) \
-                    .append(f" {forward_content}", color=RColor.white)
+                group_id = str(info.source_id)
+                rtext = RText(f"[{group_name}] ", color=RColor.gold) \
+                        .set_hover_text(group_id) \
+                        .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
+                    + RText(f"[{sender}]", color=RColor.green) \
+                    + RText(f"[{receiver}]", color=RColor.aqua) \
+                    + RText(f" {forward_content}", color=RColor.white)
                 server.say(rtext)
                 
             # @ only -> substitute all the @123 to @player_name 
@@ -256,12 +256,12 @@ class qbot_helper:
                     lambda id: f' §b[@{self._find_game_name(str(id.group(1) or id.group(2)), bot, str(info.source_id))}] ', 
                     info.content
                 )
-                rtext = RText() \
-                    .append(f"[{group_name}] ", color=RColor.gold) \
-                        .set_hover_text(info.source_id) \
-                        .set_click_event(action="copy_to_clipboard", value=info.source_id) \
-                    .append(f"[{sender}]", color=RColor.green) \
-                    .append(f" {forward_content}", color=RColor.white)
+                group_id = str(info.source_id)
+                rtext = RText(f"[{group_name}] ", color=RColor.gold) \
+                        .set_hover_text(group_id) \
+                        .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
+                    + RText(f"[{sender}]", color=RColor.green) \
+                    + RText(f" {forward_content}", color=RColor.white)
                 server.say(rtext)
             return True
         return False
@@ -273,12 +273,12 @@ class qbot_helper:
 
             if is_forward_to_mc:
                 group_name = self.group_name[info.source_id]
-                rtext = RText() \
-                    .append(f"[{group_name}] ", color=RColor.gold) \
-                        .set_hover_text(info.source_id) \
-                        .set_click_event(action="copy_to_clipboard", value=info.source_id) \
-                    .append(f"[{sender_name}]", color=RColor.green) \
-                    .append(f" {info.content}", color=RColor.white)
+                group_id = str(info.source_id)
+                rtext = RText(f"[{group_name}] ", color=RColor.gold) \
+                        .set_hover_text(group_id) \
+                        .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
+                    + RText(f"[{sender_name}]", color=RColor.green) \
+                    + RText(f" {info.content}", color=RColor.white)
                 server.say(rtext)
 
             key_word_reply = self.key_word[info.content]
@@ -290,12 +290,12 @@ class qbot_helper:
                     key_word_reply = beautify_message(key_word_reply, self.config.get('forward', {}).get('keep_raw_image_link', False))
                 
                 group_name = self.group_name[info.source_id]
-                rtext = RText() \
-                    .append(f"[{group_name}] ", color=RColor.gold) \
-                        .set_hover_text(info.source_id) \
-                        .set_click_event(action="copy_to_clipboard", value=info.source_id) \
-                    .append(f"[机器人]", color=RColor.green) \
-                    .append(f" {key_word_reply}", color=RColor.white)
+                group_id = str(info.source_id)
+                rtext = RText(f"[{group_name}] ", color=RColor.gold) \
+                        .set_hover_text(group_id) \
+                        .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
+                    + RText(f"[机器人]", color=RColor.green) \
+                    + RText(f" {key_word_reply}", color=RColor.white)
                 server.say(rtext)
 
             return True
@@ -660,12 +660,12 @@ class qbot(qbot_helper):
             # 通知
             bot.reply(info, f"[CQ:at,qq={at_id}] {get_style_template('authorization_request', self.style).format(stranger_name)}")
             group_name = self.group_name[info.source_id]
-            rtext = RText() \
-                .append(f"[{group_name}] ", color=RColor.gold) \
-                    .set_hover_text(info.source_id) \
-                    .set_click_event(action="copy_to_clipboard", value=info.source_id) \
-                .append(f"[@{at_id}]", color=RColor.aqua) \
-                .append(f" {get_style_template('authorization_request', self.style).format(stranger_name)}", color=RColor.white)
+            group_id = str(info.source_id)
+            rtext = RText(f"[{group_name}] ", color=RColor.gold) \
+                    .set_hover_text(group_id) \
+                    .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
+                + RText(f"[@{at_id}]", color=RColor.aqua) \
+                + RText(f" {get_style_template('authorization_request', self.style).format(stranger_name)}", color=RColor.white)
             server.say(rtext)
             
             self.shenheman.review_queue[at_id].append((stranger_name, info.flag, info.request_type))
