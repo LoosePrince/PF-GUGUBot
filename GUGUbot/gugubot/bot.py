@@ -635,7 +635,7 @@ class qbot(qbot_helper):
         
         elif len(command) >= 2 and command[0] == '绑定':            # 绑定功能
             self.data.handle_command(
-                info.content, info, bot, admin = info.user_id in self.config['admin_id']
+                info.content, info, bot, admin = False
             )
         
         elif command[0] == '风格':                                  # 机器人风格相关
