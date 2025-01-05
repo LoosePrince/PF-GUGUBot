@@ -111,7 +111,7 @@ def on_info(server:PluginServerInterface, info:Info)->None:
         _on_player_left(server, info)
 
     # forward server msg
-    if qq_bot.config.config['forward']['mc_to_qq'] and \
+    if qq_bot.config['forward']['mc_to_qq'] and \
         "[Server]" in info.content:
         qq_bot.send_msg_to_all_qq(info.content.replace("[Not Secure] ", "", 1))
 
