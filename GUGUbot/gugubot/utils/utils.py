@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import html
 import os
 import time
 import types
@@ -64,6 +65,9 @@ def get_latest_group_notice(qq_bot, logger):
 
     latest_notice = max(group_notices['data'], key = lambda x: x['publish_time'])
     latest_notice_text = latest_notice['message']['text']
+
+    # decoding \n, <, >
+    latest_notice_text = html.unescape(latest_notice_text)
 
     return latest_notice_text
 
