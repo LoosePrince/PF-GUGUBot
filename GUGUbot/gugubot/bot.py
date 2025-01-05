@@ -665,7 +665,7 @@ class qbot(qbot_helper):
                     .set_hover_text(info.source_id) \
                     .set_click_event(action="copy_to_clipboard", value=info.source_id) \
                 .append(f"[@{at_id}]", color=RColor.aqua) \
-                .append(f" {get_style_template("authorization_request", self.style).format(stranger_name)}", color=RColor.white)
+                .append(f" {get_style_template('authorization_request', self.style).format(stranger_name)}", color=RColor.white)
             server.say(rtext)
             
             self.shenheman.review_queue[at_id].append((stranger_name, info.flag, info.request_type))
