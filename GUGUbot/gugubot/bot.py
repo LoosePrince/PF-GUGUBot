@@ -633,7 +633,7 @@ class qbot(qbot_helper):
         elif self.config['command']['mc'] and command[0] == 'mc':   # qq发送到游戏内消息
             self._handle_mc_command(server, info, bot)
         
-        elif len(command) >= 2 and command[0] == '绑定':            # 绑定功能
+        elif len(command) >= 2 and command[0] == '绑定' and info.user_id not in self.config['admin_id']:            # 绑定功能
             self.data.handle_command(
                 info.content, info, bot, admin = False
             )
