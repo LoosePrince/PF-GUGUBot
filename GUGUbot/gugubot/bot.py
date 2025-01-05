@@ -544,11 +544,13 @@ class qbot(qbot_helper):
         if self.common_command(server, info, bot, command):
             return
         
-        if info.message_type == 'private' or (self.config.get('admin_group_id') and info.source_id in self.config.get('admin_group_id', [])):
-            self.private_command(server, info, bot, command)
-        elif info.message_type == 'group':
+        if info.message_type == 'group':
             self.group_command(server, info, bot, command)
-
+        if info.message_type == 'private' or \
+            (info.source_id in self.config.get('admin_group_id', [])) or \
+            (info.user_id in self.config.get("admin_id", [])):
+            self.private_command(server, info, bot, command)
+        
     # 公共指令
     def common_command(self, server: PluginServerInterface, info, bot, command: list) -> bool:
         admin_group_id = self.config.get('admin_group_id') if self.config.get('admin_group_id') else []
