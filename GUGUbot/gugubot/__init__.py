@@ -110,6 +110,11 @@ def on_info(server:PluginServerInterface, info:Info)->None:
     if is_player_left:
         _on_player_left(server, info)
 
+    # forward server msg
+    if qq_bot.config.config['forward']['mc_to_qq'] and \
+        "[Server]" in info.content:
+        qq_bot.send_msg_to_all_qq(info.content.replace("[Not Secure] ", "", 1))
+
 def _on_player_join(server:PluginServerInterface, info:Info):
     # 机器人名字更新
     if qq_bot.config["command"]["name"]:
