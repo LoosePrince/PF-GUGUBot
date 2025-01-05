@@ -17,7 +17,10 @@ from .data.text import (
     group_help_msg,
     name_help,
     style_help,
-    mc2qq_template
+    mc2qq_template,
+    achievement_tr,
+    achievement_template,
+    death_template
 )
 from .config import autoSaveDict, botConfig
 from .utils import *
@@ -729,3 +732,37 @@ class qbot(qbot_helper):
         # 转发消息
         if info.content[:2] not in ['@ ', '!!'] or self.config['forward'].get('mc_to_qq_command', False):
             self._forward_message(server, info)
+
+    #===================================================================#
+    #                        on_mc_achievement                          #
+    #===================================================================#
+
+    # 转发成就
+    def on_mc_achievement(self, server:PluginServerInterface, player, event, content):
+        if self.config["forward"].get("mc_achievement", True):
+
+            achievement_translation = achievement_tr.get(content.advancement[1:-1], "未知成就")
+            msg = achievement_template[event] % (player, achievement_translation)
+            self.send_msg_to_all_qq(msg)
+
+    #===================================================================#
+    #                           on_mc_death                             #
+    #===================================================================#
+
+    # 转发成就
+    def on_mc_death(self, server:PluginServerInterface, player, event, content):
+        if self.config["forward"].get("mc_death", True):
+
+            msg = death_template[event]
+
+            killer = content.death.killer
+            weapon = content.death.weapon
+
+            msg = msg.replace("%1$s", player)
+            msg = msg.replace("%2$s", killer if killer else "")
+            msg = msg.replace("%3$s", weapon if weapon else "")
+
+            self.send_msg_to_all_qq(msg)
+    
+
+    

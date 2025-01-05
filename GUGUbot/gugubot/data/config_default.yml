@@ -35,6 +35,8 @@ command: # 指令相关
 forward: # 转发设置
   forward_other_bot: false # 转发官方机器人回复
   keep_raw_image_link: false # 转发图片链接
+  mc_achievement: true # 转发 MC 成就
+  mc_death: true # 转发 MC 死亡消息
   mc_to_qq: true # 服务器往QQ群转发
   mc_to_qq_command: false # 服务器指令转发
   player_notice: false # 玩家上下线通知

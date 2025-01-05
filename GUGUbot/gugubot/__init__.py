@@ -63,6 +63,8 @@ def on_load(server: PluginServerInterface, old)->None:
     server.register_event_listener('cq_qq_api.on_qq_message', qq_bot.on_qq_message)
     server.register_event_listener('cq_qq_api.on_qq_request', qq_bot.on_qq_request)
     server.register_event_listener('cq_qq_api.on_qq_notice', qq_bot.on_qq_notice)
+    server.register_event_listener("PlayerAdvancementEvent", qq_bot.on_mc_achievement)
+    server.register_event_listener("PlayerDeathEvent", qq_bot.on_mc_death)
 
     # 检查插件版本
     def check_plugin_version():
