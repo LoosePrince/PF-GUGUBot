@@ -172,7 +172,9 @@ class qbot_helper:
 
             name = " "
             if number != 0:     
-                name = "在线人数: {}".format(number)
+                name = "在线人数: {}".format(number) if \
+                    not self.server_name else \
+                    f"[{self.server_name}] {number} 人在线"
             # Call update API
             for gid in self.config.get('group_id', []):
                 self.bot.set_group_card(gid, self.bot.get_login_info()["data"]['user_id'], name)
