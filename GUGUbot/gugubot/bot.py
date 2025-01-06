@@ -88,7 +88,6 @@ class qbot_helper:
         self.start_command = start_command_system(self.config["dict_address"]["start_command_dict"], self.server, self.config) # 开服指令
         self.shenheman = shenhe_system(self.config["dict_address"]['shenheman'], self.server, self.config) # 群审核人员
         self.uuid_qqid = uuid_system(self.config["dict_address"]['uuid_qqid'], self.server, self.config, self.data, self.whitelist) # uuid - qqid 表
-        self.rcon = rcon_connector(self.server) # connecting the rcon
 
     def customize_help(self)->None:
         """ Read customized_help """
@@ -179,8 +178,8 @@ class qbot_helper:
             for gid in self.config.get('group_id', []):
                 self.bot.set_group_card(gid, self.bot.get_login_info()["data"]['user_id'], name)
 
-        if self.rcon: # use rcon to get command return 
-            list_callback(self.rcon.send_command("list"))
+        if server.is_rcon_running(): # use rcon to get command return 
+            list_callback(server.rcon_query("list"))
         else:         # use MCDR's on_info to get command return
             self._list_callback.append(list_callback)
             server.execute("list")
@@ -307,7 +306,7 @@ class qbot_helper:
             return True
         return False
 
-    def _handle_list_command(self, server, info, bot, command):
+    def _handle_list_command(self, server:PluginServerInterface, info, bot, command:list[str]):
         def list_callback(content: str):
             server_status = command[0] in ['服务器', 'server']
             player_status = command[0] in ['玩家', '玩家列表']
@@ -318,8 +317,8 @@ class qbot_helper:
             respond = self._add_server_name(respond)
             bot.reply(info, respond, force_reply=True)
 
-        if self.rcon: # use rcon to get command return 
-            list_callback(self.rcon.send_command("list"))
+        if server.is_rcon_running(): # use rcon to get command return 
+            list_callback(server.rcon_query("list"))
         else:
             self._list_callback.append(list_callback)
             server.execute("list")
@@ -409,14 +408,14 @@ class qbot_helper:
         """ execute command handler """
         for exec_keyword in ["exec", "执行"]:
             if info.content.startswith(f"{self.config['command_prefix']}{exec_keyword}"):
-                # check switch & rcon status
-                if self.config['command'].get('execute_command', False) and self.rcon:
-                    command = info.content.replace(f"{self.config['command_prefix']}{exec_keyword}", "", 1).strip()
-                    content = self.rcon.send_command(command)
-                    bot.reply(info, content)
                 # switch = off
-                elif not self.config['command'].get('execute_command', False):
+                if not self.config['command'].get('execute_command', False):
                     bot.reply(info, "执行指令已关闭")
+                # check switch & rcon status
+                elif self.server.is_rcon_running():
+                    command = info.content.replace(f"{self.config['command_prefix']}{exec_keyword}", "", 1).strip()
+                    content = self.server.rcon_query(command)
+                    bot.reply(info, content)
                 # rcon disconnect
                 else:
                     self.server.execute(command)
