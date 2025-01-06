@@ -1,5 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 #+----------------------------------------------------------------------+
+import asyncio
 import random
 import re
 import time
@@ -73,8 +74,11 @@ class qbot_helper:
         self.member_dict = None
         self.last_style_change = 0
         self._list_callback = [] # used for list & qqbot's name function
-        self.suggestion = self._ingame_at_suggestion()
-        self.group_name = get_group_name(bot, self.config['group_id'])
+        server.schedule_task(self.__set_ingame_at_suggestion)
+        self.group_name = asyncio.run(get_group_name(bot, self.config['group_id']))
+
+    async def __set_ingame_at_suggestion(self):
+        self.suggestion = await self._ingame_at_suggestion()
 
     def __loading_systems(self) -> None:
         """ Loading the data for qqbot functions """
@@ -176,7 +180,7 @@ class qbot_helper:
                     f"[{self.server_name}] {number} 人在线"
             # Call update API
             for gid in self.config.get('group_id', []):
-                self.bot.set_group_card(gid, self.bot.get_login_info()["data"]['user_id'], name)
+                self.bot.set_group_card(gid, asyncio.run(self.bot.get_login_info())["data"]['user_id'], name)
 
         if server.is_rcon_running(): # use rcon to get command return 
             list_callback(server.rcon_query("list"))
@@ -202,7 +206,7 @@ class qbot_helper:
             return self.data[str(qq_id)][0]
         
         try:  # 未匹配到名字，尝试获取QQ名片
-            target_data = bot.get_group_member_info(group_id, qq_id).get('data', {})
+            target_data = asyncio.run(bot.get_group_member_info(group_id, qq_id)).get('data', {})
             target_name = target_data.get('card') or target_data.get('nickname', qq_id)
         except Exception as e:
             self.server.logger.error(f"获取QQ名片失败：{e}, 请检查cq_qq_api链接是否断开")
@@ -211,7 +215,7 @@ class qbot_helper:
         return target_name
 
     def _get_previous_sender_name(self, qq_id: str, group_id: str, bot, previous_message_content):
-        bot_info = bot.get_login_info()['data']
+        bot_info = asyncio.run(bot.get_login_info())['data']
         if str(qq_id) == str(bot_info['user_id']):
             # remove server_name in reply
             if self.server_name:
@@ -241,7 +245,7 @@ class qbot_helper:
             group_id = str(info.source_id)
             group_name = self.group_name.get(info.source_id, "QQ") 
             if previous_message_id:
-                previous_message = bot.get_msg(previous_message_id.group(1))['data']
+                previous_message = asyncio.run(bot.get_msg(previous_message_id.group(1)))['data']
                 receiver = self._get_previous_sender_name(str(previous_message['sender']['user_id']), str(info.source_id), bot, previous_message['message'])
                 forward_content = re.search(r'\[CQ:reply,id=-?\d+.*?\](?:\[@\d+[^\]]*?\])?(.*)', info.content).group(1).strip()
 
@@ -324,13 +328,13 @@ class qbot_helper:
             server.execute("list")
     
      # 游戏内@ 推荐
-    def _ingame_at_suggestion(self):
+    async def _ingame_at_suggestion(self):
         # 初始化成员字典和建议内容
         self.member_dict = {name: qq_id for qq_id, name_list in self.data.items() for name in name_list}
         suggest_content = set(self.member_dict.keys())
 
         try:
-            group_raw_info = [self.bot.get_group_member_list(group_id) for group_id in self.config.get('group_id', []) if group_id]
+            group_raw_info = [await self.bot.get_group_member_list(group_id) for group_id in self.config.get('group_id', []) if group_id]
             unpack = [i['data'] for i in group_raw_info if i and i['status'] == 'ok']
         except Exception as e:
             self.server.logger.warning(f"获取群成员列表失败: {e}")
@@ -399,7 +403,7 @@ class qbot_helper:
                 self.config['command']['name'] = False
                 self.config.save()
                 for gid in self.config.get('group_id', []):
-                    bot.set_group_card(gid, int(bot.get_login_info()["data"]['user_id']), " ")
+                    bot.set_group_card(gid, int(asyncio.run(bot.get_login_info())["data"]['user_id']), " ")
                 bot.reply(info, "显示游戏内人数已关闭")
             return True
         return False   
@@ -659,7 +663,7 @@ class qbot(qbot_helper):
             and self.config["command"]["shenhe"] \
             and self.shenheman.data:
             # 获取名称
-            stranger_name = bot.get_stranger_info(info.user_id)["data"]["nickname"]
+            stranger_name = asyncio.run(bot.get_stranger_info(info.user_id))["data"]["nickname"]
             # 审核人
             at_id = self.shenheman.get_id(info.comment, list(self.shenheman.keys())[0])
             # 通知
