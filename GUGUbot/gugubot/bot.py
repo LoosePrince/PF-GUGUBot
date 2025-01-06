@@ -148,7 +148,7 @@ class qbot_helper:
     def _forward_message_to_game(self, server:PluginServerInterface, info, bot, message):
         sender = self._find_game_name(str(info.user_id), bot, str(info.source_id))
         message = beautify_message(message, self.config.get('forward', {}).get('keep_raw_image_link', False))
-        group_name = self.group_name[info.source_id]
+        group_name = self.group_name.get(info.source_id, "QQ") 
         group_id = str(info.source_id)
         rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                 .set_hover_text(group_id) \
@@ -237,12 +237,13 @@ class qbot_helper:
         if 'CQ:at' in info.raw_message or 'CQ:reply' in info.raw_message:
             # reply message -> get previous message id -> get previous sender name(receiver)
             previous_message_id = re.search(r"\[CQ:reply,id=(-?\d+).*?\]", info.content, re.DOTALL)
+            group_id = str(info.source_id)
+            group_name = self.group_name.get(info.source_id, "QQ") 
             if previous_message_id:
                 previous_message = bot.get_msg(previous_message_id.group(1))['data']
                 receiver = self._get_previous_sender_name(str(previous_message['sender']['user_id']), str(info.source_id), bot, previous_message['message'])
                 forward_content = re.search(r'\[CQ:reply,id=-?\d+.*?\](?:\[@\d+[^\]]*?\])?(.*)', info.content).group(1).strip()
-                group_name = self.group_name[info.source_id]
-                group_id = str(info.source_id)
+
                 rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                         .set_hover_text(group_id) \
                         .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
@@ -259,7 +260,7 @@ class qbot_helper:
                     lambda id: f' §b[@{self._find_game_name(str(id.group(1) or id.group(2)), bot, str(info.source_id))}] ', 
                     info.content
                 )
-                group_id = str(info.source_id)
+                
                 rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                         .set_hover_text(group_id) \
                         .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
@@ -275,7 +276,7 @@ class qbot_helper:
             sender_name = self._find_game_name(str(info.user_id), bot, info.source_id)
 
             if is_forward_to_mc:
-                group_name = self.group_name[info.source_id]
+                group_name = self.group_name.get(info.source_id, "QQ") 
                 group_id = str(info.source_id)
                 rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                         .set_hover_text(group_id) \
@@ -292,7 +293,7 @@ class qbot_helper:
                 if key_word_reply.startswith('[CQ:image'):
                     key_word_reply = beautify_message(key_word_reply, self.config.get('forward', {}).get('keep_raw_image_link', False))
                 
-                group_name = self.group_name[info.source_id]
+                group_name = self.group_name.get(info.source_id, "QQ") 
                 group_id = str(info.source_id)
                 rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                         .set_hover_text(group_id) \
@@ -662,7 +663,7 @@ class qbot(qbot_helper):
             at_id = self.shenheman.get_id(info.comment, list(self.shenheman.keys())[0])
             # 通知
             bot.reply(info, f"[CQ:at,qq={at_id}] {get_style_template('authorization_request', self.style).format(stranger_name)}")
-            group_name = self.group_name[info.source_id]
+            group_name = self.group_name.get(info.source_id, "QQ") 
             group_id = str(info.source_id)
             rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                     .set_hover_text(group_id) \
@@ -741,7 +742,7 @@ class qbot(qbot_helper):
     def on_mc_achievement(self, server:PluginServerInterface, player, event, content):
         if self.config["forward"].get("mc_achievement", True):
 
-            achievement_translation = achievement_tr.get(content.advancement[1:-1], "未知成就")
+            achievement_translation = achievement_tr.get(content.advancement[1:-1], content.advancement)
             msg = achievement_template[event] % (player, achievement_translation)
             self.send_msg_to_all_qq(msg)
 
@@ -749,7 +750,7 @@ class qbot(qbot_helper):
     #                           on_mc_death                             #
     #===================================================================#
 
-    # 转发成就
+    # 转发死亡
     def on_mc_death(self, server:PluginServerInterface, player, event, content):
         if self.config["forward"].get("mc_death", True):
 
