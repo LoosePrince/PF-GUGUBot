@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import asyncio
 import html
 import os
 import time
@@ -48,7 +49,7 @@ def is_valid_command_source(info, config) -> bool:
 
 # 判断是否是机器人
 def is_robot(bot, group_id, user_id)->bool:
-    user_info = bot.get_group_member_info(group_id, user_id)
+    user_info = asyncio.run(bot.get_group_member_info(group_id, user_id))
     if user_info and user_info.get('data', {}) and user_info.get('data', {}).get('is_robot', False):
         return True
     return False
@@ -71,11 +72,11 @@ def get_latest_group_notice(qq_bot, logger):
 
     return latest_notice_text
 
-def get_group_name(bot, group_id_list:list)->dict:
+async def get_group_name(bot, group_id_list:list)->dict:
     group_name_dict = {}
 
     for group_id in group_id_list:
-        respond = bot.get_group_info(group_id)
+        respond = await bot.get_group_info(group_id)
         
         group_name_dict[group_id] = respond["data"]["group_name"] if respond else "QQ"
     

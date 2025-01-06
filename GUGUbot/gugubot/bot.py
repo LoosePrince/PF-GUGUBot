@@ -1,5 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 #+----------------------------------------------------------------------+
+import asyncio
 import random
 import re
 import time
@@ -73,8 +74,11 @@ class qbot_helper:
         self.member_dict = None
         self.last_style_change = 0
         self._list_callback = [] # used for list & qqbot's name function
-        self.suggestion = self._ingame_at_suggestion()
-        self.group_name = get_group_name(bot, self.config['group_id'])
+        server.schedule_task(self.__set_ingame_at_suggestion)
+        self.group_name = asyncio.run(get_group_name(bot, self.config['group_id']))
+
+    async def __set_ingame_at_suggestion(self):
+        self.suggestion = await self._ingame_at_suggestion()
 
     def __loading_systems(self) -> None:
         """ Loading the data for qqbot functions """
@@ -88,7 +92,6 @@ class qbot_helper:
         self.start_command = start_command_system(self.config["dict_address"]["start_command_dict"], self.server, self.config) # 开服指令
         self.shenheman = shenhe_system(self.config["dict_address"]['shenheman'], self.server, self.config) # 群审核人员
         self.uuid_qqid = uuid_system(self.config["dict_address"]['uuid_qqid'], self.server, self.config, self.data, self.whitelist) # uuid - qqid 表
-        self.rcon = rcon_connector(self.server) # connecting the rcon
 
     def customize_help(self)->None:
         """ Read customized_help """
@@ -148,7 +151,7 @@ class qbot_helper:
     def _forward_message_to_game(self, server:PluginServerInterface, info, bot, message):
         sender = self._find_game_name(str(info.user_id), bot, str(info.source_id))
         message = beautify_message(message, self.config.get('forward', {}).get('keep_raw_image_link', False))
-        group_name = self.group_name[info.source_id]
+        group_name = self.group_name.get(info.source_id, "QQ") 
         group_id = str(info.source_id)
         rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                 .set_hover_text(group_id) \
@@ -172,13 +175,15 @@ class qbot_helper:
 
             name = " "
             if number != 0:     
-                name = "在线人数: {}".format(number)
+                name = "在线人数: {}".format(number) if \
+                    not self.server_name else \
+                    f"[{self.server_name}] {number} 人在线"
             # Call update API
             for gid in self.config.get('group_id', []):
-                self.bot.set_group_card(gid, self.bot.get_login_info()["data"]['user_id'], name)
+                self.bot.set_group_card(gid, asyncio.run(self.bot.get_login_info())["data"]['user_id'], name)
 
-        if self.rcon: # use rcon to get command return 
-            list_callback(self.rcon.send_command("list"))
+        if server.is_rcon_running(): # use rcon to get command return 
+            list_callback(server.rcon_query("list"))
         else:         # use MCDR's on_info to get command return
             self._list_callback.append(list_callback)
             server.execute("list")
@@ -201,7 +206,7 @@ class qbot_helper:
             return self.data[str(qq_id)][0]
         
         try:  # 未匹配到名字，尝试获取QQ名片
-            target_data = bot.get_group_member_info(group_id, qq_id).get('data', {})
+            target_data = asyncio.run(bot.get_group_member_info(group_id, qq_id)).get('data', {})
             target_name = target_data.get('card') or target_data.get('nickname', qq_id)
         except Exception as e:
             self.server.logger.error(f"获取QQ名片失败：{e}, 请检查cq_qq_api链接是否断开")
@@ -210,7 +215,7 @@ class qbot_helper:
         return target_name
 
     def _get_previous_sender_name(self, qq_id: str, group_id: str, bot, previous_message_content):
-        bot_info = bot.get_login_info()['data']
+        bot_info = asyncio.run(bot.get_login_info())['data']
         if str(qq_id) == str(bot_info['user_id']):
             # remove server_name in reply
             if self.server_name:
@@ -237,12 +242,13 @@ class qbot_helper:
         if 'CQ:at' in info.raw_message or 'CQ:reply' in info.raw_message:
             # reply message -> get previous message id -> get previous sender name(receiver)
             previous_message_id = re.search(r"\[CQ:reply,id=(-?\d+).*?\]", info.content, re.DOTALL)
+            group_id = str(info.source_id)
+            group_name = self.group_name.get(info.source_id, "QQ") 
             if previous_message_id:
-                previous_message = bot.get_msg(previous_message_id.group(1))['data']
+                previous_message = asyncio.run(bot.get_msg(previous_message_id.group(1)))['data']
                 receiver = self._get_previous_sender_name(str(previous_message['sender']['user_id']), str(info.source_id), bot, previous_message['message'])
                 forward_content = re.search(r'\[CQ:reply,id=-?\d+.*?\](?:\[@\d+[^\]]*?\])?(.*)', info.content).group(1).strip()
-                group_name = self.group_name[info.source_id]
-                group_id = str(info.source_id)
+
                 rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                         .set_hover_text(group_id) \
                         .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
@@ -259,7 +265,7 @@ class qbot_helper:
                     lambda id: f' §b[@{self._find_game_name(str(id.group(1) or id.group(2)), bot, str(info.source_id))}] ', 
                     info.content
                 )
-                group_id = str(info.source_id)
+                
                 rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                         .set_hover_text(group_id) \
                         .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
@@ -275,7 +281,7 @@ class qbot_helper:
             sender_name = self._find_game_name(str(info.user_id), bot, info.source_id)
 
             if is_forward_to_mc:
-                group_name = self.group_name[info.source_id]
+                group_name = self.group_name.get(info.source_id, "QQ") 
                 group_id = str(info.source_id)
                 rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                         .set_hover_text(group_id) \
@@ -292,7 +298,7 @@ class qbot_helper:
                 if key_word_reply.startswith('[CQ:image'):
                     key_word_reply = beautify_message(key_word_reply, self.config.get('forward', {}).get('keep_raw_image_link', False))
                 
-                group_name = self.group_name[info.source_id]
+                group_name = self.group_name.get(info.source_id, "QQ") 
                 group_id = str(info.source_id)
                 rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                         .set_hover_text(group_id) \
@@ -304,7 +310,7 @@ class qbot_helper:
             return True
         return False
 
-    def _handle_list_command(self, server, info, bot, command):
+    def _handle_list_command(self, server:PluginServerInterface, info, bot, command:list[str]):
         def list_callback(content: str):
             server_status = command[0] in ['服务器', 'server']
             player_status = command[0] in ['玩家', '玩家列表']
@@ -315,20 +321,20 @@ class qbot_helper:
             respond = self._add_server_name(respond)
             bot.reply(info, respond, force_reply=True)
 
-        if self.rcon: # use rcon to get command return 
-            list_callback(self.rcon.send_command("list"))
+        if server.is_rcon_running(): # use rcon to get command return 
+            list_callback(server.rcon_query("list"))
         else:
             self._list_callback.append(list_callback)
             server.execute("list")
     
      # 游戏内@ 推荐
-    def _ingame_at_suggestion(self):
+    async def _ingame_at_suggestion(self):
         # 初始化成员字典和建议内容
         self.member_dict = {name: qq_id for qq_id, name_list in self.data.items() for name in name_list}
         suggest_content = set(self.member_dict.keys())
 
         try:
-            group_raw_info = [self.bot.get_group_member_list(group_id) for group_id in self.config.get('group_id', []) if group_id]
+            group_raw_info = [await self.bot.get_group_member_list(group_id) for group_id in self.config.get('group_id', []) if group_id]
             unpack = [i['data'] for i in group_raw_info if i and i['status'] == 'ok']
         except Exception as e:
             self.server.logger.warning(f"获取群成员列表失败: {e}")
@@ -397,7 +403,7 @@ class qbot_helper:
                 self.config['command']['name'] = False
                 self.config.save()
                 for gid in self.config.get('group_id', []):
-                    bot.set_group_card(gid, int(bot.get_login_info()["data"]['user_id']), " ")
+                    bot.set_group_card(gid, int(asyncio.run(bot.get_login_info())["data"]['user_id']), " ")
                 bot.reply(info, "显示游戏内人数已关闭")
             return True
         return False   
@@ -406,14 +412,14 @@ class qbot_helper:
         """ execute command handler """
         for exec_keyword in ["exec", "执行"]:
             if info.content.startswith(f"{self.config['command_prefix']}{exec_keyword}"):
-                # check switch & rcon status
-                if self.config['command'].get('execute_command', False) and self.rcon:
-                    command = info.content.replace(f"{self.config['command_prefix']}{exec_keyword}", "", 1).strip()
-                    content = self.rcon.send_command(command)
-                    bot.reply(info, content)
                 # switch = off
-                elif not self.config['command'].get('execute_command', False):
+                if not self.config['command'].get('execute_command', False):
                     bot.reply(info, "执行指令已关闭")
+                # check switch & rcon status
+                elif self.server.is_rcon_running():
+                    command = info.content.replace(f"{self.config['command_prefix']}{exec_keyword}", "", 1).strip()
+                    content = self.server.rcon_query(command)
+                    bot.reply(info, content)
                 # rcon disconnect
                 else:
                     self.server.execute(command)
@@ -657,12 +663,12 @@ class qbot(qbot_helper):
             and self.config["command"]["shenhe"] \
             and self.shenheman.data:
             # 获取名称
-            stranger_name = bot.get_stranger_info(info.user_id)["data"]["nickname"]
+            stranger_name = asyncio.run(bot.get_stranger_info(info.user_id))["data"]["nickname"]
             # 审核人
             at_id = self.shenheman.get_id(info.comment, list(self.shenheman.keys())[0])
             # 通知
             bot.reply(info, f"[CQ:at,qq={at_id}] {get_style_template('authorization_request', self.style).format(stranger_name)}")
-            group_name = self.group_name[info.source_id]
+            group_name = self.group_name.get(info.source_id, "QQ") 
             group_id = str(info.source_id)
             rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                     .set_hover_text(group_id) \
@@ -741,7 +747,7 @@ class qbot(qbot_helper):
     def on_mc_achievement(self, server:PluginServerInterface, player, event, content):
         if self.config["forward"].get("mc_achievement", True):
 
-            achievement_translation = achievement_tr.get(content.advancement[1:-1], "未知成就")
+            achievement_translation = achievement_tr.get(content.advancement[1:-1], content.advancement)
             msg = achievement_template[event] % (player, achievement_translation)
             self.send_msg_to_all_qq(msg)
 
@@ -749,7 +755,7 @@ class qbot(qbot_helper):
     #                           on_mc_death                             #
     #===================================================================#
 
-    # 转发成就
+    # 转发死亡
     def on_mc_death(self, server:PluginServerInterface, player, event, content):
         if self.config["forward"].get("mc_death", True):
 
