@@ -173,14 +173,17 @@ class qbot_helper:
 
             number = len(player_list)
 
-            name = " "
+            bot_data = asyncio.run(self.bot.get_login_info())["data"]
+            bot_qq_id = int(bot_data['user_id'])
+            bot_name = bot_data['nickname']
+
             if number != 0:     
-                name = "在线人数: {}".format(number) if \
+                bot_name = "在线人数: {}".format(number) if \
                     not self.server_name else \
-                    f"[{self.server_name}] {number} 人在线"
+                    f"{self.server_name} {number} 人在线"
             # Call update API
             for gid in self.config.get('group_id', []):
-                self.bot.set_group_card(gid, asyncio.run(self.bot.get_login_info())["data"]['user_id'], name)
+                self.bot.set_group_card(gid, bot_qq_id, bot_name)
 
         if server.is_rcon_running(): # use rcon to get command return 
             list_callback(server.rcon_query("list"))
@@ -402,9 +405,15 @@ class qbot_helper:
             elif len(command)>1 and command[1] == '关':
                 self.config['command']['name'] = False
                 self.config.save()
+
+                bot_data = asyncio.run(self.bot.get_login_info())["data"]
+                bot_qq_id = int(bot_data['user_id'])
+                bot_name = bot_data['nickname']
+
                 for gid in self.config.get('group_id', []):
-                    bot.set_group_card(gid, int(asyncio.run(bot.get_login_info())["data"]['user_id']), " ")
+                    bot.set_group_card(gid, bot_qq_id, bot_name)
                 bot.reply(info, "显示游戏内人数已关闭")
+                
             return True
         return False   
     
