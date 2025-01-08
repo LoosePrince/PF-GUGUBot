@@ -41,18 +41,6 @@
 4. [开发指南](https://docs.qq.com/aio/p/sct29j7ammzw142?p=kCIVuht8VcP2vDGLqA9VUW)
 5. [致谢](https://docs.qq.com/aio/p/sct29j7ammzw142?p=w6BO9iUIonwXPN8xBof94F)
 
-## 本文档快速导航
-
-- [快速开始](#安装)
-- [功能列表](#功能列表)
-  - [基本功能](#基本功能)
-- [详细配置](#配置)
-  - [前置cq\_qq\_api配置](#前置cq_qq_api配置)
-  - [GUGUbot机器人配置](#gugubot机器人配置)
-- [有BUG或是新的IDEA](#有bug或是新的idea)
-- [TODO](#todo)
-- [贡献](#贡献)
-
 ## 安装
 #### MCDR快捷安装: 
 1. MCDR服务端输入 `!!MCDR plugin install gugubot`
