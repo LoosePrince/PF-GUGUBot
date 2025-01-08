@@ -74,7 +74,10 @@ class qbot_helper:
         self.member_dict = None
         self.last_style_change = 0
         self._list_callback = [] # used for list & qqbot's name function
-        self.group_name = {}
+
+        self.group_name = self.config['custom_group_name'] \
+            if isinstance(self.config['custom_group_name'], dict) else {}
+
         server.schedule_task(self.__set_ingame_at_suggestion)
         
     async def __set_ingame_at_suggestion(self):
@@ -717,7 +720,11 @@ class qbot(qbot_helper):
 
         # 
         if info.source_id not in self.group_name:
-            self.group_name = asyncio.run(get_group_name(bot, self.config['group_id']))
+            temp = asyncio.run(
+                get_group_name(bot, self.config['group_id'])
+            )
+            temp.update(self.server_name)
+            self.group_name = temp
 
         # 检测关键词
         if self.config['command']['key_word']:
