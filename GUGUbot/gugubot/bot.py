@@ -74,9 +74,9 @@ class qbot_helper:
         self.member_dict = None
         self.last_style_change = 0
         self._list_callback = [] # used for list & qqbot's name function
+        self.group_name = {}
         server.schedule_task(self.__set_ingame_at_suggestion)
-        self.group_name = asyncio.run(get_group_name(bot, self.config['group_id']))
-
+        
     async def __set_ingame_at_suggestion(self):
         self.suggestion = await self._ingame_at_suggestion()
 
@@ -151,8 +151,10 @@ class qbot_helper:
     def _forward_message_to_game(self, server:PluginServerInterface, info, bot, message):
         sender = self._find_game_name(str(info.user_id), bot, str(info.source_id))
         message = beautify_message(message, self.config.get('forward', {}).get('keep_raw_image_link', False))
+
         group_name = self.group_name.get(info.source_id, "QQ") 
         group_id = str(info.source_id)
+        
         rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                 .set_hover_text(group_id) \
                 .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
@@ -245,8 +247,10 @@ class qbot_helper:
         if 'CQ:at' in info.raw_message or 'CQ:reply' in info.raw_message:
             # reply message -> get previous message id -> get previous sender name(receiver)
             previous_message_id = re.search(r"\[CQ:reply,id=(-?\d+).*?\]", info.content, re.DOTALL)
+
             group_id = str(info.source_id)
             group_name = self.group_name.get(info.source_id, "QQ") 
+
             if previous_message_id:
                 previous_message = asyncio.run(bot.get_msg(previous_message_id.group(1)))['data']
                 receiver = self._get_previous_sender_name(str(previous_message['sender']['user_id']), str(info.source_id), bot, previous_message['message'])
@@ -286,6 +290,7 @@ class qbot_helper:
             if is_forward_to_mc:
                 group_name = self.group_name.get(info.source_id, "QQ") 
                 group_id = str(info.source_id)
+
                 rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                         .set_hover_text(group_id) \
                         .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
@@ -413,7 +418,7 @@ class qbot_helper:
                 for gid in self.config.get('group_id', []):
                     bot.set_group_card(gid, bot_qq_id, bot_name)
                 bot.reply(info, "显示游戏内人数已关闭")
-                
+
             return True
         return False   
     
@@ -709,6 +714,10 @@ class qbot(qbot_helper):
         
         # 是否转发消息
         is_forward_to_mc = self.config['forward']['qq_to_mc']
+
+        # 
+        if info.source_id not in self.group_name:
+            self.group_name = asyncio.run(get_group_name(bot, self.config['group_id']))
 
         # 检测关键词
         if self.config['command']['key_word']:
