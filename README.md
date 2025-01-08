@@ -41,33 +41,15 @@
 
 ## 本文档快速导航
 
-- [依赖配置](#依赖配置)
 - [快速开始](#安装)
 - [功能列表](#功能列表)
   - [基本功能](#基本功能)
-  - [游戏内指令](#游戏内指令)
-  - [群聊功能](#群聊功能)
-  - [管理功能](#管理功能)
 - [详细配置](#配置)
   - [前置cq\_qq\_api配置](#前置cq_qq_api配置)
   - [GUGUbot机器人配置](#gugubot机器人配置)
 - [有BUG或是新的IDEA](#有bug或是新的idea)
 - [TODO](#todo)
 - [贡献](#贡献)
-
-## 依赖配置
-
-**Python 包:** 请确保已安装 [Python™](https://www.python.org/) 和 [pip](https://pypi.org/project/pip/) (pip通常在安装完python后会默认安装)。
-
-**Python 模块:** 参考插件目录内的 `requirements.txt` 文件，使用命令 `pip install -r requirements.txt` 进行安装。
-
-#### 前置插件
-- [cq_qq_api](https://github.com/XueK66/PF-cq_qq_api/releases)
-- [player_ip_logger](https://github.com/LoosePrince/PF-player_ip_logger)
-- [online_player_api](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/online_player_api)
-- [whitelist_api](https://github.com/Aimerny/MCDRPlugins/tree/main/src/whitelist_api)
-#### 可选插件
-- [PF-MCDR-WebUI](https://github.com/LoosePrince/PF-MCDR-WebUI) : 在 2.0.0 版本后将是必选前置插件
 
 ## 安装
 #### MCDR快捷安装: 
@@ -110,57 +92,9 @@
 
 #### 详细功能
 
+包括但不限于：关键词、机器人风格、服务器管理、违禁词等
+
 - [GUGUbot - 功能列表 - 腾讯文档](https://docs.qq.com/aio/p/sct29j7ammzw142?p=kKIaQMdRR7IvJ2AMa30Din)
-
-#### 游戏内指令
-
-```
-!!klist','显示游戏内关键词
-!!qq <msg>', '向QQ群发送消息(可以触发qq关键词)
-!!add <关键词> <回复>','添加游戏内关键词回复
-!!del <关键词>','删除指定游戏关键词
-@ <QQ名/号> <消息>','让机器人在qq里@
-```
-
-#### 群聊功能
-
-```
-命令帮助如下:
-#玩家                -> 获取在线玩家列表
-#假人                -> 获取在线假人列表
-#服务器              -> 同时获取在线玩家和假人列表
-#绑定 <游戏ID>       -> 绑定你的游戏ID
-#mc <消息>           -> 向游戏内发送消息（可以触发游戏内关键词）
-#风格                -> 机器人风格帮助
-#游戏关键词 列表     -> 显示现有游戏内关键词列表
-#删除假人 <假人名字> -> 删除游戏内指定假人
-
-关键词相关: 
-#添加 <关键词> <回复> -> 添加游戏内关键词回复
-#添加图片 <关键词>    -> 添加关键词图片
-#删除 <关键词>        -> 删除关键词
-#列表                 -> 获取关键词回复列表
-#帮助                 -> 查看关键词相关帮助
-```
-
-
-#### 管理功能(管理员私聊触发)
-
-```
-管理员命令帮助如下
-#绑定   -> 查看绑定相关帮助
-#白名单 -> 查看白名单相关帮助
-#启动指令 -> 查看启动指令相关帮助
-#违禁词 -> 查看违禁词相关帮助
-#关键词 -> 查看关键词相关帮助
-#游戏内关键词 -> 查看游戏内关键词相关帮助
-#uuid   -> 查看uuid 匹配相关帮助
-#名字   -> 查看机器人名字相关帮助
-#审核   -> 协助审核功能
-#执行 <command> -> 执行指令
-#重启 -> 重载机器人
-```
-
 
 
 
@@ -174,23 +108,7 @@
 
 ### 前置cq_qq_api配置
 
-| 配置项 | 默认值 | 说明 |
-| - | - | - |
-| host | `127.0.0.1` | 接收数据上报的地址 |
-| port | `8080` | 对应数据上报的端口 | 
-| post_path | "" | 对应数据上报的终点名 |
-| token | "" | 对应数据上报的token，用于加密信息 |
-
-```
-{
-    "host": "127.0.0.1",
-    "port": 8080,
-    "post_path": "",
-    "token": ""
-}
-```
-
-以上为正向websocket
+- 请前往：[CQ-QQ-API - 配置 - 腾讯文档](https://docs.qq.com/aio/p/sct29j7ammzw142?p=vUShdYdligIgQvmxLZu3s8)
 
 ### GUGUbot机器人配置
 > [!IMPORTANT]
