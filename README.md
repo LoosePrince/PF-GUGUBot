@@ -123,6 +123,10 @@
 
 # 贡献
 
-代码贡献: [QQChat](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/qq_chat) | [AnzhiZhang](https://github.com/AnzhiZhang)
+代码贡献：[QQChat](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/qq_chat) | [AnzhiZhang](https://github.com/AnzhiZhang)
 
-技术支持: [XueK__](https://github.com/XueK66)
+技术支持：[@XueK__](https://github.com/XueK66)
+
+反馈提交：请查发布版本
+
+第三方文档：[@Dreamwxz](https://github.com/Dreamwxz) | [PF-plugins](https://docs.pfingan.com/)
