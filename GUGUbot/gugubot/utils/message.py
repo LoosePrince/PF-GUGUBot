@@ -47,14 +47,15 @@ def beautify_message(content:str, keep_raw_image_link:bool=False)->str:
     content = re.sub(r'\[CQ:location,.*?\]', "[推荐群]", content)
     content = re.sub(r'\[CQ:music,type=.*?\]', '[音乐]', content)
     content = re.sub(r'\[CQ:forward,id=.*?\]', '[转发消息]', content)
+    content = re.sub(r'\[CQ:xml(?:,.*?)*\]', '', content)
     content = re.sub(r'\[CQ:file(?:,.*?)*\]', '[文件]', content)
     content = re.sub(r'\[CQ:redbag,title=.*?\]', '[红包]', content)
     content = re.sub(r'\[CQ:markdown,content=.*?\]', '', content)
     
-    content = content.replace('CQ:at,qq=', '@')
+    content = re.sub(r'\[CQ:at,qq=(\d+)(?:,.*?)*\]', r'[@\1]', content)
 
     # process emoji
-    content = re.sub(r'\[CQ:face,id=(\d+?)\]', replace_emoji, content)
+    content = re.sub(r'\[CQ:face,id=(\d+?)(?:,.*?)*\]', replace_emoji, content)
 
     # process json
     content = re.sub(r'\[CQ:json,.*?data=(\{[^,]*\}).*?\s*\]', process_json, content)
