@@ -422,6 +422,7 @@ class qbot_helper:
                     bot.reply(info, content)
                 # rcon disconnect
                 else:
+                    command = info.content.replace(f"{self.config['command_prefix']}{exec_keyword}", "", 1).strip()
                     self.server.execute(command)
                     bot.reply(info, "指令已执行（开启RCON以显示结果）")
                 return True
