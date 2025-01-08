@@ -114,7 +114,7 @@ class qbot_helper:
     # 添加服务器名字
     def _add_server_name(self, message):
         if self.server_name != "":
-            return f"|{self.server_name}| {message}"
+            return f"{self.server_name} {message}"
         return message
 
     # 转发消息到指定群
@@ -219,7 +219,7 @@ class qbot_helper:
         if str(qq_id) == str(bot_info['user_id']):
             # remove server_name in reply
             if self.server_name:
-                previous_message_content = previous_message_content.replace(f"|{self.server_name}| ", "", 1)
+                previous_message_content = previous_message_content.replace(f"{self.server_name} ", "", 1)
 
             if isinstance(previous_message_content, list):
                 self.server.logger.warning("请检查QQ机器人消息格式! 需要: CQ码 或 text")
