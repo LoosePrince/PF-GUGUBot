@@ -263,7 +263,7 @@ class qbot_helper:
                         .set_hover_text(group_id) \
                         .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
                     + RText(f"[{sender}]", color=RColor.green) \
-                    + RText(f"[{receiver}]", color=RColor.aqua) \
+                    + RText(f"[@{receiver}]", color=RColor.aqua) \
                     + RText(f" {forward_content}", color=RColor.white)
                 server.say(rtext)
                 
@@ -272,7 +272,7 @@ class qbot_helper:
                 at_pattern = r"\[@(\d+).*?\]|\[CQ:at,qq=(\d+).*?\]"
                 forward_content = re.sub(
                     at_pattern, 
-                    lambda id: f' §b[@{self._find_game_name(str(id.group(1) or id.group(2)), bot, str(info.source_id))}] ', 
+                    lambda id: f' §b[@{self._find_game_name(str(id.group(1) or id.group(2)), bot, str(info.source_id))}] §f', 
                     info.content
                 )
                 
@@ -723,7 +723,7 @@ class qbot(qbot_helper):
             temp = asyncio.run(
                 get_group_name(bot, self.config['group_id'])
             )
-            temp.update(self.server_name)
+            temp.update(self.group_name)
             self.group_name = temp
 
         # 检测关键词
