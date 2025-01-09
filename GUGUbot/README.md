@@ -19,6 +19,8 @@
 > [腾讯文档] GUGUbot文档<br>
 > 此Github文档不再维护详细内容，仅保留必要说明<br>
 > 访问腾讯文档查看更详细的说明: https://docs.qq.com/aio/p/sct29j7ammzw142
+>
+> 第三方授权文档（编写中）：https://docs.pfingan.com/PF-gugubot/
 
 ## 腾讯文档快速导航
 ### [GUGUbot](https://docs.qq.com/aio/p/sct29j7ammzw142?p=8zf59bKLGJK66HBlVLjqwJ)
@@ -26,10 +28,12 @@
 2. [安装（快速开始）](https://docs.qq.com/aio/p/sct29j7ammzw142?p=zdYp7EVd2d04QBQ0FrD7sX)
 3. [功能列表](https://docs.qq.com/aio/p/sct29j7ammzw142?p=kKIaQMdRR7IvJ2AMa30Din)
     - [自定义说明](https://docs.qq.com/aio/p/sct29j7ammzw142?p=pEQyDIrFanCo9ErEZZPncf)
-        - [群友提供的风格文件](https://docs.qq.com/aio/p/sct29j7ammzw142?p=9RglSRIzfpemyJ7gKdYVEM)
 4. [配置](https://docs.qq.com/aio/p/sct29j7ammzw142?p=iXyl6g1K1p1dK2rujfGH7u)
-5. [贡献](https://docs.qq.com/aio/p/sct29j7ammzw142?p=OreXhO8piOO7Ak7RnpPCMp)
-6. [疑难解答](https://docs.qq.com/aio/p/sct29j7ammzw142?p=8kJWVjHPK8Zkujhwd73Zbb)
+5. [疑难解答](https://docs.qq.com/aio/p/sct29j7ammzw142?p=8kJWVjHPK8Zkujhwd73Zbb)
+6. [多服互联](https://docs.qq.com/aio/p/sct29j7ammzw142?p=Ply25UKYNFiWqDdNDTLgWY)
+7. [开发指南](https://docs.qq.com/aio/p/sct29j7ammzw142?p=EY13Ly9HEWslxTOyB62KdW)
+   - [接口](https://docs.qq.com/aio/p/sct29j7ammzw142?p=pTowgV8359jVGjsobNQEst)
+8. [贡献](https://docs.qq.com/aio/p/sct29j7ammzw142?p=OreXhO8piOO7Ak7RnpPCMp)
 ### [CQ-QQ-API](https://docs.qq.com/aio/p/sct29j7ammzw142?p=NJ5GySzVisEJ9xQp7iW8P7)
 1. [快速开始](https://docs.qq.com/aio/p/sct29j7ammzw142?p=5PaUIBXxTwyMouazErWqIT)
 2. [配置](https://docs.qq.com/aio/p/sct29j7ammzw142?p=vUShdYdligIgQvmxLZu3s8)
@@ -38,18 +42,6 @@
     - [NapCat](https://docs.qq.com/aio/p/sct29j7ammzw142?p=UggIX3zxZcpl4PamYNA1Nd)
 4. [开发指南](https://docs.qq.com/aio/p/sct29j7ammzw142?p=kCIVuht8VcP2vDGLqA9VUW)
 5. [致谢](https://docs.qq.com/aio/p/sct29j7ammzw142?p=w6BO9iUIonwXPN8xBof94F)
-
-## 本文档快速导航
-
-- [快速开始](#安装)
-- [功能列表](#功能列表)
-  - [基本功能](#基本功能)
-- [详细配置](#配置)
-  - [前置cq\_qq\_api配置](#前置cq_qq_api配置)
-  - [GUGUbot机器人配置](#gugubot机器人配置)
-- [有BUG或是新的IDEA](#有bug或是新的idea)
-- [TODO](#todo)
-- [贡献](#贡献)
 
 ## 安装
 #### MCDR快捷安装: 
@@ -133,6 +125,10 @@
 
 # 贡献
 
-代码贡献: [QQChat](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/qq_chat) | [AnzhiZhang](https://github.com/AnzhiZhang)
+代码贡献：[QQChat](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/qq_chat) | [AnzhiZhang](https://github.com/AnzhiZhang)
 
-技术支持: [XueK__](https://github.com/XueK66)
+技术支持：[@XueK__](https://github.com/XueK66)
+
+反馈提交：请查发布版本
+
+第三方文档：[@Dreamwxz](https://github.com/Dreamwxz) | [PF-plugins](https://docs.pfingan.com/PF-gugubot/)
