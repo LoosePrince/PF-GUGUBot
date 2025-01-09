@@ -1,4 +1,4 @@
-group_help_msg = '''命令帮助如下:
+group_help_msg = """命令帮助如下:
 #玩家 -> 获取在线玩家列表
 #假人 -> 获取在线假人列表
 #服务器 -> 同时获取在线玩家和假人列表
@@ -15,9 +15,9 @@ group_help_msg = '''命令帮助如下:
 #删除 <关键词> -> 删除关键词
 #列表 -> 获取关键词回复列表
 #帮助 -> 查看关键词相关帮助
-'''
+"""
 
-admin_help_msg = '''管理员命令帮助如下
+admin_help_msg = """管理员命令帮助如下
 #绑定   -> 查看绑定相关帮助
 #白名单 -> 查看白名单相关帮助
 #启动指令 -> 查看启动指令相关帮助
@@ -30,83 +30,83 @@ admin_help_msg = '''管理员命令帮助如下
 #执行 <command> -> 执行指令
 #MCDR <command> -> 执行MCDR指令(无结果显示)
 #重启 -> 重载机器人
-'''
+"""
 
-bound_help = '''#绑定 列表 -> 查看绑定列表
+bound_help = """#绑定 列表 -> 查看绑定列表
 #绑定 查询 <QQ号> -> 查询绑定ID
 #绑定 解绑 <QQ号> -> 解除绑定
 #绑定 <QQ号> <游戏ID> -> 绑定新ID
 #绑定 白名单 开/关 -> 开启/关闭 绑定时添加白名单
 #绑定 白名单同步 -> 同步绑定列表到白名单中
-#绑定 清空 -> 清空绑定名单 + 白名单（需二次确认）'''
+#绑定 清空 -> 清空绑定名单 + 白名单（需二次确认）"""
 
-whitelist_help = '''#白名单 添加 <target> -> 添加白名单成员
+whitelist_help = """#白名单 添加 <target> -> 添加白名单成员
 #白名单 列表 -> 列出白名单成员
 #白名单 关   -> 关闭白名单
 #白名单 开   -> 开启白名单
 #白名单 重载 -> 重载白名单
 #白名单 更新 <老ID> <新ID> -> 改白名单的名字
 #白名单 删除 <target> -> 删除白名单成员
-<target> 可以是玩家名/目标选择器/UUID'''
+<target> 可以是玩家名/目标选择器/UUID"""
 
-start_command_help = '''启动指令菜单：
+start_command_help = """启动指令菜单：
 #启动指令 添加 <名称> <指令> -> 添加启动指令
 #启动指令 列表 -> 查看现有启动指令
 #启动指令 删除 <名称> -> 删除指定启动指令
 #启动指令 开   -> 开启开服指令
 #启动指令 关   -> 关闭开服指令
 #启动指令 执行 -> 执行一遍开服指令
-#启动指令 重载 -> 重载开服指令''' 
+#启动指令 重载 -> 重载开服指令""" 
 
-ban_word_help = '''违禁词相关指令：
+ban_word_help = """违禁词相关指令：
 #违禁词 添加 <违禁词> <违禁理由> -> 添加违禁词
 #违禁词 列表 -> 显示违禁词列表及理由
 #违禁词 删除 <违禁词> -> 删除指定违禁词
 #违禁词 开   -> 开启违禁词
 #违禁词 关   -> 关闭违禁词
-#违禁词 重载 -> 重载违禁词'''
+#违禁词 重载 -> 重载违禁词"""
 
-key_word_help = '''关键词相关指令：
+key_word_help = """关键词相关指令：
 #关键词 开   -> 开启关键词
 #关键词 关   -> 关闭关键词
 #关键词 重载 -> 重载关键词
 #关键词 列表 -> 显示关键词列表
 #添加 <关键词> <回复> -> 添加关键词
-#删除 <关键词> -> 删除指定关键词'''
+#删除 <关键词> -> 删除指定关键词"""
 
-ingame_key_word_help = '''游戏内关键词相关指令：
+ingame_key_word_help = """游戏内关键词相关指令：
 #游戏关键词 开   -> 开启游戏内关键词
 #游戏关键词 关   -> 关闭游戏内关键词
 #游戏关键词 重载 -> 重载游戏内关键词
 #游戏关键词 列表 -> 显示游戏内关键词列表
 #游戏关键词添加 <关键词> <回复> -> 添加游戏内关键词
-#游戏关键词删除 <关键词> -> 删除指定游戏内关键词'''
+#游戏关键词删除 <关键词> -> 删除指定游戏内关键词"""
 
-style_help = '''风格指令如下：
+style_help = """风格指令如下：
 #风格        -> 风格帮助
 #风格 列表   -> 风格列表
-#风格 <风格> -> 切换至指定风格'''
+#风格 <风格> -> 切换至指定风格"""
 
-uuid_help ='''uuid匹配指令如下：
+uuid_help ="""uuid匹配指令如下：
 #uuid        -> 查看uuid相关帮助
 #uuid 列表   -> 查看uuid绑定表
 #uuid 重载 -> 重新匹配uuid
-'''
+"""
 
-name_help = '''机器人名字相关指令如下：
+name_help = """机器人名字相关指令如下：
 #名字 -> 查看名字相关帮助
 #名字 开 -> 机器人名字显示为在线人数
 #名字 关 -> 机器人名字为特殊空白名字
 (会占用少许服务器资源)
-'''
+"""
 
-shenhe_help = '''审核名单帮助：
+shenhe_help = """审核名单帮助：
 #审核 开 -> 开启自动审核
 #审核 关 -> 关闭自动审核
 #审核 添加 <QQ号> <别名> -> 添加审核员的别名(匹配用)
 #审核 删除 <QQ号> -> 删除审核员
 #审核 列表 -> 审核员列表
-'''
+"""
 
 mc2qq_template = [
     "({}) {}",
@@ -117,51 +117,51 @@ mc2qq_template = [
 ]
 
 style = {
-    '正常' : {
-        'add_cancel': '图片保存已取消',
-        'add_existed': '已存在该关键词~',
-        'add_image_instruction': '请发送要添加的图片~',
-        'add_image_fail': '图片保存失败~',
-        'add_image_previous_no_done': '上一个关键词还未绑定，添加哒咩！',
-        'add_success':'添加成功！',
-        'authorization_pass': '已通过{}的申请awa',
-        'authorization_reject': '已拒绝{}的申请awa',
-        'authorization_request': '{} 申请进群, 请审核',
-        'ban_word_find':'回复包含违禁词请修改后重发，维护和谐游戏人人有责。\n违禁理由：{}',
-        'bound_add_whitelist': '已将您添加到服务器白名单',
-        'bound_exist': '您已绑定ID: {}, 绑定已达上限, 请联系管理员修改',
-        'bound_success': '已成功绑定',
-        'command_success' : '指令执行成功',
-        'delete_success':'删除成功！',
-        'del_no_exist': '该关键词不存在',
-        'del_whitelist_when_quit': '{}已退群，白名单同步删除',
-        'key_word_exist': '已有指定关键词,请删除(#删除 <关键词>)后重试 awa',
-        'lack_parameter': '缺少参数，请参考 #帮助 里的说明',
-        'list': '列表如下: \n{}',
-        'no_player_ingame': f"现在没人游玩服务器",
-        'no_word': '列表空空的',
-        'player_api_fail': '未能捕获服务器日志（推荐开启rcon精准获取玩家信息）',
-        'player_list':'在线玩家共{}人，{}列表: {}',
-        'player_notice_join': '{} 加入了游戏',
-        'player_notice_leave': '{} 离开了游戏',
-        'reload_success': '重载成功',
-        'server_start':'服务器已启动',
-        'server_stop': '服务器已关闭'
+    "正常" : {
+        "add_cancel": "图片保存已取消",
+        "add_existed": "已存在该关键词~",
+        "add_image_instruction": "请发送要添加的图片~",
+        "add_image_fail": "图片保存失败~",
+        "add_image_previous_no_done": "上一个关键词还未绑定，添加哒咩！",
+        "add_success":"添加成功！",
+        "authorization_pass": "已通过{}的申请awa",
+        "authorization_reject": "已拒绝{}的申请awa",
+        "authorization_request": "{} 申请进群, 请审核",
+        "ban_word_find":"回复包含违禁词请修改后重发，维护和谐游戏人人有责。\n违禁理由：{}",
+        "bound_add_whitelist": "已将您添加到服务器白名单",
+        "bound_exist": "您已绑定ID: {}, 绑定已达上限, 请联系管理员修改",
+        "bound_success": "已成功绑定",
+        "command_success" : "指令执行成功",
+        "delete_success":"删除成功！",
+        "del_no_exist": "该关键词不存在",
+        "del_whitelist_when_quit": "{}已退群，白名单同步删除",
+        "key_word_exist": "已有指定关键词,请删除(#删除 <关键词>)后重试 awa",
+        "lack_parameter": "缺少参数，请参考 #帮助 里的说明",
+        "list": "列表如下: \n{}",
+        "no_player_ingame": "现在没人游玩服务器",
+        "no_word": "列表空空的",
+        "player_api_fail": "未能捕获服务器日志（推荐开启rcon精准获取玩家信息）",
+        "player_list":"在线玩家共{}人，{}列表: {}",
+        "player_notice_join": "{} 加入了游戏",
+        "player_notice_leave": "{} 离开了游戏",
+        "reload_success": "重载成功",
+        "server_start":"服务器已启动",
+        "server_stop": "服务器已关闭"
     },
-    '傲娇': {
-        'ban_word_find':"本大小姐不听，才不告诉你是因为 {}",
-        'no_player_ingame':'讷讷，为什么没人玩，为什么？大家都不爱我了吗awa',
-        'player_list':'哼，这次就帮你数数，下次没那么容易了。\n现在有{}人，{}列表: {}',
-        'server_start': '服务器启动啦！笨、笨蛋，人家可不是特地来告诉你们的!',
-        'add_success':'哼..既然你都这么说了,那我就勉为其难帮你添加了！',
-        'delete_success':'删除完了，才...才不是特别为你做的呢!',
-        'key_word_exist': '已有指定关键词,请删除(#删除 <关键词>)后重试 awa',
-        'lack_parameter': '笨死了，这都不会1w1，去看 #帮助 啦！',
-        'del_no_exist': '累死我了，找了半天没这个词，大坏蛋！',
-        'no_word': '快添点东西进来叭，才。。才不是人家寂寞了',
-        'list': '列表如下: \n{}',
-        'reload_success': '重载啦awa，快夸我！',
-        'command_success' : '那么多指令，想累死本小姐嘛，才不做！什么，你说你准备了礼物，那我就勉为其难做点，哼'
+    "傲娇": {
+        "ban_word_find":"本大小姐不听，才不告诉你是因为 {}",
+        "no_player_ingame":"讷讷，为什么没人玩，为什么？大家都不爱我了吗awa",
+        "player_list":"哼，这次就帮你数数，下次没那么容易了。\n现在有{}人，{}列表: {}",
+        "server_start": "服务器启动啦！笨、笨蛋，人家可不是特地来告诉你们的!",
+        "add_success":"哼..既然你都这么说了,那我就勉为其难帮你添加了！",
+        "delete_success":"删除完了，才...才不是特别为你做的呢!",
+        "key_word_exist": "已有指定关键词,请删除(#删除 <关键词>)后重试 awa",
+        "lack_parameter": "笨死了，这都不会1w1，去看 #帮助 啦！",
+        "del_no_exist": "累死我了，找了半天没这个词，大坏蛋！",
+        "no_word": "快添点东西进来叭，才。。才不是人家寂寞了",
+        "list": "列表如下: \n{}",
+        "reload_success": "重载啦awa，快夸我！",
+        "command_success" : "那么多指令，想累死本小姐嘛，才不做！什么，你说你准备了礼物，那我就勉为其难做点，哼"
     },
     "雌小鬼": {
         "ban_word_find": "呜呜呜，偶才不告诉你是因为 {} 呢！",
@@ -428,127 +428,127 @@ qq_face_name = {
 }
 
 achievement_tr = {
-    'Stone Age': '石器时代',
-    'Getting an Upgrade': '获得升级',
-    'Acquire Hardware': '来硬的',
-    "Isn't It Iron Pick": '这不是铁镐么',
-    'Hot Stuff': '热腾腾的',
-    'Suit Up': '整装上阵',
-    'Diamonds!': '钻石！',
-    'Ice Bucket Challenge': '冰桶挑战',
-    'Not Today, Thank You': '不吃这套，谢谢',
-    'Enchanter': '附魔师',
-    'Cover Me with Diamonds': '钻石护体',
-    'We Need to Go Deeper': '勇往直下',
-    'Zombie Doctor': '僵尸科医生',
-    'Eye Spy': '隔墙有眼',
-    'The End?': '结束了？',
-    'Nether': '下界',
-    'Oh Shiny': '金光闪闪',
-    'Subspace Bubble': '曲速泡',
-    'Those Were the Days': '光辉岁月',
-    'A Terrible Fortress': '阴森的要塞',
-    'Hidden in the Depths': '深藏不露',
-    'Who is Cutting Onions?': '谁在切洋葱？',
-    'Return to Sender': '见鬼去吧',
-    'This Boat Has Legs': '画船添足',
-    'War Pigs': '战猪',
-    'Spooky Scary Skeleton': '惊悚恐怖骷髅头',
-    'Into Fire': '与火共舞',
-    'Cover Me in Debris': '残骸裹身',
-    'Country Lode, Take Me Home': '天涯共此石',
-    'Not Quite "Nine" Lives': '锚没有九条命',
-    'Uneasy Alliance': '脆弱的同盟',
-    'Hot Tourist Destinations': '热门景点',
-    'Feels Like Home': '温暖如家',
-    'Withering Heights': '凋零山庄',
-    'Local Brewery': '本地酿造厂',
-    'Bring Home the Beacon': '带信标回家',
-    'A Furious Cocktail': '狂乱的鸡尾酒',
-    'Beaconator': '信标工程师',
-    'How Did We Get Here?': '为什么会变成这样呢？',
-    'The End': '末地',
-    'Free the End': '解放末地',
-    'You Need a Mint': '你需要来点薄荷糖',
-    'The Next Generation': '下一世代',
-    'Remote Getaway': '远程折跃',
-    'The End... Again...': '结束了再一次',
-    'The City at the End of the Game': '在游戏尽头的城市',
-    "Sky's the Limit": '天空即为极限',
-    'Great View From Up Here': '这上面的风景不错',
-    'Adventure': '冒险',
-    'Sneak 100': '潜行100级',
-    'Crafters Crafting Crafters': '合成器合成合成器',
-    'Caves & Cliffs': '上天入地',
-    'Sticky Situation': '胶着状态',
-    'Monster Hunter': '怪物猎人',
-    'Surge Protector': '电涌保护器',
-    'Minecraft: Trial(s) Edition': 'Minecraft：试炼版',
-    "Ol' Betsy": '扣下悬刀',
-    'The Power of Books': '知识就是力量',
-    "Isn't It Scute?": '这不是鳞甲么？',
-    'Respecting the Remnants': '探古寻源',
-    'Sweet Dreams': '甜蜜的梦',
-    'Is It a Bird?': '那是鸟吗？',
-    'What a Deal!': '成交！',
-    'Crafting a New Look': '旧貌锻新颜',
-    'Voluntary Exile': '自我放逐',
-    'Monsters Hunted': '资深怪物猎人',
-    'It Spreads': '它蔓延了',
-    'Take Aim': '瞄准目标',
-    'A Throwaway Joke': '抖包袱',
-    'Postmortal': '超越生死',
-    'Blowback': '逆风翻盘',
-    'Lighten Up': '铜光焕发',
-    'Over-Overkill': '天赐良击',
-    'Under Lock and Key': '珍藏密敛',
-    'Who Needs Rockets?': '还要啥火箭啊？',
-    'Arbalistic': '劲弩手',
-    'Two Birds, One Arrow': '一箭双雕',
-    "Who's the Pillager Now?": '现在谁才是掠夺者？',
-    'Careful Restoration': '精修细补',
-    'Adventuring Time': '探索的时光',
-    'Sound of Music': '音乐之声',
-    'Light as a Rabbit': '轻功雪上飘',
-    'Is It a Balloon?': '那是气球吗？',
-    'Hired Help': '招募援兵',
-    'Star Trader': '星际商人',
-    'Smithing with Style': '匠心独具',
-    'Hero of the Village': '村庄英雄',
-    'Bullseye': '正中靶心',
-    'Sniper Duel': '狙击手的对决',
-    'Very Very Frightening': '魔女审判',
-    'Is It a Plane?': '那是飞机吗？',
-    'Revaulting': '宝经磨炼',
-    'Husbandry': '农牧业',
-    "You've Got a Friend in Me": '找到一个好朋友',
-    'The Parrots and the Bats': '我从哪儿来？',
-    'Fishy Business': '腥味十足的生意',
-    'Glow and Behold!': '眼前一亮！',
-    'Smells Interesting': '怪味蛋',
-    'A Seedy Place': '开荒垦地',
-    'Whatever Floats Your Goat!': '羊帆起航！',
-    'Bee Our Guest': '与蜂共舞',
-    'Total Beelocation': '举巢搬迁',
-    'Bukkit Bukkit': '蚪到桶里来',
-    'Best Friends Forever': '永恒的伙伴',
-    'Birthday Song': '生日快乐歌',
-    'Two by Two': '成双成对',
-    'Tactical Fishing': '战术性钓鱼',
-    'Little Sniffs': '小小嗅探兽',
-    'A Balanced Diet': '均衡饮食',
-    'Serious Dedication': '终极奉献',
-    'Wax On': '涂蜡',
-    'When the Squad Hops into Town': '呱呱队出动',
-    'Good as New': '完好如初',
-    'Shear Brilliance': '华丽一剪',
-    'A Complete Catalogue': '百猫全书',
-    'The Whole Pack': '群狼聚首',
-    'The Cutest Predator': '最萌捕食者',
-    'Planting the Past': '播种往事',
-    'Wax Off': '脱蜡',
-    'With Our Powers Combined!': '相映生辉！',
-    'The Healing Power of Friendship!': '友谊的治愈力！'
+    "Stone Age": "石器时代",
+    "Getting an Upgrade": "获得升级",
+    "Acquire Hardware": "来硬的",
+    "Isn't It Iron Pick": "这不是铁镐么",
+    "Hot Stuff": "热腾腾的",
+    "Suit Up": "整装上阵",
+    "Diamonds!": "钻石！",
+    "Ice Bucket Challenge": "冰桶挑战",
+    "Not Today, Thank You": "不吃这套，谢谢",
+    "Enchanter": "附魔师",
+    "Cover Me with Diamonds": "钻石护体",
+    "We Need to Go Deeper": "勇往直下",
+    "Zombie Doctor": "僵尸科医生",
+    "Eye Spy": "隔墙有眼",
+    "The End?": "结束了？",
+    "Nether": "下界",
+    "Oh Shiny": "金光闪闪",
+    "Subspace Bubble": "曲速泡",
+    "Those Were the Days": "光辉岁月",
+    "A Terrible Fortress": "阴森的要塞",
+    "Hidden in the Depths": "深藏不露",
+    "Who is Cutting Onions?": "谁在切洋葱？",
+    "Return to Sender": "见鬼去吧",
+    "This Boat Has Legs": "画船添足",
+    "War Pigs": "战猪",
+    "Spooky Scary Skeleton": "惊悚恐怖骷髅头",
+    "Into Fire": "与火共舞",
+    "Cover Me in Debris": "残骸裹身",
+    "Country Lode, Take Me Home": "天涯共此石",
+    'Not Quite "Nine" Lives': "锚没有九条命",
+    "Uneasy Alliance": "脆弱的同盟",
+    "Hot Tourist Destinations": "热门景点",
+    "Feels Like Home": "温暖如家",
+    "Withering Heights": "凋零山庄",
+    "Local Brewery": "本地酿造厂",
+    "Bring Home the Beacon": "带信标回家",
+    "A Furious Cocktail": "狂乱的鸡尾酒",
+    "Beaconator": "信标工程师",
+    "How Did We Get Here?": "为什么会变成这样呢？",
+    "The End": "末地",
+    "Free the End": "解放末地",
+    "You Need a Mint": "你需要来点薄荷糖",
+    "The Next Generation": "下一世代",
+    "Remote Getaway": "远程折跃",
+    "The End... Again...": "结束了再一次",
+    "The City at the End of the Game": "在游戏尽头的城市",
+    "Sky's the Limit": "天空即为极限",
+    "Great View From Up Here": "这上面的风景不错",
+    "Adventure": "冒险",
+    "Sneak 100": "潜行100级",
+    "Crafters Crafting Crafters": "合成器合成合成器",
+    "Caves & Cliffs": "上天入地",
+    "Sticky Situation": "胶着状态",
+    "Monster Hunter": "怪物猎人",
+    "Surge Protector": "电涌保护器",
+    "Minecraft: Trial(s) Edition": "Minecraft：试炼版",
+    "Ol' Betsy": "扣下悬刀",
+    "The Power of Books": "知识就是力量",
+    "Isn't It Scute?": "这不是鳞甲么？",
+    "Respecting the Remnants": "探古寻源",
+    "Sweet Dreams": "甜蜜的梦",
+    "Is It a Bird?": "那是鸟吗？",
+    "What a Deal!": "成交！",
+    "Crafting a New Look": "旧貌锻新颜",
+    "Voluntary Exile": "自我放逐",
+    "Monsters Hunted": "资深怪物猎人",
+    "It Spreads": "它蔓延了",
+    "Take Aim": "瞄准目标",
+    "A Throwaway Joke": "抖包袱",
+    "Postmortal": "超越生死",
+    "Blowback": "逆风翻盘",
+    "Lighten Up": "铜光焕发",
+    "Over-Overkill": "天赐良击",
+    "Under Lock and Key": "珍藏密敛",
+    "Who Needs Rockets?": "还要啥火箭啊？",
+    "Arbalistic": "劲弩手",
+    "Two Birds, One Arrow": "一箭双雕",
+    "Who's the Pillager Now?": "现在谁才是掠夺者？",
+    "Careful Restoration": "精修细补",
+    "Adventuring Time": "探索的时光",
+    "Sound of Music": "音乐之声",
+    "Light as a Rabbit": "轻功雪上飘",
+    "Is It a Balloon?": "那是气球吗？",
+    "Hired Help": "招募援兵",
+    "Star Trader": "星际商人",
+    "Smithing with Style": "匠心独具",
+    "Hero of the Village": "村庄英雄",
+    "Bullseye": "正中靶心",
+    "Sniper Duel": "狙击手的对决",
+    "Very Very Frightening": "魔女审判",
+    "Is It a Plane?": "那是飞机吗？",
+    "Revaulting": "宝经磨炼",
+    "Husbandry": "农牧业",
+    "You've Got a Friend in Me": "找到一个好朋友",
+    "The Parrots and the Bats": "我从哪儿来？",
+    "Fishy Business": "腥味十足的生意",
+    "Glow and Behold!": "眼前一亮！",
+    "Smells Interesting": "怪味蛋",
+    "A Seedy Place": "开荒垦地",
+    "Whatever Floats Your Goat!": "羊帆起航！",
+    "Bee Our Guest": "与蜂共舞",
+    "Total Beelocation": "举巢搬迁",
+    "Bukkit Bukkit": "蚪到桶里来",
+    "Best Friends Forever": "永恒的伙伴",
+    "Birthday Song": "生日快乐歌",
+    "Two by Two": "成双成对",
+    "Tactical Fishing": "战术性钓鱼",
+    "Little Sniffs": "小小嗅探兽",
+    "A Balanced Diet": "均衡饮食",
+    "Serious Dedication": "终极奉献",
+    "Wax On": "涂蜡",
+    "When the Squad Hops into Town": "呱呱队出动",
+    "Good as New": "完好如初",
+    "Shear Brilliance": "华丽一剪",
+    "A Complete Catalogue": "百猫全书",
+    "The Whole Pack": "群狼聚首",
+    "The Cutest Predator": "最萌捕食者",
+    "Planting the Past": "播种往事",
+    "Wax Off": "脱蜡",
+    "With Our Powers Combined!": "相映生辉！",
+    "The Healing Power of Friendship!": "友谊的治愈力！"
  }
 
 achievement_template = {
