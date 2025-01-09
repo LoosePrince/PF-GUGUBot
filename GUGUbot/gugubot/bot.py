@@ -723,7 +723,7 @@ class qbot(qbot_helper):
             temp = asyncio.run(
                 get_group_name(bot, self.config['group_id'])
             )
-            temp.update(self.server_name)
+            temp.update(self.group_name)
             self.group_name = temp
 
         # 检测关键词
