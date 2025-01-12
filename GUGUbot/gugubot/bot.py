@@ -546,7 +546,10 @@ class qbot(qbot_helper):
                 if self.config["command"]["whitelist"]:
                     for player_name in self.data[user_id]:
                         self.whitelist.remove_player(player_name)
-                    bot.reply(info, get_style_template('del_whitelist_when_quit', self.style).format(",".join(self.data[user_id])))
+                    bot.send_group_msg(group_id = info.group_id, 
+                                       message = get_style_template('del_whitelist_when_quit', self.style)\
+                                        .format(",".join(self.data[user_id]) )
+                        )
                 del self.data[user_id]
 
     #===================================================================#
@@ -707,7 +710,7 @@ class qbot(qbot_helper):
         if not is_valid_message(info, bot, self.config): return
         
         if self.config.get('show_message_in_console', True):
-            server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_message}")
+            server.logger.info(f"收到消息上报：{info.user_id}")#:{info.raw_message}")
 
         # 绑定提示
         if self.data.handle_bound_notice(info, bot): return
