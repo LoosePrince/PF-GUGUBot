@@ -540,16 +540,21 @@ class qbot(qbot_helper):
         server.logger.debug(f"收到上报提示：{info}")
         # 指定群里 + 是退群消息
         if info.notice_type == 'group_decrease' \
-            and info.source_id in self.config.get('group_id', []):
+            and info.group_id in self.config.get('group_id', []):
             user_id = str(info.user_id)
             if user_id in self.data.keys():
+                # Remove whitelist
                 if self.config["command"]["whitelist"]:
                     for player_name in self.data[user_id]:
                         self.whitelist.remove_player(player_name)
-                    bot.send_group_msg(group_id = info.group_id, 
-                                       message = get_style_template('del_whitelist_when_quit', self.style)\
-                                        .format(",".join(self.data[user_id]) )
-                        )
+                
+                # bot notice
+                bot.send_group_msg(group_id = info.group_id, 
+                                    message = get_style_template('del_whitelist_when_quit', self.style)\
+                                    .format(",".join(self.data[user_id]) )
+                    )
+                
+                # Remove bound
                 del self.data[user_id]
 
     #===================================================================#
