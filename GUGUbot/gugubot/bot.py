@@ -420,12 +420,7 @@ class qbot_helper:
                 self.config['command']['name'] = False
                 self.config.save()
 
-                bot_data = asyncio.run(self.bot.get_login_info())["data"]
-                bot_qq_id = int(bot_data['user_id'])
-                bot_name = bot_data['nickname']
-
-                for gid in self.config.get('group_id', []):
-                    bot.set_group_card(gid, bot_qq_id, bot_name)
+                self.set_number_as_name(server, reset=True)
                 bot.reply(info, "显示游戏内人数已关闭")
 
             return True
