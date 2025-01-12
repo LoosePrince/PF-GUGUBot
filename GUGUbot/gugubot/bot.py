@@ -165,7 +165,7 @@ class qbot_helper:
             + RText(f" {message}", color=RColor.white)
         server.say(rtext)
 
-    def set_number_as_name(self, server:PluginServerInterface)->None:
+    def set_number_as_name(self, server:PluginServerInterface, reset:bool=False)->None:
         """
         Set the number of online player as bot's groupcard
 
@@ -173,15 +173,21 @@ class qbot_helper:
             server (mcdreforged.api.types.PluginServerInterface): The MCDR game interface.
         """
 
+        bot_data = asyncio.run(self.bot.get_login_info())["data"]
+        bot_qq_id = int(bot_data['user_id'])
+        bot_name = bot_data['nickname']
+
+        if reset:
+            for gid in self.config.get('group_id', []):
+                self.bot.set_group_card(gid, bot_qq_id, bot_name)
+            return
+
         def list_callback(content:str):
             player_list, _ = parse_list_content(self.data, server, content)
 
             number = len(player_list)
-
-            bot_data = asyncio.run(self.bot.get_login_info())["data"]
-            bot_qq_id = int(bot_data['user_id'])
             bot_name = bot_data['nickname']
-
+            
             if number != 0:     
                 bot_name = "在线人数: {}".format(number) if \
                     not self.server_name else \
@@ -414,12 +420,7 @@ class qbot_helper:
                 self.config['command']['name'] = False
                 self.config.save()
 
-                bot_data = asyncio.run(self.bot.get_login_info())["data"]
-                bot_qq_id = int(bot_data['user_id'])
-                bot_name = bot_data['nickname']
-
-                for gid in self.config.get('group_id', []):
-                    bot.set_group_card(gid, bot_qq_id, bot_name)
+                self.set_number_as_name(server, reset=True)
                 bot.reply(info, "显示游戏内人数已关闭")
 
             return True
