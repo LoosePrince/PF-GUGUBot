@@ -33,11 +33,10 @@ def is_valid_message(info, bot, config):
     condition = [
         info.content,                                                 # 不是空内容
         not info.content.startswith(config['command_prefix']),        # 不是指令
-        info.source_id in config.get('group_id', []),                 # 是指定群消息
-        not is_robot(bot, info.source_id, info.user_id)               # 不是机器人  
-            or config['forward'].get('forward_other_bot', False)      # 是机器人 + 转发机器人
+        info.source_id in config.get('group_id', [])                 # 是指定群消息
     ]
-    return all(condition)
+    return all(condition) and (not is_robot(bot, info.source_id, info.user_id) \
+            or config['forward'].get('forward_other_bot', False))      # 不是机器人/是机器人 + 转发机器人)
 
 def is_valid_command_source(info, config) -> bool:
     return any([
