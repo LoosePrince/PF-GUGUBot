@@ -540,7 +540,7 @@ class qbot(qbot_helper):
         server.logger.debug(f"收到上报提示：{info}")
         # 指定群里 + 是退群消息
         if info.notice_type == 'group_decrease' \
-            and info.source_id in self.config.get('group_id', []):
+            and info.group_id in self.config.get('group_id', []):
             user_id = str(info.user_id)
             if user_id in self.data.keys():
                 if self.config["command"]["whitelist"]:
