@@ -182,11 +182,17 @@ def on_server_startup(server:PluginServerInterface)->None:
             # 执行指令
             server.execute(command)
 
+        if qq_bot.config["command"]["name"]:
+            qq_bot.set_number_as_name(server, reset=True)
+
 # 关服
 def on_server_stop(server: PluginServerInterface, server_return_code: int)->None:
     if isinstance(qq_bot, qbot):
         # 关服提示
         qq_bot.send_msg_to_all_qq(get_style_template('server_stop', qq_bot.style))
+        
+        if qq_bot.config["command"]["name"]:
+            qq_bot.set_number_as_name(server, reset=True)
 
 # 设置系统路径
 def set_sys_path()->None:
