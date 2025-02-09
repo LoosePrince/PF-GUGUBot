@@ -169,6 +169,7 @@ def parse_list_content(bound_list, server, content:str):
     
     online_player_api = server.get_plugin_instance("online_player_api")
     if "online: " not in content and online_player_api: # multiline_return
+        time.sleep(0.5) # wait for the online_player_api to update
         instance_list = online_player_api.get_player_list()
     elif "online: " not in content:
         server.logger.warning("无法解析多行返回，开启 rcon 或下载 online_player_api 来解析")
