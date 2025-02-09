@@ -178,7 +178,7 @@ class qbot_helper:
 
             number = len(player_list)
 
-            bot_data = asyncio.run(self.bot.get_login_info())["data"]
+            bot_data = self.bot.get_login_info_sync()["data"]
             bot_qq_id = int(bot_data['user_id'])
             bot_name = bot_data['nickname']
 
@@ -214,7 +214,7 @@ class qbot_helper:
             return self.data[str(qq_id)][0]
         
         try:  # 未匹配到名字，尝试获取QQ名片
-            target_data = asyncio.run(bot.get_group_member_info(group_id, qq_id)).get('data', {})
+            target_data = bot.get_group_member_info_sync(group_id, qq_id).get('data', {})
             target_name = target_data.get('card') or target_data.get('nickname', qq_id)
         except Exception as e:
             self.server.logger.error(f"获取QQ名片失败：{e}, 请检查cq_qq_api链接是否断开")
@@ -223,7 +223,7 @@ class qbot_helper:
         return target_name
 
     def _get_previous_sender_name(self, qq_id: str, group_id: str, bot, previous_message_content):
-        bot_info = asyncio.run(bot.get_login_info())['data']
+        bot_info = bot.get_login_info_sync()['data']
         if str(qq_id) == str(bot_info['user_id']):
             # remove server_name in reply
             if self.server_name:
@@ -255,7 +255,7 @@ class qbot_helper:
             group_name = self.group_name.get(info.source_id, "QQ") 
 
             if previous_message_id:
-                previous_message = asyncio.run(bot.get_msg(previous_message_id.group(1)))['data']
+                previous_message = bot.get_msg_sync(previous_message_id.group(1))['data']
                 receiver = self._get_previous_sender_name(str(previous_message['sender']['user_id']), str(info.source_id), bot, previous_message['message'])
                 forward_content = re.search(r'\[CQ:reply,id=-?\d+.*?\](?:\[@\d+[^\]]*?\])?(.*)', info.content).group(1).strip()
 
@@ -414,7 +414,7 @@ class qbot_helper:
                 self.config['command']['name'] = False
                 self.config.save()
 
-                bot_data = asyncio.run(self.bot.get_login_info())["data"]
+                bot_data = bot.get_login_info_sync()["data"]
                 bot_qq_id = int(bot_data['user_id'])
                 bot_name = bot_data['nickname']
 
@@ -681,7 +681,7 @@ class qbot(qbot_helper):
             and self.config["command"]["shenhe"] \
             and self.shenheman.data:
             # 获取名称
-            stranger_name = asyncio.run(bot.get_stranger_info(info.user_id))["data"]["nickname"]
+            stranger_name = bot.get_stranger_info_sync(info.user_id)["data"]["nickname"]
             # 审核人
             at_id = self.shenheman.get_id(info.comment, list(self.shenheman.keys())[0])
             # 通知
@@ -718,7 +718,6 @@ class qbot(qbot_helper):
         # 是否转发消息
         is_forward_to_mc = self.config['forward']['qq_to_mc']
 
-        # 
         if info.source_id not in self.group_name:
             temp = asyncio.run(
                 get_group_name(bot, self.config['group_id'])
@@ -795,6 +794,3 @@ class qbot(qbot_helper):
             msg = msg.replace("%3$s", weapon if weapon else "")
 
             self.send_msg_to_all_qq(msg)
-    
-
-    
