@@ -240,7 +240,8 @@ class qbot_helper:
 
             if isinstance(previous_message_content, list):
                 self.server.logger.warning("请检查QQ机器人消息格式! 需要: CQ码 或 text")
-                return qq_id
+                # FIXME: 临时兼容 LLOneBot 消息段返回格式
+                previous_message_content = previous_message_content[0].get("data",{}).get("text", qq_id).replace(f"{self.server_name} ", "", 1)
 
             # find player name
             pattern = r"^\((.*?)\)|^\[(.*?)\]|^(.*?) 说：|^(.*?) : |^冒着爱心眼的(.*?)说："
