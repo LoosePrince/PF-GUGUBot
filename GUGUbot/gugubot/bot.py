@@ -165,7 +165,7 @@ class qbot_helper:
             + RText(f" {message}", color=RColor.white)
         server.say(rtext)
 
-    def set_number_as_name(self, server:PluginServerInterface)->None:
+    def set_number_as_name(self, server:PluginServerInterface, reset:bool=False)->None:
         """
         Set the number of online player as bot's groupcard
 
@@ -173,15 +173,24 @@ class qbot_helper:
             server (mcdreforged.api.types.PluginServerInterface): The MCDR game interface.
         """
 
+        bot_data = asyncio.run(self.bot.get_login_info())["data"]
+        bot_qq_id = int(bot_data['user_id'])
+        bot_name = bot_data['nickname']
+
+        if reset:
+            for gid in self.config.get('group_id', []):
+                self.bot.set_group_card(gid, bot_qq_id, bot_name)
+            return
+
         def list_callback(content:str):
             player_list, _ = parse_list_content(self.data, server, content)
 
             number = len(player_list)
-
+            
             bot_data = self.bot.get_login_info_sync()["data"]
             bot_qq_id = int(bot_data['user_id'])
             bot_name = bot_data['nickname']
-
+            
             if number != 0:     
                 bot_name = "在线人数: {}".format(number) if \
                     not self.server_name else \
@@ -420,6 +429,7 @@ class qbot_helper:
 
                 for gid in self.config.get('group_id', []):
                     bot.set_group_card(gid, bot_qq_id, bot_name)
+
                 bot.reply(info, "显示游戏内人数已关闭")
 
             return True
@@ -540,13 +550,21 @@ class qbot(qbot_helper):
         server.logger.debug(f"收到上报提示：{info}")
         # 指定群里 + 是退群消息
         if info.notice_type == 'group_decrease' \
-            and info.source_id in self.config.get('group_id', []):
+            and info.group_id in self.config.get('group_id', []):
             user_id = str(info.user_id)
             if user_id in self.data.keys():
+                # Remove whitelist
                 if self.config["command"]["whitelist"]:
                     for player_name in self.data[user_id]:
                         self.whitelist.remove_player(player_name)
-                    bot.reply(info, get_style_template('del_whitelist_when_quit', self.style).format(",".join(self.data[user_id])))
+                
+                # bot notice
+                bot.send_group_msg(group_id = info.group_id, 
+                                    message = get_style_template('del_whitelist_when_quit', self.style)\
+                                    .format(",".join(self.data[user_id]) )
+                    )
+                
+                # Remove bound
                 del self.data[user_id]
 
     #===================================================================#
@@ -707,7 +725,7 @@ class qbot(qbot_helper):
         if not is_valid_message(info, bot, self.config): return
         
         if self.config.get('show_message_in_console', True):
-            server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_message}")
+            server.logger.info(f"收到消息上报：{info.user_id}")#:{info.raw_message}")
 
         # 绑定提示
         if self.data.handle_bound_notice(info, bot): return
