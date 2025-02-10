@@ -11,6 +11,7 @@ import pygame
 
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.rtext import RText, RAction, RColor
+from packaging import version
 from ruamel.yaml import YAML
 
 from .data.text import (
@@ -153,7 +154,9 @@ class qbot_helper:
 
     def _forward_message_to_game(self, server:PluginServerInterface, info, bot, message):
         sender = self._find_game_name(str(info.user_id), bot, str(info.source_id))
-        message = beautify_message(message, self.config.get('forward', {}).get('keep_raw_image_link', False))
+        message = beautify_message(message,
+                                   self.config.get('forward', {}).get('keep_raw_image_link', False),
+                                   version.parse(server.get_server_information().version) < version.parse("1.12"))
 
         group_name = self.group_name.get(info.source_id, "QQ") 
         group_id = str(info.source_id)
@@ -317,7 +320,9 @@ class qbot_helper:
             if is_forward_to_mc:
                 # 过滤图片
                 if key_word_reply.startswith('[CQ:image'):
-                    key_word_reply = beautify_message(key_word_reply, self.config.get('forward', {}).get('keep_raw_image_link', False))
+                    key_word_reply = beautify_message(key_word_reply, 
+                                                      self.config.get('forward', {}).get('keep_raw_image_link', False),
+                                                      version.parse(server.get_server_information().version) < version.parse("1.12"))
                 
                 group_name = self.group_name.get(info.source_id, "QQ") 
                 group_id = str(info.source_id)
