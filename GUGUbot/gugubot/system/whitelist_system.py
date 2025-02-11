@@ -20,7 +20,9 @@ class whitelist(base_system):
         else:
             self.__api.disable_whitelist()
 
-    def add_player(self, game_id:str)->bool:
+    def add_player(self, game_id:str, 
+                   force_online:bool=False,
+                   force_offline:bool=False)->bool:
         """Add player to whitelist
 
         Args:
@@ -32,12 +34,14 @@ class whitelist(base_system):
         whitelist = self.__api.get_whitelist_names()
 
         if game_id not in whitelist:
-            self.__api.add_online_player(game_id)
-            # Refresh whitelist to check if added to whitelist
-            whitelist = self.__api.get_whitelist_names()
-
-            if game_id not in whitelist:
+            # Auto mode
+            if not any([force_online, force_offline]):
+                self.__api.add_player(game_id)
+            elif force_online: # Add in online mode
+                self.__api.add_online_player(game_id)
+            elif force_offline: # Add in offline mode
                 self.__api.add_offline_player(game_id)
+
             return True
         
         return False
@@ -87,7 +91,7 @@ class whitelist(base_system):
         Output:
             break_signal (bool, None)
         """
-        # command: add <player_name> 
+        # command: add <player_name> (True/False)
         if parameter[0] not in ['添加', 'add']:
             return True
 
@@ -95,8 +99,22 @@ class whitelist(base_system):
             bot.reply(info, get_style_template('lack_parameter', reply_style))
             return 
         
-        player_name = parameter[1]
-        add_success = self.add_player(player_name)
+        online_keyword = ["True", "T", "正版"]
+        offline_keyword = ["False", "F", "离线"]
+
+        player_name:str = parameter[1]
+
+        # If third parameter exists -> force adding in online/offline mode 
+        online_mode:str = ""
+        if any([player_name.endswith(f" {keyword}") \
+                for keyword in online_keyword + offline_keyword]):
+            player_name, online_mode = player_name.rsplit(maxsplit=1)
+        force_online = online_mode.lower() in online_keyword
+        force_offline = online_mode.lower() in offline_keyword
+
+        add_success = self.add_player(player_name, 
+                                      force_online=force_online,
+                                      force_offline=force_offline)
         if not add_success: # player already exists
             bot.reply(info, get_style_template('add_existed', reply_style))
             return 

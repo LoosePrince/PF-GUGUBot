@@ -11,6 +11,7 @@ import pygame
 
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.rtext import RText, RAction, RColor
+from packaging import version
 from ruamel.yaml import YAML
 
 from .data.text import (
@@ -153,7 +154,9 @@ class qbot_helper:
 
     def _forward_message_to_game(self, server:PluginServerInterface, info, bot, message):
         sender = self._find_game_name(str(info.user_id), bot, str(info.source_id))
-        message = beautify_message(message, self.config.get('forward', {}).get('keep_raw_image_link', False))
+        message = beautify_message(message,
+                                   self.config.get('forward', {}).get('keep_raw_image_link', False),
+                                   version.parse(server.get_server_information().version) < version.parse("1.12"))
 
         group_name = self.group_name.get(info.source_id, "QQ") 
         group_id = str(info.source_id)
@@ -165,7 +168,7 @@ class qbot_helper:
             + RText(f" {message}", color=RColor.white)
         server.say(rtext)
 
-    def set_number_as_name(self, server:PluginServerInterface)->None:
+    def set_number_as_name(self, server:PluginServerInterface, reset:bool=False)->None:
         """
         Set the number of online player as bot's groupcard
 
@@ -173,15 +176,24 @@ class qbot_helper:
             server (mcdreforged.api.types.PluginServerInterface): The MCDR game interface.
         """
 
+        bot_data = asyncio.run(self.bot.get_login_info())["data"]
+        bot_qq_id = int(bot_data['user_id'])
+        bot_name = bot_data['nickname']
+
+        if reset:
+            for gid in self.config.get('group_id', []):
+                self.bot.set_group_card(gid, bot_qq_id, bot_name)
+            return
+
         def list_callback(content:str):
             player_list, _ = parse_list_content(self.data, server, content)
 
             number = len(player_list)
-
-            bot_data = asyncio.run(self.bot.get_login_info())["data"]
+            
+            bot_data = self.bot.get_login_info_sync()["data"]
             bot_qq_id = int(bot_data['user_id'])
             bot_name = bot_data['nickname']
-
+            
             if number != 0:     
                 bot_name = "在线人数: {}".format(number) if \
                     not self.server_name else \
@@ -214,7 +226,7 @@ class qbot_helper:
             return self.data[str(qq_id)][0]
         
         try:  # 未匹配到名字，尝试获取QQ名片
-            target_data = asyncio.run(bot.get_group_member_info(group_id, qq_id)).get('data', {})
+            target_data = bot.get_group_member_info_sync(group_id, qq_id).get('data', {})
             target_name = target_data.get('card') or target_data.get('nickname', qq_id)
         except Exception as e:
             self.server.logger.error(f"获取QQ名片失败：{e}, 请检查cq_qq_api链接是否断开")
@@ -223,7 +235,7 @@ class qbot_helper:
         return target_name
 
     def _get_previous_sender_name(self, qq_id: str, group_id: str, bot, previous_message_content):
-        bot_info = asyncio.run(bot.get_login_info())['data']
+        bot_info = bot.get_login_info_sync()['data']
         if str(qq_id) == str(bot_info['user_id']):
             # remove server_name in reply
             if self.server_name:
@@ -231,7 +243,8 @@ class qbot_helper:
 
             if isinstance(previous_message_content, list):
                 self.server.logger.warning("请检查QQ机器人消息格式! 需要: CQ码 或 text")
-                return qq_id
+                # FIXME: 临时兼容 LLOneBot 消息段返回格式
+                previous_message_content = previous_message_content[0].get("data",{}).get("text", qq_id).replace(f"{self.server_name} ", "", 1)
 
             # find player name
             pattern = r"^\((.*?)\)|^\[(.*?)\]|^(.*?) 说：|^(.*?) : |^冒着爱心眼的(.*?)说："
@@ -255,7 +268,7 @@ class qbot_helper:
             group_name = self.group_name.get(info.source_id, "QQ") 
 
             if previous_message_id:
-                previous_message = asyncio.run(bot.get_msg(previous_message_id.group(1)))['data']
+                previous_message = bot.get_msg_sync(previous_message_id.group(1))['data']
                 receiver = self._get_previous_sender_name(str(previous_message['sender']['user_id']), str(info.source_id), bot, previous_message['message'])
                 forward_content = re.search(r'\[CQ:reply,id=-?\d+.*?\](?:\[@\d+[^\]]*?\])?(.*)', info.content).group(1).strip()
 
@@ -307,7 +320,9 @@ class qbot_helper:
             if is_forward_to_mc:
                 # 过滤图片
                 if key_word_reply.startswith('[CQ:image'):
-                    key_word_reply = beautify_message(key_word_reply, self.config.get('forward', {}).get('keep_raw_image_link', False))
+                    key_word_reply = beautify_message(key_word_reply, 
+                                                      self.config.get('forward', {}).get('keep_raw_image_link', False),
+                                                      version.parse(server.get_server_information().version) < version.parse("1.12"))
                 
                 group_name = self.group_name.get(info.source_id, "QQ") 
                 group_id = str(info.source_id)
@@ -414,12 +429,13 @@ class qbot_helper:
                 self.config['command']['name'] = False
                 self.config.save()
 
-                bot_data = asyncio.run(self.bot.get_login_info())["data"]
+                bot_data = bot.get_login_info_sync()["data"]
                 bot_qq_id = int(bot_data['user_id'])
                 bot_name = bot_data['nickname']
 
                 for gid in self.config.get('group_id', []):
                     bot.set_group_card(gid, bot_qq_id, bot_name)
+
                 bot.reply(info, "显示游戏内人数已关闭")
 
             return True
@@ -540,13 +556,21 @@ class qbot(qbot_helper):
         server.logger.debug(f"收到上报提示：{info}")
         # 指定群里 + 是退群消息
         if info.notice_type == 'group_decrease' \
-            and info.source_id in self.config.get('group_id', []):
+            and info.group_id in self.config.get('group_id', []):
             user_id = str(info.user_id)
             if user_id in self.data.keys():
+                # Remove whitelist
                 if self.config["command"]["whitelist"]:
                     for player_name in self.data[user_id]:
                         self.whitelist.remove_player(player_name)
-                    bot.reply(info, get_style_template('del_whitelist_when_quit', self.style).format(",".join(self.data[user_id])))
+                
+                # bot notice
+                bot.send_group_msg(group_id = info.group_id, 
+                                    message = get_style_template('del_whitelist_when_quit', self.style)\
+                                    .format(",".join(self.data[user_id]) )
+                    )
+                
+                # Remove bound
                 del self.data[user_id]
 
     #===================================================================#
@@ -681,7 +705,7 @@ class qbot(qbot_helper):
             and self.config["command"]["shenhe"] \
             and self.shenheman.data:
             # 获取名称
-            stranger_name = asyncio.run(bot.get_stranger_info(info.user_id))["data"]["nickname"]
+            stranger_name = bot.get_stranger_info_sync(info.user_id)["data"]["nickname"]
             # 审核人
             at_id = self.shenheman.get_id(info.comment, list(self.shenheman.keys())[0])
             # 通知
@@ -707,7 +731,7 @@ class qbot(qbot_helper):
         if not is_valid_message(info, bot, self.config): return
         
         if self.config.get('show_message_in_console', True):
-            server.logger.info(f"收到消息上报：{info.user_id}:{info.raw_message}")
+            server.logger.info(f"收到消息上报：{info.user_id}")#:{info.raw_message}")
 
         # 绑定提示
         if self.data.handle_bound_notice(info, bot): return
@@ -718,7 +742,6 @@ class qbot(qbot_helper):
         # 是否转发消息
         is_forward_to_mc = self.config['forward']['qq_to_mc']
 
-        # 
         if info.source_id not in self.group_name:
             temp = asyncio.run(
                 get_group_name(bot, self.config['group_id'])
@@ -795,6 +818,3 @@ class qbot(qbot_helper):
             msg = msg.replace("%3$s", weapon if weapon else "")
 
             self.send_msg_to_all_qq(msg)
-    
-
-    

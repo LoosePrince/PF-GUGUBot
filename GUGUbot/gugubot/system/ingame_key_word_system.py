@@ -14,7 +14,7 @@ class ingame_key_word_system(base_system):
         super().__init__(path, server, bot_config, 
                          admin_help_msg=ingame_key_word_help,
                          system_name="ingame_key_word", 
-                         alias=["游戏关键词"])
+                         alias=["游戏内关键词"])
 
     def get_func(self, admin:bool=False):
         """ Return allowed function """
@@ -25,12 +25,12 @@ class ingame_key_word_system(base_system):
         ]
 
         if admin:
-            function_list += [
+            function_list = [
                 self.help,
                 self.enable,
                 self.disable,
                 self.reload
-            ]
+            ] + function_list
         return function_list
 
     def check_response(self, key_word:str):                                                

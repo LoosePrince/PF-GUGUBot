@@ -250,8 +250,9 @@ class bound_system(base_system):
         if parameter[0] not in ['白名单同步','sync_whitelist']:
             return True
 
-        for game_name in self.values():
-            self.whitelist.add_player(game_name)
+        for game_names in self.values():
+            for game_name in game_names:
+                self.whitelist.add_player(game_name)
         
         bot.reply(info, "白名单同步完成！")
     
