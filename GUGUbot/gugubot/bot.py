@@ -11,6 +11,7 @@ import pygame
 
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.rtext import RText, RAction, RColor
+from packaging import version
 from ruamel.yaml import YAML
 
 from .data.text import (
@@ -153,7 +154,9 @@ class qbot_helper:
 
     def _forward_message_to_game(self, server:PluginServerInterface, info, bot, message):
         sender = self._find_game_name(str(info.user_id), bot, str(info.source_id))
-        message = beautify_message(message, self.config.get('forward', {}).get('keep_raw_image_link', False))
+        message = beautify_message(message,
+                                   self.config.get('forward', {}).get('keep_raw_image_link', False),
+                                   version.parse(server.get_server_information().version) < version.parse("1.12"))
 
         group_name = self.group_name.get(info.source_id, "QQ") 
         group_id = str(info.source_id)
@@ -240,7 +243,8 @@ class qbot_helper:
 
             if isinstance(previous_message_content, list):
                 self.server.logger.warning("请检查QQ机器人消息格式! 需要: CQ码 或 text")
-                return qq_id
+                # FIXME: 临时兼容 LLOneBot 消息段返回格式
+                previous_message_content = previous_message_content[0].get("data",{}).get("text", qq_id).replace(f"{self.server_name} ", "", 1)
 
             # find player name
             pattern = r"^\((.*?)\)|^\[(.*?)\]|^(.*?) 说：|^(.*?) : |^冒着爱心眼的(.*?)说："
@@ -316,7 +320,9 @@ class qbot_helper:
             if is_forward_to_mc:
                 # 过滤图片
                 if key_word_reply.startswith('[CQ:image'):
-                    key_word_reply = beautify_message(key_word_reply, self.config.get('forward', {}).get('keep_raw_image_link', False))
+                    key_word_reply = beautify_message(key_word_reply, 
+                                                      self.config.get('forward', {}).get('keep_raw_image_link', False),
+                                                      version.parse(server.get_server_information().version) < version.parse("1.12"))
                 
                 group_name = self.group_name.get(info.source_id, "QQ") 
                 group_id = str(info.source_id)
