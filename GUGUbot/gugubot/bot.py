@@ -185,8 +185,8 @@ class qbot_helper:
                 self.bot.set_group_card(gid, bot_qq_id, bot_name)
             return
 
-        def list_callback(content:str):
-            player_list, _ = parse_list_content(self.data, server, content)
+        def list_callback(content:str, use_rcon:bool=False):
+            player_list, _ = parse_list_content(self.data, server, content, use_rcon)
 
             number = len(player_list)
             
@@ -203,7 +203,7 @@ class qbot_helper:
                 self.bot.set_group_card(gid, bot_qq_id, bot_name)
 
         if server.is_rcon_running(): # use rcon to get command return 
-            list_callback(server.rcon_query("list"))
+            list_callback(server.rcon_query("list"), use_rcon=True)
         else:         # use MCDR's on_info to get command return
             self._list_callback.append(list_callback)
             server.execute("list")
@@ -337,18 +337,18 @@ class qbot_helper:
         return False
 
     def _handle_list_command(self, server:PluginServerInterface, info, bot, command:list[str]):
-        def list_callback(content: str):
+        def list_callback(content: str, use_rcon:bool=False):
             server_status = command[0] in ['服务器', 'server']
             player_status = command[0] in ['玩家', '玩家列表']
             
-            player_list, bot_list = parse_list_content(self.data, server, content)
+            player_list, bot_list = parse_list_content(self.data, server, content, use_rcon)
 
             respond = format_list_response(player_list, bot_list, player_status, server_status, self.style)
             respond = self._add_server_name(respond)
             bot.reply(info, respond, force_reply=True)
 
         if server.is_rcon_running(): # use rcon to get command return 
-            list_callback(server.rcon_query("list"))
+            list_callback(server.rcon_query("list"), use_rcon=True)
         else:
             self._list_callback.append(list_callback)
             server.execute("list")
