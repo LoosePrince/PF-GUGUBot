@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from mcdreforged.api.types import PluginServerInterface
 
-from .base_system import base_system
-from .bound_system import bound_system
-from .whitelist_system import whitelist
-from ..data.text import uuid_help
-from ..utils import get_style_template
+from gugubot.system.base_system import base_system
+from gugubot.system.bound_system import bound_system
+from gugubot.system.whitelist_system import whitelist
+from gugubot.data.text import uuid_help
+from gugubot.utils.style import get_style_template
 
 class uuid_system(base_system):
     def __init__(self, 

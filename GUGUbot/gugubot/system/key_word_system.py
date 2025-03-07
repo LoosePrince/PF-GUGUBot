@@ -4,9 +4,9 @@ import time
 
 from mcdreforged.api.types import PluginServerInterface
 
-from .base_system import base_system
-from ..data.text import key_word_help
-from ..utils import get_style_template
+from gugubot.system.base_system import base_system
+from gugubot.data.text import key_word_help
+from gugubot.utils.style import get_style_template
 
 class key_word_system(base_system):
     def __init__(self, 
