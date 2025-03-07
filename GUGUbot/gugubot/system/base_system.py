@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 from mcdreforged.api.types import PluginServerInterface
 
-from ..data.text import (
+from gugubot.data.text import (
     key_word_help,
     ban_word_help,
     start_command_help,
     shenhe_help
 )
-from ..config import autoSaveDict
-from ..utils import get_style_template
+from gugubot.config import autoSaveDict
+from gugubot.utils.style import get_style_template
 
 class base_system(object):
     def __init__(self, 

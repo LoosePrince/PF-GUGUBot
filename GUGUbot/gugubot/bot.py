@@ -14,7 +14,7 @@ from mcdreforged.api.rtext import RText, RAction, RColor
 from packaging import version
 from ruamel.yaml import YAML
 
-from .data.text import (
+from gugubot.data.text import (
     admin_help_msg,
     group_help_msg,
     name_help,
@@ -24,9 +24,9 @@ from .data.text import (
     achievement_template,
     death_template
 )
-from .config import autoSaveDict, botConfig
-from .utils import *
-from .system import (
+from gugubot.config import autoSaveDict, botConfig
+from gugubot.utils import *
+from gugubot.system import (
     ban_word_system,
     bound_system,
     ingame_key_word_system,
