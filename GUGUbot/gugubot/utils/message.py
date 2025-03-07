@@ -1,8 +1,8 @@
 import json
 import re
 
-from .style import get_style_template
-from ..data.text import qq_face_name
+from gugubot.utils.style import get_style_template
+from gugubot.data.text import qq_face_name
 
 def replace_emoji(match):
     emoji_id = match.group(1)
