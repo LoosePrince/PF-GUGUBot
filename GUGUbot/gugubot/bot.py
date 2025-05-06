@@ -154,9 +154,12 @@ class qbot_helper:
 
     def _forward_message_to_game(self, server:PluginServerInterface, info, bot, message):
         sender = self._find_game_name(str(info.user_id), bot, str(info.source_id))
+
+        server_version = server.get_server_information().version
+        greater_than_1_12 = (version.parse(server_version) > version.parse("1.12") ) if server_version else True
         message = beautify_message(message,
                                    self.config.get('forward', {}).get('keep_raw_image_link', False),
-                                   version.parse(server.get_server_information().version) < version.parse("1.12"))
+                                    not greater_than_1_12)
 
         group_name = self.group_name.get(info.source_id, "QQ") 
         group_id = str(info.source_id)
@@ -320,9 +323,11 @@ class qbot_helper:
             if is_forward_to_mc:
                 # 过滤图片
                 if key_word_reply.startswith('[CQ:image'):
+                    server_version = server.get_server_information().version
+                    greater_than_1_12 = (version.parse(server_version) > version.parse("1.12") ) if server_version else True
                     key_word_reply = beautify_message(key_word_reply, 
                                                       self.config.get('forward', {}).get('keep_raw_image_link', False),
-                                                      version.parse(server.get_server_information().version) < version.parse("1.12"))
+                                                      not greater_than_1_12)
                 
                 group_name = self.group_name.get(info.source_id, "QQ") 
                 group_id = str(info.source_id)

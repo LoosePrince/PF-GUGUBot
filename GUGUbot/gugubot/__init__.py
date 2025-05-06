@@ -4,11 +4,6 @@ import json
 import os
 import requests
 import shutil
-import sys
-
-# GUGUbot加入系统路径
-gugu_dir = os.path.dirname(__file__)[:-7] # remove \gugubot
-sys.path.append(gugu_dir)  if gugu_dir not in sys.path  else None
 
 from .bot import qbot
 from .utils import get_latest_group_notice, get_style_template, is_player
@@ -18,8 +13,6 @@ from mcdreforged.api.command import *
 import pygame
 #+---------------------------------------------------------------------+
 def on_load(server: PluginServerInterface, old)->None:
-    # 设置系统路径
-    set_sys_path()
     global qq_bot
 
     # 获取接口机器人
@@ -194,11 +187,6 @@ def on_server_stop(server: PluginServerInterface, server_return_code: int)->None
         if qq_bot.config["command"]["name"]:
             qq_bot.set_number_as_name(server, reset=True)
 
-# 设置系统路径
-def set_sys_path()->None:
-    file_dir = os.path.dirname(__file__)
-    if file_dir not in sys.path:
-        sys.path.append(file_dir)
 #+---------------------------------------------------------------------+
 def temp_update_version(server:PluginServerInterface)->None:
     config_dir = "./config/GUGUbot"
