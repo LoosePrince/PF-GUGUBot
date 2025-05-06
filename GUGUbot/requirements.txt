@@ -1,3 +1,2 @@
-pygame
-Requests
+rquests
 ruamel.yaml
