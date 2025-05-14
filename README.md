@@ -18,30 +18,25 @@
 > [!TIP]
 > [腾讯文档] GUGUbot文档<br>
 > 此Github文档不再维护详细内容，仅保留必要说明<br>
-> 访问腾讯文档查看更详细的说明: https://docs.qq.com/aio/p/sct29j7ammzw142
+> 访问官方文档查看更详细的说明: https://pf-doc.pfingan.com/main.html?root=PF-gugubot
 >
 > 第三方授权文档（编写中）：https://docs.pfingan.com/PF-gugubot/
 
 ## 腾讯文档快速导航
-### [GUGUbot](https://docs.qq.com/aio/p/sct29j7ammzw142?p=8zf59bKLGJK66HBlVLjqwJ)
-1. [前置依赖](https://docs.qq.com/aio/p/sct29j7ammzw142?p=5lMm6oYzWp4nMSHHrcR1DG)
-2. [安装（快速开始）](https://docs.qq.com/aio/p/sct29j7ammzw142?p=zdYp7EVd2d04QBQ0FrD7sX)
-3. [功能列表](https://docs.qq.com/aio/p/sct29j7ammzw142?p=kKIaQMdRR7IvJ2AMa30Din)
-    - [自定义说明](https://docs.qq.com/aio/p/sct29j7ammzw142?p=pEQyDIrFanCo9ErEZZPncf)
-4. [配置](https://docs.qq.com/aio/p/sct29j7ammzw142?p=iXyl6g1K1p1dK2rujfGH7u)
-5. [疑难解答](https://docs.qq.com/aio/p/sct29j7ammzw142?p=8kJWVjHPK8Zkujhwd73Zbb)
-6. [多服互联](https://docs.qq.com/aio/p/sct29j7ammzw142?p=Ply25UKYNFiWqDdNDTLgWY)
-7. [开发指南](https://docs.qq.com/aio/p/sct29j7ammzw142?p=EY13Ly9HEWslxTOyB62KdW)
-   - [接口](https://docs.qq.com/aio/p/sct29j7ammzw142?p=pTowgV8359jVGjsobNQEst)
-8. [贡献](https://docs.qq.com/aio/p/sct29j7ammzw142?p=OreXhO8piOO7Ak7RnpPCMp)
-### [CQ-QQ-API](https://docs.qq.com/aio/p/sct29j7ammzw142?p=NJ5GySzVisEJ9xQp7iW8P7)
-1. [快速开始](https://docs.qq.com/aio/p/sct29j7ammzw142?p=5PaUIBXxTwyMouazErWqIT)
-2. [配置](https://docs.qq.com/aio/p/sct29j7ammzw142?p=vUShdYdligIgQvmxLZu3s8)
-3. [群友提供的机器人食用指南](https://docs.qq.com/aio/p/sct29j7ammzw142?p=MgrkYFk9OPpK8wZEY8IeBU)
-    - [LiteLoaderQQNT + LLOneBot](https://docs.qq.com/aio/p/sct29j7ammzw142?p=uFoW8O80TsvZ1ccJB7Wxum)
-    - [NapCat](https://docs.qq.com/aio/p/sct29j7ammzw142?p=UggIX3zxZcpl4PamYNA1Nd)
-4. [开发指南](https://docs.qq.com/aio/p/sct29j7ammzw142?p=kCIVuht8VcP2vDGLqA9VUW)
-5. [致谢](https://docs.qq.com/aio/p/sct29j7ammzw142?p=w6BO9iUIonwXPN8xBof94F)
+### [GUGUbot](https://pf-doc.pfingan.com/main.html?root=PF-gugubot)
+1. [前置依赖](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/前置依赖.md&root=PF-gugubot)
+2. [安装（快速开始）](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/快速开始.md&root=PF-gugubot)
+3. [功能列表](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/功能列表.md&root=PF-gugubot)
+4. [配置](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/配置.md&root=PF-gugubot)
+5. [文件说明文档](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/文档说明文档.md&root=PF-gugubot)
+5. [疑难解答](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/疑难解答.md&root=PF-gugubot)
+### [CQ-QQ-API](https://pf-doc.pfingan.com/main.html?root=PF-cq-api)
+1. [快速开始](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/快速开始.md&root=PF-cq-api)
+2. [群友提供的机器人食用指南](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/机器人食用指南.md&root=PF-cq-api)
+    - [LiteLoaderQQNT + LLOneBot](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/LLOneBot.md&root=PF-cq-api)
+    - [NapCat](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/NapCat.md&root=PF-cq-api)
+    - [Lagrange](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/Lagrange.md&root=PF-cq-api)
+3. [开发指南](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/开发指南.md&root=PF-cq-api)
 
 ## 安装
 #### MCDR快捷安装: 
@@ -86,7 +81,7 @@
 
 包括但不限于：关键词、机器人风格、服务器管理、违禁词等
 
-- [GUGUbot - 功能列表 - 腾讯文档](https://docs.qq.com/aio/p/sct29j7ammzw142?p=kKIaQMdRR7IvJ2AMa30Din)
+- [GUGUbot - 功能列表 - 腾讯文档](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/功能列表.md&root=PF-gugubot)
 
 
 
@@ -100,7 +95,7 @@
 
 ### 前置cq_qq_api配置
 
-- 请前往：[CQ-QQ-API - 配置 - 腾讯文档](https://docs.qq.com/aio/p/sct29j7ammzw142?p=vUShdYdligIgQvmxLZu3s8)
+- 请前往：[CQ-QQ-API - 配置 - 腾讯文档](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/快速开始.md&root=PF-cq-api)
 
 ### GUGUbot机器人配置
 > [!IMPORTANT]
@@ -111,7 +106,7 @@
 - group_id: 聊天转发的群
 
 **QQ相关设置 - 可选项**
-- 请前往：[GUGUbot - 配置 - 腾讯文档](https://docs.qq.com/aio/p/sct29j7ammzw142?p=iXyl6g1K1p1dK2rujfGH7u)
+- 请前往：[GUGUbot - 配置 - 腾讯文档](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/配置.md&root=PF-gugubot)
 
 
 # 有BUG或是新的IDEA
