@@ -22,7 +22,7 @@
 >
 > 第三方授权文档（编写中）：https://docs.pfingan.com/PF-gugubot/
 
-## 腾讯文档快速导航
+## 文档快速导航
 ### [GUGUbot](https://pf-doc.pfingan.com/main.html?root=PF-gugubot)
 1. [前置依赖](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/前置依赖.md&root=PF-gugubot)
 2. [安装（快速开始）](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/快速开始.md&root=PF-gugubot)
