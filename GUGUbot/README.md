@@ -81,7 +81,7 @@
 
 包括但不限于：关键词、机器人风格、服务器管理、违禁词等
 
-- [GUGUbot - 功能列表 - 腾讯文档](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/功能列表.md&root=PF-gugubot)
+- [GUGUbot - 功能列表](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/功能列表.md&root=PF-gugubot)
 
 
 
@@ -95,7 +95,7 @@
 
 ### 前置cq_qq_api配置
 
-- 请前往：[CQ-QQ-API - 配置 - 腾讯文档](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/快速开始.md&root=PF-cq-api)
+- 请前往：[CQ-QQ-API - 配置](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/快速开始.md&root=PF-cq-api)
 
 ### GUGUbot机器人配置
 > [!IMPORTANT]
@@ -106,7 +106,7 @@
 - group_id: 聊天转发的群
 
 **QQ相关设置 - 可选项**
-- 请前往：[GUGUbot - 配置 - 腾讯文档](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/配置.md&root=PF-gugubot)
+- 请前往：[GUGUbot - 配置](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/配置.md&root=PF-gugubot)
 
 
 # 有BUG或是新的IDEA
