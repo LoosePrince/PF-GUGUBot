@@ -18,16 +18,16 @@
 > [!TIP]
 > [腾讯文档] GUGUbot文档<br>
 > 此Github文档不再维护详细内容，仅保留必要说明<br>
-> 访问官方文档查看更详细的说明: https://pf-doc.pfingan.com/main.html?root=PF-gugubot
+> 访问官方文档查看更详细的说明: https://pf-doc.pfingan.com/main/#PF-gugubot/
 
 ## 文档快速导航
-### [GUGUbot](https://pf-doc.pfingan.com/main/#PF-gugubot)
+### [GUGUbot](https://pf-doc.pfingan.com/main/#PF-gugubot/)
 1. [前置依赖](https://pf-doc.pfingan.com/main/#PF-gugubot/前置依赖)
 2. [安装（快速开始）](https://pf-doc.pfingan.com/main/#PF-gugubot/快速开始)
 3. [功能列表](https://pf-doc.pfingan.com/main/#PF-gugubot/功能列表)
 4. [配置](https://pf-doc.pfingan.com/main/#PF-gugubot/配置)
 5. [文件说明文档](https://pf-doc.pfingan.com/main/#PF-gugubot/文档说明文档)
-6. [疑难解答](https://pf-doc.pfingan.com/main/#PF-gugubot/疑难解答)
+6. [疑难解答](https://pf-doc.pfingan.com/main/#/常见问题/GUGUbot-疑难解答)
 ### [CQ-QQ-API](https://pf-doc.pfingan.com/main/#PF-cq-api)
 1. [快速开始](https://pf-doc.pfingan.com/main/#PF-cq-api/快速开始)
 2. [机器人食用指南](https://pf-doc.pfingan.com/main/#PF-cq-api/机器人食用指南)
