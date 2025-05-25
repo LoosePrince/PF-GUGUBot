@@ -19,24 +19,22 @@
 > [腾讯文档] GUGUbot文档<br>
 > 此Github文档不再维护详细内容，仅保留必要说明<br>
 > 访问官方文档查看更详细的说明: https://pf-doc.pfingan.com/main.html?root=PF-gugubot
->
-> 第三方授权文档（编写中）：https://docs.pfingan.com/PF-gugubot/
 
 ## 文档快速导航
-### [GUGUbot](https://pf-doc.pfingan.com/main.html?root=PF-gugubot)
-1. [前置依赖](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/前置依赖.md&root=PF-gugubot)
-2. [安装（快速开始）](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/快速开始.md&root=PF-gugubot)
-3. [功能列表](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/功能列表.md&root=PF-gugubot)
-4. [配置](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/配置.md&root=PF-gugubot)
-5. [文件说明文档](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/文档说明文档.md&root=PF-gugubot)
-5. [疑难解答](https://pf-doc.pfingan.com/main.html?path=常见问题/GUGUbot-疑难解答.md&root=PF-gugubot)
-### [CQ-QQ-API](https://pf-doc.pfingan.com/main.html?root=PF-cq-api)
-1. [快速开始](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/快速开始.md&root=PF-cq-api)
-2. [群友提供的机器人食用指南](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/机器人食用指南.md&root=PF-cq-api)
-    - [LiteLoaderQQNT + LLOneBot](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/LLOneBot.md&root=PF-cq-api)
-    - [NapCat](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/NapCat.md&root=PF-cq-api)
-    - [Lagrange](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/Lagrange.md&root=PF-cq-api)
-3. [开发指南](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/开发指南.md&root=PF-cq-api)
+### [GUGUbot](https://pf-doc.pfingan.com/main/#PF-gugubot)
+1. [前置依赖](https://pf-doc.pfingan.com/main/#PF-gugubot/前置依赖)
+2. [安装（快速开始）](https://pf-doc.pfingan.com/main/#PF-gugubot/快速开始)
+3. [功能列表](https://pf-doc.pfingan.com/main/#PF-gugubot/功能列表)
+4. [配置](https://pf-doc.pfingan.com/main/#PF-gugubot/配置)
+5. [文件说明文档](https://pf-doc.pfingan.com/main/#PF-gugubot/文档说明文档)
+6. [疑难解答](https://pf-doc.pfingan.com/main/#PF-gugubot/疑难解答)
+### [CQ-QQ-API](https://pf-doc.pfingan.com/main/#PF-cq-api)
+1. [快速开始](https://pf-doc.pfingan.com/main/#PF-cq-api/快速开始)
+2. [机器人食用指南](https://pf-doc.pfingan.com/main/#PF-cq-api/机器人食用指南)
+    - [LiteLoaderQQNT + LLOneBot](https://pf-doc.pfingan.com/main/#PF-cq-api/LLOneBot)
+    - [NapCat](https://pf-doc.pfingan.com/main/#PF-cq-api/NapCat)
+    - [Lagrange](https://pf-doc.pfingan.com/main/#PF-cq-api/Lagrange)
+3. [开发指南](https://pf-doc.pfingan.com/main/#PF-cq-api/开发指南)
 
 ## 安装
 #### MCDR快捷安装: 
@@ -81,7 +79,7 @@
 
 包括但不限于：关键词、机器人风格、服务器管理、违禁词等
 
-- [GUGUbot - 功能列表](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/功能列表.md&root=PF-gugubot)
+- [GUGUbot - 功能列表](https://pf-doc.pfingan.com/main/#PF-gugubot/功能列表)
 
 
 
@@ -95,7 +93,7 @@
 
 ### 前置cq_qq_api配置
 
-- 请前往：[CQ-QQ-API - 配置](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/快速开始.md&root=PF-cq-api)
+- 请前往：[CQ-QQ-API - 配置](https://pf-doc.pfingan.com/main/#PF-cq-api/快速开始)
 
 ### GUGUbot机器人配置
 > [!IMPORTANT]
@@ -106,7 +104,7 @@
 - group_id: 聊天转发的群
 
 **QQ相关设置 - 可选项**
-- 请前往：[GUGUbot - 配置](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/配置.md&root=PF-gugubot)
+- 请前往：[GUGUbot - 配置](https://pf-doc.pfingan.com/main/#PF-gugubot/配置)
 
 
 # 有BUG或是新的IDEA
