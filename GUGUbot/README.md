@@ -29,7 +29,7 @@
 3. [功能列表](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/功能列表.md&root=PF-gugubot)
 4. [配置](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/配置.md&root=PF-gugubot)
 5. [文件说明文档](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/文档说明文档.md&root=PF-gugubot)
-5. [疑难解答](https://pf-doc.pfingan.com/main.html?path=PF-gugubot/疑难解答.md&root=PF-gugubot)
+5. [疑难解答](https://pf-doc.pfingan.com/main.html?path=常见问题/GUGUbot-疑难解答.md&root=PF-gugubot)
 ### [CQ-QQ-API](https://pf-doc.pfingan.com/main.html?root=PF-cq-api)
 1. [快速开始](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/快速开始.md&root=PF-cq-api)
 2. [群友提供的机器人食用指南](https://pf-doc.pfingan.com/main.html?path=PF-cq-api/机器人食用指南.md&root=PF-cq-api)
