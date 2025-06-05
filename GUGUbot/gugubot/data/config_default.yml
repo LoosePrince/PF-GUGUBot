@@ -20,6 +20,7 @@ custom_group_name: # 自定义游戏内显示群名 :: （可选）不设置默�
 ################### 指令开关（可以通过机器人调整）########################
 
 bound_notice: true # 绑定提示 :: 是否进行绑定提示
+member_can_unbound: false # 群成员可以解绑 :: 是否允许群成员解绑自己的绑定
 
 command: # 指令相关
   ban_word: true # 违禁词撤回
