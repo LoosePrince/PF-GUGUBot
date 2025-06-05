@@ -790,11 +790,11 @@ class qbot(qbot_helper):
     # 转发成就
     def on_mc_achievement(self, server:PluginServerInterface, player, event, content):
         if self.config["forward"].get("mc_achievement", True):
-
-            achievement_translation = achievement_tr.get(content.advancement[1:-1], content.advancement)
-            msg = achievement_template[event] % (player, achievement_translation)
-            self.send_msg_to_all_qq(msg)
-
+            player: str = player
+            event: str = event # achievement event
+            for i in content:
+                if i.locale == self.server.get_mcdr_language(): # get the correct language
+                    self.send_msg_to_all_qq(i.raw) # forward corresponding achievement message
     #===================================================================#
     #                           on_mc_death                             #
     #===================================================================#
@@ -802,14 +802,8 @@ class qbot(qbot_helper):
     # 转发死亡
     def on_mc_death(self, server:PluginServerInterface, player, event, content):
         if self.config["forward"].get("mc_death", True):
-
-            msg = death_template[event]
-
-            killer = content.death.killer
-            weapon = content.death.weapon
-
-            msg = msg.replace("%1$s", player)
-            msg = msg.replace("%2$s", killer if killer else "")
-            msg = msg.replace("%3$s", weapon if weapon else "")
-
-            self.send_msg_to_all_qq(msg)
+            player: str = player
+            event: str = event # death event
+            for i in content:
+                if i.locale == self.server.get_mcdr_language(): # get the correct language
+                    self.send_msg_to_all_qq(i.raw) # forward corresponding death message
