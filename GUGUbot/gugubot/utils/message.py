@@ -105,9 +105,9 @@ def format_bot_list(bot_list):
     return '\n\n没有假人在线哦!'
 
 def construct_CQ_at(qq_id: str) -> str:
-    if not qq_id or not qq_id.isdigit():
-        return qq_id
-    return f'[CQ:at,qq={qq_id}]'
+    if qq_id and qq_id.isdigit():  
+        return f'[CQ:at,qq={qq_id}]'
+    return qq_id
 
 def fetch_QQ_id(input_str: str, member_dict: dict) -> str:
     # is QQ id
