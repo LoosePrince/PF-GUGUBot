@@ -30,9 +30,9 @@ class bound_system(base_system):
             self.add_group,
         ]
 
-        if not admin and self.bot_config.get("member_can_unbound", False):
-            return function_list + [self.remove_group]
-        elif not admin:
+        if self.bot_config.get("member_can_unbound", False):
+            function_list = [self.remove_group] + function_list
+        if not admin:
             return function_list
 
         return [
@@ -193,8 +193,8 @@ class bound_system(base_system):
             return True
         
         if len(parameter) < 2: # lack parameter                             
-            bot.reply(info, get_style_template('lack_parameter', reply_style))
-            return
+            # bot.reply(info, get_style_template('lack_parameter', reply_style))
+            return True
         
         word = parameter[1]
         qq_id = self.get_qq_id(word)
@@ -223,6 +223,9 @@ class bound_system(base_system):
         Output:
             break_signal (bool, None)
         """
+        if len(parameter) >= 2: # pass to remove
+            return True
+
         # command: del <player_name/qq_id>
         if parameter[0] not in ["解绑", "unbound"]:
             return True
