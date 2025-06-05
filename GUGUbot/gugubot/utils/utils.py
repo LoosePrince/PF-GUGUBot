@@ -2,6 +2,7 @@
 import asyncio
 import html
 import os
+import re
 import time
 import types
 
@@ -167,17 +168,22 @@ def is_player(server, qbot, player_name):
         return True
 
 
-def parse_list_content(bound_list, server, content:str):
+def parse_list_content(bound_list, server, content:str, use_rcon:bool = False) -> tuple[list[str], list[str]]:
     bound_list = {i for player_names in bound_list.values() for i in player_names}
 
-    instance_list = [i.strip() for i in content.split(": ", 1)[-1].split(", ") if i.strip()]
-    instance_list = [i.split(']')[-1].split('】')[-1].strip() for i in instance_list] # 针对 [123] 玩家 和 【123】玩家 这种人名
-    
+    match_pattern = r"players online:(?: (.*)|(.+))"
+    match_result = re.search(match_pattern, content)
+
+    instance_list = []
     online_player_api = server.get_plugin_instance("online_player_api")
-    if "online: " not in content and online_player_api: # multiline_return
-        time.sleep(0.5) # wait for the online_player_api to update
+    if match_result:
+        instance_list = match_result.group(1) or match_result.group(2)
+
+        instance_list = [i.strip() for i in instance_list.split(", ") if i.strip()] if instance_list else []
+        instance_list = [i.split(']')[-1].split('】')[-1].strip() for i in instance_list] # 针对 [123] 玩家 和 【123】玩家 这种人名
+    elif not use_rcon and online_player_api: # 使用 online_player_api
         instance_list = online_player_api.get_player_list()
-    elif "online: " not in content:
+    elif "players online:" in content:
         server.logger.warning("无法解析多行返回，开启 rcon 或下载 online_player_api 来解析")
         server.logger.warning("下载命令: !!MCDR plugin install online_player_api")
 

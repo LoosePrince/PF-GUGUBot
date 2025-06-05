@@ -1,3 +1,3 @@
-from .message import *
-from .style import *
-from .utils import *
+from gugubot.utils.message import *
+from gugubot.utils.style import *
+from gugubot.utils.utils import *

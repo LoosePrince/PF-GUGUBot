@@ -6,10 +6,12 @@ from pathlib import Path
 
 from mcdreforged.api.types import PluginServerInterface
 
-from .base_system import base_system
-from .whitelist_system import whitelist
-from ..data.text import bound_help
-from ..utils import get_style_template, is_robot, construct_CQ_at
+from gugubot.system.base_system import base_system
+from gugubot.system.whitelist_system import whitelist
+from gugubot.data.text import bound_help
+from gugubot.utils.style import get_style_template
+from gugubot.utils.message import construct_CQ_at
+from gugubot.utils.utils import is_robot
 
 class bound_system(base_system):
     def __init__(self, 

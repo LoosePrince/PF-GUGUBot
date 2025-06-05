@@ -11,9 +11,10 @@ import pygame
 
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.rtext import RText, RAction, RColor
+from packaging import version
 from ruamel.yaml import YAML
 
-from .data.text import (
+from gugubot.data.text import (
     admin_help_msg,
     group_help_msg,
     name_help,
@@ -23,9 +24,9 @@ from .data.text import (
     achievement_template,
     death_template
 )
-from .config import autoSaveDict, botConfig
-from .utils import *
-from .system import (
+from gugubot.config import autoSaveDict, botConfig
+from gugubot.utils import *
+from gugubot.system import (
     ban_word_system,
     bound_system,
     ingame_key_word_system,
@@ -157,7 +158,9 @@ class qbot_helper:
 
     def _forward_message_to_game(self, server:PluginServerInterface, info, bot, message):
         sender = self._find_game_name(str(info.user_id), bot, str(info.source_id))
-        message = beautify_message(message, self.config.get('forward', {}).get('keep_raw_image_link', False))
+        message = beautify_message(message,
+                                   self.config.get('forward', {}).get('keep_raw_image_link', False),
+                                   version.parse(server.get_server_information().version) < version.parse("1.12"))
 
         group_name = self.group_name.get(info.source_id, "QQ") 
         group_id = str(info.source_id)
@@ -186,8 +189,8 @@ class qbot_helper:
                 self.bot.set_group_card(gid, bot_qq_id, bot_name)
             return
 
-        def list_callback(content:str):
-            player_list, _ = parse_list_content(self.data, server, content)
+        def list_callback(content:str, use_rcon:bool=False):
+            player_list, _ = parse_list_content(self.data, server, content, use_rcon)
 
             number = len(player_list)
             
@@ -204,7 +207,7 @@ class qbot_helper:
                 self.bot.set_group_card(gid, bot_qq_id, bot_name)
 
         if server.is_rcon_running(): # use rcon to get command return 
-            list_callback(server.rcon_query("list"))
+            list_callback(server.rcon_query("list"), use_rcon=True)
         else:         # use MCDR's on_info to get command return
             self._list_callback.append(list_callback)
             server.execute("list")
@@ -244,7 +247,8 @@ class qbot_helper:
 
             if isinstance(previous_message_content, list):
                 self.server.logger.warning("请检查QQ机器人消息格式! 需要: CQ码 或 text")
-                return qq_id
+                # FIXME: 临时兼容 LLOneBot 消息段返回格式
+                previous_message_content = previous_message_content[0].get("data",{}).get("text", qq_id).replace(f"{self.server_name} ", "", 1)
 
             # find player name
             pattern = r"^\((.*?)\)|^\[(.*?)\]|^(.*?) 说：|^(.*?) : |^冒着爱心眼的(.*?)说："
@@ -320,7 +324,9 @@ class qbot_helper:
             if is_forward_to_mc:
                 # 过滤图片
                 if key_word_reply.startswith('[CQ:image'):
-                    key_word_reply = beautify_message(key_word_reply, self.config.get('forward', {}).get('keep_raw_image_link', False))
+                    key_word_reply = beautify_message(key_word_reply, 
+                                                      self.config.get('forward', {}).get('keep_raw_image_link', False),
+                                                      version.parse(server.get_server_information().version) < version.parse("1.12"))
                 
                 group_name = self.group_name.get(info.source_id, "QQ") 
                 group_id = str(info.source_id)
@@ -335,18 +341,18 @@ class qbot_helper:
         return False
 
     def _handle_list_command(self, server:PluginServerInterface, info, bot, command:list[str]):
-        def list_callback(content: str):
+        def list_callback(content: str, use_rcon:bool=False):
             server_status = command[0] in ['服务器', 'server']
             player_status = command[0] in ['玩家', '玩家列表']
             
-            player_list, bot_list = parse_list_content(self.data, server, content)
+            player_list, bot_list = parse_list_content(self.data, server, content, use_rcon)
 
             respond = format_list_response(player_list, bot_list, player_status, server_status, self.style)
             respond = self._add_server_name(respond)
             bot.reply(info, respond, force_reply=True)
 
         if server.is_rcon_running(): # use rcon to get command return 
-            list_callback(server.rcon_query("list"))
+            list_callback(server.rcon_query("list"), use_rcon=True)
         else:
             self._list_callback.append(list_callback)
             server.execute("list")

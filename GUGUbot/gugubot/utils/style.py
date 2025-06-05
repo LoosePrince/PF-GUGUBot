@@ -1,8 +1,8 @@
 import json
 import os
 
-from ..config import autoSaveDict
-from ..data.text import style
+from gugubot.config import autoSaveDict
+from gugubot.data.text import style
 
 
 def read_extra_style(extra_style_path)->dict:
