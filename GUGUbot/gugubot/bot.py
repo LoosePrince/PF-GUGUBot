@@ -145,6 +145,9 @@ class qbot_helper:
             template_index = 3
 
         message = mc2qq_template[template_index].format(info.player, info.content)
+        # convert @ to CQ:at
+        message = convert_to_CQ_at(message, member_dict=self.member_dict)
+
         self.send_msg_to_all_qq(message)
 
         if self.config['command']['ingame_key_word']:
