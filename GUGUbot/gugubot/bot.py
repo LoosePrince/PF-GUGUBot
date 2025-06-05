@@ -66,7 +66,10 @@ class qbot_helper:
         self.is_main_server = self.config.get("is_main_server", True)
         self.style = self.config.get("style") if self.config.get("style") != "" else "正常"
 
-        pygame.init()              # for text to image
+        if self.config.get("font_limit", -1) > 0:
+            pygame.init()              # for text to image
+            self.font = pygame.font.Font(self.config["dict_address"]["font_path"], 26)
+            
         self.__loading_systems()      # read data for qqbot functions
         self.customize_help()      # loading customized help msg
 
@@ -85,8 +88,6 @@ class qbot_helper:
 
     def __loading_systems(self) -> None:
         """ Loading the data for qqbot functions """
-        self.font = pygame.font.Font(self.config["dict_address"]["font_path"], 26)
-        
         self.whitelist = whitelist(self.server, self.config) # 白名单
         self.data = bound_system("./config/GUGUbot/GUGUbot.json", self.server, self.config, self.whitelist)
         self.key_word = key_word_system(self.config["dict_address"]['key_word_dict'], self.server, self.config) # QQ 关键词
