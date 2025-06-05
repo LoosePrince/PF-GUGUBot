@@ -128,3 +128,21 @@ def format_bot_list(bot_list):
     if bot_list:
         return f"\n\n---假人---\n" + '\n'.join(sorted(bot_list))
     return '\n\n没有假人在线哦!'
+
+def construct_CQ_at(qq_id: str) -> str:
+    if qq_id and qq_id.isdigit():  
+        return f'[CQ:at,qq={qq_id}]'
+    return qq_id
+
+def fetch_QQ_id(input_str: str, member_dict: dict) -> str:
+    # is QQ id
+    if input_str.isdigit():
+        return input_str
+    
+    return str(member_dict.get(input_str, input_str))
+
+def convert_to_CQ_at(message: str, member_dict: dict) -> str:
+    pattern = r'\[@([^\s,]+)\]'
+    message = re.sub(pattern, lambda m: construct_CQ_at(fetch_QQ_id(m.group(1), member_dict)), message)
+    return message
+

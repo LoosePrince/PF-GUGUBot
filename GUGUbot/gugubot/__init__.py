@@ -117,7 +117,7 @@ def _on_player_join(server:PluginServerInterface, info:Info):
     
     # 玩家上线通知
     if qq_bot.config["forward"].get("player_notice", False):
-        player_name = "[".join(info.content.split(" logged in with entity id")[0].split("[")[:-1])
+        player_name = info.content.split(" logged in with entity id")[0].split("[/")[0]
 
         if (qq_bot.config['forward'].get("player_notice", False) and is_player(server, qq_bot, player_name)) or \
             (qq_bot.config['forward'].get("bot_notice", False) and not is_player(server, qq_bot, player_name)):

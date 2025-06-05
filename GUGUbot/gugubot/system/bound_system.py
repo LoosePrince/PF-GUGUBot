@@ -10,6 +10,7 @@ from gugubot.system.base_system import base_system
 from gugubot.system.whitelist_system import whitelist
 from gugubot.data.text import bound_help
 from gugubot.utils.style import get_style_template
+from gugubot.utils.message import construct_CQ_at
 from gugubot.utils.utils import is_robot
 
 class bound_system(base_system):
@@ -31,8 +32,12 @@ class bound_system(base_system):
             self.add_group,
         ]
 
-        if admin:
-            function_list = [
+        if self.bot_config.get("member_can_unbound", False):
+            function_list = [self.remove_group] + function_list
+        if not admin:
+            return function_list
+
+        return [
                 self.help,
                 self.add_whitelist_switch,
                 self.add,
@@ -43,7 +48,6 @@ class bound_system(base_system):
                 self.reload,
                 self.clean
             ] + function_list
-        return function_list
 
     def get_qq_id(self, player_name:str):
         """Find corresponding player qq_id
@@ -191,8 +195,8 @@ class bound_system(base_system):
             return True
         
         if len(parameter) < 2: # lack parameter                             
-            bot.reply(info, get_style_template('lack_parameter', reply_style))
-            return
+            # bot.reply(info, get_style_template('lack_parameter', reply_style))
+            return True
         
         word = parameter[1]
         qq_id = self.get_qq_id(word)
@@ -208,6 +212,35 @@ class bound_system(base_system):
                 del self.data[qq_id]
         self.data.save()
         bot.reply(info, f'已解除 {word} 绑定的ID')
+
+    def remove_group(self, parameter, info, bot, reply_style, admin):
+        """Remove word in the system
+
+        Args:
+            parameter (list[str]): command parameters
+            info: message info 
+            bot: qqbot
+            reply_style: reply template style
+            admin (bool): Admin mode
+        Output:
+            break_signal (bool, None)
+        """
+        if len(parameter) >= 2: # pass to remove
+            return True
+
+        # command: del <player_name/qq_id>
+        if parameter[0] not in ["解绑", "unbound"]:
+            return True
+        
+        qq_id = str(info.user_id)
+        
+        if qq_id not in self: # not exists
+            bot.reply(info, f'{construct_CQ_at(qq_id)} 你还没有绑定任何账号')
+            return
+        
+        del self.data[qq_id]  # remove all bound
+        self.data.save()
+        bot.reply(info, f'已解除 {qq_id} 绑定的ID')
 
     def search(self, parameter, info, bot, reply_style, admin):
         """Search the bound record

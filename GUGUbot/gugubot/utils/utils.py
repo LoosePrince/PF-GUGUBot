@@ -32,6 +32,7 @@ def packing_copy(server) -> None:
 
 def is_valid_message(info, bot, config):
     condition = [
+        not is_self(info, bot),                           # 不是机器人自己发的消息
         info.content,                                                 # 不是空内容
         not info.content.startswith(config['command_prefix']),        # 不是指令
         info.source_id in config.get('group_id', [])                 # 是指定群消息
@@ -46,6 +47,11 @@ def is_valid_command_source(info, config) -> bool:
         info.source_id in config.get('admin_id', []),
         (config.get("friend_is_admin", False) and info.sub_type == "private")
     ])
+
+def is_self(info, bot)->bool:
+    bot_data = asyncio.run(bot.get_login_info())["data"]
+    bot_qq_id = int(bot_data['user_id'])
+    return info.user_id == bot_qq_id
 
 # 判断是否是机器人
 def is_robot(bot, group_id, user_id)->bool:

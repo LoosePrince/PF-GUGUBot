@@ -67,7 +67,10 @@ class qbot_helper:
         self.is_main_server = self.config.get("is_main_server", True)
         self.style = self.config.get("style") if self.config.get("style") != "" else "正常"
 
-        pygame.init()              # for text to image
+        if self.config.get("font_limit", -1) > 0:
+            pygame.init()              # for text to image
+            self.font = pygame.font.Font(self.config["dict_address"]["font_path"], 26)
+            
         self.__loading_systems()      # read data for qqbot functions
         self.customize_help()      # loading customized help msg
 
@@ -86,8 +89,6 @@ class qbot_helper:
 
     def __loading_systems(self) -> None:
         """ Loading the data for qqbot functions """
-        self.font = pygame.font.Font(self.config["dict_address"]["font_path"], 26)
-        
         self.whitelist = whitelist(self.server, self.config) # 白名单
         self.data = bound_system("./config/GUGUbot/GUGUbot.json", self.server, self.config, self.whitelist)
         self.key_word = key_word_system(self.config["dict_address"]['key_word_dict'], self.server, self.config) # QQ 关键词
@@ -145,6 +146,9 @@ class qbot_helper:
             template_index = 3
 
         message = mc2qq_template[template_index].format(info.player, info.content)
+        # convert @ to CQ:at
+        message = convert_to_CQ_at(message, member_dict=self.member_dict)
+
         self.send_msg_to_all_qq(message)
 
         if self.config['command']['ingame_key_word']:
@@ -784,6 +788,13 @@ class qbot(qbot_helper):
         if self.key_word_ingame.handle_ingame_keyword(server, info):
             return
 
+        # ISSUE 168
+        patterns = self.config.get('ignore_mc_command_patterns', [])
+        for pattern in patterns:
+            if re.match(pattern, info.content.strip()):
+                server.logger.debug(f"忽略游戏内指令: {info.content}")
+                return
+
         # 转发消息
         if info.content[:2] not in ['@ ', '!!'] or self.config['forward'].get('mc_to_qq_command', False):
             self._forward_message(server, info)
@@ -795,11 +806,11 @@ class qbot(qbot_helper):
     # 转发成就
     def on_mc_achievement(self, server:PluginServerInterface, player, event, content):
         if self.config["forward"].get("mc_achievement", True):
-
-            achievement_translation = achievement_tr.get(content.advancement[1:-1], content.advancement)
-            msg = achievement_template[event] % (player, achievement_translation)
-            self.send_msg_to_all_qq(msg)
-
+            player: str = player
+            event: str = event # achievement event
+            for i in content:
+                if i.locale == self.server.get_mcdr_language(): # get the correct language
+                    self.send_msg_to_all_qq(i.raw) # forward corresponding achievement message
     #===================================================================#
     #                           on_mc_death                             #
     #===================================================================#
@@ -807,14 +818,8 @@ class qbot(qbot_helper):
     # 转发死亡
     def on_mc_death(self, server:PluginServerInterface, player, event, content):
         if self.config["forward"].get("mc_death", True):
-
-            msg = death_template[event]
-
-            killer = content.death.killer
-            weapon = content.death.weapon
-
-            msg = msg.replace("%1$s", player)
-            msg = msg.replace("%2$s", killer if killer else "")
-            msg = msg.replace("%3$s", weapon if weapon else "")
-
-            self.send_msg_to_all_qq(msg)
+            player: str = player
+            event: str = event # death event
+            for i in content:
+                if i.locale == self.server.get_mcdr_language(): # get the correct language
+                    self.send_msg_to_all_qq(i.raw) # forward corresponding death message
