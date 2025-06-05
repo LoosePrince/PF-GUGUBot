@@ -79,4 +79,8 @@ style_cooldown: 0 # 风格切换冷却
 whitelist_add_with_bound: false # 绑定ID自动绑定服务器白名单
 whitelist_remove_with_leave: true # 退群时移除白名单
 
+ignore_mc_command_patterns: # 忽略的服务器指令模式
+  - "\[Command: /.*\]" # carpet 指令记录
+  - "xaero-waypoint:.*" # 忽略 Xaero Waypoint 的共享
+
 ########################################################################

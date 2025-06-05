@@ -782,6 +782,13 @@ class qbot(qbot_helper):
         if self.key_word_ingame.handle_ingame_keyword(server, info):
             return
 
+        # ISSUE 168
+        patterns = self.config.get('ignore_mc_command_patterns', [])
+        for pattern in patterns:
+            if re.match(pattern, info.content.strip()):
+                server.logger.debug(f"忽略游戏内指令: {info.content}")
+                return
+
         # 转发消息
         if info.content[:2] not in ['@ ', '!!'] or self.config['forward'].get('mc_to_qq_command', False):
             self._forward_message(server, info)
