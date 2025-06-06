@@ -241,14 +241,15 @@ class qbot_helper:
     def _get_previous_sender_name(self, qq_id: str, group_id: str, bot, previous_message_content):
         bot_info = bot.get_login_info_sync()['data']
         if str(qq_id) == str(bot_info['user_id']):
-            # remove server_name in reply
-            if self.server_name:
-                previous_message_content = previous_message_content.replace(f"{self.server_name} ", "", 1)
-
+            
             if isinstance(previous_message_content, list):
                 self.server.logger.warning("请检查QQ机器人消息格式! 需要: CQ码 或 text")
                 # FIXME: 临时兼容 LLOneBot 消息段返回格式
                 previous_message_content = previous_message_content[0].get("data",{}).get("text", qq_id).replace(f"{self.server_name} ", "", 1)
+
+            # remove server_name in reply
+            if self.server_name:
+                previous_message_content = previous_message_content.replace(f"{self.server_name} ", "", 1)
 
             # find player name
             pattern = r"^\((.*?)\)|^\[(.*?)\]|^(.*?) 说：|^(.*?) : |^冒着爱心眼的(.*?)说："
