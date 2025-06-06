@@ -146,8 +146,9 @@ def addTextToImage(func):
             pass
 
     def _addTextToImage(self, server: PluginServerInterface, info, bot):
-        _newReplyWithFont = partial(_newReply, self.font, int(self.config["font_limit"]), self.is_main_server)
-        bot.reply = types.MethodType(_newReplyWithFont, bot)
+        if int(self.config["font_limit"]) > 0:
+            _newReplyWithFont = partial(_newReply, self.font, int(self.config["font_limit"]), self.is_main_server)
+            bot.reply = types.MethodType(_newReplyWithFont, bot)
         return func(self, server, info, bot)
 
     return _addTextToImage
