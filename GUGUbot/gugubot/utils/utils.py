@@ -127,7 +127,7 @@ def addTextToImage(func):
         if not is_main_server and not force_reply:
             return 
 
-        if font_limit >= 0 and len(message.split("]")[-1]) >= font_limit:
+        if font_limit > 0 and len(message.split("]")[-1]) >= font_limit:
             image_path = text2image(font, message)
             message = f"[CQ:image,file=file:///{os.path.abspath(image_path)}]"
 
@@ -146,9 +146,9 @@ def addTextToImage(func):
             pass
 
     def _addTextToImage(self, server: PluginServerInterface, info, bot):
-        if int(self.config["font_limit"]) > 0:
-            _newReplyWithFont = partial(_newReply, self.font, int(self.config["font_limit"]), self.is_main_server)
-            bot.reply = types.MethodType(_newReplyWithFont, bot)
+        font_limit = int(self.config["font_limit"])
+        _newReplyWithFont = partial(_newReply, None if font_limit <= 0 else self.font, font_limit, self.is_main_server)
+        bot.reply = types.MethodType(_newReplyWithFont, bot)
         return func(self, server, info, bot)
 
     return _addTextToImage
