@@ -119,7 +119,7 @@ class whitelist(base_system):
                                       force_offline=force_offline,
                                       force_bedrock=force_bedrock)
         if not add_success: # player already exists
-            bot.reply(info, get_style_template('add_existed', reply_style))
+            bot.reply(info, "该玩家已在白名单中！")
             return 
     
         # adding success

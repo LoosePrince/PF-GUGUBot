@@ -100,7 +100,7 @@ class bound_system(base_system):
             break_signal (bool, None)
         """
         # command: bound <player_name>
-        if len(parameter) >= 2: # pass to add
+        if len(parameter) > 1: # pass to add
             return True
 
         if len(parameter) < 1: # lack of parameters                                                     
@@ -165,7 +165,7 @@ class bound_system(base_system):
         
         elif self.get_qq_id(player_name): # name exists
             bot.reply(info, '该名称已被绑定')
-            return
+            return  
 
         # Add bound
         if qq_id not in self:

@@ -63,11 +63,13 @@ class base_system(object):
         raw_command = raw_command.replace(command_prefix, "", 1)
         if not any([raw_command.startswith(i) for i in self.alias]):
             return 
-
+        
         reply_style = self.bot_config.get("style", "正常")
 
         parameter = raw_command.strip().split(maxsplit=3)[1:] # remove system_name        
 
+        # admin check
+        admin = admin or self.__is_admin(info.source_id) or self.__is_admin(info.user_id)
         function_list = self.get_func(admin)
 
         for func in function_list:
@@ -242,6 +244,11 @@ class base_system(object):
         self.bot_config["command"][self.system_name] = False
         self.bot_config.save()
         bot.reply(info, f'已关闭{self.alias[0]}！')
+
+    def __is_admin(self, user_id:int)->bool:
+        is_admin = user_id in self.bot_config.get("admin", [])
+        is_admin_group = user_id in self.bot_config.get("admin_group", [])
+        return is_admin or is_admin_group
         
     def __contains__(self, key:str)->bool:
         return key in self.data
