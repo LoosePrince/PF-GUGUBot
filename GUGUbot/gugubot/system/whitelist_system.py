@@ -34,17 +34,18 @@ class whitelist(base_system):
         """
         whitelist = self.__api.get_whitelist_names()
 
+        if force_bedrock: # Add in bedrock mode
+            self.__api.add_floodgate_player(game_id, "")
+            return True
+
         if game_id not in whitelist:
             # Auto mode
-            if not any([force_online, force_offline, force_bedrock]):
+            if not any([force_online, force_offline]):
                 self.__api.add_player(game_id)
             elif force_online: # Add in online mode
                 self.__api.add_online_player(game_id)
             elif force_offline: # Add in offline mode
                 self.__api.add_offline_player(game_id)
-            elif force_bedrock: # Add in bedrock mode
-                self.__api.add_floodgate_player(game_id, "")
-            
             return True
         
         return False
