@@ -602,9 +602,9 @@ class qbot(qbot_helper):
         
         if info.message_type == 'group':
             self.group_command(server, info, bot, command)
+
         if info.message_type == 'private' or \
-            (info.source_id in self.config.get('admin_group_id', [])) or \
-            (info.user_id in self.config.get("admin_id", [])):
+            (info.user_id in get_admin_id_list(bot, self.config)):
             self.private_command(server, info, bot, command)
         
     # 公共指令
@@ -621,8 +621,7 @@ class qbot(qbot_helper):
 
         # 禁止群员执行指令
         elif self.config['command'].get("group_admin", False) \
-            and info.user_id not in self.config['admin_id'] \
-            and info.source_id not in admin_group_id:
+            and info.user_id not in get_admin_id_list(bot, self.config):
             return True
         # 关键词操作
         elif self.config['command']['key_word'] and command[0] in ["列表", 'list', '添加', 'add', '删除', '移除', 'del', '添加图片', '取消']:
@@ -639,7 +638,6 @@ class qbot(qbot_helper):
         else:
             return False
 
-        return True
 
     # 管理员指令
     def private_command(self, server, info, bot, command:list):
