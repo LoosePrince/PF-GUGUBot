@@ -565,7 +565,7 @@ class qbot(qbot_helper):
             user_id = str(info.user_id)
             if user_id in self.data.keys():
                 # Remove whitelist
-                if self.config["command"]["whitelist"]:
+                if self.config["command"]["whitelist"] or self.config.get("whitelist_remove_with_leave", False):
                     for player_name in self.data[user_id]:
                         self.whitelist.remove_player(player_name)
                 

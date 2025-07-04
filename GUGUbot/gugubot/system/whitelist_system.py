@@ -61,9 +61,10 @@ class whitelist(base_system):
         """
         whitelist = self.__api.get_whitelist_names()
 
-        if game_id in whitelist:
-            self.__api.remove_player(game_id, force_offline=True)
-            return True
+        for player_name in whitelist:
+            if game_id.lower() == player_name.lower():
+                self.__api.remove_player(player_name, force_offline=True)
+                return True
         
         return False
 

@@ -203,11 +203,17 @@ class bound_system(base_system):
         if word not in self and not qq_id: # not exists
             bot.reply(info, f'{word} 未绑定')
             return
-        
+
         if word in self: # word is qq_id
+            for player_name in self.data[word]: # remove all bound
+                self.__remove_whitelist(player_name) # remove from whitelist if exists
+
             del self.data[word]                  
         else: # word is player_name -> qq_id will be not None value
             self.data[qq_id].remove(word)
+
+            self.__remove_whitelist(word) # remove from whitelist if exists
+
             if not self.data[qq_id]: # remove if empty
                 del self.data[qq_id]
         self.data.save()
@@ -238,8 +244,12 @@ class bound_system(base_system):
             bot.reply(info, f'{construct_CQ_at(qq_id)} 你还没有绑定任何账号')
             return
         
+        for player_name in self.data[qq_id]: # remove all bound
+            self.__remove_whitelist(player_name) # remove from whitelist if exists
+
         del self.data[qq_id]  # remove all bound
         self.data.save()
+
         bot.reply(info, f'已解除 {qq_id} 绑定的ID')
 
     def search(self, parameter, info, bot, reply_style, admin):
@@ -373,3 +383,12 @@ class bound_system(base_system):
                 bot.reply(info, f'[CQ:at,qq={info.user_id}] 请使用  {command_prefix}绑定 玩家名称  来绑定~')
             return True
         return False
+    
+    def __remove_whitelist(self, player_name:str):
+        """Remove player from whitelist
+
+        Args:
+            player_name (str): player name
+        """
+        if self.bot_config.get("whitelist_add_with_bound", False):
+            self.whitelist.remove_player(player_name)
