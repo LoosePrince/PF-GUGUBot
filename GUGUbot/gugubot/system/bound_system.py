@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 import re
+import time
 
 from pathlib import Path
 
@@ -46,7 +47,9 @@ class bound_system(base_system):
                 self.sync_whitelist,
                 self.show_list,
                 self.reload,
-                self.clean
+                self.clean,
+                self.check_bound,
+                self.remove_unbound_members
             ] + function_list
 
     def get_qq_id(self, player_name:str):
@@ -392,3 +395,149 @@ class bound_system(base_system):
         """
         if self.bot_config.get("whitelist_add_with_bound", False):
             self.whitelist.remove_player(player_name)
+
+    def __get_unbound_members(self, bot):
+        """Get unbound members in the group
+
+        Args:
+            group_id (str): group id
+
+        Returns:
+            list[dict]: unbound members
+        """
+        result = []
+        # bot's qq_id
+        self_qq_id = bot.get_login_info_sync().get('data', {}).get('user_id', None)
+        # bot's admin's qq ids
+        admin_qq_ids = self.bot_config.get("admin_id", [])
+        # admin group's qq ids
+        admin_group_qq_ids = []
+        for group_id in self.bot_config.get("admin_group_id", []):
+            group_info = bot.get_group_member_list_sync(group_id)
+            if group_info and group_info.get('data', {}):
+                admin_group_qq_ids.extend(
+                    [i['user_id'] for i in group_info['data']]
+                )
+        admin_group_qq_ids = [str(i) for i in admin_group_qq_ids]
+
+        # filter out admin qq_ids and self_qq_id
+        filtered_ids = set(admin_qq_ids + admin_group_qq_ids + [self_qq_id])
+
+        for group_id in self.bot_config.get("group_id", []):
+            
+            group_member_list = bot.get_group_member_list_sync(group_id)
+            if not group_member_list:
+                continue
+
+            group_member_list = group_member_list.get('data', [])
+
+            result.append( (group_id, [i 
+                                       for i in group_member_list 
+                                       if str(i['user_id']) not in self \
+                                        and str(i['user_id']) not in filtered_ids \
+                                        and i['join_time'] - time.time() > self.bot_config.get("unbound_member_time_limit", 7200) # 2 hours
+                                    ]) )
+
+        return result
+
+    def check_bound(self, parameter, info, bot, reply_style, admin:bool):
+        """Check if there are group members didn't bound with any account"""
+        # command: bound_check
+        if parameter[0] not in ['绑定检查', 'bound_check']:
+            return True
+
+        result = self.__get_unbound_members(bot)
+
+        def __get_name(member:dict)->str:
+            """Get player name from member info"""
+            return member.get('card') or member.get('nickname', '')
+
+        # construct reply message
+        # print([i[1] for i in result])
+        if not any([i[1] for i in result]):
+            bot.reply(info, '所有人都已绑定~')
+        else:
+            reply_msg = []
+            for group_id, members in result:
+                if members:
+                    reply_msg.append(f'群{group_id}:\n' + "\n".join([f'  {__get_name(i)}({i["user_id"]}) 未绑定' for i in members]))
+            bot.reply(info, "\n".join(reply_msg))
+            bot.reply(info, f"使用 {self.bot_config['command_prefix']}绑定 移除未绑定 来移除未绑定成员~")
+
+    def remove_unbound_members(self, parameter, info, bot, reply_style, admin:bool):
+        """Remove unbound members from whitelist
+
+        Args:
+            bot (PluginServerInterface): bot instance
+        """
+        # command: remove_unbound
+        if parameter[0] not in ['移除未绑定', 'remove_unbound']:
+            return True
+
+        unbound_members = self.__get_unbound_members(bot)
+
+        if not any([i[1] for i in unbound_members]):
+            bot.reply(info, '所有人都已绑定，没有人被移除~')
+            return
+
+        def __get_name(member:dict)->str:
+            """Get player name from member info"""
+            return member.get('card') or member.get('nickname', '')
+
+        count = 0
+        for group_id, members in unbound_members:
+            for member in members:
+                bot.set_group_kick(group_id, member['user_id'])
+                count += 1
+        bot.reply(info, f'已将未绑定的成员({count}人)移除出群:\n' + "\n".join(
+            [f'群{group_id}:\n' + "\n".join([f'  {__get_name(i)}({i["user_id"]})' for i in members]) for group_id, members in unbound_members if members]
+        ))
+
+    def trigger_time_functions(self, bot):
+        """Trigger time functions"""
+        last_check_time = self.bot_config.get("unbound_check_last_time", -1)
+        check_interval = self.bot_config.get("unbound_check_interval", -1) * 3600 # convert to seconds
+        current_time = time.time()
+
+        # check off
+        if check_interval <= 0:
+            return 
+        
+
+        run_task:bool = (last_check_time <= 0) or (current_time - last_check_time >= check_interval)
+
+        def __get_name(member:dict)->str:
+            """Get player name from member info"""
+            return member.get('card') or member.get('nickname', '')
+
+        if run_task:
+            # update last check time
+            self.bot_config["unbound_check_last_time"] = current_time
+            self.bot_config.save()
+
+            result = self.__get_unbound_members(bot)
+
+            # construct reply message
+            # print([i[1] for i in result])
+            if not any([i[1] for i in result]):
+                for user_id in self.bot_config.get("admin_id", []):
+                    bot.send_private_msg(user_id, "未绑定定期检查: 所有人都已绑定~")
+
+                for admin_group_id in self.bot_config.get("admin_group_id", []):
+                    bot.send_group_msg(admin_group_id, "未绑定定期检查: 所有人都已绑定~")
+            else:
+                reply_msg = []
+                for group_id, members in result:
+                    if members:
+                        reply_msg.append(f'群{group_id}:\n' + "\n".join([f'  {__get_name(i)}({i["user_id"]}) 未绑定' for i in members]))
+            
+                for user_id in self.bot_config.get("admin_id", []):
+                    bot.send_private_msg(user_id, "未绑定定期检查:\n"+"\n".join(reply_msg))
+                    bot.send_private_msg(user_id, f"使用 {self.bot_config['command_prefix']}绑定 移除未绑定 来移除未绑定成员~")
+
+                for admin_group_id in self.bot_config.get("admin_group_id", []):
+                    bot.send_group_msg(admin_group_id, "未绑定定期检查:\n"+"\n".join(reply_msg))
+                    bot.send_group_msg(admin_group_id, f"使用 {self.bot_config['command_prefix']}绑定 移除未绑定 来移除未绑定成员~")
+
+            
+        

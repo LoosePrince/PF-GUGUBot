@@ -730,6 +730,7 @@ class qbot(qbot_helper):
     # 转发消息
     @addTextToImage
     def on_qq_message(self, server:PluginServerInterface, info, bot):
+        self.data.trigger_time_functions(bot)  # 检测未绑定任务
         # 判断是否转发
         if not is_valid_message(info, bot, self.config): return
         
@@ -776,6 +777,7 @@ class qbot(qbot_helper):
 
     # 转发消息
     def on_mc_message(self, server: PluginServerInterface, info: Info):
+        self.data.trigger_time_functions(self.bot)  # 检测未绑定任务
         if not info.is_player or not self.config['forward']['mc_to_qq']:
             return
 
