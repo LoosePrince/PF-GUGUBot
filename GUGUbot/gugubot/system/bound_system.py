@@ -663,8 +663,8 @@ class bound_system(base_system):
 
 
         bot.reply(info, f'已将不活跃的成员({count}人)移除出群:\n' + "\n".join(
-            [f'{",".join(self.data.get(qq_id, []))}({qq_id}) -> {int(inactive_days)} 天']
-            for qq_id, inactive_days in inactive_members.items()
+            [f'{",".join(self.data.get(qq_id, []))}({qq_id}) -> {int(inactive_days)} 天' 
+             for qq_id, inactive_days in inactive_members.items()]
         ))
 
     def trigger_time_functions(self, bot):
