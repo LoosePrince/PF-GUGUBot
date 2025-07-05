@@ -435,7 +435,7 @@ class bound_system(base_system):
                                        for i in group_member_list 
                                        if str(i['user_id']) not in self \
                                         and str(i['user_id']) not in filtered_ids \
-                                        and i['join_time'] - time.time() > self.bot_config.get("unbound_member_time_limit", 7200) # 2 hours
+                                        and time.time() - i['join_time'] > self.bot_config.get("unbound_member_time_limit", 7200) # 2 hours
                                     ]) )
 
         return result
@@ -516,7 +516,6 @@ class bound_system(base_system):
             self.bot_config.save()
 
             result = self.__get_unbound_members(bot)
-
             # construct reply message
             # print([i[1] for i in result])
             if not any([i[1] for i in result]):
