@@ -35,7 +35,8 @@ class whitelist(base_system):
         whitelist = self.__api.get_whitelist_names()
 
         if force_bedrock: # Add in bedrock mode
-            self.__api.add_floodgate_player(game_id, "")
+            prefix = self.get_bedrock_player_prefix()
+            self.server.execute_command(f"floodgate add {prefix}{game_id}")
             return True
 
         if game_id not in whitelist:
@@ -249,3 +250,20 @@ class whitelist(base_system):
     def items(self):
         for player in self.__api.get_whitelist():
             yield player.uuid, player.name
+
+    def get_bedrock_player_prefix(self):
+        """Get the prefix of bedrock player
+
+        Returns:
+            str: bedrock player prefix
+        """
+        from pathlib import Path
+        import ruamel.yaml as yaml
+
+        floodgate_config_path = Path("./server/config/floodgate/config.yml")
+
+        if floodgate_config_path.exists():
+            with floodgate_config_path.open("r", encoding="utf-8") as file:
+                floodgate_config = yaml.safe_load(file)
+            return floodgate_config.get("username-prefix", ".")
+        return "."
