@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+import json
 import random
 import re
 import time
 
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 from mcdreforged.api.types import PluginServerInterface
@@ -49,7 +51,9 @@ class bound_system(base_system):
                 self.reload,
                 self.clean,
                 self.check_bound,
-                self.remove_unbound_members
+                self.remove_unbound_members,
+                self.check_inactive_player,
+                self.remove_inactive_members
             ] + function_list
 
     def get_qq_id(self, player_name:str):
@@ -406,6 +410,8 @@ class bound_system(base_system):
         if self.bot_config.get("whitelist_add_with_bound", False):
             self.whitelist.remove_player(player_name)
 
+    ########################################################### unbound check ###########################################################
+
     def __get_unbound_members(self, bot):
         """Get unbound members in the group
 
@@ -453,7 +459,7 @@ class bound_system(base_system):
     def check_bound(self, parameter, info, bot, reply_style, admin:bool):
         """Check if there are group members didn't bound with any account"""
         # command: bound_check
-        if parameter[0] not in ['绑定检查', 'bound_check']:
+        if parameter[0] not in ['绑定检查', "检查绑定", 'bound_check']:
             return True
 
         result = self.__get_unbound_members(bot)
@@ -462,17 +468,54 @@ class bound_system(base_system):
             """Get player name from member info"""
             return member.get('card') or member.get('nickname', '')
 
+        # update last check time
+        self.bot_config["unbound_check_last_time"] = time.time()
+        self.bot_config.save()
+
+        result = self.__get_unbound_members(bot)
+        notice_option = self.bot_config.get("unbound_notice_option", []) # group, admin, admin_group
         # construct reply message
         # print([i[1] for i in result])
         if not any([i[1] for i in result]):
-            bot.reply(info, '所有人都已绑定~')
+            if 'admin' in notice_option:
+                for user_id in self.bot_config.get("admin_id", []):
+                    bot.send_private_msg(user_id, "未绑定定期检查: 所有人都已绑定~")
+
+            if 'admin_group' in notice_option:
+                for admin_group_id in self.bot_config.get("admin_group_id", []):
+                    bot.send_group_msg(admin_group_id, "未绑定定期检查: 所有人都已绑定~")
         else:
             reply_msg = []
             for group_id, members in result:
                 if members:
-                    reply_msg.append(f'群{group_id}:\n' + "\n".join([f'  {__get_name(i)}({i["user_id"]}) 未绑定' for i in members]))
-            bot.reply(info, "\n".join(reply_msg))
-            bot.reply(info, f"使用 {self.bot_config['command_prefix']}绑定 移除未绑定 来移除未绑定成员~")
+                    reply_msg.append(f'群{group_id}:\n' + "\n".join(
+                        [f'  {__get_name(i)}({i["user_id"]}) 未绑定' 
+                        for i in sorted(members, key=lambda x: x['user_id'])]
+                    ))
+        
+            
+            
+            if 'admin' in notice_option:
+                for user_id in self.bot_config.get("admin_id", []):
+                    bot.send_private_msg(user_id, "未绑定定期检查:\n"+"\n".join(reply_msg))
+                    bot.send_private_msg(user_id, f"使用 {self.bot_config['command_prefix']}绑定 移除未绑定 来移除未绑定成员~")
+
+            if 'admin_group' in notice_option:
+                for admin_group_id in self.bot_config.get("admin_group_id", []):
+                    bot.send_group_msg(admin_group_id, "未绑定定期检查:\n"+"\n".join(reply_msg))
+                    bot.send_group_msg(admin_group_id, f"使用 {self.bot_config['command_prefix']}绑定 移除未绑定 来移除未绑定成员~")
+
+            if 'group' in notice_option:
+                reply_msg = []
+                for group_id, members in result:
+                    if members:
+                        reply_msg.append(f'群{group_id}:\n' + "\n".join(
+                            [f'  {__get_name(i)}({construct_CQ_at(str(i["user_id"]))}) 未绑定' 
+                            for i in sorted(members, key=lambda x: x['user_id'])]
+                        ))
+
+                for group_id in self.bot_config.get("group_id", []):
+                    bot.send_group_msg(group_id, "未绑定定期检查:\n"+"\n".join(reply_msg))
 
     def remove_unbound_members(self, parameter, info, bot, reply_style, admin:bool):
         """Remove unbound members from whitelist
@@ -501,55 +544,140 @@ class bound_system(base_system):
                 count += 1
         bot.reply(info, f'已将未绑定的成员({count}人)移除出群:\n' + "\n".join(
             [f'群{group_id}:\n' + "\n".join([f'  {__get_name(i)}({i["user_id"]})' for i in members]) for group_id, members in unbound_members if members]
-        ))
+        ))  
+            
+    ########################################################### inactive check ###########################################################
 
-    def trigger_time_functions(self, bot):
-        """Trigger time functions"""
-        last_check_time = self.bot_config.get("unbound_check_last_time", -1)
-        check_interval = self.bot_config.get("unbound_check_interval", -1) * 3600 # convert to seconds
-        current_time = time.time()
+    def __get_inactive_player(self)->list:
+        """Check if there are group members didn't bound with any account"""
+        usercache_path = Path("./server/usercache.json")
 
-        # check off
-        if check_interval <= 0:
-            return 
+        inactive_day_range = self.bot_config.get("inactive_player_time_range", 30)
+
+        if not usercache_path.exists():
+            return list(self.keys())
         
+        with open(usercache_path, 'r', encoding='utf-8') as f:
+            usercache = json.load(f)
+        
+        # Example: "2025-01-10 21:25:32 -0800"
+        def parse_time(timestr):
+            # Parse the datetime string with timezone
+            dt = datetime.strptime(timestr, "%Y-%m-%d %H:%M:%S %z")
+            year = dt.year
+            month = dt.month - 1
+            if month == 0:
+                month = 12
+                year -= 1
+            day = min(dt.day, [31,
+                               29 if year % 4 == 0 and (year % 100 != 0 or year % 400 == 0) else 28,
+                               31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month-1])
+            dt = dt.replace(year=year, month=month, day=day)
+            return dt
 
-        run_task:bool = (last_check_time <= 0) or (current_time - last_check_time >= check_interval)
+        inactive_dict = {
+            i['name']: (datetime.now(timezone.utc) - parse_time(i['expiresOn'])).total_seconds() / 86400 for i in usercache
+        }
 
+        result = {}
+        for qq_id, player_names in self.data.items():
+            inactive_day = min([inactive_dict.get(name, float('inf')) for name in player_names], default=float('inf'))
+            if inactive_day > inactive_day_range:
+                result[qq_id] = inactive_day
+
+        return result
+
+    def check_inactive_player(self, parameter, info, bot, reply_style, admin:bool):
+        """Check if there are group members didn't bound with any account"""
+        # command: bound_check
+        if parameter[0] not in ['活跃', '活跃检测', 'active_check']:
+            return True
+        
         def __get_name(member:dict)->str:
             """Get player name from member info"""
             return member.get('card') or member.get('nickname', '')
 
-        if run_task:
-            # update last check time
-            self.bot_config["unbound_check_last_time"] = current_time
-            self.bot_config.save()
+        # update last check time
+        self.bot_config["inactive_player_check_last_time"] = time.time()
+        self.bot_config.save()
 
-            result = self.__get_unbound_members(bot)
-            # construct reply message
-            # print([i[1] for i in result])
-            if not any([i[1] for i in result]):
+        result = self.__get_inactive_player()
+        notice_option = self.bot_config.get("inactive_notice_option", []) # group, admin, admin_group
+        # construct reply message
+        # print([i[1] for i in result])
+        if not result:
+            if 'admin' in notice_option:
                 for user_id in self.bot_config.get("admin_id", []):
-                    bot.send_private_msg(user_id, "未绑定定期检查: 所有人都已绑定~")
+                    bot.send_private_msg(user_id, "活跃度定期检查: 没有死鱼咩~")
 
+            if 'admin_group' in notice_option:
                 for admin_group_id in self.bot_config.get("admin_group_id", []):
-                    bot.send_group_msg(admin_group_id, "未绑定定期检查: 所有人都已绑定~")
-            else:
-                reply_msg = []
-                for group_id, members in result:
-                    if members:
-                        reply_msg.append(f'群{group_id}:\n' + "\n".join([f'  {__get_name(i)}({i["user_id"]}) 未绑定' for i in members]))
+                    bot.send_group_msg(admin_group_id, "活跃度定期检查: 没有死鱼咩~")
+        else:
+            reply_msg = []
+            for qq_id, inactive_days in result.items():
+                player_names = ",".join(self.data.get(qq_id, []))
+                reply_msg.append(f'{player_names}({qq_id}) -> {int(inactive_days)} 天未活跃')
             
+            
+            if 'admin' in notice_option:
                 for user_id in self.bot_config.get("admin_id", []):
-                    bot.send_private_msg(user_id, "未绑定定期检查:\n"+"\n".join(reply_msg))
-                    bot.send_private_msg(user_id, f"使用 {self.bot_config['command_prefix']}绑定 移除未绑定 来移除未绑定成员~")
+                    bot.send_private_msg(user_id, "活跃度定期检查:\n"+"\n".join(reply_msg))
+                    bot.send_private_msg(user_id, f"使用 {self.bot_config['command_prefix']}绑定 移除不活跃 来移除不活跃成员~")
 
+            if 'admin_group' in notice_option:
                 for admin_group_id in self.bot_config.get("admin_group_id", []):
-                    bot.send_group_msg(admin_group_id, "未绑定定期检查:\n"+"\n".join(reply_msg))
-                    bot.send_group_msg(admin_group_id, f"使用 {self.bot_config['command_prefix']}绑定 移除未绑定 来移除未绑定成员~")
+                    bot.send_group_msg(admin_group_id, "活跃度定期检查:\n"+"\n".join(reply_msg))
+                    bot.send_group_msg(admin_group_id, f"使用 {self.bot_config['command_prefix']}绑定 移除不活跃 来移除不活跃成员~")
+
+            if 'group' in notice_option:
+                reply_msg = []
+                for qq_id, inactive_days in result.items():
+                    player_names = ",".join(self.data.get(qq_id, []))
+                    reply_msg.append(f'{player_names}({construct_CQ_at(str(qq_id))}) -> {int(inactive_days)} 天未活跃')
 
                 for group_id in self.bot_config.get("group_id", []):
-                    bot.send_group_msg(group_id, "未绑定定期检查:\n"+"\n".join(reply_msg))
-
+                    bot.send_group_msg(group_id, "活跃度定期检查:\n"+"\n".join(reply_msg))
             
+    def remove_inactive_members(self, parameter, info, bot, reply_style, admin:bool):
+        """Remove inactive members from whitelist
+
+        Args:
+            bot (PluginServerInterface): bot instance
+        """
+        # command: remove_inactive
+        if parameter[0] not in ['移除不活跃', 'remove_inactive']:
+            return True
+
+        inactive_members = self.__get_inactive_player()
+
+        if not inactive_members:
+            bot.reply(info, '没有不活跃成员~')
+            return
+
+        count = 0
+        for qq_id, _ in inactive_members.items():
+ 
+            bot.set_group_kick(info.source_id, qq_id)
+            count += 1
+
+
+        bot.reply(info, f'已将不活跃的成员({count}人)移除出群:\n' + "\n".join(
+            [f'{",".join(self.data.get(qq_id, []))}({qq_id}) -> {int(inactive_days)} 天']
+            for qq_id, inactive_days in inactive_members.items()
+        ))
+
+    def trigger_time_functions(self, bot):
+        """Trigger time functions"""
+        last_check_time_unbound = self.bot_config.get("unbound_check_last_time", -1)
+        check_interval_unbound = self.bot_config.get("unbound_check_interval", -1) * 3600 # convert to seconds
+        last_check_time_inactive = self.bot_config.get("inactive_player_check_last_time", -1)
+        check_interval_inactive = self.bot_config.get("inactive_check_interval", -1) * 3600 * 24
+        current_time = time.time()
+
+        # check off
+        if check_interval_unbound > 0 and (last_check_time_unbound < 0 or (current_time - last_check_time_unbound >= check_interval_unbound)):
+            self.check_bound(['绑定检查'], None, bot, None, True)
         
+        if check_interval_inactive > 0 and (last_check_time_inactive < 0 or (current_time - last_check_time_inactive >= check_interval_inactive)):
+            self.check_inactive_player(['活跃检测'], None, bot, None, True)
