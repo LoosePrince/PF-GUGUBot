@@ -85,6 +85,8 @@ ignore_mc_command_patterns: # 忽略的服务器指令模式
 - ".*?\\[Command: /.*\\]" # carpet 指令记录
 - ".*?xaero-waypoint:.*" # 忽略 Xaero Waypoint 的共享
 
+player_name_pattern: "^[a-zA-Z0-9_]{3,16}$"  # 绑定时玩家名称匹配模板 :: 用于匹配玩家名称
+
 ########################################################################
 
 unbound_check_last_time: -1 # 上次检查未绑定成员的时间戳 :: -1表示未检查过

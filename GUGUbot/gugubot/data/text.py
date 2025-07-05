@@ -137,6 +137,7 @@ style = {
         "delete_success":"删除成功！",
         "del_no_exist": "该关键词不存在",
         "del_whitelist_when_quit": "{}已退群，白名单同步删除",
+        "invalid_player_name": "玩家名称不符合规范，请使用 #绑定 <游戏ID> 进行绑定",
         "key_word_exist": "已有指定关键词,请删除(#删除 <关键词>)后重试 awa",
         "lack_parameter": "缺少参数，请参考 #帮助 里的说明",
         "list": "列表如下: \n{}",

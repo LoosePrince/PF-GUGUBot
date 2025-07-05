@@ -110,6 +110,10 @@ class bound_system(base_system):
             bot.reply(info, get_style_template('lack_parameter', reply_style))
             return 
         
+        if not re.match(self.bot_config.get("player_name_pattern", "^[a-zA-Z0-9_]{3,16}$"), parameter[0]):
+            bot.reply(info, get_style_template('invalid_player_name', reply_style))
+            return
+
         qq_id, player_name = str(info.user_id), parameter[0]
         if len(self.data.get(qq_id, [])) >= self.bot_config.get("max_bound", 2): # maximum reaches
             bot.reply(info, '绑定数量已达上限')
@@ -162,6 +166,12 @@ class bound_system(base_system):
         if qq_id.startswith("[@") and match: 
             qq_id = match.group(1)
             player_name = match.group(2)
+
+        player_name_pattern = self.bot_config.get("player_name_pattern", "^[a-zA-Z0-9_]{3,16}$")
+        if not re.match(player_name_pattern, player_name):
+            bot.reply(info, get_style_template('invalid_player_name', reply_style))
+            return
+
         if len(self.data.get(qq_id, [])) >= self.bot_config.get("max_bound", 2): # maximum reaches
             bot.reply(info, '绑定数量已达上限')
             return 
@@ -537,6 +547,9 @@ class bound_system(base_system):
                 for admin_group_id in self.bot_config.get("admin_group_id", []):
                     bot.send_group_msg(admin_group_id, "未绑定定期检查:\n"+"\n".join(reply_msg))
                     bot.send_group_msg(admin_group_id, f"使用 {self.bot_config['command_prefix']}绑定 移除未绑定 来移除未绑定成员~")
+
+                for group_id in self.bot_config.get("group_id", []):
+                    bot.send_group_msg(group_id, "未绑定定期检查:\n"+"\n".join(reply_msg))
 
             
         
