@@ -412,16 +412,7 @@ class bound_system(base_system):
 
     ########################################################### unbound check ###########################################################
 
-    def __get_unbound_members(self, bot):
-        """Get unbound members in the group
-
-        Args:
-            group_id (str): group id
-
-        Returns:
-            list[dict]: unbound members
-        """
-        result = []
+    def __get_self_and_admin_ids(self, bot):
         # bot's qq_id
         self_qq_id = bot.get_login_info_sync().get('data', {}).get('user_id', None)
         # bot's admin's qq ids
@@ -438,6 +429,20 @@ class bound_system(base_system):
 
         # filter out admin qq_ids and self_qq_id
         filtered_ids = set(admin_qq_ids + admin_group_qq_ids + [self_qq_id])
+
+    def __get_unbound_members(self, bot):
+        """Get unbound members in the group
+
+        Args:
+            group_id (str): group id
+
+        Returns:
+            list[dict]: unbound members
+        """
+        result = []
+
+        # filter out admin qq_ids and self_qq_id
+        filtered_ids = self.__get_self_and_admin_ids(bot)
 
         for group_id in self.bot_config.get("group_id", []):
             
@@ -602,6 +607,8 @@ class bound_system(base_system):
         self.bot_config.save()
 
         result = self.__get_inactive_player()
+        self_and_admin_ids = self.__get_self_and_admin_ids(bot)
+        result = {qq_id: inactive_days for qq_id, inactive_days in result.items() if str(qq_id) not in self_and_admin_ids}
         notice_option = self.bot_config.get("inactive_notice_option", []) # group, admin, admin_group
         # construct reply message
         # print([i[1] for i in result])
