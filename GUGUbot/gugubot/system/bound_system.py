@@ -53,7 +53,9 @@ class bound_system(base_system):
                 self.check_bound,
                 self.remove_unbound_members,
                 self.check_inactive_player,
-                self.remove_inactive_members
+                self.remove_inactive_members,
+                self.check_whitelist,
+                self.remove_unbound_whitelist
             ] + function_list
 
     def get_qq_id(self, player_name:str):
@@ -691,6 +693,65 @@ class bound_system(base_system):
                 if member['user_id'] in self and member['card'] != self.data[member['user_id']][-1]:
                     # update group card
                     self.bot.set_group_card(group_id, member['user_id'], self.data[member['user_id']][-1])
+
+    ############################################################## check whitelist ##############################################################
+    def __get_unbound_whitelist(self):
+        """Get unbound members in the whitelist
+
+        Returns:
+            list[tuple]: unbound members (uuid, player_name)
+        """
+        result = []
+
+        all_player_names = {i.lower() for player_names in self.data.values() for i in player_names}
+
+        for uuid, whitelist_player_name in self.whitelist.items():
+            if whitelist_player_name.lower() not in all_player_names:
+                result.append((uuid, whitelist_player_name))
+
+        return result
+    
+    def check_whitelist(self, parameter, info, bot, reply_style, admin:bool):
+        """Check if there are group members didn't bound with any account"""
+        # command: bound_check
+        if parameter[0] not in ['白名单检查', 'whitelist_check']:
+            return True
+
+        result = self.__get_unbound_whitelist()
+
+        if not result:
+            bot.reply(info, '白名单检查: 所有玩家都已绑定~')
+            return
+        
+        reply_msg = []
+        for uuid, player_name in result:
+            reply_msg.append(f'{player_name}({uuid}) 未绑定')
+
+        bot.reply(info, "白名单检查:\n"+"\n".join(reply_msg))
+
+    def remove_unbound_whitelist(self, parameter, info, bot, reply_style, admin:bool):
+        """Remove unbound members from whitelist
+
+        Args:
+            bot (PluginServerInterface): bot instance
+        """
+        # command: remove_unbound_whitelist
+        if parameter[0] not in ['移除未绑定白名单', 'remove_unbound_whitelist']:
+            return True
+
+        result = self.__get_unbound_whitelist()
+
+        if not result:
+            bot.reply(info, '没有未绑定的白名单成员~')
+            return
+        
+        reply_msg = []
+        for uuid, player_name in result:
+            self.whitelist.remove_player(player_name)
+            reply_msg.append(f'{player_name}({uuid}) 已从白名单中移除')
+
+        bot.reply(info, "已将未绑定的白名单成员移除:\n"+"\n".join(reply_msg))
+
 
     def trigger_time_functions(self, bot):
         """Trigger time functions"""
