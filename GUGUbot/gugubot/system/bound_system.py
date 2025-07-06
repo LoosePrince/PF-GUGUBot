@@ -681,18 +681,19 @@ class bound_system(base_system):
         ))
 
     ############################################################## check name ##############################################################
-    def check_name(self):
+    def check_name(self, bot):
         """Check if there are group members didn't bound with any account"""
         for group_id in self.bot_config.get("group_id", []):
-            group_member_list = self.bot.get_group_member_list_sync(group_id)
+            group_member_list = bot.get_group_member_list_sync(group_id)
             if not group_member_list:
                 continue
 
             group_member_list = group_member_list.get('data', [])
             for member in group_member_list:
-                if member['user_id'] in self and member['card'] != self.data[member['user_id']][-1]:
+                user_id = str(member['user_id'])
+                if user_id in self and member['card'] != self[user_id][-1]:
                     # update group card
-                    self.bot.set_group_card(group_id, member['user_id'], self.data[member['user_id']][-1])
+                    bot.set_group_card(group_id, member['user_id'], self[user_id][-1])
 
     ############################################################## check whitelist ##############################################################
     def __get_unbound_whitelist(self):
@@ -703,7 +704,7 @@ class bound_system(base_system):
         """
         result = []
 
-        all_player_names = {i.lower() for player_names in self.data.values() for i in player_names}
+        all_player_names = {i.lower() for player_names in self.values() for i in player_names}
 
         for uuid, whitelist_player_name in self.whitelist.items():
             if whitelist_player_name.lower() not in all_player_names:
@@ -769,4 +770,4 @@ class bound_system(base_system):
             self.check_inactive_player(['活跃检测'], None, bot, None, True)
 
         if self.bot_config.get("force_game_name", False):
-            self.check_name()
+            self.check_name(bot)
