@@ -678,6 +678,20 @@ class bound_system(base_system):
              for qq_id, inactive_days in inactive_members.items()]
         ))
 
+    ############################################################## check name ##############################################################
+    def check_name(self):
+        """Check if there are group members didn't bound with any account"""
+        for group_id in self.bot_config.get("group_id", []):
+            group_member_list = self.bot.get_group_member_list_sync(group_id)
+            if not group_member_list:
+                continue
+
+            group_member_list = group_member_list.get('data', [])
+            for member in group_member_list:
+                if member['user_id'] in self and member['card'] != self.data[member['user_id']][-1]:
+                    # update group card
+                    self.bot.set_group_card(group_id, member['user_id'], self.data[member['user_id']][-1])
+
     def trigger_time_functions(self, bot):
         """Trigger time functions"""
         last_check_time_unbound = self.bot_config.get("unbound_check_last_time", -1)
@@ -692,3 +706,6 @@ class bound_system(base_system):
         
         if check_interval_inactive > 0 and (last_check_time_inactive < 0 or (current_time - last_check_time_inactive >= check_interval_inactive)):
             self.check_inactive_player(['活跃检测'], None, bot, None, True)
+
+        if self.bot_config.get("force_game_name", False):
+            self.check_name()
