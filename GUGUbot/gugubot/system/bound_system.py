@@ -430,6 +430,8 @@ class bound_system(base_system):
         # filter out admin qq_ids and self_qq_id
         filtered_ids = set(admin_qq_ids + admin_group_qq_ids + [self_qq_id])
 
+        return filtered_ids
+
     def __get_unbound_members(self, bot):
         """Get unbound members in the group
 
@@ -624,7 +626,8 @@ class bound_system(base_system):
             reply_msg = []
             for qq_id, inactive_days in result.items():
                 player_names = ",".join(self.data.get(qq_id, []))
-                reply_msg.append(f'{player_names}({qq_id}) -> {int(inactive_days)} 天未活跃')
+                inactive_str = f'{int(inactive_days)} 天' if inactive_days < float('inf') else '未登录'
+                reply_msg.append(f'{player_names}({qq_id}) -> {inactive_str}')
             
             
             if 'admin' in notice_option:
@@ -641,7 +644,8 @@ class bound_system(base_system):
                 reply_msg = []
                 for qq_id, inactive_days in result.items():
                     player_names = ",".join(self.data.get(qq_id, []))
-                    reply_msg.append(f'{player_names}({construct_CQ_at(str(qq_id))}) -> {int(inactive_days)} 天未活跃')
+                    inactive_str = f'{int(inactive_days)} 天' if inactive_days < float('inf') else '未登录'
+                    reply_msg.append(f'{player_names}({construct_CQ_at(str(qq_id))}) -> {inactive_str}')
 
                 for group_id in self.bot_config.get("group_id", []):
                     bot.send_group_msg(group_id, "活跃度定期检查:\n"+"\n".join(reply_msg))
@@ -668,9 +672,9 @@ class bound_system(base_system):
             bot.set_group_kick(info.source_id, qq_id)
             count += 1
 
-
+        inactive_str_func = lambda inactive_days: f'{int(inactive_days)} 天' if inactive_days < float('inf') else '未登录'
         bot.reply(info, f'已将不活跃的成员({count}人)移除出群:\n' + "\n".join(
-            [f'{",".join(self.data.get(qq_id, []))}({qq_id}) -> {int(inactive_days)} 天' 
+            [f'{",".join(self.data.get(qq_id, []))}({qq_id}) -> {inactive_str_func(inactive_days)} 天' 
              for qq_id, inactive_days in inactive_members.items()]
         ))
 
