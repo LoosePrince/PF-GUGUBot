@@ -599,7 +599,7 @@ class bound_system(base_system):
     def check_inactive_player(self, parameter, info, bot, reply_style, admin:bool):
         """Check if there are group members didn't bound with any account"""
         # command: bound_check
-        if parameter[0] not in ['活跃', '活跃检测', 'active_check']:
+        if parameter[0] not in ['活跃', '活跃检查', 'active_check']:
             return True
         
         def __get_name(member:dict)->str:
