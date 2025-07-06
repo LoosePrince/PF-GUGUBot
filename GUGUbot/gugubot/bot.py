@@ -138,6 +138,16 @@ class qbot_helper:
         for group in self.config.get('group_id', []):
             self._send_group_msg(msg, group)
 
+    def send_msg_to_admin_groups(self, msg:str)->None:
+        """
+        Send message to all the admin QQ group
+
+        Args:
+            msg (str): the forward message
+        """
+        for group in self.config.get('admin_group_id', []):
+            self._send_group_msg(msg, group)
+
     def _forward_message(self, server, info):
         roll_number = random.randint(0, 10000)
         template_index = (roll_number % (len(mc2qq_template) - 1)) if roll_number >= 3 else -1
@@ -571,9 +581,13 @@ class qbot(qbot_helper):
                 
                 # bot notice
                 bot.send_group_msg(group_id = info.group_id, 
-                                    message = get_style_template('del_whitelist_when_quit', self.style)\
-                                    .format(",".join(self.data[user_id]) )
-                    )
+                                message = get_style_template('del_whitelist_when_quit', self.style)\
+                                .format(",".join(self.data[user_id]) )
+                )
+
+                bot.send_msg_to_admin_groups( get_style_template('del_whitelist_when_quit', self.style)\
+                                .format(",".join(self.data[user_id]) )
+                )
                 
                 # Remove bound
                 del self.data[user_id]
