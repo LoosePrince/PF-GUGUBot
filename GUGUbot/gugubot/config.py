@@ -160,7 +160,11 @@ class botConfig(autoSaveDict):
                 with open(self.path, 'r', encoding='UTF-8') as f:
                     yaml.load(f)
             except Exception as e:
-                msg = f"YAML 配置文件语法错误: {e}"
+                if hasattr(e, 'problem_mark') and e.problem_mark is not None:
+                    mark = e.problem_mark
+                    msg = f"YAML 配置文件语法错误: 出错位置：第 {mark.line + 1} 行，第 {mark.column + 1} 列\n详细信息: {e}"
+                else:
+                    msg = f"YAML 配置文件语法错误: {e}\n请检查 YAML 文件的缩进和冒号(:)是否正确。"
                 if self.logger:
                     self.logger.error(msg)
                 else:
@@ -171,7 +175,10 @@ class botConfig(autoSaveDict):
                 with open(self.path, 'r', encoding='UTF-8') as f:
                     json.load(f)
             except Exception as e:
-                msg = f"JSON 配置文件语法错误: {e}"
+                if hasattr(e, 'lineno') and hasattr(e, 'colno'):
+                    msg = f"JSON 配置文件语法错误: 出错位置：第 {e.lineno} 行，第 {e.colno} 列\n详细信息: {e}"
+                else:
+                    msg = f"JSON 配置文件语法错误: {e}\n请检查 JSON 文件的格式是否正确。"
                 if self.logger:
                     self.logger.error(msg)
                 else:
