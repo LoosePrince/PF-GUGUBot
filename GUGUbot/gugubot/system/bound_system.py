@@ -795,7 +795,7 @@ class bound_system(base_system):
             self.check_bound(['绑定检查'], None, bot, None, True)
         
         if check_interval_inactive > 0 and (last_check_time_inactive < 0 or (current_time - last_check_time_inactive >= check_interval_inactive)):
-            self.check_inactive_player(['活跃检测'], None, bot, None, True)
+            self.check_inactive_player(['活跃'], None, bot, None, True)
 
         if self.bot_config.get("force_game_name", False):
             self.check_name(bot)
