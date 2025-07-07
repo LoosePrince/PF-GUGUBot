@@ -117,6 +117,7 @@ class botConfig(autoSaveDict):
         self.save()
 
     def load(self):
+        self.validate()
         super().load()
         self.plugin_check()
 
@@ -150,4 +151,31 @@ class botConfig(autoSaveDict):
                 self["admin_group_id"] = [self["admin_group_id"]]
 
         self.save()
+
+    def validate(self):
+        """Validate config file and prompt user where is wrong, including YAML/JSON syntax errors."""
+        # Check YAML or JSON syntax
+        if self.yaml:
+            try:
+                with open(self.path, 'r', encoding='UTF-8') as f:
+                    yaml.load(f)
+            except Exception as e:
+                msg = f"YAML 配置文件语法错误: {e}"
+                if self.logger:
+                    self.logger.error(msg)
+                else:
+                    print(msg)
+                return False
+        else:
+            try:
+                with open(self.path, 'r', encoding='UTF-8') as f:
+                    json.load(f)
+            except Exception as e:
+                msg = f"JSON 配置文件语法错误: {e}"
+                if self.logger:
+                    self.logger.error(msg)
+                else:
+                    print(msg)
+                return False
+    
 
