@@ -629,6 +629,7 @@ class bound_system(base_system):
 
         # update last check time
         self.bot_config["inactive_player_check_last_time"] = time.time()
+        inactive_day_limit = self.bot_config.get("inactive_player_time_range",30)
         self.bot_config.save()
 
         result = self.__get_inactive_player()
@@ -637,6 +638,9 @@ class bound_system(base_system):
 
         result = {qq_id: inactive_days for qq_id, inactive_days in result.items() if str(qq_id) not in self_and_admin_ids}
         result = {qq_id: min(inactive_days, existing_day_dict.get(str(qq_id), float('inf'))) for qq_id, inactive_days in result.items()}
+
+        result = {qq_id: inactive_days for qq_id, inactive_days in result.items() if inactive_days >= inactive_day_limit}
+
         notice_option = self.bot_config.get("inactive_notice_option", []) # group, admin, admin_group
         # construct reply message
         # print([i[1] for i in result])
