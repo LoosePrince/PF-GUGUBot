@@ -4,6 +4,7 @@ import random
 import re
 import time
 
+from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -427,10 +428,18 @@ class bound_system(base_system):
                 admin_group_qq_ids.extend(
                     [i['user_id'] for i in group_info['data']]
                 )
-        admin_group_qq_ids = [str(i) for i in admin_group_qq_ids]
+
+        group_admin_qq_ids = []
+        for group_id in self.bot_config.get("group_id", []):
+            group_info = bot.get_group_member_list_sync(group_id)
+            if group_info and group_info.get('data', {}):
+                group_admin_qq_ids.extend(
+                    [i['user_id'] for i in group_info['data'] if i['role'] != 'member']
+                )
 
         # filter out admin qq_ids and self_qq_id
-        filtered_ids = set(admin_qq_ids + admin_group_qq_ids + [self_qq_id])
+        filtered_ids = set(admin_qq_ids + admin_group_qq_ids + [self_qq_id] + group_admin_qq_ids)
+        filtered_ids = {str(i) for i in filtered_ids}
 
         return filtered_ids
 
@@ -502,8 +511,6 @@ class bound_system(base_system):
                         for i in sorted(members, key=lambda x: x['user_id'])]
                     ))
         
-            
-            
             if 'admin' in notice_option:
                 for user_id in self.bot_config.get("admin_id", []):
                     bot.send_private_msg(user_id, "未绑定定期检查:\n"+"\n".join(reply_msg))
@@ -595,16 +602,30 @@ class bound_system(base_system):
                 result[qq_id] = inactive_day
 
         return result
+    
+    def __get_member_existing_day_in_group(self, bot, qq_ids):
+        existing_day_dict = defaultdict(int)
+
+        for group_id in self.bot_config.get("group_id", []):
+            group_member_list = bot.get_group_member_list_sync(group_id)
+            if not group_member_list:
+                continue
+
+            group_member_list = group_member_list.get('data', [])
+            for i in group_member_list:
+                qq_id = str(i['user_id'])
+                if qq_id in qq_ids:
+                    existing_day_dict[qq_id] = max(existing_day_dict.get(qq_id,0), i['join_time'])
+        
+        existing_day_dict = {k:round((time.time()-v)/3600/24) for k,v in existing_day_dict.items()}
+
+        return existing_day_dict
 
     def check_inactive_player(self, parameter, info, bot, reply_style, admin:bool):
         """Check if there are group members didn't bound with any account"""
         # command: bound_check
         if parameter[0] not in ['活跃', '活跃检查', 'active_check']:
             return True
-        
-        def __get_name(member:dict)->str:
-            """Get player name from member info"""
-            return member.get('card') or member.get('nickname', '')
 
         # update last check time
         self.bot_config["inactive_player_check_last_time"] = time.time()
@@ -612,7 +633,10 @@ class bound_system(base_system):
 
         result = self.__get_inactive_player()
         self_and_admin_ids = self.__get_self_and_admin_ids(bot)
+        existing_day_dict = self.__get_member_existing_day_in_group(bot, result.keys())
+
         result = {qq_id: inactive_days for qq_id, inactive_days in result.items() if str(qq_id) not in self_and_admin_ids}
+        result = {qq_id: min(inactive_days, existing_day_dict.get(str(qq_id), float('inf'))) for qq_id, inactive_days in result.items()}
         notice_option = self.bot_config.get("inactive_notice_option", []) # group, admin, admin_group
         # construct reply message
         # print([i[1] for i in result])
