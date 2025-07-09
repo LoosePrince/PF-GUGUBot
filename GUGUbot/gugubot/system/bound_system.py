@@ -226,7 +226,8 @@ class bound_system(base_system):
 
         if word in self: # word is qq_id
             for player_name in self.data[word]: # remove all bound
-                self.__remove_whitelist(player_name) # remove from whitelist if exists
+                if self.__remove_whitelist(player_name): # remove from whitelist if exists
+                    bot.reply(info, f'已将 {player_name} 从白名单中移除')
 
             del self.data[word]                  
         else: # word is player_name -> qq_id will be not None value
@@ -265,7 +266,8 @@ class bound_system(base_system):
             return
         
         for player_name in self.data[qq_id]: # remove all bound
-            self.__remove_whitelist(player_name) # remove from whitelist if exists
+            if self.__remove_whitelist(player_name): # remove from whitelist if exists
+                bot.reply(info, f'已将 {player_name} 从白名单中移除')
 
         del self.data[qq_id]  # remove all bound
         self.data.save()
@@ -411,7 +413,7 @@ class bound_system(base_system):
             player_name (str): player name
         """
         if self.bot_config.get("whitelist_add_with_bound", False):
-            self.whitelist.remove_player(player_name)
+            return self.whitelist.remove_player(player_name)
 
     ########################################################### unbound check ###########################################################
 
@@ -494,14 +496,28 @@ class bound_system(base_system):
         notice_option = self.bot_config.get("unbound_notice_option", []) # group, admin, admin_group
         # construct reply message
         # print([i[1] for i in result])
+
+        response_msg = [
+            '✅ 绑定情况核查完毕，暂无未绑定成员。',
+            '定期检测：全部成员已完成绑定，状态良好。',
+            '绑定审核通过，无遗漏人员~',
+            '所有用户已绑定，无需额外操作~',
+            '🔍 绑定检查完成：未发现未绑定账号。',
+            '本轮绑定检查无异常，大家都很配合 👍',
+            '例行绑定检查中：暂无未绑定记录。',
+            '绑定状态良好，当前无未完成用户。',
+            '✔️ 已确认，全员账号状态正常、已绑定。',
+            '检查完毕：没有发现任何未绑定的成员~',
+        ]
+
         if not any([i[1] for i in result]):
             if 'admin' in notice_option:
                 for user_id in self.bot_config.get("admin_id", []):
-                    bot.send_private_msg(user_id, "未绑定定期检查: 所有人都已绑定~")
+                    bot.send_private_msg(user_id, random.choice(response_msg))
 
             if 'admin_group' in notice_option:
                 for admin_group_id in self.bot_config.get("admin_group_id", []):
-                    bot.send_group_msg(admin_group_id, "未绑定定期检查: 所有人都已绑定~")
+                    bot.send_group_msg(admin_group_id, random.choice(response_msg))
         else:
             reply_msg = []
             for group_id, members in result:
@@ -644,14 +660,27 @@ class bound_system(base_system):
         notice_option = self.bot_config.get("inactive_notice_option", []) # group, admin, admin_group
         # construct reply message
         # print([i[1] for i in result])
+        response_msg = [
+            '✅ 活跃检查完成，暂无发现不活跃成员。',
+            '活跃度审核通过，当前所有玩家状态良好~',
+            '定期检测中，暂无非活跃用户，继续保持！',
+            '活跃状态良好，无需处理闲置玩家。',
+            '🔍 扫描结束：无不活跃成员。',
+            '例行检查：所有成员都在线活跃中~',
+            '状态检测完成，暂无低活跃账号~',
+            '无不活跃情况，群内活跃正常。',
+            '活跃监测：暂无异常，继续愉快交流！',
+            '✔️ 成员活跃状态正常，无需清理。',
+        ]
+
         if not result:
             if 'admin' in notice_option:
                 for user_id in self.bot_config.get("admin_id", []):
-                    bot.send_private_msg(user_id, "活跃度定期检查: 没有死鱼咩~")
+                    bot.send_private_msg(user_id, random.choice(response_msg))
 
             if 'admin_group' in notice_option:
                 for admin_group_id in self.bot_config.get("admin_group_id", []):
-                    bot.send_group_msg(admin_group_id, "活跃度定期检查: 没有死鱼咩~")
+                    bot.send_group_msg(admin_group_id, random.choice(response_msg))
         else:
             reply_msg = []
             for qq_id, inactive_days in result.items():
