@@ -27,6 +27,7 @@ def on_load(server: PluginServerInterface, old)->None:
 
     # gugubot主体
     qq_bot = qbot(server, cq_qq_api_bot)
+    server.schedule_task(qq_bot._trigger_periodic_tasks(cq_qq_api_bot))
 
     # 注册指令
     server.register_command(
@@ -161,6 +162,7 @@ def on_user_info(server:PluginServerInterface, info:Info)->None:
 # 卸载
 def on_unload(server:PluginServerInterface)->None:
     try:
+        qq_bot.periodic_task_running_flag = False
         pygame.quit()
     except:
         pass

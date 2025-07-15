@@ -506,6 +506,18 @@ class qbot_helper:
 #+----------------------------------------------------------------------+
 
 class qbot(qbot_helper):
+    def __init__(self, server: PluginServerInterface, bot):
+        super().__init__(server, bot)
+        # schedule periodic tasks
+        self.periodic_task_running_flag = True
+
+    def _trigger_periodic_tasks(self, bot):
+        async def trigger_periodic_tasks():
+            while self.periodic_task_running_flag:
+                await self.data.trigger_time_functions(bot)
+                await asyncio.sleep(60)  # 每分钟检查一次
+        return trigger_periodic_tasks
+
     #===================================================================#
     #                        ingame @ command                           #
     #===================================================================#
@@ -578,19 +590,23 @@ class qbot(qbot_helper):
                 if self.config["command"]["whitelist"] or self.config.get("whitelist_remove_with_leave", False):
                     for player_name in self.data[user_id]:
                         self.whitelist.remove_player(player_name)
+
+                player_names = ",".join(self.data[user_id])
+
+                # Remove bound
+                del self.data[user_id]
                 
                 # bot notice
                 bot.send_group_msg(group_id = info.group_id, 
                                 message = get_style_template('del_whitelist_when_quit', self.style)\
-                                .format(",".join(self.data[user_id]) )
+                                .format(player_names)
                 )
 
-                bot.send_msg_to_admin_groups( get_style_template('del_whitelist_when_quit', self.style)\
-                                .format(",".join(self.data[user_id]) )
-                )
-                
-                # Remove bound
-                del self.data[user_id]
+                for admin_group_id in self.config.get('admin_group_id', []):
+                    bot.send_group_msg(group_id = admin_group_id, 
+                                       message = get_style_template('del_whitelist_when_quit', self.style)\
+                                           .format(player_names)
+                    )
 
     #===================================================================#
     #                          on_qq_command                            #
@@ -744,7 +760,6 @@ class qbot(qbot_helper):
     # 转发消息
     @addTextToImage
     def on_qq_message(self, server:PluginServerInterface, info, bot):
-        self.data.trigger_time_functions(bot)  # 检测未绑定任务
         # 判断是否转发
         if not is_valid_message(info, bot, self.config): return
         
@@ -791,7 +806,6 @@ class qbot(qbot_helper):
 
     # 转发消息
     def on_mc_message(self, server: PluginServerInterface, info: Info):
-        self.data.trigger_time_functions(self.bot)  # 检测未绑定任务
         if not info.is_player or not self.config['forward']['mc_to_qq']:
             return
 
