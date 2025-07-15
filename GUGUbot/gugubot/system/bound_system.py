@@ -550,6 +550,8 @@ class bound_system(base_system):
                 for group_id in self.bot_config.get("group_id", []):
                     bot.send_group_msg(group_id, "未绑定定期检查:\n"+"\n".join(reply_msg))
 
+            reply_msg = []
+            count = 0
             remove_time_limit = self.bot_config.get("unbound_member_tick_limit", -1)
             if remove_time_limit >= 0:
                 for group_id, members in result:
@@ -557,12 +559,24 @@ class bound_system(base_system):
                         time_left = int(remove_time_limit - (time.time() - member['join_time'])/3600)
                         if time_left <= 0:
                             bot.set_group_kick(group_id, member['user_id'])
+                            reply_msg.append(f'已将 {__get_name(member)}({member["user_id"]}) 移除出群')
+                            count += 1
                         elif self.bot_config.get("unbound_member_notice", False):
                             bot.send_private_msg(member['user_id'], 
                                 f'请使用 {self.bot_config["command_prefix"]}绑定 玩家名称 来绑定~\n' +\
                                 f'若不绑定将会在 {time_left} 小时后被移除出群哦~',
                                 group_id=group_id
                             )
+                if count > 0:
+                    if 'admin' in notice_option:
+                        for user_id in self.bot_config.get("admin_id", []):
+                            bot.send_private_msg(user_id, f'已将 {count} 名未绑定成员移除出群:\n' + "\n".join(reply_msg))
+                    if 'admin_group' in notice_option:
+                        for admin_group_id in self.bot_config.get("admin_group_id", []):
+                            bot.send_group_msg(admin_group_id, f'已将 {count} 名未绑定成员移除出群:\n' + "\n".join(reply_msg))
+                    if 'group' in notice_option:
+                        for group_id in self.bot_config.get("group_id", []):
+                            bot.send_group_msg(group_id, f'已将 {count} 名未绑定成员移除出群:\n' + "\n".join(reply_msg))
 
     def check_bound_sync(self, parameter, info, bot, reply_style, admin:bool):
         return asyncio.run(self.check_bound(parameter, info, bot, reply_style, admin))
