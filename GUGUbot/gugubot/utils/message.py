@@ -1,6 +1,8 @@
 import json
 import re
 
+from mcdreforged.api.rtext import RText, RAction, RColor
+
 from gugubot.utils.style import get_style_template
 from gugubot.data.text import qq_face_name
 
@@ -27,11 +29,17 @@ def extract_url(match):
     summary_match = f"表情: {summary_match.group(1)}" if summary_match else '图片'
     if url_match:
         url = url_match.group(1)
-        return f'[[CICode,url={re.sub("&amp;", "&", url)},name={summary_match}]]'
+        return url, summary_match
     if url_match2:
         url = url_match2.group(1)
-        return f'[[CICode,url={re.sub("&amp;", "&", url)},name={summary_match}]]'
+        return url, summary_match
     return cq_code
+
+def construct_ChatImage_url(url, summary="图片"):
+    return f'[[CICode,url={re.sub("&amp;", "&", url)},name={summary}]]'
+
+def construct_Image_url(url, summary="图片"):
+    return f'[图片: {summary}]({re.sub("&amp;", "&", url)})'
 
 def replace_emoji_with_placeholder(text):
     # 定义匹配 emoji 的正则表达式
@@ -81,12 +89,11 @@ def beautify_message(content:str, keep_raw_image_link:bool=False, low_game_versi
 
     # process image link
     if keep_raw_image_link:
-        content = re.sub(r'\[CQ:image,.*?\]|\[CQ:mface,.*?\]', extract_url, content)
+        content = re.sub(r'\[CQ:image,.*?\]|\[CQ:mface,.*?\]', \
+                         lambda x: construct_ChatImage_url(*extract_url(x)), content)
     else:
-        content = re.sub(r'\[CQ:image,.*?\]', '[图片]', content)
-        content = re.sub(r'\[CQ:mface,summary=(?:&#91;)?(.*?)(?:&#93;)?,.*?\]', r'[表情: \1]', content)
-        content = re.sub(r'\[CQ:mface\]&#91;(.*?)&#93;.*?', r'[表情: \1]', content)
-        content = re.sub(r'&#91;(.*?)&#93;.*?', '', content)
+        content = re.sub(r'\[CQ:image,.*?\]|\[CQ:mface,.*?\]', \
+                         lambda x: construct_Image_url(*extract_url(x)), content)
 
     # process emoji
     if low_game_version:
@@ -145,4 +152,26 @@ def convert_to_CQ_at(message: str, member_dict: dict) -> str:
     pattern = r'\[@([^\s,]+)\]'
     message = re.sub(pattern, lambda m: construct_CQ_at(fetch_QQ_id(m.group(1), member_dict)), message)
     return message
+
+def convert_message_to_RText(message: str) -> RText:
+    image_pattern = re.compile(r'\[图片: (.*?)\]\((.*?)\)')
+
+    def replace_image(match):
+        summary = match.group(1)
+        image_summary = f'[图片: {summary}]' if summary!="图片" else '[图片]'
+        url = match.group(2)
+        return RText(image_summary, color=RColor.gold) \
+            .set_hover_text(url) \
+            .set_click_event(action=RAction.open_url, value=url)
+
+    last_end = 0
+    result = RText('', color=RColor.white)
+    for match in image_pattern.finditer(message):
+        if match.start() > last_end:
+            result += RText(message[last_end:match.start()], color=RColor.white)
+        result += replace_image(match)
+        last_end = match.end()
+    if last_end < len(message):
+        result += RText(message[last_end:], color=RColor.white)
+    return result
 

@@ -179,7 +179,8 @@ class qbot_helper:
                 .set_hover_text(group_id) \
                 .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
             + RText(f"[{sender}]", color=RColor.green) \
-            + RText(f" {message}", color=RColor.white)
+            + RText(f" ", color=RColor.white) \
+            + convert_message_to_RText(message)
         server.say(rtext)
 
     def set_number_as_name(self, server:PluginServerInterface, reset:bool=False)->None:
@@ -292,7 +293,8 @@ class qbot_helper:
                         .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
                     + RText(f"[{sender}]", color=RColor.green) \
                     + RText(f"[@{receiver}]", color=RColor.aqua) \
-                    + RText(f" {forward_content}", color=RColor.white)
+                    + RText(f" ", color=RColor.white) \
+                    + convert_message_to_RText(forward_content)
                 server.say(rtext)
                 
             # @ only -> substitute all the @123 to @player_name 
@@ -308,7 +310,8 @@ class qbot_helper:
                         .set_hover_text(group_id) \
                         .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
                     + RText(f"[{sender}]", color=RColor.green) \
-                    + RText(f" {forward_content}", color=RColor.white)
+                    + RText(f" {forward_content}", color=RColor.white) \
+                    + convert_message_to_RText(forward_content)
                 server.say(rtext)
             return True
         return False
@@ -326,7 +329,8 @@ class qbot_helper:
                         .set_hover_text(group_id) \
                         .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
                     + RText(f"[{sender_name}]", color=RColor.green) \
-                    + RText(f" {info.content}", color=RColor.white)
+                    + RText(f" ", color=RColor.white) \
+                    + convert_message_to_RText(info.content)
                 server.say(rtext)
 
             key_word_reply = self.key_word[info.content]
@@ -345,8 +349,9 @@ class qbot_helper:
                         .set_hover_text(group_id) \
                         .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
                     + RText(f"[机器人]", color=RColor.green) \
-                    + RText(f" {key_word_reply}", color=RColor.white)
-                server.say(rtext)
+                    + RText(f" ", color=RColor.white) \
+                    + convert_message_to_RText(key_word_reply)
+                server.say(convert_message_to_RText(rtext))
 
             return True
         return False
@@ -750,7 +755,7 @@ class qbot(qbot_helper):
                     .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
                 + RText(f"[@{at_id}]", color=RColor.aqua) \
                 + RText(f" {get_style_template('authorization_request', self.style).format(stranger_name)}", color=RColor.white)
-            server.say(rtext)
+            server.say(convert_message_to_RText(rtext))
             
             self.shenheman.review_queue[at_id].append((stranger_name, info.flag, info.request_type))
 
