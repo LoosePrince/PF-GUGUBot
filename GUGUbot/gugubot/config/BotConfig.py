@@ -1,3 +1,5 @@
+import json
+
 from gugubot.config.BasicConfig import BasicConfig, yaml
 
 class BotConfig(BasicConfig):
@@ -62,3 +64,34 @@ class BotConfig(BasicConfig):
                 self["admin_group_id"] = [self["admin_group_id"]]
 
         self.save()
+
+    def validate(self):
+        """Validate config file and prompt user where is wrong, including YAML/JSON syntax errors."""
+        # Check YAML or JSON syntax
+        try:
+            with open(self.path, 'r', encoding='UTF-8') as f:
+                if self.yaml:
+                    yaml.load(f)
+                else:
+                    json.load(f)
+        except Exception as e:
+            if self.yaml:
+                mark = getattr(e, 'problem_mark', None)
+                if mark:
+                    msg = f"YAML 配置文件语法错误: 出错位置：第 {mark.line + 1} 行，第 {mark.column + 1} 列\n详细信息: {e}"
+                else:
+                    msg = f"YAML 配置文件语法错误: {e}\n请检查 YAML 文件的缩进和冒号(:)是否正确。"
+            else:
+                lineno = getattr(e, 'lineno', None)
+                colno = getattr(e, 'colno', None)
+                if lineno and colno:
+                    msg = f"JSON 配置文件语法错误: 出错位置：第 {lineno} 行，第 {colno} 列\n详细信息: {e}"
+                else:
+                    msg = f"JSON 配置文件语法错误: {e}\n请检查 JSON 文件的格式是否正确。"
+
+                if self.logger:
+                    self.logger.error(msg)
+                else:
+                    print(msg)
+                    
+            return False
