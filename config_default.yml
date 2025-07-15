@@ -92,7 +92,9 @@ unbound_notice_option: # 未绑定检查发在哪 :: 注释掉表示不发
 inactive_check_interval: -1 # 不活跃成员检查间隔 :: 单位小时，默认不检查（-1）
 inactive_player_time_range: 30 # 多久判断成不活跃玩家 :: 单位天，默认30天
 unbound_check_interval: -1 # 未绑定成员检查间隔 :: 单位小时，默认不检查（-1）
-unbound_member_time_limit: 7200 # 未绑定成员多久后会被指令移除 :: 单位秒，默认2小时
+unbound_member_time_limit: -1 # 成员多久后会被判定为未绑定:: 单位小时，默认不检查（-1）
+unbound_member_tick_limit: -1 # 未绑定成员多久后会被移除:: 单位小时，默认不移除（-1）
+unbound_member_notice: false # 未绑定成员私信通知 :: 是否通知未绑定成员
 
 whitelist_add_with_bound: true  # 绑定ID自动绑定服务器白名单
 whitelist_remove_with_leave: true # 退群时移除白名单
