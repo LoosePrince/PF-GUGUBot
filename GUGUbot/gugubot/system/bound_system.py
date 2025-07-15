@@ -8,6 +8,8 @@ from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
+import asyncio
+
 from mcdreforged.api.types import PluginServerInterface
 
 from gugubot.system.base_system import base_system
@@ -51,12 +53,13 @@ class bound_system(base_system):
                 self.show_list,
                 self.reload,
                 self.clean,
-                self.check_bound,
+                self.check_bound_sync,
                 self.remove_unbound_members,
-                self.check_inactive_player,
+                self.check_inactive_player_sync,
                 self.remove_inactive_members,
                 self.check_whitelist,
-                self.remove_unbound_whitelist
+                self.remove_unbound_whitelist,
+                self.remove_quit_member,
             ] + function_list
 
     def get_qq_id(self, player_name:str):
@@ -196,7 +199,7 @@ class bound_system(base_system):
         # Add whitelist
         if self.bot_config.get("whitelist_add_with_bound", False):
             self.whitelist.add_player(player_name)
-            bot.reply(info, f'@{qq_id} {get_style_template("bound_add_whitelist", reply_style)}')
+            bot.reply(info, f'已将 {player_name} 添加到白名单中')
 
     def remove(self, parameter, info, bot, reply_style, admin):
         """Remove word in the system
@@ -417,15 +420,15 @@ class bound_system(base_system):
 
     ########################################################### unbound check ###########################################################
 
-    def __get_self_and_admin_ids(self, bot):
+    async def __get_self_and_admin_ids(self, bot):
         # bot's qq_id
-        self_qq_id = bot.get_login_info_sync().get('data', {}).get('user_id', None)
+        self_qq_id = (await bot.get_login_info()).get('data', {}).get('user_id', None)
         # bot's admin's qq ids
         admin_qq_ids = self.bot_config.get("admin_id", [])
         # admin group's qq ids
         admin_group_qq_ids = []
         for group_id in self.bot_config.get("admin_group_id", []):
-            group_info = bot.get_group_member_list_sync(group_id)
+            group_info = await bot.get_group_member_list(group_id)
             if group_info and group_info.get('data', {}):
                 admin_group_qq_ids.extend(
                     [i['user_id'] for i in group_info['data']]
@@ -433,7 +436,7 @@ class bound_system(base_system):
 
         group_admin_qq_ids = []
         for group_id in self.bot_config.get("group_id", []):
-            group_info = bot.get_group_member_list_sync(group_id)
+            group_info = await bot.get_group_member_list(group_id)
             if group_info and group_info.get('data', {}):
                 group_admin_qq_ids.extend(
                     [i['user_id'] for i in group_info['data'] if i['role'] != 'member']
@@ -445,7 +448,7 @@ class bound_system(base_system):
 
         return filtered_ids
 
-    def __get_unbound_members(self, bot):
+    async def __get_unbound_members(self, bot):
         """Get unbound members in the group
 
         Args:
@@ -457,32 +460,30 @@ class bound_system(base_system):
         result = []
 
         # filter out admin qq_ids and self_qq_id
-        filtered_ids = self.__get_self_and_admin_ids(bot)
+        filtered_ids = await self.__get_self_and_admin_ids(bot)
 
         for group_id in self.bot_config.get("group_id", []):
             
-            group_member_list = bot.get_group_member_list_sync(group_id)
+            group_member_list = await bot.get_group_member_list(group_id)
             if not group_member_list:
                 continue
 
             group_member_list = group_member_list.get('data', [])
 
-            result.append( (group_id, [i 
+            result.append( (group_id, [i
                                        for i in group_member_list 
-                                       if str(i['user_id']) not in self \
+                                       if str(i['user_id']) not in self.data \
                                         and str(i['user_id']) not in filtered_ids \
-                                        and time.time() - i['join_time'] > self.bot_config.get("unbound_member_time_limit", 7200) # 2 hours
+                                        and time.time() - i['join_time'] > self.bot_config.get("unbound_member_time_limit", -1) * 3600 # 2 hours
                                     ]) )
 
         return result
 
-    def check_bound(self, parameter, info, bot, reply_style, admin:bool):
+    async def check_bound(self, parameter, info, bot, reply_style, admin:bool):
         """Check if there are group members didn't bound with any account"""
         # command: bound_check
         if parameter[0] not in ['绑定检查', "检查绑定", 'bound_check']:
             return True
-
-        result = self.__get_unbound_members(bot)
 
         def __get_name(member:dict)->str:
             """Get player name from member info"""
@@ -492,7 +493,7 @@ class bound_system(base_system):
         self.bot_config["unbound_check_last_time"] = time.time()
         self.bot_config.save()
 
-        result = self.__get_unbound_members(bot)
+        result = await self.__get_unbound_members(bot)
         notice_option = self.bot_config.get("unbound_notice_option", []) # group, admin, admin_group
         # construct reply message
         # print([i[1] for i in result])
@@ -549,6 +550,23 @@ class bound_system(base_system):
                 for group_id in self.bot_config.get("group_id", []):
                     bot.send_group_msg(group_id, "未绑定定期检查:\n"+"\n".join(reply_msg))
 
+            remove_time_limit = self.bot_config.get("unbound_member_tick_limit", -1)
+            if remove_time_limit >= 0:
+                for group_id, members in result:
+                    for member in members:
+                        time_left = int(remove_time_limit - (time.time() - member['join_time'])/3600)
+                        if time_left <= 0:
+                            bot.set_group_kick(group_id, member['user_id'])
+                        elif self.bot_config.get("unbound_member_notice", False):
+                            bot.send_private_msg(member['user_id'], 
+                                f'请使用 {self.bot_config["command_prefix"]}绑定 玩家名称 来绑定~\n' +\
+                                f'若不绑定将会在 {time_left} 小时后被移除出群哦~',
+                                group_id=group_id
+                            )
+
+    def check_bound_sync(self, parameter, info, bot, reply_style, admin:bool):
+        return asyncio.run(self.check_bound(parameter, info, bot, reply_style, admin))
+
     def remove_unbound_members(self, parameter, info, bot, reply_style, admin:bool):
         """Remove unbound members from whitelist
 
@@ -580,11 +598,11 @@ class bound_system(base_system):
             
     ########################################################### inactive check ###########################################################
 
-    def __get_inactive_player(self)->list:
+    async def __get_inactive_player(self, bot)->list:
         """Check if there are group members didn't bound with any account"""
         usercache_path = Path("./server/usercache.json")
 
-        inactive_day_range = self.bot_config.get("inactive_player_time_range", 30)
+        inactive_day_limit = self.bot_config.get("inactive_player_time_range", 30)
 
         if not usercache_path.exists():
             return list(self.keys())
@@ -614,30 +632,45 @@ class bound_system(base_system):
         result = {}
         for qq_id, player_names in self.data.items():
             inactive_day = min([inactive_dict.get(name, float('inf')) for name in player_names], default=float('inf'))
-            if inactive_day > inactive_day_range:
+            if inactive_day > inactive_day_limit:
                 result[qq_id] = inactive_day
 
-        return result
+        self_and_admin_ids = await self.__get_self_and_admin_ids(bot)
+        existing_day_dict = await self.__get_member_existing_day_in_group(bot)
+
+
+        # Add identifier to differentiate qq_id from result and existing_day_dict
+        merged_result = {}
+        for qq_id, inactive_days in existing_day_dict.items():
+            merged_result[qq_id] = {'inactive_days': inactive_days, 'source': 'existing_day_dict'}
+        for qq_id, inactive_days in result.items():
+            merged_result[qq_id] = {'inactive_days': inactive_days, 'source': 'game'}
+
+        # filter out active members
+        merged_result = {qq_id: data for qq_id, data in merged_result.items() if data['inactive_days'] >= inactive_day_limit}
+        # filter out admin and self
+        merged_result = {qq_id: data for qq_id, data in merged_result.items() if str(qq_id) not in self_and_admin_ids}
+
+        return merged_result
     
-    def __get_member_existing_day_in_group(self, bot, qq_ids):
+    async def __get_member_existing_day_in_group(self, bot):
         existing_day_dict = defaultdict(int)
 
         for group_id in self.bot_config.get("group_id", []):
-            group_member_list = bot.get_group_member_list_sync(group_id)
+            group_member_list = await bot.get_group_member_list(group_id)
             if not group_member_list:
                 continue
 
             group_member_list = group_member_list.get('data', [])
             for i in group_member_list:
                 qq_id = str(i['user_id'])
-                if qq_id in qq_ids:
-                    existing_day_dict[qq_id] = max(existing_day_dict.get(qq_id,0), i['join_time'])
+                existing_day_dict[qq_id] = max(existing_day_dict.get(qq_id,0), i['join_time'])
         
         existing_day_dict = {k:round((time.time()-v)/3600/24) for k,v in existing_day_dict.items()}
 
         return existing_day_dict
 
-    def check_inactive_player(self, parameter, info, bot, reply_style, admin:bool):
+    async def check_inactive_player(self, parameter, info, bot, reply_style, admin:bool):
         """Check if there are group members didn't bound with any account"""
         # command: bound_check
         if parameter[0] not in ['活跃', '活跃检查', 'active_check']:
@@ -645,18 +678,11 @@ class bound_system(base_system):
 
         # update last check time
         self.bot_config["inactive_player_check_last_time"] = time.time()
-        inactive_day_limit = self.bot_config.get("inactive_player_time_range",30)
+        
         self.bot_config.save()
 
-        result = self.__get_inactive_player()
-        self_and_admin_ids = self.__get_self_and_admin_ids(bot)
-        existing_day_dict = self.__get_member_existing_day_in_group(bot, result.keys())
-
-        result = {qq_id: inactive_days for qq_id, inactive_days in result.items() if str(qq_id) not in self_and_admin_ids}
-        result = {qq_id: min(inactive_days, existing_day_dict.get(str(qq_id), float('inf'))) for qq_id, inactive_days in result.items()}
-
-        result = {qq_id: inactive_days for qq_id, inactive_days in result.items() if inactive_days >= inactive_day_limit}
-
+        result = await self.__get_inactive_player(bot)
+        
         notice_option = self.bot_config.get("inactive_notice_option", []) # group, admin, admin_group
         # construct reply message
         # print([i[1] for i in result])
@@ -683,9 +709,11 @@ class bound_system(base_system):
                     bot.send_group_msg(admin_group_id, random.choice(response_msg))
         else:
             reply_msg = []
-            for qq_id, inactive_days in result.items():
+            for qq_id, inactive_dict in result.items():
                 player_names = ",".join(self.data.get(qq_id, []))
-                inactive_str = f'{int(inactive_days)} 天' if inactive_days < float('inf') else '未登录'
+                inactive_days = inactive_dict['inactive_days']
+                inactive_source_game = inactive_dict['source'] == "game"
+                inactive_str = f'{int(inactive_days)} 天' if inactive_source_game else f'已进群 {int(inactive_days)} 天（未登录）'
                 reply_msg.append(f'{player_names}({qq_id}) -> {inactive_str}')
             
             
@@ -703,12 +731,17 @@ class bound_system(base_system):
                 reply_msg = []
                 for qq_id, inactive_days in result.items():
                     player_names = ",".join(self.data.get(qq_id, []))
-                    inactive_str = f'{int(inactive_days)} 天' if inactive_days < float('inf') else '未登录'
+                    inactive_days = inactive_dict['inactive_days']
+                    inactive_source_game = inactive_dict['source'] == "game"
+                    inactive_str = f'{int(inactive_days)} 天' if inactive_source_game else f'已进群 {int(inactive_days)} 天（未登录）'
                     reply_msg.append(f'{player_names}({construct_CQ_at(str(qq_id))}) -> {inactive_str}')
 
                 for group_id in self.bot_config.get("group_id", []):
                     bot.send_group_msg(group_id, "活跃度定期检查:\n"+"\n".join(reply_msg))
             
+    def check_inactive_player_sync(self, parameter, info, bot, reply_style, admin:bool):
+        return asyncio.run(self.check_inactive_player(parameter, info, bot, reply_style, admin))
+
     def remove_inactive_members(self, parameter, info, bot, reply_style, admin:bool):
         """Remove inactive members from whitelist
 
@@ -719,29 +752,48 @@ class bound_system(base_system):
         if parameter[0] not in ['移除不活跃', 'remove_inactive']:
             return True
 
-        inactive_members = self.__get_inactive_player()
+        inactive_members = self.__get_inactive_player(bot)
 
         if not inactive_members:
             bot.reply(info, '没有不活跃成员~')
             return
 
+        group_member_dict = defaultdict(set)
+        for group_id in self.bot_config.get("group_id", []):
+            group_member_list = bot.get_group_member_list_sync(group_id)
+            if not group_member_list:
+                continue
+
+            group_member_list = group_member_list.get('data', [])
+            for i in group_member_list:
+                qq_id = str(i['user_id'])
+                group_member_dict[qq_id].add(group_id)
+
         count = 0
         for qq_id, _ in inactive_members.items():
- 
-            bot.set_group_kick(info.source_id, qq_id)
+            for player_name in self.data.get(qq_id, []):
+                self.__remove_whitelist(player_name)
+            del self.data[qq_id]
+            self.data.save()
+
+            for group_id in group_member_dict.get(qq_id, []):
+                bot.set_group_kick(group_id, qq_id)
             count += 1
 
-        inactive_str_func = lambda inactive_days: f'{int(inactive_days)} 天' if inactive_days < float('inf') else '未登录'
+        inactive_str_func = lambda inactive_days: \
+            f'{int(inactive_days)} 天' \
+            if inactive_days.get("source", "") == "game" else\
+            f'已进群 {int(inactive_days)} 天（未登录）'
         bot.reply(info, f'已将不活跃的成员({count}人)移除出群:\n' + "\n".join(
-            [f'{",".join(self.data.get(qq_id, []))}({qq_id}) -> {inactive_str_func(inactive_days)} 天' 
-             for qq_id, inactive_days in inactive_members.items()]
+            [f'{",".join(self.data.get(qq_id, []))}({qq_id}) -> {inactive_str_func(inactive_dict)}' 
+             for qq_id, inactive_dict in inactive_members.items()]
         ))
 
     ############################################################## check name ##############################################################
-    def check_name(self, bot):
+    async def check_name(self, bot):
         """Check if there are group members didn't bound with any account"""
         for group_id in self.bot_config.get("group_id", []):
-            group_member_list = bot.get_group_member_list_sync(group_id)
+            group_member_list = await bot.get_group_member_list(group_id)
             if not group_member_list:
                 continue
 
@@ -810,21 +862,67 @@ class bound_system(base_system):
 
         bot.reply(info, "已将未绑定的白名单成员移除:\n"+"\n".join(reply_msg))
 
+    ############################################################## check quit ##############################################################
+    def __get_member_in_group(self, bot):
+        member_id_list = set()
 
-    def trigger_time_functions(self, bot):
+        for group_id in self.bot_config.get("group_id", []):
+            group_member_list = bot.get_group_member_list_sync(group_id)
+            if not group_member_list:
+                continue
+
+            group_member_list = group_member_list.get('data', [])
+            for i in group_member_list:
+                qq_id = str(i['user_id'])
+                member_id_list.add(qq_id)
+        
+        return member_id_list
+
+
+    def remove_quit_member(self, parameter, info, bot, reply_style, admin:bool):
+        """Remove unbound members from whitelist
+
+        Args:
+            bot (PluginServerInterface): bot instance
+        """
+        # command: remove_unbound_whitelist
+        if parameter[0] not in ['移除退群', 'remove_quit']:
+            return True
+
+        result = self.__get_member_in_group(bot)
+
+        quit_members = {qq_id for qq_id in self.data.keys() if qq_id not in result}
+
+        if not quit_members:
+            bot.reply(info, '没有退群的绑定成员~')
+            return
+        
+        reply_msg = []
+        for qq_id in quit_members:
+            for player_name in self.get(qq_id, []):
+                self.__remove_whitelist(player_name)
+                reply_msg.append(f'\t{player_name} 已从白名单中移除')
+            del self.data[qq_id]
+            self.data.save()
+            reply_msg.append(f'\t{qq_id} 已解除绑定')
+
+        bot.reply(info, "已将退群成员绑定及白名单移除:\n"+"\n".join(reply_msg))
+
+
+    async def trigger_time_functions(self, bot):
         """Trigger time functions"""
         last_check_time_unbound = self.bot_config.get("unbound_check_last_time", -1)
         check_interval_unbound = self.bot_config.get("unbound_check_interval", -1) * 3600 # convert to seconds
         last_check_time_inactive = self.bot_config.get("inactive_player_check_last_time", -1)
-        check_interval_inactive = self.bot_config.get("inactive_check_interval", -1) * 3600 * 24
+        check_interval_inactive = self.bot_config.get("inactive_check_interval", -1) * 3600
         current_time = time.time()
 
         # check off
         if check_interval_unbound > 0 and (last_check_time_unbound < 0 or (current_time - last_check_time_unbound >= check_interval_unbound)):
-            self.check_bound(['绑定检查'], None, bot, None, True)
+            await self.check_bound(['绑定检查'], None, bot, None, True)
         
         if check_interval_inactive > 0 and (last_check_time_inactive < 0 or (current_time - last_check_time_inactive >= check_interval_inactive)):
-            self.check_inactive_player(['活跃'], None, bot, None, True)
+            await self.check_inactive_player(['活跃'], None, bot, None, True)
 
         if self.bot_config.get("force_game_name", False):
-            self.check_name(bot)
+            await self.check_name(bot)
