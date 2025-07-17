@@ -153,7 +153,7 @@ class shenhe_system(base_system):
             return
         
         request_name, flag, sub_type = self.review_queue[qq_id].pop(0)
-        bot.set_group_add_request(flag, sub_type, action) # send command to bot
+        bot.set_group_add_request_sync(flag, sub_type, action) # send command to bot
         
         with open(self.bot_config["dict_address"]['shenhe_log'], 'a+', encoding='utf-8') as f:  # record log
             f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())} {flag} {qq_id} {'通过' if action else '拒绝'}\n")
