@@ -310,7 +310,7 @@ class qbot_helper:
                         .set_hover_text(group_id) \
                         .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
                     + RText(f"[{sender}]", color=RColor.green) \
-                    + RText(f" {forward_content}", color=RColor.white) \
+                    + RText(f" ", color=RColor.white) \
                     + convert_message_to_RText(forward_content)
                 server.say(rtext)
             return True
@@ -351,7 +351,7 @@ class qbot_helper:
                     + RText(f"[机器人]", color=RColor.green) \
                     + RText(f" ", color=RColor.white) \
                     + convert_message_to_RText(key_word_reply)
-                server.say(convert_message_to_RText(rtext))
+                server.say(rtext)
 
             return True
         return False
@@ -755,7 +755,7 @@ class qbot(qbot_helper):
                     .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
                 + RText(f"[@{at_id}]", color=RColor.aqua) \
                 + RText(f" {get_style_template('authorization_request', self.style).format(stranger_name)}", color=RColor.white)
-            server.say(convert_message_to_RText(rtext))
+            server.say(rtext)
             
             self.shenheman.review_queue[at_id].append((stranger_name, info.flag, info.request_type))
 
