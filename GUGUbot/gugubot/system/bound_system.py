@@ -591,7 +591,7 @@ class bound_system(base_system):
         if parameter[0] not in ['移除未绑定', 'remove_unbound']:
             return True
 
-        unbound_members = self.__get_unbound_members(bot)
+        unbound_members = asyncio.ru(self.__get_unbound_members(bot))
 
         if not any([i[1] for i in unbound_members]):
             bot.reply(info, '所有人都已绑定，没有人被移除~')
@@ -602,13 +602,14 @@ class bound_system(base_system):
             return member.get('card') or member.get('nickname', '')
 
         count = 0
+        reply_detail = []
         for group_id, members in unbound_members:
             for member in members:
                 bot.set_group_kick(group_id, member['user_id'])
                 count += 1
-        bot.reply(info, f'已将未绑定的成员({count}人)移除出群:\n' + "\n".join(
-            [f'群{group_id}:\n' + "\n".join([f'  {__get_name(i)}({i["user_id"]})' for i in members]) for group_id, members in unbound_members if members]
-        ))  
+            if members:
+                reply_detail.append(f'群{group_id}:\n' + "\n".join([f'  {__get_name(i)}({i["user_id"]})' for i in members]))
+        bot.reply(info, f'已将未绑定的成员({count}人)移除出群:\n' + "\n".join(reply_detail))
             
     ########################################################### inactive check ###########################################################
 
@@ -658,7 +659,11 @@ class bound_system(base_system):
         for qq_id, inactive_days in existing_day_dict.items():
             merged_result[qq_id] = {'inactive_days': inactive_days, 'source': 'existing_day_dict'}
         for qq_id, inactive_days in result.items():
-            merged_result[qq_id] = {'inactive_days': inactive_days, 'source': 'game'}
+            if qq_id in merged_result:
+                merged_result[qq_id]['inactive_days'] = min(merged_result[qq_id]['inactive_days'], inactive_days)
+                merged_result[qq_id]['source'] = 'game' if merged_result[qq_id]['inactive_days'] == inactive_days else merged_result[qq_id]['source']
+            else:
+                merged_result[qq_id] = {'inactive_days': inactive_days, 'source': 'game'}
 
         # filter out active members
         merged_result = {qq_id: data for qq_id, data in merged_result.items() if data['inactive_days'] >= inactive_day_limit}
@@ -683,6 +688,19 @@ class bound_system(base_system):
         existing_day_dict = {k:round((time.time()-v)/3600/24) for k,v in existing_day_dict.items()}
 
         return existing_day_dict
+
+    def __get_inactive_string(self, inactive_dict:dict)->str:
+        inactive_days = inactive_dict['inactive_days']
+        inactive_source_game = inactive_dict['source'] == "game"
+
+        if inactive_days == float('inf'):
+            inactive_str = '未登录且退群'
+        elif inactive_source_game:
+            inactive_str = f"{int(inactive_days)} 天"
+        else:
+            inactive_str = f"已进群 {int(inactive_days)} 天（未登录）"
+        
+        return inactive_str
 
     async def check_inactive_player(self, parameter, info, bot, reply_style, admin:bool):
         """Check if there are group members didn't bound with any account"""
@@ -725,9 +743,9 @@ class bound_system(base_system):
             reply_msg = []
             for qq_id, inactive_dict in result.items():
                 player_names = ",".join(self.data.get(qq_id, []))
-                inactive_days = inactive_dict['inactive_days']
-                inactive_source_game = inactive_dict['source'] == "game"
-                inactive_str = f'{int(inactive_days)} 天' if inactive_source_game else f'已进群 {int(inactive_days)} 天（未登录）'
+                
+                inactive_str = self.__get_inactive_string(inactive_dict)
+
                 reply_msg.append(f'{player_names}({qq_id}) -> {inactive_str}')
             
             
@@ -743,11 +761,11 @@ class bound_system(base_system):
 
             if 'group' in notice_option:
                 reply_msg = []
-                for qq_id, inactive_days in result.items():
+                for qq_id, inactive_dict in result.items():
                     player_names = ",".join(self.data.get(qq_id, []))
-                    inactive_days = inactive_dict['inactive_days']
-                    inactive_source_game = inactive_dict['source'] == "game"
-                    inactive_str = f'{int(inactive_days)} 天' if inactive_source_game else f'已进群 {int(inactive_days)} 天（未登录）'
+
+                    inactive_str = self.__get_inactive_string(inactive_dict)
+
                     reply_msg.append(f'{player_names}({construct_CQ_at(str(qq_id))}) -> {inactive_str}')
 
                 for group_id in self.bot_config.get("group_id", []):
@@ -766,7 +784,7 @@ class bound_system(base_system):
         if parameter[0] not in ['移除不活跃', 'remove_inactive']:
             return True
 
-        inactive_members = self.__get_inactive_player(bot)
+        inactive_members = asyncio.run(self.__get_inactive_player(bot))
 
         if not inactive_members:
             bot.reply(info, '没有不活跃成员~')
@@ -784,24 +802,27 @@ class bound_system(base_system):
                 group_member_dict[qq_id].add(group_id)
 
         count = 0
-        for qq_id, _ in inactive_members.items():
+        reply_detail = []
+        # 先保存要输出的信息，避免del后访问
+        for qq_id, inactive_dict in inactive_members.items():
+            player_names = ",".join(self.data.get(qq_id, []))
+            inactive_str = self.__get_inactive_string(inactive_dict)
+            reply_detail.append(f'{player_names}({qq_id}) -> {inactive_str}')
+
+        # 再执行删除和踢人
+        for qq_id in list(inactive_members.keys()):
             for player_name in self.data.get(qq_id, []):
                 self.__remove_whitelist(player_name)
-            del self.data[qq_id]
-            self.data.save()
+            if qq_id in self.data:
+                del self.data[qq_id]
+        self.data.save()
 
+        for qq_id in inactive_members.keys():
             for group_id in group_member_dict.get(qq_id, []):
                 bot.set_group_kick(group_id, qq_id)
             count += 1
 
-        inactive_str_func = lambda inactive_days: \
-            f'{int(inactive_days)} 天' \
-            if inactive_days.get("source", "") == "game" else\
-            f'已进群 {int(inactive_days)} 天（未登录）'
-        bot.reply(info, f'已将不活跃的成员({count}人)移除出群:\n' + "\n".join(
-            [f'{",".join(self.data.get(qq_id, []))}({qq_id}) -> {inactive_str_func(inactive_dict)}' 
-             for qq_id, inactive_dict in inactive_members.items()]
-        ))
+        bot.reply(info, f'已将不活跃的成员({count}人)移除出群:\n' + "\n".join(reply_detail))
 
     ############################################################## check name ##############################################################
     async def check_name(self, bot):
