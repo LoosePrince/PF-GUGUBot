@@ -591,7 +591,7 @@ class bound_system(base_system):
         if parameter[0] not in ['移除未绑定', 'remove_unbound']:
             return True
 
-        unbound_members = asyncio.ru(self.__get_unbound_members(bot))
+        unbound_members = asyncio.run(self.__get_unbound_members(bot))
 
         if not any([i[1] for i in unbound_members]):
             bot.reply(info, '所有人都已绑定，没有人被移除~')
