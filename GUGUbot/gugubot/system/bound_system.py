@@ -613,46 +613,31 @@ class bound_system(base_system):
             
     ########################################################### inactive check ###########################################################
 
-    async def __get_inactive_player(self, bot)->list:
+    async def __get_inactive_player(self, bot)->dict:
         """Check if there are group members didn't bound with any account"""
-        usercache_path = Path("./server/usercache.json")
 
-        inactive_day_limit = self.bot_config.get("inactive_player_time_range", 30)
-
-        if not usercache_path.exists():
-            return list(self.keys())
-        
-        with open(usercache_path, 'r', encoding='utf-8') as f:
-            usercache = json.load(f)
-        
-        # Example: "2025-01-10 21:25:32 -0800"
-        def parse_time(timestr):
-            # Parse the datetime string with timezone
-            dt = datetime.strptime(timestr, "%Y-%m-%d %H:%M:%S %z")
-            year = dt.year
-            month = dt.month - 1
-            if month == 0:
-                month = 12
-                year -= 1
-            day = min(dt.day, [31,
-                               29 if year % 4 == 0 and (year % 100 != 0 or year % 400 == 0) else 28,
-                               31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month-1])
-            dt = dt.replace(year=year, month=month, day=day)
-            return dt
-
-        inactive_dict = {
-            i['name']: (datetime.now(timezone.utc) - parse_time(i['expiresOn'])).total_seconds() / 86400 for i in usercache
-        }
-
+        # fetch player's last update time
         result = {}
-        for qq_id, player_names in self.data.items():
-            inactive_day = min([inactive_dict.get(name, float('inf')) for name in player_names], default=float('inf'))
-            if inactive_day > inactive_day_limit:
-                result[qq_id] = inactive_day
+        inactive_day_limit = self.bot_config.get("inactive_player_time_range", 30)
+        player_data_folder = Path(self.server.get_mcdr_config()['working_directory']) / "world" / "playerdata"
 
+        if not player_data_folder.exists():
+            result = {}
+    
+        for uuid, whitelist_name in self.whitelist.items():
+            if (player_data_path := (player_data_folder / f"{uuid}.dat")).exists():
+                update_time = player_data_path.stat().st_mtime
+                inactive_day = (datetime.now(timezone.utc) - datetime.fromtimestamp(update_time, timezone.utc)).days
+
+                # map player name to qq_id
+                for qq_id, player_names in self.data.items():
+                    if whitelist_name.lower() not in [i.lower() for i in player_names]:
+                        continue
+                    result[qq_id] = min(inactive_day, result.get(qq_id, float('inf')))
+
+        # filter out admin qq_ids and self_qq_id
         self_and_admin_ids = await self.__get_self_and_admin_ids(bot)
         existing_day_dict = await self.__get_member_existing_day_in_group(bot)
-
 
         # Add identifier to differentiate qq_id from result and existing_day_dict
         merged_result = {}
