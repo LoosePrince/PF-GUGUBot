@@ -1,3 +1,4 @@
+from mcdreforged.api.event import LiteralEvent
 from mcdreforged.api.types import PluginServerInterface
 
 from gugubot.system.base_system import base_system
@@ -62,9 +63,15 @@ class whitelist(base_system):
         """
         whitelist = self.__api.get_whitelist_names()
 
-        for player_name in whitelist:
+        for uuid, player_name in whitelist.items():
             if game_id.lower() == player_name.lower():
                 self.__api.remove_player(player_name, force_offline=True)
+
+                self.server.dispatch_event(
+                    LiteralEvent("gugubot.delete_whitelist_player"),
+                    (uuid, player_name)
+                )
+
                 return True
         
         return False
