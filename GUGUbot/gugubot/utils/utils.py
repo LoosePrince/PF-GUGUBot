@@ -197,13 +197,14 @@ def parse_list_content(bound_list, server, content:str, use_rcon:bool = False) -
     # 有人绑定 -> 识别假人
     ip_logger = server.get_plugin_instance("player_ip_logger")
     
-    if ip_logger:
-        player_list = [i for i in instance_list if ip_logger.is_player(i)]
-        bot_list = [i for i in instance_list if not ip_logger.is_player(i)]
-    elif bound_list:
-        player_list = [i for i in instance_list if i in bound_list]
-        bot_list = [i for i in instance_list if i not in bound_list]
-    else:  # 无人绑定 -> 不识别假人 ==> 下版本使用 ip_logging 来识别假人
-        player_list = instance_list
-        bot_list = []
+    player_list = []
+    bot_list = []
+
+    for instance in instance_list:
+        if (not ip_logger or (ip_logger and ip_logger.is_player(instance))) \
+            and (not bound_list or (bound_list and instance in bound_list)):
+            player_list.append(instance)
+        else:
+            bot_list.append(instance)
+
     return player_list, bot_list
