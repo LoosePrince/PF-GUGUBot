@@ -90,7 +90,7 @@ async def get_group_name(bot, group_id_list:list)->dict:
     
 def get_admin_id_list(bot, config):
     request_results = [bot.get_group_member_list_sync(admin_group_id)  for admin_group_id in config.get("admin_group_id", [])]
-    request_data = [result.get('data', []) for result in request_results if result]
+    request_data = [result.get('data', []) for result in request_results if result and result.get('data', [])]
     admin_ids = {person['user_id'] for group_list in request_data for person in group_list if 'user_id' in person}
 
     return list(admin_ids) + config.get("admin_id", [])
