@@ -39,6 +39,7 @@ command: # 指令相关
 forward: # 转发设置
   forward_other_bot: false # 转发官方机器人回复
   keep_raw_image_link: false # 转发图片链接
+  use_image_preview: false # 转发带imagepreview mod点击事件的图片
   mc_achievement: true # 转发 MC 成就
   mc_death: true # 转发 MC 死亡消息
   mc_to_qq: true # 服务器往QQ群转发

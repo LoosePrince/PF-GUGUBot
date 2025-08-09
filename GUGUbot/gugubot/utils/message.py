@@ -153,13 +153,19 @@ def convert_to_CQ_at(message: str, member_dict: dict) -> str:
     message = re.sub(pattern, lambda m: construct_CQ_at(fetch_QQ_id(m.group(1), member_dict)), message)
     return message
 
-def convert_message_to_RText(message: str) -> RText:
+def convert_message_to_RText(message: str, use_image_preview:bool=False) -> RText:
     image_pattern = re.compile(r'\[图片: (.*?)\]\((.*?)\)')
 
     def replace_image(match):
         summary = match.group(1)
         image_summary = f'[图片: {summary}]' if summary!="图片" else '[图片]'
         url = match.group(2)
+
+        if use_image_preview:
+            return RText(image_summary, color=RColor.gold) \
+            .set_hover_text(url) \
+            .set_click_event(action=RAction.run_command, value=f"/imagepreview preview {url} 60")
+
         return RText(image_summary, color=RColor.gold) \
             .set_hover_text(url) \
             .set_click_event(action=RAction.open_url, value=url)

@@ -180,7 +180,7 @@ class qbot_helper:
                 .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
             + RText(f"[{sender}]", color=RColor.green) \
             + RText(f" ", color=RColor.white) \
-            + convert_message_to_RText(message)
+            + convert_message_to_RText(message, use_image_preview=self.config['forward'].get("use_image_preview", False))
         server.say(rtext)
 
     def set_number_as_name(self, server:PluginServerInterface, reset:bool=False)->None:
@@ -294,7 +294,7 @@ class qbot_helper:
                     + RText(f"[{sender}]", color=RColor.green) \
                     + RText(f"[@{receiver}]", color=RColor.aqua) \
                     + RText(f" ", color=RColor.white) \
-                    + convert_message_to_RText(forward_content)
+                    + convert_message_to_RText(forward_content, use_image_preview=self.config['forward'].get("use_image_preview", False))
                 server.say(rtext)
                 
             # @ only -> substitute all the @123 to @player_name 
@@ -311,7 +311,7 @@ class qbot_helper:
                         .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
                     + RText(f"[{sender}]", color=RColor.green) \
                     + RText(f" ", color=RColor.white) \
-                    + convert_message_to_RText(forward_content)
+                    + convert_message_to_RText(forward_content, use_image_preview=self.config['forward'].get("use_image_preview", False))
                 server.say(rtext)
             return True
         return False
@@ -330,7 +330,7 @@ class qbot_helper:
                         .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
                     + RText(f"[{sender_name}]", color=RColor.green) \
                     + RText(f" ", color=RColor.white) \
-                    + convert_message_to_RText(info.content)
+                    + convert_message_to_RText(info.content, use_image_preview=self.config['forward'].get("use_image_preview", False))
                 server.say(rtext)
 
             key_word_reply = self.key_word[info.content]
@@ -350,7 +350,7 @@ class qbot_helper:
                         .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
                     + RText(f"[机器人]", color=RColor.green) \
                     + RText(f" ", color=RColor.white) \
-                    + convert_message_to_RText(key_word_reply)
+                    + convert_message_to_RText(key_word_reply, use_image_preview=self.config['forward'].get("use_image_preview", False))
                 server.say(rtext)
 
             return True
