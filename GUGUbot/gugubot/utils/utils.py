@@ -55,9 +55,20 @@ def is_self(info, bot)->bool:
 
 # 判断是否是机器人
 def is_robot(bot, group_id, user_id)->bool:
-    user_info = asyncio.run(bot.get_group_member_info(group_id, user_id))
-    if user_info and user_info.get('data', {}) and user_info.get('data', {}).get('is_robot', False):
-        return True
+    bot_range = bot.get_robot_uin_range_sync()
+    if bot_range and bot_range.get("data", []):
+        for uin_dict in bot_range['data']:
+            lower_bound = int(uin_dict.get("minUin"))
+            upper_bound = int(uin_dict.get("maxUin"))
+            if lower_bound <= user_id <= upper_bound:
+                return True
+    elif bot_range.get("data", []) is None:
+        # 如果没有获取到机器人范围，则尝试获取群成员信息
+        # 这可能是因为机器人范围不支持
+        user_info = asyncio.run(bot.get_group_member_info(group_id, user_id))
+        if user_info and user_info.get('data', {}) and user_info.get('data', {}).get('is_robot', False):
+            return True
+    # 如果没有获取到机器人范围或群成员信息，则默认不是机器人
     return False
 
 def get_latest_group_notice(qq_bot, logger):
