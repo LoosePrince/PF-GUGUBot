@@ -59,6 +59,8 @@ class bound_system(base_system):
                 self.remove_inactive_members,
                 self.check_whitelist,
                 self.remove_unbound_whitelist,
+                self.check_extra_bound,
+                self.remove_extra_bound,
                 self.remove_quit_member,
             ] + function_list
 
@@ -881,6 +883,85 @@ class bound_system(base_system):
             reply_msg.append(f'{player_name}({uuid}) 已从白名单中移除')
 
         bot.reply(info, "已将未绑定的白名单成员移除:\n"+"\n".join(reply_msg))
+
+    ############################################################## check bound ##############################################################
+    def __get_extra_bound_member(self, bot):
+        """Get extra bound members not in the whitelist
+
+        Returns:
+            list[tuple]: extra bound members (qq_id, player_name)
+        """
+        extra_bound_members = []
+
+        group_ids = self.bot_config.get("group_id", [])
+        admin_group_ids = self.bot_config.get("admin_group_id", [])
+        group_ids = set(group_ids + admin_group_ids)
+
+        group_member_ids = set()
+        for group_id in group_ids:
+            group_member_list = bot.get_group_member_list_sync(group_id)
+            if not group_member_list:
+                continue
+
+            group_member_list = group_member_list.get('data', [])
+            for i in group_member_list:
+                qq_id = str(i['user_id'])
+                group_member_ids.add(qq_id)
+
+        for qq_id, player_names in self.data.items():
+            if qq_id not in group_member_ids:
+                extra_bound_members.append((qq_id, player_names))
+        
+        return extra_bound_members
+
+    def check_extra_bound(self, parameter, info, bot, reply_style, admin:bool):
+        """Check if there are group members didn't bound with any account"""
+        # command: bound_check
+        if parameter[0] not in ['多余绑定检查', 'extra_bound_check']:
+            return True
+
+        result = self.__get_extra_bound_member(bot)
+
+        if not result:
+            bot.reply(info, '多余绑定检查: 绑定成员都在群里~')
+            return
+        
+        reply_msg = []
+        for qqid, player_names in result:
+            player_name = ", ".join(player_names)
+            reply_msg.append(f'{qqid}({player_name}) 未在群里')
+
+        bot.reply(info, "多余绑定检查:\n"+"\n".join(reply_msg))
+
+    def remove_extra_bound(self, parameter, info, bot, reply_style, admin:bool):
+        """Remove unbound members from whitelist
+
+        Args:
+            bot (PluginServerInterface): bot instance
+        """
+        # command: remove_unbound_whitelist
+        if parameter[0] not in ['移除多余绑定', 'remove_extra_bound']:
+            return True
+
+        result = self.__get_extra_bound_member(bot)
+
+        if not result:
+            bot.reply(info, '绑定成员都在群里~')
+            return
+        
+        reply_msg = []
+        for qqid, player_names in result:
+            if qqid in self:
+                del self.data[qqid] # remove all bound
+                self.data.save()
+            
+            for player_name in player_names:
+                self.__remove_whitelist(player_name) # remove from whitelist if exists
+
+            player_name = ", ".join(player_names)
+            reply_msg.append(f'{qqid}({player_name}) 已从绑定中移除')
+
+        bot.reply(info, "已将多余已绑定成员移除:\n"+"\n".join(reply_msg))
 
     ############################################################## check quit ##############################################################
     def __get_member_in_group(self, bot):
