@@ -12,6 +12,10 @@ from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.command import *
 import pygame
 #+---------------------------------------------------------------------+
+def is_qq_connected(server):
+    cq_qq_api_instance = server.get_plugin_instance("cq_qq_api")
+    return cq_qq_api_instance.is_connected() if cq_qq_api_instance else False
+#+---------------------------------------------------------------------+
 def on_load(server: PluginServerInterface, old)->None:
     global qq_bot
 
@@ -88,7 +92,7 @@ def on_info(server:PluginServerInterface, info:Info)->None:
     # Why I don't use on_player_join & on_player_left?
     # -> Some player with illegal name will not trigger the those events.
 
-    if not isinstance(qq_bot, qbot):
+    if not isinstance(qq_bot, qbot) and is_qq_connected(server):
         return 
 
     # player list
@@ -156,7 +160,7 @@ def _on_player_left(server:PluginServerInterface, info:Info):
 
 # mc游戏消息 -> QQ
 def on_user_info(server:PluginServerInterface, info:Info)->None:
-    if isinstance(qq_bot, qbot):
+    if isinstance(qq_bot, qbot) and is_qq_connected(server):
         qq_bot.on_mc_message(server, info)
 
 # 卸载
@@ -169,7 +173,7 @@ def on_unload(server:PluginServerInterface)->None:
 
 # 开服
 def on_server_startup(server:PluginServerInterface)->None:
-    if isinstance(qq_bot, qbot):
+    if isinstance(qq_bot, qbot) and is_qq_connected(server):
         # 开服提示
         qq_bot.send_msg_to_all_qq(get_style_template('server_start', qq_bot.style))
         # 开服指令
@@ -182,7 +186,7 @@ def on_server_startup(server:PluginServerInterface)->None:
 
 # 关服
 def on_server_stop(server: PluginServerInterface, server_return_code: int)->None:
-    if isinstance(qq_bot, qbot):
+    if isinstance(qq_bot, qbot) and is_qq_connected(server):
         # 关服提示
         qq_bot.send_msg_to_all_qq(get_style_template('server_stop', qq_bot.style))
         
