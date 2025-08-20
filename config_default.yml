@@ -110,3 +110,100 @@ player_name_pattern: "^[a-zA-Z0-9_]{3,16}$"  # 绑定时玩家名称匹配模板
 
 unbound_check_last_time: -1 # 上次检查未绑定成员的时间戳 :: -1表示未检查过
 inactive_player_check_last_time: -1 # 上次检查未活跃成员的时间戳 :: -1表示未检查过
+
+
+
+
+
+
+
+
+
+# [en-US]
+# admin_id | Admin QQ IDs::List of administrator QQ numbers
+# admin_group_id | Admin Group ID::Optional; all members in this group have admin permissions
+# group_id | Group IDs::QQ group IDs to listen to and forward
+# friend_is_admin | Friend Is Admin::Grant admin permission to the bot's QQ friends
+# is_main_server | Main Server::Enable main features such as group commands
+# server_name | Server Name::Optional; shown as a prefix before forwarded messages
+# custom_group_name | Custom In-game Group Name::Map group_id to a custom display name in game
+
+# bound_notice | Bind Notice::Whether to prompt binding
+# member_can_unbound | Member Can Unbind::Allow members to unbind their own bindings
+
+# command | Commands::Feature switches
+# command.ban_word | Ban Word Recall::Recall messages that contain banned words
+# command.execute_command | Execute Server Command::Allow executing server commands
+# command.group_admin | Group Admin Commands::Only administrators can execute
+# command.ingame_key_word | In-game Keyword Reply::Auto reply to keywords in game
+# command.key_word | Group Keyword Reply::Auto reply to keywords in group
+# command.list | Player List::Query online players
+# command.mc | Minecraft Chat::Receive chat messages from the server
+# command.name | Bot Nickname::Set or query the bot's nickname
+# command.qq | QQ Chat::Receive chat messages from QQ
+# command.shenhe | Review Assistant::Auxiliary review feature (WIP)
+# command.start_command | Start Server Command::Start server command features
+# command.whitelist | Whitelist::Whitelist related features
+
+# forward | Forwarding Settings::Message bridging behavior
+# forward.forward_other_bot | Forward Other Bots::Forward replies from official bots
+# forward.keep_raw_image_link | Keep Image Link::Forward raw image URLs
+# forward.use_image_preview | Use ImagePreview::Forward clickable images from the imagepreview mod
+# forward.mc_achievement | MC Achievement::Forward Minecraft achievement messages
+# forward.mc_death | MC Death::Forward death messages
+# forward.mc_to_qq | MC → QQ::Forward messages from server to QQ groups
+# forward.mc_to_qq_command | Command To QQ::Forward server commands
+# forward.player_notice | Player Join/Leave::Notify when players join or leave
+# forward.bot_notice | Fake Player Join/Leave::Notify when fake players join or leave
+# forward.qq_to_mc | QQ → MC::Forward messages from QQ groups to the server
+# forward.show_group_notice | Show Group Notice::Show the latest group announcement on player join
+
+# command_prefix | Command Prefix::Prefix used for chat commands
+
+# dict_address | Paths::Storage paths for fonts and various data files
+# dict_address.ban_word_dict | Ban Word Dict Path::Path to banned words JSON
+# dict_address.bound_image_path | Bind Image Path::Path to the binding hint image
+# dict_address.customized_help_path | Custom Help Path::Path to custom help message JSON
+# dict_address.extra_style_path | Extra Style Path::Path to custom style file
+# dict_address.font_path | Font Path::Path to font file
+# dict_address.key_word_dict | Keyword Dict Path::Path to group keyword JSON
+# dict_address.key_word_ingame_dict | In-game Keyword Dict Path::Path to in-game keyword JSON
+# dict_address.shenhe_log | Review Log Path::Path to review log text file
+# dict_address.shenheman | Reviewer List Path::Path to reviewer JSON
+# dict_address.start_command_dict | Start Commands Path::Path to start commands JSON
+# dict_address.uuid_qqid | UUID-QQ Map Path::Path to UUID-QQ mapping JSON
+# dict_address.whitelist | Whitelist Path::Path to Minecraft whitelist JSON
+
+# force_game_name | Force In-game Name::Use in-game name as the bound name after binding
+# font_limit | Text-to-Image Limit::If text length exceeds this value, convert to image; -1 to disable
+# max_bound | Max Bindings::Maximum number of names a player can bind
+# random_template | Random Templates::Use random message templates to avoid risk control
+# show_message_in_console | Show Reports In Console::Print reported messages in console
+# style | Reply Style::Bot reply style (optional); see style help for details
+# style_cooldown | Style Switch Cooldown::Cooldown time for switching styles
+
+# inactive_notice_option | Inactive Check Target::Where to send inactive member alerts; comment out to disable
+# inactive_notice_option.admin | Admin::Bot administrators
+# inactive_notice_option.admin_group | Admin Group::Administrator group
+# inactive_notice_option.group | Monitor Group::Monitored group
+
+# unbound_notice_option | Unbound Check Target::Where to send unbound member alerts; comment out to disable
+# unbound_notice_option.admin | Admin::Bot administrators
+# unbound_notice_option.admin_group | Admin Group::Administrator group
+# unbound_notice_option.group | Monitor Group::Monitored group
+
+# inactive_check_interval | Inactive Check Interval::Unit (hours); -1 to disable
+# inactive_player_time_range | Inactive Player Window::Unit (days); threshold to consider a player inactive
+# unbound_check_interval | Unbound Check Interval::Unit (hours); -1 to disable
+# unbound_member_time_limit | Unbound Time Limit::Unit (hours); after join, considered unbound if not bound
+# unbound_member_tick_limit | Unbound Removal Limit::Unit (hours); remove after being unbound for this long; -1 to never remove
+# unbound_member_notice | Unbound DM Notice::Whether to DM unbound members
+
+# whitelist_add_with_bound | Add To Whitelist On Bind::Automatically add to server whitelist when binding ID
+# whitelist_remove_with_leave | Remove Whitelist On Leave::Remove from whitelist when leaving the group
+
+# ignore_mc_command_patterns | Ignore MC Command Patterns::Regex patterns of server commands to ignore
+# player_name_pattern | Player Name Pattern::Regex for validating player names when binding
+
+# unbound_check_last_time | Last Unbound Check Timestamp::-1 means never checked
+# inactive_player_check_last_time | Last Inactive Player Check Timestamp::-1 means never checked
