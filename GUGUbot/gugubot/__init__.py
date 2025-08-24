@@ -192,11 +192,6 @@ def on_server_stop(server: PluginServerInterface, server_return_code: int)->None
         
         if qq_bot.config["command"]["name"]:
             qq_bot.set_number_as_name(server, reset=True)
-
-    # reset online players
-    online_player_api = server.get_plugin_instance("online_player_api")
-    if online_player_api:
-        online_player_api.online_players = []
 #+---------------------------------------------------------------------+
 def temp_update_version(server:PluginServerInterface)->None:
     config_dir = "./config/GUGUbot"
