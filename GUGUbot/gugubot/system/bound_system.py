@@ -14,6 +14,7 @@ from mcdreforged.api.types import PluginServerInterface
 
 from gugubot.system.base_system import base_system
 from gugubot.system.whitelist_system import whitelist
+from gugubot.system.active_whitelist_system import ActiveWhiteListSystem
 from gugubot.data.text import bound_help
 from gugubot.utils.style import get_style_template
 from gugubot.utils.message import construct_CQ_at
@@ -24,13 +25,19 @@ class bound_system(base_system):
                  path: str, 
                  server:PluginServerInterface,
                  bot_config,
-                 whitelist:whitelist):
+                 whitelist:whitelist,
+                 active_awhitelist:ActiveWhiteListSystem=None):
         super().__init__(path, server, bot_config, 
                          admin_help_msg=bound_help, 
                          system_name="bound",
                          alias=["绑定"])
         self.whitelist = whitelist
         self.__empty_double_check = None
+        if active_awhitelist is not None:
+            self.active_awhitelist = active_awhitelist
+        else:
+            active_path = Path(path).with_stem("active_awhitelist") if path else None
+            self.active_awhitelist = ActiveWhiteListSystem(active_path, server, bot_config)
 
     def get_func(self, admin:bool=False):
         """ Return allowed function """
@@ -657,7 +664,15 @@ class bound_system(base_system):
         # filter out admin and self
         merged_result = {qq_id: data for qq_id, data in merged_result.items() if str(qq_id) not in self_and_admin_ids}
 
-        return merged_result
+        # 排除ActiveAWhiteList成员
+        filtered_result = {}
+        for qq_id, data in merged_result.items():
+            player_names = self.data.get(qq_id, [])
+            if any(self.active_awhitelist.is_active(name) for name in player_names):
+                continue
+            filtered_result[qq_id] = data
+
+        return filtered_result
     
     async def __get_member_existing_day_in_group(self, bot):
         existing_day_dict = defaultdict(int)

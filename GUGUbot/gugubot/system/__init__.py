@@ -1,3 +1,4 @@
+from gugubot.system.active_whitelist_system import ActiveWhiteListSystem
 from gugubot.system.ban_word_system import ban_word_system
 from gugubot.system.bound_system import bound_system
 from gugubot.system.key_word_system import key_word_system

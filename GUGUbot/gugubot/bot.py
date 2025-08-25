@@ -27,6 +27,7 @@ from gugubot.data.text import (
 from gugubot.config import autoSaveDict, botConfig
 from gugubot.utils import *
 from gugubot.system import (
+    ActiveWhiteListSystem,
     ban_word_system,
     bound_system,
     ingame_key_word_system,
@@ -89,8 +90,9 @@ class qbot_helper:
 
     def __loading_systems(self) -> None:
         """ Loading the data for qqbot functions """
+        self.active_whitelist = ActiveWhiteListSystem(self.config["dict_address"].get('active_awhitelist_dict', "./config/GUGUbot/active_awhitelist.json"), self.server, self.config) # 活跃白名单
         self.whitelist = whitelist(self.server, self.config) # 白名单
-        self.data = bound_system("./config/GUGUbot/GUGUbot.json", self.server, self.config, self.whitelist)
+        self.data = bound_system("./config/GUGUbot/GUGUbot.json", self.server, self.config, self.whitelist, self.active_whitelist)
         self.key_word = key_word_system(self.config["dict_address"]['key_word_dict'], self.server, self.config) # QQ 关键词
         self.key_word_ingame = ingame_key_word_system(self.config["dict_address"]['key_word_ingame_dict'], self.server, self.config) # MC 关键词
         self.ban_word = ban_word_system(self.config["dict_address"]['ban_word_dict'], self.server, self.config) # 违禁词
@@ -685,6 +687,7 @@ class qbot(qbot_helper):
         admin = True
 
         function_list = [
+            self.active_whitelist,
             self.data, # bound
             self.whitelist,
             self.start_command,
