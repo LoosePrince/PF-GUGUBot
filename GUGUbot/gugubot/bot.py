@@ -323,7 +323,7 @@ class qbot_helper:
         if info.content in self.key_word:
             sender_name = self._find_game_name(str(info.user_id), bot, info.source_id)
 
-            if is_forward_to_mc:
+            if is_forward_to_mc and server.is_server_running():
                 group_name = self.group_name.get(info.source_id, "QQ") 
                 group_id = str(info.source_id)
 
@@ -338,7 +338,7 @@ class qbot_helper:
             key_word_reply = self.key_word[info.content]
             bot.reply(info, key_word_reply)
             
-            if is_forward_to_mc:
+            if is_forward_to_mc and server.is_server_running():
                 # 过滤图片
                 if key_word_reply.startswith('[CQ:image'):
                     key_word_reply = beautify_message(key_word_reply, 
@@ -800,7 +800,7 @@ class qbot(qbot_helper):
             if not self.key_word.add_image_handler(info, bot, self.style): return
 
         # 转发消息
-        if is_forward_to_mc:
+        if is_forward_to_mc and server.is_server_running():
 
             # @ 模块（回复 + @人）
             if self._handle_at(server, info, bot): return
