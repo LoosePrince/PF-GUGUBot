@@ -470,16 +470,25 @@ class qbot_helper:
                 # switch = off
                 if not self.config['command'].get('execute_command', False):
                     bot.reply(info, "执行指令已关闭")
+                    return True
+                
+                command = info.content.replace(f"{self.config['command_prefix']}{exec_keyword}", "", 1).strip()
+
+                # check ignore command
+                for pattern in self.config.get("ignore_execute_command_patterns", []):
+                    if re.match(pattern, command):
+                        bot.reply(info, "该指令已被禁止执行")
+                        return True
+
                 # check switch & rcon status
-                elif self.server.is_rcon_running():
-                    command = info.content.replace(f"{self.config['command_prefix']}{exec_keyword}", "", 1).strip()
+                if self.server.is_rcon_running():
                     content = self.server.rcon_query(command)
                     bot.reply(info, content)
                 # rcon disconnect
                 else:
-                    command = info.content.replace(f"{self.config['command_prefix']}{exec_keyword}", "", 1).strip()
                     self.server.execute(command)
                     bot.reply(info, "指令已执行（开启RCON以显示结果）")
+
                 return True
         return False
 
