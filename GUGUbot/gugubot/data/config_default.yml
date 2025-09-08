@@ -94,8 +94,9 @@ inactive_check_interval: -1 # 不活跃成员检查间隔 :: 单位小时，默�
 inactive_player_time_range: 30 # 多久判断成不活跃玩家 :: 单位天，默认30天
 unbound_check_interval: -1 # 未绑定成员检查间隔 :: 单位小时，默认不检查（-1）
 unbound_member_time_limit: -1 # 成员多久后会被判定为未绑定:: 单位小时，默认不检查（-1）
-unbound_member_tick_limit: -1 # 未绑定成员多久后会被移除:: 单位小时，默认不移除（-1）
+unbound_member_kick_limit: -1 # 未绑定成员多久后会被移除:: 单位小时，默认不移除（-1）
 unbound_member_notice: false # 未绑定成员私信通知 :: 是否通知未绑定成员
+unbound_member_kick_number_limit: 10 # 未绑定成员移除上限 :: 单次移除未绑定成员数量上限
 
 whitelist_add_with_bound: true  # 绑定ID自动绑定服务器白名单
 whitelist_remove_with_leave: true # 退群时移除白名单
@@ -199,8 +200,9 @@ inactive_player_check_last_time: -1 # 上次检查未活跃成员的时间戳 ::
 # inactive_player_time_range | Inactive Player Window::Unit (days); threshold to consider a player inactive
 # unbound_check_interval | Unbound Check Interval::Unit (hours); -1 to disable
 # unbound_member_time_limit | Unbound Time Limit::Unit (hours); after join, considered unbound if not bound
-# unbound_member_tick_limit | Unbound Removal Limit::Unit (hours); remove after being unbound for this long; -1 to never remove
+# unbound_member_kick_limit | Unbound Removal Limit::Unit (hours); remove after being unbound for this long; -1 to never remove
 # unbound_member_notice | Unbound DM Notice::Whether to DM unbound members
+# unbound_member_kick_number_limit | Unbound Removal Number Limit::Max number of unbound members to remove at once
 
 # whitelist_add_with_bound | Add To Whitelist On Bind::Automatically add to server whitelist when binding ID
 # whitelist_remove_with_leave | Remove Whitelist On Leave::Remove from whitelist when leaving the group
