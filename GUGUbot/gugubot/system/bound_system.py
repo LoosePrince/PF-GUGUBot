@@ -559,33 +559,47 @@ class bound_system(base_system):
                 for group_id in self.bot_config.get("group_id", []):
                     bot.send_group_msg(group_id, "未绑定定期检查:\n"+"\n".join(reply_msg))
 
+            remove_time_limit = self.bot_config.get("unbound_member_kick_limit", -1)
+            if remove_time_limit < 0:
+                return 
+            
+            kick_list = []
+            for group_id, members in result:
+                for member in members:
+                    time_left = int(remove_time_limit - (time.time() - member['join_time'])/3600)
+                    if time_left <= 0:
+                        kick_list.append( (group_id, member['user_id'], __get_name(member), time_left) )
+                    elif self.bot_config.get("unbound_member_notice", False):
+                        bot.send_private_msg(member['user_id'], 
+                            f'请使用 {self.bot_config["command_prefix"]}绑定 玩家名称 来绑定~\n' +\
+                            f'若不绑定将会在 {time_left} 小时后被移除出群哦~',
+                            group_id=group_id
+                        )
+
+            kick_count = len(kick_list)
             reply_msg = []
-            count = 0
-            remove_time_limit = self.bot_config.get("unbound_member_tick_limit", -1)
-            if remove_time_limit >= 0:
-                for group_id, members in result:
-                    for member in members:
-                        time_left = int(remove_time_limit - (time.time() - member['join_time'])/3600)
-                        if time_left <= 0:
-                            bot.set_group_kick(group_id, member['user_id'])
-                            reply_msg.append(f'已将 {__get_name(member)}({member["user_id"]}) 移除出群')
-                            count += 1
-                        elif self.bot_config.get("unbound_member_notice", False):
-                            bot.send_private_msg(member['user_id'], 
-                                f'请使用 {self.bot_config["command_prefix"]}绑定 玩家名称 来绑定~\n' +\
-                                f'若不绑定将会在 {time_left} 小时后被移除出群哦~',
-                                group_id=group_id
-                            )
-                if count > 0:
-                    if 'admin' in notice_option:
-                        for user_id in self.bot_config.get("admin_id", []):
-                            bot.send_private_msg(user_id, f'已将 {count} 名未绑定成员移除出群:\n' + "\n".join(reply_msg))
-                    if 'admin_group' in notice_option:
-                        for admin_group_id in self.bot_config.get("admin_group_id", []):
-                            bot.send_group_msg(admin_group_id, f'已将 {count} 名未绑定成员移除出群:\n' + "\n".join(reply_msg))
-                    if 'group' in notice_option:
-                        for group_id in self.bot_config.get("group_id", []):
-                            bot.send_group_msg(group_id, f'已将 {count} 名未绑定成员移除出群:\n' + "\n".join(reply_msg))
+            remove_time_limit_hour = remove_time_limit / 3600
+            unbound_member_kick_number_limit = self.bot_config.get("unbound_member_kick_number_limit", 10)
+            if 0 < kick_count < unbound_member_kick_number_limit:
+                for group_id, user_id, name, time_left in kick_list:
+                    bot.set_group_kick(group_id, user_id)
+                    reply_msg.append(f'已移除 {name}({user_id}): {-time_left + remove_time_limit_hour} 小时未绑定')
+                msg = f'已将 {kick_count} 名未绑定成员移除出群:\n' + "\n".join(reply_msg)
+            elif kick_count >= unbound_member_kick_number_limit:
+                for group_id, user_id, name, time_left in kick_list:
+                    reply_msg.append(f'{name}({user_id}): {-time_left + remove_time_limit_hour} 小时未绑定')
+                msg = f'{kick_count} 名未绑定成员已达到移除数量上限，建议手动移除:\n' + "\n".join(reply_msg)
+
+            if kick_count > 0:
+                if 'admin' in notice_option:
+                    for user_id in self.bot_config.get("admin_id", []):
+                        bot.send_private_msg(user_id, msg)
+                if 'admin_group' in notice_option:
+                    for admin_group_id in self.bot_config.get("admin_group_id", []):
+                        bot.send_group_msg(admin_group_id, msg)
+                if 'group' in notice_option:
+                    for group_id in self.bot_config.get("group_id", []):
+                        bot.send_group_msg(group_id, msg)
 
     def check_bound_sync(self, parameter, info, bot, reply_style, admin:bool):
         return asyncio.run(self.check_bound(parameter, info, bot, reply_style, admin))
