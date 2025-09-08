@@ -11,7 +11,6 @@ import pygame
 
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.rtext import RText, RAction, RColor
-from packaging import version
 from ruamel.yaml import YAML
 
 from gugubot.data.text import (
@@ -172,7 +171,7 @@ class qbot_helper:
         sender = self._find_game_name(str(info.user_id), bot, str(info.source_id))
         message = beautify_message(message,
                                    self.config.get('forward', {}).get('keep_raw_image_link', False),
-                                   version.parse(server.get_server_information().version or "1.12") < version.parse("1.12"))
+                                   not is_support_emoji_version(server.get_server_information().version))
 
         group_name = self.group_name.get(info.source_id, "QQ") 
         group_id = str(info.source_id)
@@ -343,7 +342,7 @@ class qbot_helper:
                 if key_word_reply.startswith('[CQ:image'):
                     key_word_reply = beautify_message(key_word_reply, 
                                                       self.config.get('forward', {}).get('keep_raw_image_link', False),
-                                                      version.parse(server.get_server_information().version or "1.12") < version.parse("1.12"))
+                                                      not is_support_emoji_version(server.get_server_information().version))
                 
                 group_name = self.group_name.get(info.source_id, "QQ") 
                 group_id = str(info.source_id)

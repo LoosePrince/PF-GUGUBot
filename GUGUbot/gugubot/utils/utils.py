@@ -10,6 +10,7 @@ from functools import partial
 from pathlib import Path
 
 import pygame
+from packaging import version
 
 from mcdreforged.api.types import PluginServerInterface
 
@@ -29,6 +30,13 @@ def packing_copy(server) -> None:
     __copyFile("gugubot/data/config_default.yml", "./config/GUGUbot/config.yml")        # 默认设置
     __copyFile("gugubot/data/bound.jpg", "./config/GUGUbot/bound.jpg")        # 绑定图片
     __copyFile("gugubot/font/MicrosoftYaHei-01.ttf", "./config/GUGUbot/font/MicrosoftYaHei-01.ttf") # 默认字体
+
+def is_support_emoji_version(server_version)->bool:
+    version_pattern = r'^\d+(\.\d+){0,2}$'
+    if not re.match(version_pattern, server_version or ""):
+        return True
+    return version.parse(server_version or "1.12") >= version.parse("1.12")
+
 
 def is_valid_message(info, bot, config):
     condition = [
