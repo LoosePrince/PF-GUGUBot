@@ -101,6 +101,9 @@ unbound_member_kick_number_limit: 10 # 未绑定成员移除上限 :: 单次移�
 whitelist_add_with_bound: true  # 绑定ID自动绑定服务器白名单
 whitelist_remove_with_leave: true # 退群时移除白名单
 
+ignore_execute_command_patterns: # 忽略的执行服务器指令模式
+- ".*?give.*?" # 忽略 give 指令
+
 ignore_mc_command_patterns: # 忽略的服务器指令模式
 - ".*?\\[Command: /.*\\]" # carpet 指令记录
 - ".*?xaero-waypoint:.*" # 忽略 Xaero Waypoint 的共享
@@ -206,6 +209,7 @@ inactive_player_check_last_time: -1 # 上次检查未活跃成员的时间戳 ::
 
 # ignore_mc_command_patterns | Ignore MC Command Patterns::Regex patterns of server commands to ignore
 # player_name_pattern | Player Name Pattern::Regex for validating player names when binding
+# ignore_execute_command_patterns | Ignore Execute Command Patterns::Regex patterns of server commands to ignore when executing
 
 # unbound_check_last_time | Last Unbound Check Timestamp::-1 means never checked
 # inactive_player_check_last_time | Last Inactive Player Check Timestamp::-1 means never checked
