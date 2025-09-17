@@ -178,7 +178,7 @@ class qbot_helper:
         
         rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                 .set_hover_text(group_id) \
-                .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
+                .set_click_event(RAction.copy_to_clipboard, value=group_id) \
             + RText(f"[{sender}]", color=RColor.green) \
             + RText(f" ", color=RColor.white) \
             + convert_message_to_RText(message, use_image_preview=self.config['forward'].get("use_image_preview", False))
@@ -291,7 +291,7 @@ class qbot_helper:
 
                 rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                         .set_hover_text(group_id) \
-                        .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
+                        .set_click_event(RAction.copy_to_clipboard, value=group_id) \
                     + RText(f"[{sender}]", color=RColor.green) \
                     + RText(f"[@{receiver}]", color=RColor.aqua) \
                     + RText(f" ", color=RColor.white) \
@@ -309,7 +309,7 @@ class qbot_helper:
                 
                 rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                         .set_hover_text(group_id) \
-                        .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
+                        .set_click_event(RAction.copy_to_clipboard, value=group_id) \
                     + RText(f"[{sender}]", color=RColor.green) \
                     + RText(f" ", color=RColor.white) \
                     + convert_message_to_RText(forward_content, use_image_preview=self.config['forward'].get("use_image_preview", False))
@@ -328,7 +328,7 @@ class qbot_helper:
 
                 rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                         .set_hover_text(group_id) \
-                        .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
+                        .set_click_event(RAction.copy_to_clipboard, value=group_id) \
                     + RText(f"[{sender_name}]", color=RColor.green) \
                     + RText(f" ", color=RColor.white) \
                     + convert_message_to_RText(info.content, use_image_preview=self.config['forward'].get("use_image_preview", False))
@@ -348,7 +348,7 @@ class qbot_helper:
                 group_id = str(info.source_id)
                 rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                         .set_hover_text(group_id) \
-                        .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
+                        .set_click_event(RAction.copy_to_clipboard, value=group_id) \
                     + RText(f"[机器人]", color=RColor.green) \
                     + RText(f" ", color=RColor.white) \
                     + convert_message_to_RText(key_word_reply, use_image_preview=self.config['forward'].get("use_image_preview", False))
@@ -763,7 +763,7 @@ class qbot(qbot_helper):
             group_id = str(info.source_id)
             rtext = RText(f"[{group_name}] ", color=RColor.gold) \
                     .set_hover_text(group_id) \
-                    .set_click_event(action=RAction.copy_to_clipboard, value=group_id) \
+                    .set_click_event(RAction.copy_to_clipboard, value=group_id) \
                 + RText(f"[@{at_id}]", color=RColor.aqua) \
                 + RText(f" {get_style_template('authorization_request', self.style).format(stranger_name)}", color=RColor.white)
             server.say(rtext)
