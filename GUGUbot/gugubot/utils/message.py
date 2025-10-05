@@ -164,11 +164,11 @@ def convert_message_to_RText(message: str, use_image_preview:bool=False) -> RTex
         if use_image_preview:
             return RText(image_summary, color=RColor.gold) \
             .set_hover_text(url) \
-            .set_click_event(RAction.run_command, value=f"/imagepreview preview {url} 60")
+            .set_click_event(RAction.run_command, f"/imagepreview preview {url} 60")
 
         return RText(image_summary, color=RColor.gold) \
             .set_hover_text(url) \
-            .set_click_event(RAction.open_url, value=url)
+            .set_click_event(RAction.open_url, url)
 
     last_end = 0
     result = RText('', color=RColor.white)
