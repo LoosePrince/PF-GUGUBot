@@ -8,6 +8,7 @@ class BotConfig(BasicConfig):
         super().__init__(path, default_content, yaml_format)
 
     def load(self):
+        self.validate()
         super().load()
         self.plugin_check()
 
@@ -93,5 +94,5 @@ class BotConfig(BasicConfig):
                     self.logger.error(msg)
                 else:
                     print(msg)
-                    
+
             return False
