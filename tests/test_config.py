@@ -6,7 +6,7 @@ from gugubot.config.BotConfig import BotConfig
 class TestBasicConfig(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        print("\n** Testing BasicConfig **")
+        print("\n** Testing Config BasicConfig **")
 
     def test_init_default(self):
         # Test initialization with default parameters
@@ -57,7 +57,7 @@ class TestBasicConfig(unittest.TestCase):
 class TestBotConfig(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        print("\n** Testing BotConfig **")
+        print("\n** Testing Config BotConfig **")
 
     def test_init(self):
         # Test initialization with default parameters
