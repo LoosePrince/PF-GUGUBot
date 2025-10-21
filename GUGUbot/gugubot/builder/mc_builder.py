@@ -7,7 +7,7 @@ from mcdreforged.api.rtext import RText, RAction, RColor
 
 from gugubot.constant.qq_emoji_map import qq_emoji_map
 
-class mcMessageBuilder:
+class McMessageBuilder:
     @staticmethod
     def build(
         forward_content: str | RText, *,
@@ -40,15 +40,15 @@ class mcMessageBuilder:
         process_functions = {
             "text": lambda data: RText(
                 data['text'] if not low_game_version 
-                else mcMessageBuilder.replace_emoji_with_placeholder(data['text'])
+                else McMessageBuilder.replace_emoji_with_placeholder(data['text'])
             ),
             "at": lambda data: RText(f"[@{data['qq']}]", color=RColor.aqua),
-            "image": lambda data: mcMessageBuilder.process_image(data, chat_image=ChatImage),
+            "image": lambda data: McMessageBuilder.process_image(data, chat_image=ChatImage),
             "record": lambda _: RText("[语音]"),
             "video": lambda _: RText("[视频]"),
-            "face": lambda data: mcMessageBuilder.process_face(data, low_game_version=low_game_version),
+            "face": lambda data: McMessageBuilder.process_face(data, low_game_version=low_game_version),
             "bface": lambda _: RText("[表情]"),
-            "mface": lambda data: mcMessageBuilder.process_image(data, chat_image=ChatImage),
+            "mface": lambda data: McMessageBuilder.process_image(data, chat_image=ChatImage),
             "sface": lambda _: RText("[表情]"),
             "rps": lambda _: RText("[猜拳]"),
             "dice": lambda _: RText("[掷骰子]"),
@@ -113,7 +113,7 @@ class mcMessageBuilder:
         emoji = str(qq_emoji_map.get(data['id'], ''))
 
         if low_game_version:
-            emoji = mcMessageBuilder.replace_emoji_with_placeholder(emoji)
+            emoji = McMessageBuilder.replace_emoji_with_placeholder(emoji)
 
         return RText(f"[表情:{emoji}]") if emoji else RText("[表情]")
 

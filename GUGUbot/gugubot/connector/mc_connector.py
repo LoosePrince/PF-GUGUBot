@@ -7,7 +7,7 @@ from mcdreforged.api.types import PluginServerInterface, Info
 
 from gugubot.connector.basic_connector import BasicConnector
 from gugubot.parser.mc_parser import MCParser
-from gugubot.parser.message.mcMessageBuilder import mcMessageBuilder
+from gugubot.builder.mc_builder import McMessageBuilder
 from gugubot.utils.types import ProcessedInfo
 
 class MCConnector(BasicConnector):
@@ -33,7 +33,7 @@ class MCConnector(BasicConnector):
         logger : Optional[logging.Logger]
             日志记录器实例，如果未提供则创建新的
         """
-        super().__init__(source="minecraft", parser=MCParser, builder=mcMessageBuilder)
+        super().__init__(source="minecraft", parser=MCParser, builder=McMessageBuilder)
         self.server = server
         self.logger = logger or server.logger
 
@@ -65,7 +65,7 @@ class MCConnector(BasicConnector):
         ValueError
             当消息格式无效时
         """
-        self.builder: mcMessageBuilder
+        self.builder: McMessageBuilder
 
         message = processed_info.processed_message
         source = processed_info.source

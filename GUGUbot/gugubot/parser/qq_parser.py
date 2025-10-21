@@ -4,7 +4,7 @@ import json
 from typing import Dict, Optional
 
 from gugubot.parser.basic_parser import BasicParser
-from gugubot.parser.message.QQ import ArrayHandler, CQHandler
+from gugubot.builder.qq_builder import ArrayHandler, CQHandler
 from gugubot.utils.types import BoardcastInfo
 
 
