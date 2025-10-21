@@ -23,17 +23,10 @@ class QQInfo(BasicConstructor):
         if self.post_type == "message":
             self.source_id = self.user_id if self.message_type == "private" else self.group_id
 
-            self.server.dispatch_event(
-                LiteralEvent("gugubot.on_qq_message"),
-                (self, self.bot)
-            )
-        elif self.post_type == "request":
-            self.server.dispatch_event(
-                LiteralEvent("gugubot.on_qq_request"),
-                (self, self.bot)
-            )
-        elif self.post_type == "notice":
-            self.server.dispatch_event(
-                LiteralEvent("gugubot.on_qq_notice"),
-                (self, self.bot)
-            )
+        self.server.dispatch_event(
+            LiteralEvent("gugubot.on_qq_message"),
+            (self, self.bot)
+        )
+
+        
+        
