@@ -1,8 +1,9 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Optional
 
+
+from gugubot.utils.types import BoardcastInfo, ProcessedInfo
+from gugubot.parser.basic_parser import BasicParser
 
 class BasicConnector(ABC):
 	"""Abstract base connector class.
@@ -30,10 +31,12 @@ class BasicConnector(ABC):
 		Handle a raw incoming message (usually asynchronous).
 	"""
 
-	def __init__(self, source: str = "", parser: Any = None, builder: Any = None) -> None:
+	def __init__(self, source: str = "", parser: Optional[BasicParser] = None, builder: Any = None) -> None:
 		self.source: str = source
-		self.parser: Any = parser
+		self.parser: Optional[BasicParser] = parser
 		self.builder: Any = builder
+		self.connector_manager: Any = None  # Will be set when registered to ConnectorManager
+		self.logger: Any = None  # Will be set when registered to ConnectorManager
 
 	@abstractmethod
 	async def connect(self) -> None:
@@ -49,7 +52,7 @@ class BasicConnector(ABC):
 		raise NotImplementedError
 
 	@abstractmethod
-	async def send_message(self, message: Any) -> None:
+	async def send_message(self, boardcase_info: ProcessedInfo, **kargs) -> None:
 		"""Send a message through the connector.
 		
 		Parameters
@@ -61,7 +64,7 @@ class BasicConnector(ABC):
 		raise NotImplementedError
 
 	@abstractmethod
-	async def on_message(self, raw: Any) -> None:
+	async def on_message(self, raw: Any) -> BoardcastInfo:
 		"""Called when a raw message is received.
 
 		Typical responsibilities:

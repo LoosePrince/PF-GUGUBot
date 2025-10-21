@@ -1,0 +1,4 @@
+from gugubot.connector.connector_manager import ConnectorManager
+from gugubot.connector.mc_connector import MCConnector
+from gugubot.connector.qq_connector import QQWebSocketConnector
+from gugubot.connector.test_connector import TestConnector

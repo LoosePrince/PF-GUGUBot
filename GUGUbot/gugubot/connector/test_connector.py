@@ -1,0 +1,80 @@
+import logging
+from typing import Any, Optional
+
+from gugubot.connector.basic_connector import BasicConnector, BoardcastInfo
+
+class TestConnector(BasicConnector):
+    """TEST服务器连接器。
+    
+    用于与TEST服务器进行消息交互。
+
+    Attributes
+    ----------
+    server : Any
+        MCDR服务器实例
+    logger : logging.Logger
+        日志记录器
+    """
+
+    def __init__(self, server: Any, logger: Optional[logging.Logger] = None) -> None:
+        """初始化TEST连接器。
+
+        Parameters
+        ----------
+        server : Any
+            MCDR服务器实例
+        logger : Optional[logging.Logger]
+            日志记录器实例，如果未提供则创建新的
+        """
+        super().__init__(source="test")
+        self.server = server
+        self.logger = logger or server.logger
+        
+    async def connect(self) -> None:
+        """连接到TEST服务器。
+
+        由于MCDR已经处理了服务器连接，此方法不需要执行任何操作。
+        """
+        self.logger.info("[GUGUBot]TEST连接器就绪")
+
+    async def disconnect(self) -> None:
+        """断开与TEST服务器的连接。
+
+        由于MCDR负责服务器连接的生命周期，此方法不需要执行任何操作。
+        """
+        self.logger.info("[GUGUBot]TEST连接器已断开")
+
+    async def send_message(self, boardcast_info: BoardcastInfo) -> None:
+        """向TEST服务器发送消息。
+
+        Parameters
+        ----------
+        message : Any
+            要发送的消息。如果是字符串，直接发送；
+            如果是dict，应包含'content'键。
+
+        Raises
+        ------
+        ValueError
+            当消息格式无效时
+        """
+        self.logger.info(f"[GUGUBot]发送消息: {boardcast_info}")
+
+    async def on_message(self, raw: Any) -> None:
+        """处理从TEST服务器接收的消息。
+
+        Parameters
+        ----------
+        raw : Any
+            原始消息数据，应该是一个包含玩家和消息信息的字典
+
+        Example
+        -------
+        消息格式示例：
+        {
+            'player': 'Steve',
+            'content': 'Hello, world!',
+            'type': 'chat'  # 或其他消息类型
+        }
+        """
+        self.logger.debug(f"[GUGUBot]接收消息: {raw}")
