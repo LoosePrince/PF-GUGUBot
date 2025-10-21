@@ -1,6 +1,6 @@
 import re
 
-from __future__ import annotations
+from packaging import version
 from typing import Optional, List, Dict
 
 from mcdreforged.api.rtext import RText, RAction, RColor
@@ -43,12 +43,12 @@ class mcMessageBuilder:
                 else mcMessageBuilder.replace_emoji_with_placeholder(data['text'])
             ),
             "at": lambda data: RText(f"[@{data['qq']}]", color=RColor.aqua),
-            "image": lambda data: mcMessageBuilder.process_image(data, ChatImage=ChatImage),
+            "image": lambda data: mcMessageBuilder.process_image(data, chat_image=ChatImage),
             "record": lambda _: RText("[语音]"),
             "video": lambda _: RText("[视频]"),
             "face": lambda data: mcMessageBuilder.process_face(data, low_game_version=low_game_version),
             "bface": lambda _: RText("[表情]"),
-            "mface": lambda data: mcMessageBuilder.process_image(data, ChatImage=ChatImage),
+            "mface": lambda data: mcMessageBuilder.process_image(data, chat_image=ChatImage),
             "sface": lambda _: RText("[表情]"),
             "rps": lambda _: RText("[猜拳]"),
             "dice": lambda _: RText("[掷骰子]"),
@@ -68,9 +68,10 @@ class mcMessageBuilder:
             ),
         }
         
-        result = RText()
+        result = RText("")
 
         for message in array:
+            
             message_type = message['type']
             message_data = message['data']
 
@@ -78,6 +79,13 @@ class mcMessageBuilder:
 
         return result
     
+    @staticmethod
+    def is_low_game_version(version_string: str) -> bool:
+        version_pattern = r'^\d+(\.\d+){0,2}$'
+        if not re.match(version_pattern, version_string or ""):
+            return True
+        return version.parse(version_string or "1.12") >= version.parse("1.12")
+
 
     @staticmethod
     def replace_emoji_with_placeholder(text: str) -> str:
