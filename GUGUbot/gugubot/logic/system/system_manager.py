@@ -43,7 +43,9 @@ class SystemManager:
         self.logger = logger or server.logger
         self.connector_manager = connector_manager
 
-    def register_system(self, system: BasicSystem) -> None:
+    def register_system(self, system: BasicSystem, 
+                        before: Optional[List[str]] = None,
+                        after: Optional[List[str]] = None) -> None:
         """添加一个新的系统实例。
 
         Parameters
@@ -64,7 +66,25 @@ class SystemManager:
             system.logger = self.logger
 
             system.initialize()
-            self.systems.append(system)
+
+            # Check for circular dependencies
+            if before and after:
+                duplicate = set(before or []) & set(after or [])
+                if duplicate:
+                    raise ValueError(f"Circular dependency: {system.name} cannot be both before and after {duplicate}")
+
+            # Insert the system based on before and after dependencies
+            if before or after:
+                insert_pos = 0
+                for i, existing_system in enumerate(self.systems):
+                    if before and existing_system.name in before:
+                        break
+                    if after and existing_system.name in after:
+                        insert_pos = i + 1
+                    insert_pos = i + 1
+                self.systems.insert(insert_pos, system)
+            else:
+                self.systems.append(system)
             
             self.logger.info(f"已添加并初始化系统: {system.name}")
         except Exception as e:
