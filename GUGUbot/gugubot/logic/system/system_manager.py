@@ -1,0 +1,167 @@
+import re
+import logging
+
+import asyncio
+import traceback
+
+from mcdreforged.api.types import PluginServerInterface
+from typing import Dict, List, Optional
+
+from gugubot.connector.connector_manager import ConnectorManager
+from gugubot.logic.system.basic_system import BasicSystem
+from gugubot.utils.types import BoardcastInfo
+
+
+class SystemManager:
+    """管理多个系统实例的管理器。
+
+    提供添加、移除系统和命令广播功能。
+
+    Attributes
+    ----------
+    systems : List[BasicSystem]
+        当前管理的所有系统实例
+    logger : logging.Logger
+        日志记录器实例
+    """
+
+    def __init__(self, server: PluginServerInterface,
+                 logger: Optional[logging.Logger] = None, connector_manager: ConnectorManager=None) -> None:
+        """初始化系统管理器。
+
+        Parameters
+        ----------
+        server : PluginServerInterface
+            MCDR插件服务器接口实例
+        logger : Optional[logging.Logger]
+            用于日志记录的Logger实例。如果未提供，将创建一个新的。
+        connector_manager : ConnectorManager
+            连接管理器实例
+        """
+        self.systems: List[BasicSystem] = []
+        self.server = server
+        self.logger = logger or server.logger
+        self.connector_manager = connector_manager
+
+    def register_system(self, system: BasicSystem) -> None:
+        """添加一个新的系统实例。
+
+        Parameters
+        ----------
+        system : BasicSystem
+            要添加的系统实例
+
+        Raises
+        ------
+        ValueError
+            如果系统已经存在于管理器中
+        """
+        if system in self.systems:
+            raise ValueError(f"系统 {system.name} 已经存在")
+
+        try:
+            system.system_manager = self
+            system.logger = self.logger
+
+            system.initialize()
+            self.systems.append(system)
+            
+            self.logger.info(f"已添加并初始化系统: {system.name}")
+        except Exception as e:
+            self.logger.error(f"初始化 {system.name} 失败: {str(e)}\n{traceback.format_exc()}")
+            raise
+
+    def remove_system(self, system_name: str) -> bool:
+        """移除一个系统实例。
+
+        Parameters
+        ----------
+        system_name : str
+            要移除的系统名称
+
+        Returns
+        -------
+        bool
+            如果系统被成功移除则返回True，否则返回False
+        """
+
+        for system in self.systems:
+            if system.name == system_name:
+                self.systems.remove(system)
+                self.logger.info(f"已移除系统: {system_name}")
+                return True
+        return False
+
+    async def broadcast_command(self, boardcast_info: BoardcastInfo,
+                             include: Optional[List[str]]=None,
+                             exclude: Optional[List[str]]=None
+        ) -> bool:
+        """向所有系统广播命令。
+
+        Parameters
+        ----------
+        boardcast_info : BoardcastInfo
+            要广播的命令信息
+        include : Optional[List[str]]
+            仅向这些名称的系统发送命令（如果为None，则发送给所有系统）
+        exclude : Optional[List[str]]
+            不向这些名称的系统发送命令
+
+        Returns
+        -------
+        bool
+            是否所有系统都成功处理了命令
+        """
+        results: Dict[str, bool] = {}
+        tasks = []
+        to_systems = self.systems
+
+        if include is not None:
+            to_systems = [
+                s for s in to_systems 
+                if any(re.match(p, s.name) for p in include)
+            ]
+
+        if exclude is not None:
+            to_systems = [
+                s for s in to_systems 
+                if not any(re.match(p, s.name) for p in exclude)
+            ]
+
+        self.logger.debug(f"广播命令到系统: {to_systems}\n命令内容: {boardcast_info}")
+
+        # 创建处理任务
+        result = False
+        for system in to_systems:
+            if not system.enable:
+                continue
+
+            result = await self._safe_process_command(system, boardcast_info)
+
+            if result:
+                break
+
+        # 判断是否有系统成功处理了命令
+        return result
+
+    async def _safe_process_command(self, system: BasicSystem, boardcast_info: BoardcastInfo) -> bool:
+        """安全地向单个系统发送命令。
+
+        Parameters
+        ----------
+        system : BasicSystem
+            目标系统
+        boardcast_info : BoardcastInfo
+            要处理的命令信息
+
+        Returns
+        -------
+        bool
+            命令是否成功处理
+        """
+        try:
+            result = await system.process_command(boardcast_info)
+            return result if isinstance(result, bool) else False
+        except Exception as e:
+            self.logger.error(f"系统 {system.name} 处理命令失败: {str(e)}\n{traceback.format_exc()}")
+            return False
