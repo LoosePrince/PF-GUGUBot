@@ -11,6 +11,7 @@ import websocket
 from typing import Any, Optional, override
 
 from gugubot.connector.basic_connector import BasicConnector
+from gugubot.config.BotConfig import BotConfig
 from gugubot.utils.types import ProcessedInfo
 from gugubot.parser.qq_parser import QQParser
 
@@ -62,27 +63,27 @@ class Bot:
         return handler
 
 class QQWebSocketConnector(BasicConnector):
-    def __init__(self, server, config):
+    def __init__(self, server, config: BotConfig = None):
         super().__init__(source="QQ", parser=QQParser)
-        self.config = config
         self.server = server
         self.ws = None
         self.listener_thread = None
+        self.config = config or {}
         
         # determine scheme using single parameter 'use_ssl' (boolean)
-        use_ssl = config.get('use_ssl', False)
+        use_ssl = config.get_keys(["connector", "QQ", "connection", "use_ssl"], False)
         self.scheme = "wss" if use_ssl else "ws"
         self.url = self._build_url(config)
         
-        token = config.get("token")
+        token = config.get_keys(["connector", "QQ", "connection", "token"], None)
         self.headers = {"Authorization": f"Bearer {token}"} if token else None
 
-        self.bot = Bot(self._send_message, max_wait_time=config.get("max_wait_time", 5))
+        self.bot = Bot(self._send_message, max_wait_time=config.get_keys(["connector", "QQ", "connection", "max_wait_time"], 5))
 
     def _build_url(self, config):
-        host = config.get("host", "127.0.0.1")
-        port = config.get("port", 8080)
-        post_path = config.get("post_path", "")
+        host = config.get_keys(["connector", "QQ", "connection", "host"], "127.0.0.1")
+        port = config.get_keys(["connector", "QQ", "connection", "port"], 8080)
+        post_path = config.get_keys(["connector", "QQ", "connection", "post_path"], "")
         url = f"{self.scheme}://{host}:{port}"
         if post_path:
             url += f"/{post_path}"
@@ -92,7 +93,7 @@ class QQWebSocketConnector(BasicConnector):
     @override
     async def connect(self) -> None:
         """建立到QQ WebSocket服务器的连接"""
-        self.logger.info(self.server.tr("gugubot.connector.qq.try_connect", url=self.url))
+        self.logger.info(self.server.tr("gugubot.connector.QQ.try_connect", url=self.url))
         self.ws = websocket.WebSocketApp(
             self.url,
             header=self.headers,
@@ -103,33 +104,33 @@ class QQWebSocketConnector(BasicConnector):
         )
 
         # reconnect value is optional in config, default to 5 if supported by websocket-client
-        run_kwargs = {'reconnect': self.config.get('reconnect', 5)}
+        run_kwargs = {'reconnect': self.config.get_keys(["connector", "QQ", "connection", "reconnect"], 5)}
 
         if self.scheme and self.scheme.lower().startswith('wss'):
             import ssl
             # Configure SSL options
-            verify = self.config.get('verify', True)
+            verify = self.config.get_keys(["connector", "QQ", "connection", "verify"], True)
             sslopt = {}
             if not verify:
                 sslopt['cert_reqs'] = ssl.CERT_NONE
             else:
                 sslopt['cert_reqs'] = ssl.CERT_REQUIRED
-                ca_certs = self.config.get('ca_certs')
+                ca_certs = self.config.get_keys(["connector", "QQ", "connection", "ca_certs"], None)
                 if ca_certs:
                     sslopt['ca_certs'] = ca_certs
 
             # allow passing additional ssl options from config
-            extra_sslopt = self.config.get('sslopt') or {}
+            extra_sslopt = self.config.get_keys(["connector", "QQ", "connection", "sslopt"], {})
             sslopt.update(extra_sslopt)
             run_kwargs['sslopt'] = sslopt
 
         self.listener_thread = threading.Thread(target=self.ws.run_forever, name="[GUGUBot]QQ_Connector", kwargs=run_kwargs)
         self.listener_thread.daemon = True  # 设置为守护线程
         self.listener_thread.start()
-        self.logger.info(self.server.tr("gugubot.connector.qq.start_connect"))
+        self.logger.info(self.server.tr("gugubot.connector.QQ.start_connect"))
 
     def _on_open(self, _):
-        self.logger.info(f"[{self.source}] " + self.server.tr("gugubot.connector.qq.connect_success"))
+        self.logger.info(f"[{self.source}] " + self.server.tr("gugubot.connector.QQ.connect_success"))
 
     def _on_error(self, _: Any, error: Exception) -> None:
         """处理WebSocket错误
@@ -141,7 +142,7 @@ class QQWebSocketConnector(BasicConnector):
         error : Exception
             发生的错误
         """
-        self.logger.error(self.server.tr("gugubot.connector.qq.error_connect", error=error))
+        self.logger.error(self.server.tr("gugubot.connector.QQ.error_connect", error=error))
 
     def _on_close(self, _: Any, status_code: Optional[int], reason: Optional[str]) -> None:
         """处理WebSocket连接关闭
@@ -156,7 +157,7 @@ class QQWebSocketConnector(BasicConnector):
             关闭原因
         """
         self.logger.debug(
-            self.server.tr("gugubot.connector.qq.close_connect", status_code=status_code, reason=reason)
+            self.server.tr("gugubot.connector.QQ.close_connect", status_code=status_code, reason=reason)
         )
 
 
@@ -166,11 +167,11 @@ class QQWebSocketConnector(BasicConnector):
             try:
                 self.ws.send(json.dumps(message))
                 # use server translations with a named placeholder
-                self.logger.debug(self.server.tr("gugubot.connector.qq.send_message", message=message))
+                self.logger.debug(self.server.tr("gugubot.connector.QQ.send_message", message=message))
             except Exception as e:
-                self.logger.error(self.server.tr("gugubot.connector.qq.send_message_failed", error=e))
+                self.logger.error(self.server.tr("gugubot.connector.QQ.send_message_failed", error=e))
         else:
-            self.logger.warning(self.server.tr("gugubot.connector.qq.retry_connect"))
+            self.logger.warning(self.server.tr("gugubot.connector.QQ.retry_connect"))
 
 
     async def send_message(self, processed_info: ProcessedInfo) -> None:
@@ -203,9 +204,9 @@ class QQWebSocketConnector(BasicConnector):
                 self.ws.close()
             if self.listener_thread and self.listener_thread.is_alive():
                 self.listener_thread.join(timeout=5)  # 设置超时时间
-            self.logger.info(self.server.tr("gugubot.connector.qq.close_info"))
+            self.logger.info(self.server.tr("gugubot.connector.QQ.close_info"))
         except Exception as e:
-            self.logger.warning(self.server.tr("gugubot.connector.qq.error_close", error=str(e) + f"\n{traceback.format_exc()}"))
+            self.logger.warning(self.server.tr("gugubot.connector.QQ.error_close", error=str(e) + f"\n{traceback.format_exc()}"))
             raise
 
     @override
@@ -229,4 +230,4 @@ class QQWebSocketConnector(BasicConnector):
 
         except Exception as e:
             # 使用翻译条目并包含堆栈信息
-            self.logger.error(self.server.tr("gugubot.connector.qq.message_handle_failed", error=str(e) + f"\n{traceback.format_exc()}"))
+            self.logger.error(self.server.tr("gugubot.connector.QQ.message_handle_failed", error=str(e) + f"\n{traceback.format_exc()}"))

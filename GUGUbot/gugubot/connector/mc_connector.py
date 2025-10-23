@@ -77,7 +77,7 @@ class MCConnector(BasicConnector):
             game_version = self.server.get_server_information().version.lower() or ""
             is_low_version = self.builder.is_low_game_version(game_version)
 
-            Rtext_conect = self.builder.array_to_RText(message, low_game_version=is_low_version, ChatImage=True)
+            Rtext_conect = self.builder.array_to_RText(message, low_game_version=is_low_version, chat_image=True)
 
             main_content = self.builder.build(Rtext_conect, 
                                               group_name=source,
@@ -102,8 +102,24 @@ class MCConnector(BasicConnector):
             接收到的信息对象
         """
         try:
+            enable = self.config.get("minecraft", {}).get("enable", True)
+            is_player = info.is_player
+            
+            if not enable or not is_player:
+                return
+
             await self.parser(self).process_message(info, server=server)
 
         except Exception as e:
             self.logger.error(f"[GUGUBot]处理消息失败: {e}")
             raise
+
+    def _is_admin(self, sender_id) -> bool:
+        """检查是否是管理员"""
+        bound_system = self.connector_manager.system_manager.get_system("bound")
+
+        if not bound_system:
+            return False
+
+        player_manager = bound_system.player_manager
+        return player_manager.is_admin(sender_id)

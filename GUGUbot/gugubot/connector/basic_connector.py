@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Any, Optional
 
-
-from gugubot.utils.types import BoardcastInfo, ProcessedInfo
+from gugubot.config.BotConfig import BotConfig
 from gugubot.parser.basic_parser import BasicParser
+from gugubot.utils.types import BoardcastInfo, ProcessedInfo
 
 class BasicConnector(ABC):
 	"""Abstract base connector class.
@@ -31,12 +31,17 @@ class BasicConnector(ABC):
 		Handle a raw incoming message (usually asynchronous).
 	"""
 
-	def __init__(self, source: str = "", parser: Optional[BasicParser] = None, builder: Any = None) -> None:
+	def __init__(self, source: str = "", 
+		parser: Optional[BasicParser] = None, builder: Any = None,
+		server: Any = None, logger: Any = None,
+		bot_config: BotConfig = None
+	) -> None:
 		self.source: str = source
 		self.parser: Optional[BasicParser] = parser
 		self.builder: Any = builder
 		self.connector_manager: Any = None  # Will be set when registered to ConnectorManager
 		self.logger: Any = None  # Will be set when registered to ConnectorManager
+		self.config: BotConfig = bot_config or {}
 
 	@abstractmethod
 	async def connect(self) -> None:

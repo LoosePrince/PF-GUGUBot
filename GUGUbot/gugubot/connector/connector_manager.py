@@ -6,6 +6,7 @@ import logging
 from typing import Dict, List, Optional
 
 from gugubot.connector.basic_connector import BasicConnector, BoardcastInfo
+from gugubot.config.BotConfig import BotConfig
 from gugubot.utils.types import ProcessedInfo
 
 class ConnectorManager:
@@ -21,7 +22,7 @@ class ConnectorManager:
         日志记录器实例
     """
 
-    def __init__(self, server, logger: Optional[logging.Logger] = None) -> None:
+    def __init__(self, server, bot_config: BotConfig, logger: Optional[logging.Logger] = None) -> None:
         """初始化连接器管理器。
 
         Parameters
@@ -30,8 +31,11 @@ class ConnectorManager:
             用于日志记录的Logger实例。如果未提供，将创建一个新的。
         """
         self.connectors: List[BasicConnector] = []
+
         self.server = server
+        self.config = bot_config
         self.logger = logger or server.logger
+
         self.system_manager = None # gugubot.logic.system.system_manager.SystemManager
 
     def register_system_manager(self, system_manager) -> None:
@@ -81,6 +85,7 @@ class ConnectorManager:
         try:
             connector.connector_manager = self
             connector.logger = self.logger
+            connector.config = self.config
 
             await connector.connect()
             self.connectors.append(connector)
