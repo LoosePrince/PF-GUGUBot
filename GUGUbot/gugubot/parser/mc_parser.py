@@ -41,6 +41,7 @@ class MCParser(BasicParser):
 
             boardcast_info = BoardcastInfo(
                 event_type="message",
+                event_sub_type="group",
                 message=str_to_array(content),
                 raw=raw_message,
                 server=server,
@@ -48,6 +49,8 @@ class MCParser(BasicParser):
                 source=self.connector.source,
                 source_id=None,
                 sender=raw_message.player,
+                sender_id=raw_message.player,
+                is_admin=self.connector._is_admin(raw_message.player)
             )
 
             return boardcast_info
