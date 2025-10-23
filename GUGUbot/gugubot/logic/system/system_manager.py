@@ -7,10 +7,10 @@ import traceback
 from mcdreforged.api.types import PluginServerInterface
 from typing import Dict, List, Optional
 
+from gugubot.config.BotConfig import BotConfig
 from gugubot.connector.connector_manager import ConnectorManager
 from gugubot.logic.system.basic_system import BasicSystem
 from gugubot.utils.types import BoardcastInfo
-
 
 class SystemManager:
     """管理多个系统实例的管理器。
@@ -25,8 +25,9 @@ class SystemManager:
         日志记录器实例
     """
 
-    def __init__(self, server: PluginServerInterface,
-                 logger: Optional[logging.Logger] = None, connector_manager: ConnectorManager=None) -> None:
+    def __init__(self, server: PluginServerInterface, logger: Optional[logging.Logger] = None, 
+                 connector_manager: Optional[ConnectorManager] = None,
+                 config: Optional[BotConfig] = None) -> None:
         """初始化系统管理器。
 
         Parameters
@@ -37,11 +38,20 @@ class SystemManager:
             用于日志记录的Logger实例。如果未提供，将创建一个新的。
         connector_manager : ConnectorManager
             连接管理器实例
+        config : BotConfig
+            配置实例
         """
         self.systems: List[BasicSystem] = []
-        self.server = server
+        self.server: PluginServerInterface = server
         self.logger = logger or server.logger
         self.connector_manager = connector_manager
+        self.config = config
+
+    def get_system(self, name: str) -> Optional[BasicSystem]:
+        for system in self.systems:
+            if system.name == name:
+                return system
+        return None
 
     def register_system(self, system: BasicSystem, 
                         before: Optional[List[str]] = None,
@@ -58,12 +68,13 @@ class SystemManager:
         ValueError
             如果系统已经存在于管理器中
         """
-        if system in self.systems:
+        if system.name in [s.name for s in self.systems]:
             raise ValueError(f"系统 {system.name} 已经存在")
 
         try:
             system.system_manager = self
             system.logger = self.logger
+            system.config = self.config
 
             system.initialize()
 
@@ -132,8 +143,6 @@ class SystemManager:
         bool
             是否所有系统都成功处理了命令
         """
-        results: Dict[str, bool] = {}
-        tasks = []
         to_systems = self.systems
 
         if include is not None:
@@ -156,7 +165,7 @@ class SystemManager:
             if not system.enable:
                 continue
 
-            result = await self._safe_process_command(system, boardcast_info)
+            result = await self._safe_process_boardcast_info(system, boardcast_info)
 
             if result:
                 break
@@ -164,7 +173,7 @@ class SystemManager:
         # 判断是否有系统成功处理了命令
         return result
 
-    async def _safe_process_command(self, system: BasicSystem, boardcast_info: BoardcastInfo) -> bool:
+    async def _safe_process_boardcast_info(self, system: BasicSystem, boardcast_info: BoardcastInfo) -> bool:
         """安全地向单个系统发送命令。
 
         Parameters
@@ -180,7 +189,7 @@ class SystemManager:
             命令是否成功处理
         """
         try:
-            result = await system.process_command(boardcast_info)
+            result = await system.process_boardcast_info(boardcast_info)
             return result if isinstance(result, bool) else False
         except Exception as e:
             self.logger.error(f"系统 {system.name} 处理命令失败: {str(e)}\n{traceback.format_exc()}")

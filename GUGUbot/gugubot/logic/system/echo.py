@@ -27,7 +27,7 @@ class EchoSystem(BasicSystem):
     def initialize(self) -> None:
         return
 
-    async def process_command(self, boardcast_info: BoardcastInfo) -> bool:
+    async def process_boardcast_info(self, boardcast_info: BoardcastInfo) -> bool:
         """处理传入的消息。
 
         将收到的消息转发到除了源平台以外的其他平台。
@@ -44,7 +44,7 @@ class EchoSystem(BasicSystem):
         """
         try:
             # 准备转发的消息
-            processed_info = self._create_processed_info(boardcast_info)
+            processed_info = self.create_processed_info(boardcast_info)
             
             # 转发到其他平台（排除源平台）
             await self.system_manager.connector_manager.broadcast_processed_info(
@@ -58,27 +58,3 @@ class EchoSystem(BasicSystem):
             self.logger.error(f"Echo系统处理消息失败: {str(e)}", exc_info=True)
             return False
 
-    def _create_processed_info(self, boardcast_info: BoardcastInfo) -> ProcessedInfo:
-        """创建用于转发的处理后消息对象。
-
-        Parameters
-        ----------
-        boardcast_info : BoardcastInfo
-            原始广播信息
-
-        Returns
-        -------
-        ProcessedInfo
-            处理后的消息对象
-        """
-        # 构造转发消息的格式
-
-        return ProcessedInfo(
-            processed_message=boardcast_info.message,
-            source=boardcast_info.source,
-            source_id=boardcast_info.source_id,
-            sender=boardcast_info.sender,
-            raw=boardcast_info.raw,
-            server=boardcast_info.server,
-            logger=boardcast_info.logger
-        )
