@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from logging import Logger
 from mcdreforged.api.types import PluginServerInterface
-from typing import Any, List, Optional
+from typing import Any, List, Literal, Optional
 
 @dataclass
 class ProcessedInfo:

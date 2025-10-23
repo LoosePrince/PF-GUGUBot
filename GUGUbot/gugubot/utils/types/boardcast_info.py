@@ -9,6 +9,7 @@ from mcdreforged.api.types import PluginServerInterface
 @dataclass
 class BoardcastInfo:
 	event_type: Literal["message", "notice", "request"]
+	event_sub_type: str
 	message: List[dict]
 
 	raw: Any
@@ -19,3 +20,6 @@ class BoardcastInfo:
 	source: str = ""
 	source_id: str = ""
 	sender: str = ""
+	sender_id: str = ""
+
+	is_admin: bool = False
