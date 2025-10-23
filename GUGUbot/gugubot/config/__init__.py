@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 #+----------------------------------------------------------------------+
 
-from .config_manager import ConfigManager, autoSaveDict, botConfig
+from gugubot.config.BasicConfig import BasicConfig
+from gugubot.config.BotConfig import BotConfig
 
 __all__ = [
-    'ConfigManager',
-    'autoSaveDict',
-    'botConfig'
+    'BasicConfig',
+    'BotConfig',
 ]

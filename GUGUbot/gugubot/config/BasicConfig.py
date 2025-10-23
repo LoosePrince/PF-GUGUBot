@@ -8,7 +8,7 @@ yaml.preserve_quotes = True
 
 class BasicConfig(dict):
     """Basic configuration class for loading and saving JSON/YAML files."""
-    def __init__(self, path: str = "./default.json", default_content: dict = None, yaml_format: bool = False) -> None:
+    def __init__(self, path: str = "./config.json", default_content: dict = None, yaml_format: bool = False) -> None:
         super().__init__()
         self.yaml_format = yaml_format
         self.path = Path(path).with_suffix(".yml" if yaml_format else ".json")
@@ -41,3 +41,8 @@ class BasicConfig(dict):
         super().__delitem__(key)
         self.save()
 
+    def get_keys(self, key: list, default: any = None) -> any:
+        result = self
+        for k in key[:-1]:
+            result = result.get(k, {})
+        return result.get(key[-1], default)

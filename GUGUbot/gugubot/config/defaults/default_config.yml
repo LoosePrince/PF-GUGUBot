@@ -1,0 +1,111 @@
+######################### GUGUBot设置 #################################
+
+GUGUBot:
+  command_prefix: "#"   # 命令前缀
+  group_admin: false   # 群指令 :: 只能被咱们的管理员执行
+
+  show_message_in_console: true   # 展示上报消息
+
+  
+
+########################### 连接设置 ##################################
+
+connector:
+  QQ:   # QQ连接器
+    enable: true
+    connection:
+      host: 127.0.0.1
+      port: 8080
+      post_path: ""
+      use_ssl: false
+      verify: true
+      ca_certs: ""
+      sslopt: {}
+      reconnect: 5
+      max_wait_time: 5
+      token: ""
+    permissions:
+      admin_ids:       # 管理员QQ号
+      - 12345634534534
+      - 12345644563453
+
+      admin_group_ids:        # 管理群群号 :: (可选)群内所有成员拥有管理权限
+      - 1215645646534534
+
+      group_ids:       # qq群号 :: 要监听，转发的qq群号
+      - 12345615646416
+
+      friend_is_admin: false       # 好友即是管理 :: 开放管理权限给机器人好友
+      custom_group_name:       # 自定义游戏内显示群名 :: （可选）不设置默认转发[群名称]
+        726741344: 定制的显示群名         # 如无需自定义，无视这行
+
+    others:
+      forward_other_bot: false       # 转发官方机器人回复
+
+  minecraft:   # Minecraft连接器
+    enable: true
+
+    server_name: ""     # 服务器名字 :: （可选）会在转发前面显示服务器名字
+    mc_achievement: true     # 转发 MC 成就
+    mc_death: true     # 转发 MC 死亡消息
+    player_notice: false     # 玩家上下线通知
+
+  minecraft_bridge:   # Minecraft桥接器
+    enable: true
+
+    is_main_server: true     # 是否为主服务器 :: 发送消息到其他服务器
+
+    connection:
+      host: 127.0.0.1
+      port: 25565
+      use_ssl: false
+      verify: true
+      ca_certs: ""
+      sslopt: {}
+      reconnect: 5
+      max_wait_time: 5
+      token: ""
+
+########################### 风格设置 ##################################
+
+style:
+  current_style: 正常   # 机器人回复风格 :: （可选） #风格 查看风格帮助
+  style_cooldown: 0   # 风格切换冷却
+
+########################### 系统设置 ##################################
+
+system:
+  ban_word:   # 违禁词撤回
+    enable: false
+
+  bound:   # 绑定系统
+    enable: false
+
+    bound_notice: true     # 绑定提示 :: 是否进行绑定提示
+    max_bedrock_bound: 1
+    max_java_bound: 1
+
+    whitelist_add_with_bound: false   # 绑定ID自动绑定服务器白名单
+    whitelist_remove_with_leave: true   # 退群时移除白名单
+
+  echo:   # 转发系统
+    enable: true
+
+  execute_command:   # 执行服务器指令
+    enable: false
+
+  key_words:   # 关键词回复
+    enable: true
+    max_add_time: 30
+
+  list:   # 在线玩家查询
+    enable: false
+
+  name:   # 机器人昵称
+    enable: false
+
+  start_command:   # 开服指令
+    enable: false
+
+  whitelist:   # 白名单
+    enable: false
