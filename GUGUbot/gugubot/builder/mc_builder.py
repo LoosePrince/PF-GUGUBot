@@ -35,7 +35,7 @@ class McMessageBuilder:
     def array_to_RText(
         array: List[Dict[str, Dict[str, str]]], 
         low_game_version: bool = False, 
-        ChatImage: bool = False
+        chat_image: bool = False
     ) -> RText:
         process_functions = {
             "text": lambda data: RText(
@@ -43,12 +43,12 @@ class McMessageBuilder:
                 else McMessageBuilder.replace_emoji_with_placeholder(data['text'])
             ),
             "at": lambda data: RText(f"[@{data['qq']}]", color=RColor.aqua),
-            "image": lambda data: McMessageBuilder.process_image(data, chat_image=ChatImage),
+            "image": lambda data: McMessageBuilder.process_image(data, chat_image=chat_image),
             "record": lambda _: RText("[语音]"),
             "video": lambda _: RText("[视频]"),
             "face": lambda data: McMessageBuilder.process_face(data, low_game_version=low_game_version),
             "bface": lambda _: RText("[表情]"),
-            "mface": lambda data: McMessageBuilder.process_image(data, chat_image=ChatImage),
+            "mface": lambda data: McMessageBuilder.process_image(data, chat_image=chat_image),
             "sface": lambda _: RText("[表情]"),
             "rps": lambda _: RText("[猜拳]"),
             "dice": lambda _: RText("[掷骰子]"),
