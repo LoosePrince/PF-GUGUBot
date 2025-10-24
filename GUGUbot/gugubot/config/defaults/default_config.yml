@@ -10,6 +10,7 @@ GUGUBot:
 
 connector:
   QQ:   # QQ连接器
+    source_name: "QQ"
     enable: true
     connection:
       host: 127.0.0.1
@@ -41,6 +42,7 @@ connector:
       forward_other_bot: false       # 转发官方机器人回复
 
   minecraft:   # Minecraft连接器
+    source_name: "Minecraft"
     enable: true
 
     server_name: ""     # 服务器名字 :: （可选）会在转发前面显示服务器名字
@@ -49,6 +51,7 @@ connector:
     player_notice: false     # 玩家上下线通知
 
   minecraft_bridge:   # Minecraft桥接器
+    source_name: "Bridge"
     enable: true
 
     is_main_server: true     # 是否为主服务器 :: 发送消息到其他服务器

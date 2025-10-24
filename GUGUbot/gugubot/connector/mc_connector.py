@@ -5,6 +5,7 @@ from typing import Any, Optional
 
 from mcdreforged.api.types import PluginServerInterface, Info
 
+from gugubot.config import BotConfig
 from gugubot.connector.basic_connector import BasicConnector
 from gugubot.parser.mc_parser import MCParser
 from gugubot.builder.mc_builder import McMessageBuilder
@@ -23,7 +24,7 @@ class MCConnector(BasicConnector):
         日志记录器
     """
 
-    def __init__(self, server: Any, logger: Optional[logging.Logger] = None) -> None:
+    def __init__(self, server: Any, config: BotConfig = None, logger: Optional[logging.Logger] = None) -> None:
         """初始化Minecraft连接器。
 
         Parameters
@@ -33,23 +34,29 @@ class MCConnector(BasicConnector):
         logger : Optional[logging.Logger]
             日志记录器实例，如果未提供则创建新的
         """
-        super().__init__(source="minecraft", parser=MCParser, builder=McMessageBuilder)
+        source_name = config.get_keys(["connector", "minecraft", "source_name"], "Minecraft")
+        super().__init__(source=source_name, parser=MCParser, builder=McMessageBuilder)
         self.server = server
+        self.config = config or {}
         self.logger = logger or server.logger
+        
+        # 存储日志前缀
+        connector_basic_name = self.server.tr("gugubot.connector.name")
+        self.log_prefix = f"[{connector_basic_name}{self.source}]"
 
     async def connect(self) -> None:
         """连接到Minecraft服务器。
 
         由于MCDR已经处理了服务器连接，此方法不需要执行任何操作。
         """
-        self.logger.info("[GUGUBot]Minecraft连接器就绪")
+        self.logger.info(f"{self.log_prefix} 就绪 ~")
 
     async def disconnect(self) -> None:
         """断开与Minecraft服务器的连接。
 
         由于MCDR负责服务器连接的生命周期，此方法不需要执行任何操作。
         """
-        self.logger.info("[GUGUBot]Minecraft连接器已断开")
+        self.logger.info(f"{self.log_prefix} 已断开 ~")
 
     async def send_message(self, processed_info: ProcessedInfo) -> None:
         """向Minecraft服务器发送消息。
@@ -88,7 +95,7 @@ class MCConnector(BasicConnector):
             self.server.say(main_content)
 
         except Exception as e:
-            self.logger.error(f"[GUGUBot]发送消息失败: {e}\n{traceback.format_exc()}")
+            self.logger.error(f"{self.log_prefix} 发送消息失败: {e}\n{traceback.format_exc()}")
             raise
 
     async def on_message(self, server:PluginServerInterface, info:Info) -> None:
@@ -102,7 +109,7 @@ class MCConnector(BasicConnector):
             接收到的信息对象
         """
         try:
-            enable = self.config.get("minecraft", {}).get("enable", True)
+            enable = self.config.get_keys(["connector", "minecraft", "enable"], True)
             is_player = info.is_player
             
             if not enable or not is_player:
@@ -111,7 +118,7 @@ class MCConnector(BasicConnector):
             await self.parser(self).process_message(info, server=server)
 
         except Exception as e:
-            self.logger.error(f"[GUGUBot]处理消息失败: {e}")
+            self.logger.error(f"{self.log_prefix} 处理消息失败: {e}")
             raise
 
     def _is_admin(self, sender_id) -> bool:

@@ -60,10 +60,15 @@ class Bot:
 
 class QQWebSocketConnector(BasicConnector):
     def __init__(self, server, config: BotConfig = None):
-        super().__init__(source="QQ", parser=QQParser)
+        source_name = config.get_keys(["connector", "QQ", "source_name"], "QQ")
+        super().__init__(source=source_name, parser=QQParser)
         self.server = server
         self.ws_client = None
         self.config = config or {}
+        
+        # 存储日志前缀
+        connector_basic_name = self.server.tr("gugubot.connector.name")
+        self.log_prefix = f"[{connector_basic_name}{self.source}]"
         
         # determine scheme using single parameter 'use_ssl' (boolean)
         self.use_ssl = config.get_keys(["connector", "QQ", "connection", "use_ssl"], False)
@@ -91,7 +96,7 @@ class QQWebSocketConnector(BasicConnector):
     @override
     async def connect(self) -> None:
         """建立到QQ WebSocket服务器的连接"""
-        self.logger.info(self.server.tr("gugubot.connector.QQ.try_connect", url=self.url))
+        self.logger.info(f"{self.log_prefix} {self.server.tr('gugubot.connector.QQ.try_connect', url=self.url)}")
         
         # 使用WebSocketFactory创建客户端
         self.ws_client = WebSocketFactory.create_client(
@@ -114,10 +119,10 @@ class QQWebSocketConnector(BasicConnector):
             thread_name="[GUGUBot]QQ_Connector"
         )
         
-        self.logger.info(self.server.tr("gugubot.connector.QQ.start_connect"))
+        self.logger.info(f"{self.log_prefix} {self.server.tr('gugubot.connector.QQ.start_connect')}")
 
     def _on_open(self, _):
-        self.logger.info(f"[{self.source}] " + self.server.tr("gugubot.connector.QQ.connect_success"))
+        self.logger.info(f"{self.log_prefix} {self.server.tr('gugubot.connector.QQ.connect_success')}")
 
     def _on_error(self, _: Any, error: Exception) -> None:
         """处理WebSocket错误
@@ -129,7 +134,7 @@ class QQWebSocketConnector(BasicConnector):
         error : Exception
             发生的错误
         """
-        self.logger.error(self.server.tr("gugubot.connector.QQ.error_connect", error=error))
+        self.logger.error(f"{self.log_prefix} {self.server.tr('gugubot.connector.QQ.error_connect', error=error)}")
 
     def _on_close(self, _: Any, status_code: Optional[int], reason: Optional[str]) -> None:
         """处理WebSocket连接关闭
@@ -143,9 +148,7 @@ class QQWebSocketConnector(BasicConnector):
         reason : Optional[str]
             关闭原因
         """
-        self.logger.debug(
-            self.server.tr("gugubot.connector.QQ.close_connect", status_code=status_code, reason=reason)
-        )
+        self.logger.debug(f"{self.log_prefix} {self.server.tr('gugubot.connector.QQ.close_connect', status_code=status_code, reason=reason)}")
 
 
     async def _send_message(self, message: Any) -> None:
@@ -194,9 +197,9 @@ class QQWebSocketConnector(BasicConnector):
         try:
             if self.ws_client:
                 self.ws_client.disconnect(timeout=5)
-            self.logger.info(self.server.tr("gugubot.connector.QQ.close_info"))
+            self.logger.info(f"{self.log_prefix} {self.server.tr('gugubot.connector.QQ.close_info')}")
         except Exception as e:
-            self.logger.warning(self.server.tr("gugubot.connector.QQ.error_close", error=str(e) + f"\n{traceback.format_exc()}"))
+            self.logger.warning(f"{self.log_prefix} {self.server.tr('gugubot.connector.QQ.error_close', error=str(e) + f'\n{traceback.format_exc()}')}")
             raise
 
     @override
