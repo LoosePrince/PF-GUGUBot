@@ -1,0 +1,214 @@
+import json
+import time
+import asyncio
+from typing import Any, Dict, override
+
+from mcdreforged.api.types import Info
+
+from gugubot.builder import McMessageBuilder
+from gugubot.connector.basic_connector import BasicConnector
+from gugubot.config.BotConfig import BotConfig
+from gugubot.utils.types import ProcessedInfo, BoardcastInfo
+from gugubot.parser.mc_parser import MCParser
+from gugubot.ws import WebSocketFactory
+
+class BridgeConnector(BasicConnector):
+    """桥接连接器，支持服务器模式和客户端模式
+    
+    根据配置中的is_main_server决定运行模式：
+    - True: 启动WebSocket服务器，等待其他服务器连接
+    - False: 作为客户端连接到主服务器
+    """
+    
+    def __init__(self, server, config: BotConfig = None):
+        super().__init__(source="Bridge", parser=MCParser)
+        self.server = server
+        self.config = config or {}
+        
+        # 判断是否为服务器模式
+        self.is_main_server = config.get_keys(["connector", "minecraft_bridge", "is_main_server"], True)
+        
+        # 获取配置
+        self.reconnect = config.get_keys(["connector", "minecraft_bridge", "connection", "reconnect"], 5)
+        self.use_ssl = config.get_keys(["connector", "minecraft_bridge", "connection", "use_ssl"], False)
+        self.verify = config.get_keys(["connector", "minecraft_bridge", "connection", "verify"], True)
+        
+        # 创建WebSocket实例
+        self.ws_server = None
+        self.ws_client = None
+
+    @override
+    async def connect(self) -> None:
+        """建立连接"""
+        if self.is_main_server:
+            self._start_server()
+        else:
+            self._connect_to_server()
+
+    def _start_server(self) -> None:
+        """启动WebSocket服务器"""
+        self.logger.info(f"[{self.source}] 启动桥接服务器")
+        
+        # 创建服务器并设置回调
+        self.ws_server = WebSocketFactory.create_bridge_server(
+            self.config,
+            logger=self.logger
+        )
+        
+        # 设置回调（在创建服务器后）
+        self.ws_server._on_message_callback = self._handle_server_message
+        self.ws_server._on_client_connect_callback = self._on_client_connect
+        self.ws_server._on_client_disconnect_callback = self._on_client_disconnect
+        
+        # 启动服务器（守护线程）
+        self.ws_server.start(daemon=True)
+        
+        self.logger.info(f"[{self.source}] 桥接服务器启动成功")
+
+    def _connect_to_server(self) -> None:
+        """连接到主服务器"""
+        self.logger.info(f"[{self.source}] 连接到桥接服务器")
+        
+        # 创建客户端并设置回调
+        self.ws_client = WebSocketFactory.create_bridge_client(
+            self.config,
+            logger=self.logger
+        )
+        
+        # 设置回调
+        self.ws_client._on_message_callback = self._handle_client_message
+        self.ws_client._on_open_callback = self._on_client_open
+        self.ws_client._on_error_callback = self._on_client_error
+        self.ws_client._on_close_callback = self._on_client_close
+        
+        # 连接到服务器
+        self.ws_client.connect(
+            reconnect=self.reconnect,
+            use_ssl=self.use_ssl,
+            verify=self.verify,
+            thread_name="[GUGUBot]Bridge_Client"
+        )
+        
+        self.logger.info(f"[{self.source}] 正在连接到桥接服务器...")
+
+    def _on_client_connect(self, client: Dict, server: Any) -> None:
+        """新客户端连接到服务器时"""
+        self.logger.info(f"[{self.source}] 新桥接客户端连接: {client.get('address', 'unknown')}")
+
+    def _on_client_disconnect(self, client: Dict, server: Any) -> None:
+        """客户端从服务器断开时"""
+        self.logger.info(f"[{self.source}] 桥接客户端断开: {client.get('address', 'unknown')}")
+
+    def _on_client_open(self, ws) -> None:
+        """客户端连接建立时"""
+        self.logger.info(f"[{self.source}] 成功连接到桥接服务器")
+
+    def _on_client_error(self, ws, error: Exception) -> None:
+        """客户端连接错误时"""
+        self.logger.error(f"[{self.source}] 桥接客户端错误: {error}")
+
+    def _on_client_close(self, ws, status_code: int, reason: str) -> None:
+        """客户端连接关闭时"""
+        self.logger.info(f"[{self.source}] 桥接客户端连接关闭: {status_code} - {reason}")
+
+    def _handle_server_message(self, client: Dict, server: Any, message: str) -> None:
+        """处理服务器端接收到的消息（同步方法）"""
+        try:
+            message_data = json.loads(message) if isinstance(message, str) else message
+            
+            # 广播消息给所有其他客户端（除了发送者）
+            if self.ws_server and self.ws_server.get_client_count() > 1:
+                # 添加来源标识
+                message_data["bridge_source"] = client.get('address', ['unknown', 0])[0]
+                
+                # 广播给其他客户端
+                for other_client in self.ws_server.get_clients():
+                    if other_client['id'] != client['id']:
+                        self.ws_server.send_message(other_client, message_data)
+            
+            # 处理消息并传递给本地系统
+            asyncio.run(self._process_bridge_message(message_data))
+            
+        except Exception as e:
+            self.logger.error(f"[{self.source}] 服务器消息处理失败: {e}")
+
+    def _handle_client_message(self, ws, message: str) -> None:
+        """处理客户端接收到的消息（同步方法）"""
+        try:
+            message_data = json.loads(message) if isinstance(message, str) else message 
+            
+            # 处理消息并传递给本地系统
+            asyncio.run(self._process_bridge_message(message_data))
+            
+        except Exception as e:
+            self.logger.error(f"[{self.source}] 客户端消息处理失败: {e}")
+
+    async def _process_bridge_message(self, message_data: Dict) -> None:
+        """处理桥接消息的实际逻辑"""
+        try:
+            # 解析消息类型和内容
+            content = message_data.get("message", message_data.get("content", ""))
+            sender = message_data.get("sender", "System")
+            
+            raw_message = Info(
+                raw_content=content,
+                source=0,# SERVER
+            )
+            raw_message.player = sender
+            raw_message.content = McMessageBuilder.array_to_RText(content).to_plain_text()
+
+            # 传递给parser处理
+            if self.parser:
+                await self.parser(self).process_message(raw_message, server=self.server)
+        except Exception as e:
+            self.logger.error(f"[{self.source}] 处理桥接消息失败: {e}")
+
+    @override
+    async def send_message(self, processed_info: ProcessedInfo) -> None:
+        """发送消息"""
+        message = processed_info.processed_message
+        
+        message_data = {
+            "content": message,
+            "sender": processed_info.sender or "System",
+        }
+        
+        if self.is_main_server:
+            # 服务器模式：广播给所有连接的客户端
+            if self.ws_server and self.ws_server.is_running():
+                count = self.ws_server.broadcast(message_data)
+                self.logger.debug(f"[{self.source}] 广播消息给 {count} 个客户端")
+        else:
+            # 客户端模式：发送给服务器
+            if self.ws_client and self.ws_client.is_connected():
+                if self.ws_client.send(message_data):
+                    self.logger.debug(f"[{self.source}] 发送消息到服务器")
+                else:
+                    self.logger.warning(f"[{self.source}] 发送消息失败")
+
+    @override
+    async def disconnect(self) -> None:
+        """断开连接"""
+        try:
+            if self.is_main_server:
+                # 关闭服务器
+                if self.ws_server and self.ws_server.is_running():
+                    self.ws_server.stop()
+                self.logger.info(f"[{self.source}] 桥接服务器已关闭")
+            else:
+                # 关闭客户端连接
+                if self.ws_client:
+                    self.ws_client.disconnect()
+                self.logger.info(f"[{self.source}] 桥接客户端已断开")
+        except Exception as e:
+            self.logger.warning(f"[{self.source}] 断开连接时出错: {e}")
+
+    @override
+    async def on_message(self, raw: Any) -> BoardcastInfo:
+        """处理接收到的消息"""
+        if self.parser:
+            return await self.parser(self).parse(raw)
+        return None
+
+    def _is_admin(self, sender_id) -> bool:
+        return False

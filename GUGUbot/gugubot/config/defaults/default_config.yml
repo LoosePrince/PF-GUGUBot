@@ -6,8 +6,6 @@ GUGUBot:
 
   show_message_in_console: true   # 展示上报消息
 
-  
-
 ########################### 连接设置 ##################################
 
 connector:
@@ -57,7 +55,7 @@ connector:
 
     connection:
       host: 127.0.0.1
-      port: 25565
+      port: 8787
       use_ssl: false
       verify: true
       ca_certs: ""

@@ -1,2 +1,4 @@
-rquests
+requests
 ruamel.yaml
+websocket-client>=1.0.0
+websocket-server>=0.6.0
