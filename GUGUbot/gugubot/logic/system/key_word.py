@@ -6,7 +6,7 @@ from typing import Dict
 
 from mcdreforged.api.types import PluginServerInterface
 
-from gugubot.builder.mc_builder import McMessageBuilder
+from gugubot.builder import MessageBuilder, McMessageBuilder
 from gugubot.config import BasicConfig
 from gugubot.logic.system.basic_system import BasicSystem
 from gugubot.utils.types import BoardcastInfo, ProcessedInfo
@@ -65,7 +65,7 @@ class KeyWordSystem(BasicConfig, BasicSystem):
             del self.adding_request_dict[boardcast_info.sender_id]
             self[command] = boardcast_info.message
             self.save()
-            await self.reply(boardcast_info, [{"type": "text", "data": {"text": self.get_tr("add_success")}}])
+            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("add_success"))])
             return True
 
         if content in self:
@@ -128,12 +128,12 @@ class KeyWordSystem(BasicConfig, BasicSystem):
             command = command.replace(i, "", 1).strip()
 
         if command in self:
-            await self.reply(boardcast_info, [{"type": "text", "data": {"text": self.get_tr("add_existed")}}])
+            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("add_existed"))])
             return True
 
         self.adding_request_dict[boardcast_info.sender_id] = command
         self._add_task_timeout(boardcast_info.sender_id, boardcast_info)
-        await self.reply(boardcast_info, [{"type": "text", "data": {"text": self.get_tr("add_instruction")}}])
+        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("add_instruction"))])
 
         return True
 
@@ -148,7 +148,7 @@ class KeyWordSystem(BasicConfig, BasicSystem):
             if sender_id in self.adding_request_dict:
                 command = self.adding_request_dict[sender_id]
                 del self.adding_request_dict[sender_id]
-                await self.reply(boardcast_info, [{"type": "text", "data": {"text": self.get_tr("add_timeout", command=command)}}])
+                await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("add_timeout", command=command))])
         self.system_manager.server.schedule_task(task)
     
     async def _handle_remove(self, boardcast_info: BoardcastInfo) -> bool:
@@ -162,26 +162,26 @@ class KeyWordSystem(BasicConfig, BasicSystem):
             command = command.replace(i, "", 1).strip()
 
         if command not in self:
-            await self.reply(boardcast_info, [{"type": "text", "data": {"text": self.get_tr("remove_not_exist")}}])
+            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("remove_not_exist"))])
             return True
         
         del self[command]
         self.save()
-        await self.reply(boardcast_info, [{"type": "text", "data": {"text": self.get_tr("remove_success")}}])
+        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("remove_success"))])
         return True
 
     async def _handle_list(self, boardcast_info: BoardcastInfo) -> bool:
         """处理显示关键词列表命令"""
 
         if len(self) == 0:
-            await self.reply(boardcast_info, [{"type": "text", "data": {"text": self.get_tr("list_empty")}}])
+            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("list_empty"))])
             return True
         
         keyword_list = []
         for k, v in self.items():
             keyword_list.append(f"{k}: {McMessageBuilder.array_to_RText(v)}")
         keyword_list = '\n'.join(keyword_list)
-        await self.reply(boardcast_info, [{"type": "text", "data": {"text": self.get_tr("keyword_list", keyword_list=keyword_list)}}])
+        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("keyword_list", keyword_list=keyword_list))])
         return True
 
     async def _handle_cancel(self, boardcast_info: BoardcastInfo) -> bool:
@@ -189,11 +189,11 @@ class KeyWordSystem(BasicConfig, BasicSystem):
         sender_id = boardcast_info.sender_id
 
         if sender_id not in self.adding_request_dict:
-            await self.reply(boardcast_info, [{"type": "text", "data": {"text": self.get_tr("cancel_not_exist")}}])
+            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("cancel_not_exist"))])
             return True
         
         del self.adding_request_dict[sender_id]
-        await self.reply(boardcast_info, [{"type": "text", "data": {"text": self.get_tr("cancel_success")}}])
+        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("cancel_success"))])
         return True
 
     async def _handle_help(self, boardcast_info: BoardcastInfo) -> bool:
@@ -201,5 +201,5 @@ class KeyWordSystem(BasicConfig, BasicSystem):
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
         system_name = self.get_tr("name")
         help_msg = self.get_tr("help_msg", command_prefix=command_prefix, name=system_name)
-        await self.reply(boardcast_info, [{"type": "text", "data": {"text": help_msg}}])
+        await self.reply(boardcast_info, [MessageBuilder.text(help_msg)])
         return True
