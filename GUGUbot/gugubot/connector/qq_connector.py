@@ -171,8 +171,17 @@ class QQWebSocketConnector(BasicConnector):
 
         message = processed_info.processed_message
         source = processed_info.source
-        if source != "QQ":
-            source_message = MessageBuilder.text(f"[{source}] {processed_info.sender}: ")
+        source_id = processed_info.source_id
+        
+        # 如果source_id在custom_group_name中，使用自定义名称
+        if source != "QQ" and source != "":
+            custom_group_name = self.config.get_keys(["connector", "QQ", "permissions", "custom_group_name"], {})
+            
+            if isinstance(source_id, int):
+                source_id = str(source_id)
+            display_name = custom_group_name.get(source_id, source)
+            
+            source_message = MessageBuilder.text(f"[{display_name}] {processed_info.sender}: ")
             message = [source_message] + message
 
         for target_id, target_type in target.items():
