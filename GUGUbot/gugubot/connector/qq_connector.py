@@ -175,7 +175,9 @@ class QQWebSocketConnector(BasicConnector):
 
 
     async def send_message(self, processed_info: ProcessedInfo) -> None:
-        target = processed_info.target or {"971765556":"group"}  # FIXME: remove testing
+        forward_group_ids = self.config.get_keys(["connector", "QQ", "permissions", "group_ids"], [])
+        forward_group_target = {str(group_id): "group" for group_id in forward_group_ids}
+        target = processed_info.target or forward_group_target
         message = processed_info.processed_message
 
         for target_id, target_type in target.items():

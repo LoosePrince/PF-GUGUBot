@@ -32,6 +32,9 @@ class QQParser(BasicParser):
         try:
             message_data: Dict = json.loads(raw_message)
 
+            if not self._is_valid_source(message_data):
+                return None
+
             event_type = message_data.get("post_type", "")
             if event_type not in self.PROCESS_TYPE:
                 return None
@@ -100,4 +103,28 @@ class QQParser(BasicParser):
         if str(sender_id) in [str(i) for i in admin_ids + admin_groups]:
             return True
         return False
+
+    def _friend_is_admin(self, message_data) -> bool:
+        """检查是否是好友管理员"""
+        config = self.connector.config
+        friend_is_admin = config.get_keys(["connector", "QQ", "permissions", "friend_is_admin"], False)
+        
+        is_private_chat = message_data.get("message_type") == 'private'
+
+        return friend_is_admin and is_private_chat
+
+    def _is_valid_source(self, message_data) -> bool:
+        friend_is_admin = self._friend_is_admin(message_data)
+
+        source_id = message_data.get("user_id") if message_data.get("message_type") == 'private' else message_data.get("group_id")
+
+        admin_ids = self.connector.config.get_keys(["connector", "QQ", "permissions", "admin_ids"], [])
+        admin_groups = self.connector.config.get_keys(["connector", "QQ", "permissions", "admin_group_ids"], [])
+        group_ids = self.connector.config.get_keys(["connector", "QQ", "permissions", "group_ids"], [])
+
+        valid_source = [str(i) for i in admin_ids + admin_groups + group_ids]
+
+        return friend_is_admin or str(source_id) in valid_source
+
+    
 
