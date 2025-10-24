@@ -61,10 +61,9 @@ class Bot:
 class QQWebSocketConnector(BasicConnector):
     def __init__(self, server, config: BotConfig = None):
         source_name = config.get_keys(["connector", "QQ", "source_name"], "QQ")
-        super().__init__(source=source_name, parser=QQParser)
+        super().__init__(source=source_name, parser=QQParser, config=config)
         self.server = server
         self.ws_client = None
-        self.config = config or {}
         
         # 存储日志前缀
         connector_basic_name = self.server.tr("gugubot.connector.name")
@@ -163,6 +162,9 @@ class QQWebSocketConnector(BasicConnector):
 
 
     async def send_message(self, processed_info: ProcessedInfo) -> None:
+        if not self.enable:
+            return
+        
         forward_group_ids = self.config.get_keys(["connector", "QQ", "permissions", "group_ids"], [])
         forward_group_target = {str(group_id): "group" for group_id in forward_group_ids}
         target = processed_info.target or forward_group_target
@@ -218,6 +220,9 @@ class QQWebSocketConnector(BasicConnector):
         raw_message : str
             WebSocket接收到的JSON格式消息
         """
+        if not self.enable:
+            return
+        
         try:
             asyncio.run(self.parser(self).process_message(raw_message))
 

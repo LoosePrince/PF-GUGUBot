@@ -2,6 +2,7 @@ import logging
 from typing import Any, Optional
 
 from gugubot.connector.basic_connector import BasicConnector, BoardcastInfo
+from gugubot.config import BotConfig
 
 class TestConnector(BasicConnector):
     """TEST服务器连接器。
@@ -16,7 +17,7 @@ class TestConnector(BasicConnector):
         日志记录器
     """
 
-    def __init__(self, server: Any, logger: Optional[logging.Logger] = None) -> None:
+    def __init__(self, server: Any, config: BotConfig = None, logger: Optional[logging.Logger] = None) -> None:
         """初始化TEST连接器。
 
         Parameters
@@ -26,7 +27,7 @@ class TestConnector(BasicConnector):
         logger : Optional[logging.Logger]
             日志记录器实例，如果未提供则创建新的
         """
-        super().__init__(source="test")
+        super().__init__(source="test", config=config)
         self.server = server
         self.logger = logger or server.logger
         
@@ -58,6 +59,9 @@ class TestConnector(BasicConnector):
         ValueError
             当消息格式无效时
         """
+        if not self.enable:
+            return
+        
         self.logger.info(f"[GUGUBot]发送消息: {boardcast_info}")
 
     async def on_message(self, raw: Any) -> None:
@@ -77,4 +81,7 @@ class TestConnector(BasicConnector):
             'type': 'chat'  # 或其他消息类型
         }
         """
+        if not self.enable:
+            return
+        
         self.logger.debug(f"[GUGUBot]接收消息: {raw}")

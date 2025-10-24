@@ -22,9 +22,8 @@ class BridgeConnector(BasicConnector):
     
     def __init__(self, server, config: BotConfig = None):
         source_name = config.get_keys(["connector", "minecraft_bridge", "source_name"], "Bridge")
-        super().__init__(source=source_name, parser=MCParser)
+        super().__init__(source=source_name, parser=MCParser, config=config)
         self.server = server
-        self.config = config or {}
         
         # 存储日志前缀
         connector_basic_name = self.server.tr("gugubot.connector.name")
@@ -175,6 +174,9 @@ class BridgeConnector(BasicConnector):
     @override
     async def send_message(self, processed_info: ProcessedInfo) -> None:
         """发送消息"""
+        if not self.enable:
+            return
+        
         message = processed_info.processed_message
         
         message_data = {
@@ -215,6 +217,9 @@ class BridgeConnector(BasicConnector):
     @override
     async def on_message(self, raw: Any) -> BoardcastInfo:
         """处理接收到的消息"""
+        if not self.enable:
+            return None
+        
         if self.parser:
             return await self.parser(self).parse(raw)
         return None

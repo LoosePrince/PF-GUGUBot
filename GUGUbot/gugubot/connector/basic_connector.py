@@ -34,14 +34,15 @@ class BasicConnector(ABC):
 	def __init__(self, source: str = "", 
 		parser: Optional[BasicParser] = None, builder: Any = None,
 		server: Any = None, logger: Any = None,
-		bot_config: BotConfig = None
+		config: BotConfig = None
 	) -> None:
 		self.source: str = source
 		self.parser: Optional[BasicParser] = parser
 		self.builder: Any = builder
 		self.connector_manager: Any = None  # Will be set when registered to ConnectorManager
 		self.logger: Any = None  # Will be set when registered to ConnectorManager
-		self.config: BotConfig = bot_config or {}
+		self.config: BotConfig = config or {}
+		self.enable: bool = config.get_keys(["connector", self.source, "enable"], True)
 
 	@abstractmethod
 	async def connect(self) -> None:
@@ -65,6 +66,10 @@ class BasicConnector(ABC):
 		message: Any
 			The message to be sent. Implementations should use self.builder
 			to transform the message if needed before sending.
+		
+		Note
+		----
+		Implementations should check self.enable and return early if disabled.
 		"""
 		raise NotImplementedError
 
@@ -80,5 +85,11 @@ class BasicConnector(ABC):
 		----------
 		raw: Any
 			The raw data received from `source`.
+		
+		Note
+		----
+		Implementations should check self.enable and return early if disabled.
 		"""
 		raise NotImplementedError
+
+	

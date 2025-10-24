@@ -35,9 +35,8 @@ class MCConnector(BasicConnector):
             日志记录器实例，如果未提供则创建新的
         """
         source_name = config.get_keys(["connector", "minecraft", "source_name"], "Minecraft")
-        super().__init__(source=source_name, parser=MCParser, builder=McMessageBuilder)
+        super().__init__(source=source_name, parser=MCParser, builder=McMessageBuilder, config=config)
         self.server = server
-        self.config = config or {}
         self.logger = logger or server.logger
         
         # 存储日志前缀
@@ -72,6 +71,9 @@ class MCConnector(BasicConnector):
         ValueError
             当消息格式无效时
         """
+        if not self.enable:
+            return
+        
         self.builder: McMessageBuilder
 
         message = processed_info.processed_message
@@ -109,10 +111,12 @@ class MCConnector(BasicConnector):
             接收到的信息对象
         """
         try:
-            enable = self.config.get_keys(["connector", "minecraft", "enable"], True)
+            if not self.enable:
+                return
+            
             is_player = info.is_player
             
-            if not enable or not is_player:
+            if not is_player:
                 return
 
             await self.parser(self).process_message(info, server=server)
