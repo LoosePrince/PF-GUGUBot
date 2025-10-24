@@ -49,6 +49,8 @@ connector:
     mc_achievement: true     # 转发 MC 成就
     mc_death: true     # 转发 MC 死亡消息
     player_notice: false     # 玩家上下线通知
+    server_start_notice: true     # 服务器启动通知
+    server_stop_notice: true     # 服务器停止通知
 
   minecraft_bridge:   # Minecraft桥接器
     source_name: "Bridge" # 桥接服务器显示名称 :: 如果不是主服务器，会显示这个名称
