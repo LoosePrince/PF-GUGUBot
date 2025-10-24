@@ -35,14 +35,14 @@ class TestConnector(BasicConnector):
 
         由于MCDR已经处理了服务器连接，此方法不需要执行任何操作。
         """
-        self.logger.info("[GUGUBot]TEST连接器就绪")
+        self.logger.info("TEST连接器就绪")
 
     async def disconnect(self) -> None:
         """断开与TEST服务器的连接。
 
         由于MCDR负责服务器连接的生命周期，此方法不需要执行任何操作。
         """
-        self.logger.info("[GUGUBot]TEST连接器已断开")
+        self.logger.info("TEST连接器已断开")
 
     async def send_message(self, boardcast_info: BoardcastInfo) -> None:
         """向TEST服务器发送消息。
