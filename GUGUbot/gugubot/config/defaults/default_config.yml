@@ -52,6 +52,11 @@ connector:
     server_start_notice: true     # 服务器启动通知
     server_stop_notice: true     # 服务器停止通知
 
+    ignore_mc_command_patterns: 
+    - "!!.*" # 忽略MCDR指令
+    - ".*?\\[Command: /.*\\]" # carpet 指令记录
+    - ".*?xaero-waypoint:.*" # 忽略 Xaero Waypoint 的共享
+
   minecraft_bridge:   # Minecraft桥接器
     source_name: "Bridge" # 桥接服务器显示名称 :: 如果不是主服务器，会显示这个名称
     enable: true # 是否启用
@@ -78,7 +83,7 @@ style:
 ########################### 系统设置 ##################################
 
 system:
-  ban_word:   # 违禁词撤回
+  ban_words:   # 违禁词撤回
     enable: false
 
   bound:   # 绑定系统
@@ -108,6 +113,9 @@ system:
     enable: false
 
   start_command:   # 开服指令
+    enable: false
+
+  startup_command:   # 启动指令
     enable: false
 
   whitelist:   # 白名单
