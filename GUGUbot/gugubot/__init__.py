@@ -3,21 +3,29 @@
 from pathlib import Path
 
 # from gugubot.logic.bot_core import GUGUBotCore
-from gugubot.connector import ConnectorManager, MCConnector, QQWebSocketConnector, TestConnector, BridgeConnector
-from gugubot.logic.system import BanWordSystem, BoundSystem, EchoSystem, KeyWordSystem, SystemManager
-from gugubot.logic.system.whitelist import WhitelistSystem
-from gugubot.config.BotConfig import BotConfig
+from gugubot.connector import (
+    ConnectorManager, MCConnector, QQWebSocketConnector, TestConnector, BridgeConnector
+)
+from gugubot.logic.system import (
+    BanWordSystem, BoundSystem, EchoSystem, GeneralHelpSystem, KeyWordSystem, 
+    StartupCommandSystem, SystemManager, WhitelistSystem
+)
+from gugubot.config import BotConfig
+from gugubot.utils import check_plugin_version
 
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.command import *
 
 mc_connector: MCConnector = None
 gugubot_config: BotConfig = None
+startup_command_system: StartupCommandSystem = None
 
 #+---------------------------------------------------------------------+
 async def on_load(server: PluginServerInterface, old)->None:
-    global qq_bot, connector_manager
-    global mc_connector, gugubot_config
+    global connector_manager
+    global mc_connector
+    global gugubot_config
+    global startup_command_system
 
     gugubot_config = BotConfig(Path(server.get_data_folder()) / "config.yml")
     gugubot_config.addNewConfig(server)
@@ -41,71 +49,46 @@ async def on_load(server: PluginServerInterface, old)->None:
 
     # 注册系统管理器
     system_manager = SystemManager(server, connector_manager=connector_manager, config=gugubot_config)
-    systems = [EchoSystem()]
+    
+    # 创建系统实例，enable状态在各系统__init__中从config自动读取
+    systems = [EchoSystem(enable=True, config=gugubot_config)]
+    
     if is_main_server:
-        systems.insert(0, BanWordSystem(server))
-        systems.insert(1, KeyWordSystem(server))
-
-        whitelist_system = WhitelistSystem(server)
-        bound_system = BoundSystem(server)
+        general_help_system = GeneralHelpSystem(server, config=gugubot_config)
+        ban_word_system = BanWordSystem(server, config=gugubot_config)
+        key_word_system = KeyWordSystem(server, config=gugubot_config)
+        whitelist_system = WhitelistSystem(server, config=gugubot_config)
+        bound_system = BoundSystem(server, config=gugubot_config)
+        startup_command_system = StartupCommandSystem(server, config=gugubot_config)
 
         # 设置白名单系统引用
         bound_system.set_whitelist_system(whitelist_system)
 
-        systems.insert(1, bound_system)
-        systems.insert(1, whitelist_system)
-    
+        systems.insert(0, general_help_system)
+        systems.insert(1, ban_word_system)
+        systems.insert(2, key_word_system)
+        systems.insert(3, bound_system)
+        systems.insert(4, whitelist_system)
+        systems.insert(5, startup_command_system)
+
     for system in systems:
         system_manager.register_system(system)
     
     connector_manager.register_system_manager(system_manager)
 
-    # # 注册指令
-    # server.register_command(
-    #     Literal('!!klist').runs(qq_bot.ingame_key_list)
-    # )
-    # server.register_command(
-    #     Literal('!!qq').
-    #         then(
-    #             GreedyText('message').runs(qq_bot.ingame_command_qq)
-    #         )
-    # )
-    # server.register_command(
-    #     Literal('@').then(
-    #         Text('QQ(name/id)').suggests(lambda: qq_bot.suggestion).then(
-    #             GreedyText('message').runs(qq_bot.ingame_at)
-    #         )
-    #     )
-    # )
-    # # 注册帮助消息
-    # server.register_help_message('!!klist','显示游戏内关键词')
-    # server.register_help_message('!!qq <msg>', '向QQ群发送消息(可以触发qq关键词)')
-    # server.register_help_message('!!add <关键词> <回复>','添加游戏内关键词回复')
-    # server.register_help_message('!!del <关键词>','删除指定游戏关键词')
-    # server.register_help_message('@ <QQ名/号> <消息>','让机器人在qq里@')
+    # 检查插件版本
+    server.schedule_task(check_plugin_version(server))
+
+    # 注册帮助消息
+    command_prefix = gugubot_config.get_keys(["GUGUBot", "command_prefix"], "#")
+    help_name = server.tr("gugubot.system.general_help.name")
+    main_help_msg = f"GUGUBot {help_name}"
+    server.register_help_message(f'{command_prefix}{help_name}', main_help_msg)
+
     # # 注册监听任务
-    # server.register_event_listener("PlayerAdvancementEvent", qq_bot.on_mc_achievement)
-    # server.register_event_listener("PlayerDeathEvent", qq_bot.on_mc_death)
-
-    # # 检查插件版本
-    # async def check_plugin_version():
-    #     try:
-    #         response = requests.get("https://api.github.com/repos/LoosePrince/PF-GUGUBot/releases/latest")
-    #         if response.status_code != 200:
-    #             server.logger.warning(f"无法检查插件版本，网络代码: {response.status_code}")
-    #             return
-    #         latest_version = response.json()["tag_name"].replace('v', '')
-    #         current_version = str(server.get_self_metadata().version)
-    #         if latest_version > current_version:
-    #             server.logger.info(f"§e[PF-GUGUBot] §6有新版本可用: §b{latest_version}§6，当前版本: §b{current_version}")
-    #             server.logger.info("§e[PF-GUGUBot] §6请使用 §b!!MCDR plugin install -U -y gugubot §6来更新插件")
-    #         else:
-    #             server.logger.info(f"§e[PF-GUGUBot] §6已是最新版本: §b{current_version}")
-    #     except Exception as e:
-    #         server.logger.warning(f"检查插件版本时出错: {e}")
-
-    # # 在插件加载完成后异步检查版本
-    # server.schedule_task(check_plugin_version())
+    from gugubot.logic.plugins.mg_event import create_on_mc_achievement, create_on_mc_death
+    server.register_event_listener("PlayerAdvancementEvent", create_on_mc_achievement(gugubot_config, connector_manager))
+    server.register_event_listener("PlayerDeathEvent", create_on_mc_death(gugubot_config, connector_manager))
 
 #+---------------------------------------------------------------------+
 # # 防止初始化报错
@@ -200,6 +183,9 @@ from gugubot.logic.plugins import broadcast_server_start, broadcast_server_stop
 async def on_server_startup(server: PluginServerInterface) -> None:
     """服务器启动时的回调函数。"""
     try:
+        if startup_command_system:
+            await startup_command_system.execute_all_commands()
+
         if connector_manager:
             # 广播服务器启动消息
             await broadcast_server_start(server, connector_manager, gugubot_config)
