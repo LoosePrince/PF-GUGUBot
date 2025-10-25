@@ -162,9 +162,6 @@ class SystemManager:
         # 创建处理任务
         result = False
         for system in to_systems:
-            if not system.enable:
-                continue
-
             result = await self._safe_process_boardcast_info(system, boardcast_info)
 
             if result:
