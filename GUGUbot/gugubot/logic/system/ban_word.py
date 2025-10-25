@@ -7,7 +7,7 @@ from typing import Dict, List, Optional, Tuple
 from mcdreforged.api.types import PluginServerInterface
 
 from gugubot.builder import MessageBuilder
-from gugubot.config import BasicConfig
+from gugubot.config import BasicConfig, BotConfig
 from gugubot.logic.system.basic_system import BasicSystem
 from gugubot.utils.types import BoardcastInfo
 
@@ -18,9 +18,9 @@ class BanWordSystem(BasicConfig, BasicSystem):
     提供添加、删除、显示违禁词，以及违禁词检测等功能。
     """
 
-    def __init__(self, server: PluginServerInterface) -> None:
+    def __init__(self, server: PluginServerInterface, config: Optional[BotConfig] = None) -> None:
         """初始化违禁词系统。"""
-        BasicSystem.__init__(self, "ban_word")
+        BasicSystem.__init__(self, "ban_words", enable=False, config=config)
         data_path = Path(server.get_data_folder()) / "system" / "ban_words.json"
         data_path.parent.mkdir(parents=True, exist_ok=True)
         BasicConfig.__init__(self, data_path)
@@ -44,6 +44,10 @@ class BanWordSystem(BasicConfig, BasicSystem):
         if not message:
             return False
 
+        # 先检查是否是开启/关闭命令
+        if await self.handle_enable_disable(boardcast_info):
+            return True
+        
         return await self._handle_msg(boardcast_info)
 
     async def _handle_msg(self, boardcast_info: BoardcastInfo) -> bool:
@@ -53,7 +57,7 @@ class BanWordSystem(BasicConfig, BasicSystem):
 
         # 检查消息中是否包含违禁词
         ban_check = self._check_ban(messages)
-        if ban_check and not is_admin:
+        if ban_check and not is_admin and self.enable:
             ban_word, reason = ban_check
             await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("ban_word_detected", ban_word=ban_word, reason=reason))])
             return True
@@ -176,6 +180,20 @@ class BanWordSystem(BasicConfig, BasicSystem):
         """违禁词指令帮助"""
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
         system_name = self.get_tr("name")
-        help_msg = self.get_tr("help_msg", command_prefix=command_prefix, name=system_name)
+        enable_cmd = self.get_tr("gugubot.enable", global_key=True)
+        disable_cmd = self.get_tr("gugubot.disable", global_key=True)
+        add_cmd = self.get_tr("add")
+        remove_cmd = self.get_tr("remove")
+        list_cmd = self.get_tr("list")
+        help_msg = self.get_tr(
+            "help_msg", 
+            command_prefix=command_prefix, 
+            name=system_name,
+            enable=enable_cmd,
+            disable=disable_cmd,
+            add=add_cmd,
+            remove=remove_cmd,
+            list=list_cmd
+        )
         await self.reply(boardcast_info, [MessageBuilder.text(help_msg)])
         return True

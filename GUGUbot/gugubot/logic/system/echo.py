@@ -2,9 +2,9 @@
 
 该模块提供了回声功能，可以将一个平台的消息转发到其他平台。
 """
-
+from gugubot.config.BotConfig import BotConfig
 from gugubot.logic.system.basic_system import BasicSystem
-from gugubot.utils.types import BoardcastInfo, ProcessedInfo
+from gugubot.utils.types import BoardcastInfo
 
 
 class EchoSystem(BasicSystem):
@@ -20,9 +20,9 @@ class EchoSystem(BasicSystem):
         系统是否启用
     """
 
-    def __init__(self, enable: bool = True) -> None:
+    def __init__(self, enable: bool = True, config: BotConfig = None) -> None:
         """初始化回声系统。"""
-        super().__init__(name="echo", enable=enable)
+        super().__init__(name="echo", enable=enable, config=config)
 
     def initialize(self) -> None:
         return
@@ -42,6 +42,10 @@ class EchoSystem(BasicSystem):
         bool
             是否成功处理了消息
         """
+        # 先检查是否是开启/关闭命令
+        if await self.handle_enable_disable(boardcast_info):
+            return True
+            
         try:
             # 准备转发的消息
             processed_info = self.create_processed_info(boardcast_info)

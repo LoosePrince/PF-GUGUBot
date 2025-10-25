@@ -6,6 +6,7 @@ from typing import Dict, Optional
 from mcdreforged.api.types import PluginServerInterface
 
 from gugubot.builder import MessageBuilder
+from gugubot.config.BotConfig import BotConfig
 from gugubot.logic.system.basic_system import BasicSystem
 from gugubot.logic.system.whitelist import WhitelistSystem
 from gugubot.utils.player_manager import PlayerManager, Player
@@ -18,9 +19,9 @@ class BoundSystem(BasicSystem):
     提供绑定、解绑、查询绑定信息等功能。
     """
 
-    def __init__(self, server: PluginServerInterface) -> None:
+    def __init__(self, server: PluginServerInterface, config: Optional[BotConfig] = None) -> None:
         """初始化绑定系统。"""
-        super().__init__("bound")
+        super().__init__("bound", enable=False, config=config)
         self.server = server
         self.player_manager = PlayerManager(server, self)
         self.whitelist: Optional[WhitelistSystem] = None
@@ -48,9 +49,13 @@ class BoundSystem(BasicSystem):
             return False
         
         first_message = message[0]
-
+        
         if first_message.get("type") != "text":
             return False
+
+        # 先检查是否是开启/关闭命令
+        if await self.handle_enable_disable(boardcast_info):
+            return True
 
         return await self._handle_msg(boardcast_info)
 
@@ -91,12 +96,15 @@ class BoundSystem(BasicSystem):
         command = boardcast_info.message[0].get("data",{}).get("text", "")
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
         system_name = self.get_tr("name")
+        bind_cmd = self.get_tr("bind")
 
         for i in [command_prefix, system_name]:
             command = command.replace(i, "", 1).strip()
 
         if not command and len(boardcast_info.message) == 1:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("bind_instruction"))])
+            await self.reply(boardcast_info, [MessageBuilder.text(
+                self.get_tr("bind_instruction", command_prefix=command_prefix, name=system_name, bind=bind_cmd)
+            )])
             return True
 
         # 解析消息段
@@ -127,7 +135,9 @@ class BoundSystem(BasicSystem):
             is_online = parts[1].lower() in ["online", "在线", "on"]
 
         if not player_name:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("bind_instruction"))])
+            await self.reply(boardcast_info, [MessageBuilder.text(
+                self.get_tr("bind_instruction", command_prefix=command_prefix, name=system_name, bind=bind_cmd)
+            )])
             return True
 
         # 检查是否达到绑定上限
@@ -340,7 +350,21 @@ class BoundSystem(BasicSystem):
         """绑定指令帮助"""
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
         system_name = self.get_tr("name")
-        help_msg = self.get_tr("help_msg", command_prefix=command_prefix, name=system_name)
+        enable_cmd = self.get_tr("gugubot.enable", global_key=True)
+        disable_cmd = self.get_tr("gugubot.disable", global_key=True)
+        bind_cmd = self.get_tr("bind")
+        unbind_cmd = self.get_tr("unbind")
+        list_cmd = self.get_tr("list")
+        help_msg = self.get_tr(
+            "help_msg", 
+            command_prefix=command_prefix, 
+            name=system_name,
+            enable=enable_cmd,
+            disable=disable_cmd,
+            bind=bind_cmd,
+            unbind=unbind_cmd,
+            list=list_cmd
+        )
         await self.reply(boardcast_info, [MessageBuilder.text(help_msg)])
         return True
 

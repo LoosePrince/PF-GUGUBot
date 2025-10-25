@@ -2,6 +2,7 @@ import logging
 
 from typing import TYPE_CHECKING, List, Optional
 
+from gugubot.builder import MessageBuilder
 from gugubot.config.BotConfig import BotConfig
 from gugubot.utils.types import BoardcastInfo, ProcessedInfo
 
@@ -24,19 +25,28 @@ class BasicSystem:
         日志记录器实例
     """
 
-    def __init__(self, name: str, enable: bool = True) -> None:
+    def __init__(self, name: str, enable: bool = True, config: Optional[BotConfig] = None) -> None:
         """初始化基础系统。
 
         Parameters
         ----------
         name : str
             系统名称
+        enable : bool
+            默认启用状态，如果config中有配置则使用config的值
+        config : Optional[BotConfig]
+            配置对象，用于读取enable状态
         """
         self.name = name
         self.system_manager: Optional[SystemManager] = None
         self.logger: Optional[logging.Logger] = None
-        self.enable: bool = enable
-        self.config: Optional[BotConfig] = None
+        self.config: Optional[BotConfig] = config
+        
+        # 从配置读取enable状态，如果没有配置则使用传入的enable参数
+        if config:
+            self.enable = config.get_keys(["system", name, "enable"], enable)
+        else:
+            self.enable = enable
 
     def initialize(self) -> None:
         """初始化系统。
@@ -110,6 +120,7 @@ class BasicSystem:
             source=boardcast_info.source,
             source_id=boardcast_info.source_id,
             sender=boardcast_info.sender,
+            sender_id=boardcast_info.sender_id,
             raw=boardcast_info.raw,
             server=boardcast_info.server,
             logger=boardcast_info.logger
@@ -122,6 +133,7 @@ class BasicSystem:
             source=boardcast_info.source,
             source_id=boardcast_info.source_id,
             sender=self.system_manager.server.tr("gugubot.bot_name"),
+            sender_id=None,
             raw=boardcast_info.raw,
             server=boardcast_info.server,
             logger=boardcast_info.logger,
@@ -139,5 +151,58 @@ class BasicSystem:
             return server.tr(key, **kwargs)
         else:
             return server.tr(f"gugubot.system.{self.name}.{key}", **kwargs)
+
+    async def handle_enable_disable(self, boardcast_info: BoardcastInfo) -> bool:
+        """处理开启/关闭命令
+        
+        Parameters
+        ----------
+        boardcast_info : BoardcastInfo
+            广播信息
+            
+        Returns
+        -------
+        bool
+            是否处理了命令
+        """
+        if not self.is_command(boardcast_info):
+            return False
+            
+        if not boardcast_info.is_admin:
+            return False
+            
+        command = boardcast_info.message[0].get("data", {}).get("text", "")
+        command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
+        system_name = self.get_tr("name")
+        
+        command = command.replace(command_prefix, "", 1).strip()
+        
+        if not command.startswith(system_name):
+            return False
+        
+        command = command.replace(system_name, "", 1).strip()
+        
+        enable_cmd = self.get_tr("gugubot.enable", global_key=True)
+        disable_cmd = self.get_tr("gugubot.disable", global_key=True)
+        
+        if command in [enable_cmd, disable_cmd]:
+            return await self._handle_switch(command == enable_cmd, boardcast_info)
+        
+        return False
+
+    async def _handle_switch(self, enable: bool, boardcast_info: BoardcastInfo) -> bool:
+        """处理开启系统命令"""
+        self.enable = enable
+        self._save_enable_state()
+        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr(f"gugubot.enable_success" if enable else "gugubot.disable_success", global_key=True))])
+        return True
+
+    def _save_enable_state(self) -> None:
+        """保存enable状态到配置文件"""
+        if self.config:
+            system_config = self.config.get("system", {})
+            if self.name in system_config:
+                system_config[self.name]["enable"] = self.enable
+                self.config.save()
         
         

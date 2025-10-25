@@ -2,6 +2,7 @@ from mcdreforged.api.types import PluginServerInterface
 from typing import Optional
 
 from gugubot.builder import MessageBuilder
+from gugubot.config.BotConfig import BotConfig
 from gugubot.logic.system.basic_system import BasicSystem
 from gugubot.utils.types import BoardcastInfo
 
@@ -12,9 +13,9 @@ class WhitelistSystem(BasicSystem):
     提供添加、删除、查询白名单玩家等功能。
     """
 
-    def __init__(self, server: PluginServerInterface) -> None:
+    def __init__(self, server: PluginServerInterface, config: Optional[BotConfig] = None) -> None:
         """初始化白名单系统。"""
-        super().__init__("whitelist")
+        super().__init__("whitelist", enable=False, config=config)
         self.server = server
         self._api: Optional[object] = None
         self.online_mode: bool = False  # 默认离线模式
@@ -84,9 +85,9 @@ class WhitelistSystem(BasicSystem):
             return await self._handle_remove(boardcast_info)
         elif command.startswith(self.get_tr("list")):
             return await self._handle_list(boardcast_info)
-        elif command.startswith(self.get_tr("enable")):
+        elif command.startswith(self.get_tr("gugubot.enable", global_key=True)):
             return await self._handle_enable(boardcast_info)
-        elif command.startswith(self.get_tr("disable")):
+        elif command.startswith(self.get_tr("gugubot.disable", global_key=True)):
             return await self._handle_disable(boardcast_info)
         
         return await self._handle_help(boardcast_info)
@@ -278,8 +279,8 @@ class WhitelistSystem(BasicSystem):
         add_command = self.get_tr("add")
         remove_command = self.get_tr("remove")
         list_command = self.get_tr("list")
-        enable_command = self.get_tr("enable")
-        disable_command = self.get_tr("disable")
+        enable_command = self.get_tr("gugubot.enable", global_key=True)
+        disable_command = self.get_tr("gugubot.disable", global_key=True)
         help_msg = self.get_tr(
             "help_msg", command_prefix=command_prefix, name=system_name, 
             add=add_command, remove=remove_command, list=list_command, enable=enable_command, disable=disable_command

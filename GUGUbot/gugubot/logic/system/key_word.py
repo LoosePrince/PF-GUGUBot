@@ -18,9 +18,9 @@ class KeyWordSystem(BasicConfig, BasicSystem):
     提供添加、删除、显示关键词，以及添加图片回复等功能。
     """
 
-    def __init__(self, server: PluginServerInterface) -> None:
+    def __init__(self, server: PluginServerInterface, config=None) -> None:
         """初始化关键词系统。"""
-        BasicSystem.__init__(self, "key_word")
+        BasicSystem.__init__(self, "key_words", enable=True, config=config)
         data_path = Path(server.get_data_folder()) / "system" / "key_words.json"
         data_path.parent.mkdir(parents=True, exist_ok=True)
         BasicConfig.__init__(self, data_path)
@@ -51,11 +51,18 @@ class KeyWordSystem(BasicConfig, BasicSystem):
         if first_message.get("type") not in ACCEPTABLE_TYPES:
             return False
 
+        # 先检查是否是开启/关闭命令
+        if await self.handle_enable_disable(boardcast_info):
+            return True
+        
         return await self._handle_msg(boardcast_info)
 
     async def _handle_msg(self, boardcast_info: BoardcastInfo) -> bool:
         """处理消息"""
         content = boardcast_info.message[0].get("data",{}).get("text", "")
+
+        if not self.enable:
+            return False
 
         if self.is_command(boardcast_info):
             return await self._handle_command(boardcast_info)
@@ -200,6 +207,22 @@ class KeyWordSystem(BasicConfig, BasicSystem):
         """关键词指令帮助"""
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
         system_name = self.get_tr("name")
-        help_msg = self.get_tr("help_msg", command_prefix=command_prefix, name=system_name)
+        enable_cmd = self.get_tr("gugubot.enable", global_key=True)
+        disable_cmd = self.get_tr("gugubot.disable", global_key=True)
+        add_cmd = self.get_tr("add")
+        remove_cmd = self.get_tr("remove")
+        list_cmd = self.get_tr("list")
+        cancel_cmd = self.get_tr("cancel")
+        help_msg = self.get_tr(
+            "help_msg", 
+            command_prefix=command_prefix, 
+            name=system_name,
+            enable=enable_cmd,
+            disable=disable_cmd,
+            add=add_cmd,
+            remove=remove_cmd,
+            list=list_cmd,
+            cancel=cancel_cmd
+        )
         await self.reply(boardcast_info, [MessageBuilder.text(help_msg)])
         return True
