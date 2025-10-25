@@ -1,12 +1,13 @@
+import re
 import traceback
 
 from typing import Any, Optional, override
 
 from mcdreforged.api.types import PluginServerInterface, Info
 
+from gugubot.builder import CQHandler
 from gugubot.parser.basic_parser import BasicParser
 from gugubot.utils.types import BoardcastInfo
-from gugubot.utils.message import str_to_array
 
 
 class MCParser(BasicParser):
@@ -33,6 +34,9 @@ class MCParser(BasicParser):
             player = raw_message.player
             content = raw_message.content
 
+            if self._ignore_message(content):
+                return None
+
             self.logger.debug(
                 f"[GUGUBot]收到Minecraft消息 - "
                 f"玩家: {player}, "
@@ -42,7 +46,7 @@ class MCParser(BasicParser):
             boardcast_info = BoardcastInfo(
                 event_type="message",
                 event_sub_type="group",
-                message=str_to_array(content),
+                message=CQHandler.parse(content),
                 raw=raw_message,
                 server=server,
                 logger=self.logger,
@@ -58,4 +62,14 @@ class MCParser(BasicParser):
         except Exception as e:
             self.logger.error(f"MC消息解析失败: {str(e)}\n{traceback.format_exc()}")
             raise
+
+    def _ignore_message(self, content: str) -> bool:
+        """检查消息是否需要忽略"""
+        config  = self.connector.config
+        ignore_mc_command_patterns = config.get_keys(["connector", "minecraft", "ignore_mc_command_patterns"], [])
+
+        for pattern in ignore_mc_command_patterns:
+            if re.match(pattern, content):
+                return True
+        return False
 

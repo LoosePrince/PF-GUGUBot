@@ -80,18 +80,23 @@ class MCConnector(BasicConnector):
         source = processed_info.source
         source_id = processed_info.source_id
         sender = processed_info.sender
+        sender_id = processed_info.sender_id
         receiver = getattr(processed_info, 'receiver', None)
 
         try:
             game_version = self.server.get_server_information().version.lower() or ""
             is_low_version = self.builder.is_low_game_version(game_version)
 
-            Rtext_conect = self.builder.array_to_RText(message, low_game_version=is_low_version, chat_image=True)
+            player_manager = getattr(self.connector_manager.system_manager.get_system("bound"), "player_manager", None)
+
+            Rtext_conect = self.builder.array_to_RText(message, sender_id=sender_id, 
+                low_game_version=is_low_version, chat_image=True, player_manager=player_manager)
 
             main_content = self.builder.build(Rtext_conect, 
                                               group_name=source,
                                               group_id=source_id,
                                               sender=sender,
+                                              sender_id=sender_id,
                                               receiver=receiver)
             
             self.server.say(main_content)

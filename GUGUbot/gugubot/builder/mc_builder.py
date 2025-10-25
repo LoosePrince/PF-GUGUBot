@@ -3,9 +3,11 @@ import re
 from packaging import version
 from typing import Optional, List, Dict
 
-from mcdreforged.api.rtext import RText, RAction, RColor
+from mcdreforged.api.rtext import RText, RAction, RColor, RTextBase
+
 
 from gugubot.constant.qq_emoji_map import qq_emoji_map
+from gugubot.utils.player_manager import PlayerManager
 
 class McMessageBuilder:
     @staticmethod
@@ -14,16 +16,19 @@ class McMessageBuilder:
         group_name: str = "QQ",
         group_id: Optional[str] = None,
         sender: Optional[str] = None,
+        sender_id: Optional[str] = None,
         receiver: Optional[str] = None
     ) -> RText:
         rtext = RText(f"[{group_name}]", color=RColor.gold)
         if group_id is not None:
             rtext = rtext.set_hover_text(group_id).set_click_event(action=RAction.copy_to_clipboard, value=group_id)
         if sender is not None:
-            rtext += RText(f" [{sender}]", color=RColor.green)
+            rtext += RText(f" [{sender}]", color=RColor.green) \
+                .set_hover_text(f"点击草稿 @{sender} 的消息") \
+                .set_click_event(action=RAction.suggest_command, value=f"[CQ:at,qq={sender_id}]" if sender_id else "")
         if receiver is not None:
             rtext += RText(f"[@{receiver}]", color=RColor.aqua)
-        if isinstance(forward_content, RText):
+        if isinstance(forward_content, RTextBase):
             rtext += RText(" ") + forward_content
         else:
             rtext += RText(f" {forward_content}", color=RColor.white)
@@ -34,15 +39,26 @@ class McMessageBuilder:
     @staticmethod
     def array_to_RText(
         array: List[Dict[str, Dict[str, str]]], 
+        sender_id: Optional[str] = None,
         low_game_version: bool = False, 
-        chat_image: bool = False
+        chat_image: bool = False,
+        player_manager: PlayerManager = None,
     ) -> RText:
+        def get_player_name(player_id: str) -> str:
+            if player_manager:
+                player = player_manager.get_player(str(player_id))
+                if player:
+                    return player.name
+            return player_id
+        
         process_functions = {
             "text": lambda data: RText(
                 data['text'] if not low_game_version 
                 else McMessageBuilder.replace_emoji_with_placeholder(data['text'])
             ),
-            "at": lambda data: RText(f"[@{data['qq']}]", color=RColor.aqua),
+            "at": lambda data: RText(f"[@{get_player_name(data['qq'])}]", color=RColor.aqua)
+                .set_hover_text(f"点击草稿 @{get_player_name(data['qq'])} 的消息")
+                .set_click_event(action=RAction.suggest_command, value=f"[CQ:at,qq={data['qq']}]"),
             "image": lambda data: McMessageBuilder.process_image(data, chat_image=chat_image),
             "record": lambda _: RText("[语音]"),
             "video": lambda _: RText("[视频]"),

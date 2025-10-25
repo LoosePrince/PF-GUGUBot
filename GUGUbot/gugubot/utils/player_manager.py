@@ -133,7 +133,7 @@ class PlayerManager(BasicConfig):
                 
             # 3. 通过关联账号查找
             for platform_name, account_ids in player.accounts.items():
-                if platform_name != platform:
+                if platform and platform_name != platform:
                     continue
                 if identifier in account_ids:
                     return player   

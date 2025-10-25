@@ -16,6 +16,7 @@ class ProcessedInfo:
     server: PluginServerInterface
     logger: Logger
 
+    sender_id: Optional[str] = None
     receiver: Optional[str] = None
 
     target: Optional[dict] = None  # e.g., {"123456789": "group", "987654321": "private"}   
