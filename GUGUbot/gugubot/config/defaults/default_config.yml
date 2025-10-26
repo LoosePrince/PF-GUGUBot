@@ -56,6 +56,9 @@ connector:
     
     server_start_notice: true     # 服务器启动通知
     server_stop_notice: true     # 服务器停止通知
+
+    chat_image: false     # 使用 ChatImage 显示图片
+    image_previewer: false     # 使用 ImagePreview 显示图片
     
     player_join_patterns:   # 玩家加入消息的正则表达式模式（第一个捕获组为玩家名）
     - "([^\\[]+)\\[.*?\\] logged in with entity id"  # 标准格式：PlayerName[/IP] logged in with entity id

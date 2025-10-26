@@ -83,14 +83,20 @@ class MCConnector(BasicConnector):
         sender_id = processed_info.sender_id
         receiver = getattr(processed_info, 'receiver', None)
 
+        use_chat_image = self.config.get_keys(["connector", "minecraft", "chat_image"], False)
+        use_image_previewer = self.config.get_keys(["connector", "minecraft", "image_previewer"], False)
+
         try:
             game_version = self.server.get_server_information().version.lower() or ""
             is_low_version = self.builder.is_low_game_version(game_version)
 
             player_manager = getattr(self.connector_manager.system_manager.get_system("bound"), "player_manager", None)
 
-            Rtext_conect = self.builder.array_to_RText(message, sender_id=sender_id, 
-                low_game_version=is_low_version, chat_image=True, player_manager=player_manager)
+            Rtext_conect = self.builder.array_to_RText(
+                message, sender_id=sender_id, 
+                low_game_version=is_low_version, chat_image=use_chat_image, image_previewer=use_image_previewer,
+                player_manager=player_manager
+            )
 
             main_content = self.builder.build(Rtext_conect, 
                                               group_name=source,

@@ -155,19 +155,30 @@ class BridgeConnector(BasicConnector):
         """处理桥接消息的实际逻辑"""
         try:
             # 解析消息类型和内容
-            content = message_data.get("message", message_data.get("content", ""))
+            processed_message = message_data.get("processed_message", [])
             sender = message_data.get("sender", "System")
-            
-            raw_message = Info(
-                raw_content=content,
-                source=0,# SERVER
-            )
-            raw_message.player = sender
-            raw_message.content = McMessageBuilder.array_to_RText(content).to_plain_text()
+            sender_id = message_data.get("sender_id", None)
+            source = message_data.get("source", "")
+            source_id = message_data.get("source_id", "")
+            server = self.server
+            logger = self.logger
+            raw = message_data.get("raw", message_data)
 
-            # 传递给parser处理
-            if self.parser:
-                await self.parser(self).process_message(raw_message, server=self.server)
+            processed_info = BoardcastInfo(
+                event_type="message",
+                event_sub_type="group",
+                message=processed_message,
+                sender=sender,
+                sender_id=sender_id,
+                source=self.source,
+                source_id=source_id,
+                raw=raw,
+                server=server,
+                logger=logger
+            )
+
+            await self.parser(self).system_manager.broadcast_command(processed_info)
+
         except Exception as e:
             self.logger.error(f"{self.log_prefix} 处理桥接消息失败: {e}")
 
@@ -177,11 +188,14 @@ class BridgeConnector(BasicConnector):
         if not self.enable:
             return
         
-        message = processed_info.processed_message
-        
         message_data = {
-            "content": message,
             "sender": processed_info.sender or "System",
+            "sender_id": processed_info.sender_id,
+            "receiver": processed_info.receiver,
+            "source": processed_info.source,
+            "source_id": processed_info.source_id,
+            "raw": processed_info.raw,
+            "processed_message": processed_info.processed_message,
         }
         
         if self.is_main_server:

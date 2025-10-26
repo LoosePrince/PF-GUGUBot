@@ -42,6 +42,7 @@ class McMessageBuilder:
         sender_id: Optional[str] = None,
         low_game_version: bool = False, 
         chat_image: bool = False,
+        image_previewer: bool = False,
         player_manager: PlayerManager = None,
     ) -> RText:
         def get_player_name(player_id: str) -> str:
@@ -59,12 +60,12 @@ class McMessageBuilder:
             "at": lambda data: RText(f"[@{get_player_name(data['qq'])}]", color=RColor.aqua)
                 .set_hover_text(f"点击草稿 @{get_player_name(data['qq'])} 的消息")
                 .set_click_event(action=RAction.suggest_command, value=f"[CQ:at,qq={data['qq']}]"),
-            "image": lambda data: McMessageBuilder.process_image(data, chat_image=chat_image),
+            "image": lambda data: McMessageBuilder.process_image(data, chat_image=chat_image, image_previewer=image_previewer),
             "record": lambda _: RText("[语音]"),
             "video": lambda _: RText("[视频]"),
             "face": lambda data: McMessageBuilder.process_face(data, low_game_version=low_game_version),
             "bface": lambda _: RText("[表情]"),
-            "mface": lambda data: McMessageBuilder.process_image(data, chat_image=chat_image),
+            "mface": lambda data: McMessageBuilder.process_image(data, chat_image=chat_image, image_previewer=image_previewer),
             "sface": lambda _: RText("[表情]"),
             "rps": lambda _: RText("[猜拳]"),
             "dice": lambda _: RText("[掷骰子]"),
@@ -135,7 +136,7 @@ class McMessageBuilder:
 
 
     @staticmethod
-    def process_image(data: Dict[str, str], chat_image: bool = False) -> RText:
+    def process_image(data: Dict[str, str], chat_image: bool = False, image_previewer: bool = False) -> RText:
         url = data.get('url', '')
         file = data.get('file', '')
         summary = data.get('summary', '').strip('[]')
@@ -144,9 +145,14 @@ class McMessageBuilder:
 
         if chat_image:
             return f'[[CICode,url={image_link},name={summary}]]'
-
+        
         text = f"[图片:{summary}]" if summary else "[图片]"
         result = RText(text, color=RColor.gold)
+
+        if image_previewer:
+            return result.set_hover_text(image_link) \
+                         .set_click_event(RAction.run_command, f"/imagepreview preview {image_link} 60")
+
         if image_link:
             result = result.set_hover_text(image_link)\
                            .set_click_event(action=RAction.open_url, value=image_link)

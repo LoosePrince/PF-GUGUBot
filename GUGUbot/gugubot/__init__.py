@@ -16,6 +16,7 @@ from gugubot.utils import check_plugin_version
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.command import *
 
+connector_manager: ConnectorManager = None
 mc_connector: MCConnector = None
 gugubot_config: BotConfig = None
 startup_command_system: StartupCommandSystem = None
