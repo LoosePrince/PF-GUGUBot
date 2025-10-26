@@ -94,6 +94,15 @@ async def on_load(server: PluginServerInterface, old)->None:
 # # 防止初始化报错
 # qq_bot = None
 
+from gugubot.logic.plugins.player_notice import create_on_player_join, create_on_player_left
+async def on_info(server:PluginServerInterface, info:Info)->None:
+    if connector_manager is not None:
+        on_player_join = create_on_player_join(connector_manager, gugubot_config)
+        on_player_left = create_on_player_left(connector_manager, gugubot_config)
+        await on_player_join(server, info)
+        await on_player_left(server, info)
+
+
 # def on_info(server:PluginServerInterface, info:Info)->None:
 #     # Why I don't use on_player_join & on_player_left?
 #     # -> Some player with illegal name will not trigger the those events.

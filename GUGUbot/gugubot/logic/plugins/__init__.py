@@ -7,9 +7,15 @@ from gugubot.logic.plugins.server_notice import (
     broadcast_server_start,
     broadcast_server_stop
 )
+from gugubot.logic.plugins.player_notice import (
+    create_on_player_join,
+    create_on_player_left,
+)
 
 __all__ = [
     'broadcast_server_start',
-    'broadcast_server_stop'
+    'broadcast_server_stop',
+    'create_on_player_join',
+    'create_on_player_left',
 ]
 

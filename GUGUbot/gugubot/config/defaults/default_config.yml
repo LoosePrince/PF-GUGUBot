@@ -48,9 +48,26 @@ connector:
 
     mc_achievement: true     # 转发 MC 成就
     mc_death: true     # 转发 MC 死亡消息
-    player_notice: false     # 玩家上下线通知
+
+    player_join_notice: true     # 玩家加入通知
+    player_left_notice: true     # 玩家离开通知
+    bot_join_notice: true     # 机器人加入通知
+    bot_left_notice: true     # 机器人离开通知
+    
     server_start_notice: true     # 服务器启动通知
     server_stop_notice: true     # 服务器停止通知
+    
+    player_join_patterns:   # 玩家加入消息的正则表达式模式（第一个捕获组为玩家名）
+    - "([^\\[]+)\\[.*?\\] logged in with entity id"  # 标准格式：PlayerName[/IP] logged in with entity id
+    - "([^\\s]+) joined the game"                     # 简单格式：PlayerName joined the game
+    
+    player_left_patterns:   # 玩家离开消息的正则表达式模式（第一个捕获组为玩家名）
+    - "([^\\[]+)\\[.*?\\] left the game"             # 标准格式：PlayerName[/IP] left the game
+    - "([^\\s]+) left the game"                       # 简单格式：PlayerName left the game
+    
+    bot_names_pattern:     # 机器人名称模式列表（支持正则表达式，玩家通知时会忽略匹配的玩家） 
+    - ".*bot.*"            # 包含 "bot" 的玩家名
+    - "^[A-Za-z]+Bot$"     # 以任意字母开头，以 "Bot" 结尾的玩家名
 
     ignore_mc_command_patterns: 
     - "!!.*" # 忽略MCDR指令
