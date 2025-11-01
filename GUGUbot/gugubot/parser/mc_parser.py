@@ -47,7 +47,7 @@ class MCParser(BasicParser):
                 event_type="message",
                 event_sub_type="group",
                 message=CQHandler.parse(content),
-                raw=raw_message,
+                raw=content,
                 server=server,
                 logger=self.logger,
                 source=self.connector.source,

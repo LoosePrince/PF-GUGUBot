@@ -169,8 +169,9 @@ class PlayerManager(BasicConfig):
         for player in self._players.values():
             player_in_name = player_name in player.java_name or player_name in player.bedrock_name
             not_current_user = current_user_id not in player.accounts.get(source, [])
+            platform_not_bound = source in player.accounts
 
-            if player_in_name and not_current_user:
+            if player_in_name and not_current_user and platform_not_bound:
                 return True
 
         return False
@@ -179,6 +180,9 @@ class PlayerManager(BasicConfig):
     def is_admin(self, sender_id: str) -> bool:
         """检查是否是管理员"""
         player = self.get_player(sender_id)
+
+        if not player:
+            return False
 
         config: BotConfig = self.bound_system.config
         connectors = config.get_keys(['connector'], {})

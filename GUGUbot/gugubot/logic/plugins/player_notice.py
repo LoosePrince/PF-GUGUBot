@@ -48,7 +48,7 @@ def create_on_player_join(connector_manager:ConnectorManager, config: BotConfig)
                 source=minecraft_source_name,
                 source_id="",
                 sender="",
-                raw=info,
+                raw=None,
                 server=server,
                 logger=server.logger
             )
@@ -102,7 +102,7 @@ def create_on_player_left(connector_manager:ConnectorManager, config: BotConfig)
                 source=minecraft_source_name,
                 source_id="",
                 sender="",
-                raw=info,
+                raw=None,
                 server=server,
                 logger=server.logger
             )

@@ -201,7 +201,13 @@ class BoundSystem(BasicSystem):
                     self.player_manager.save()
                     _bound_whitelist(player_name, is_offline, is_online, is_bedrock)
                     return True
-                
+
+                elif player_name not in existing_player.accounts.get(platform, []):
+                    existing_player.add_account(platform, target_id)
+                    self.player_manager.save()
+                    _bound_whitelist(player_name, is_offline, is_online, is_bedrock)
+                    return True
+
                 return False
             
             # 添加新玩家绑定
