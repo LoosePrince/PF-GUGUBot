@@ -7,11 +7,11 @@ from gugubot.connector import (
     ConnectorManager, MCConnector, QQWebSocketConnector, TestConnector, BridgeConnector
 )
 from gugubot.logic.system import (
-    BanWordSystem, BoundSystem, EchoSystem, GeneralHelpSystem, KeyWordSystem, 
-    StartupCommandSystem, SystemManager, WhitelistSystem
+    BanWordSystem, BoundSystem, BoundNoticeSystem, EchoSystem, GeneralHelpSystem, KeyWordSystem, 
+    StartupCommandSystem, SystemManager, WhitelistSystem, StyleSystem
 )
 from gugubot.config import BotConfig
-from gugubot.utils import check_plugin_version
+from gugubot.utils import check_plugin_version, StyleManager
 
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.command import *
@@ -20,6 +20,7 @@ connector_manager: ConnectorManager = None
 mc_connector: MCConnector = None
 gugubot_config: BotConfig = None
 startup_command_system: StartupCommandSystem = None
+style_manager: StyleManager = None
 
 #+---------------------------------------------------------------------+
 async def on_load(server: PluginServerInterface, old)->None:
@@ -27,6 +28,7 @@ async def on_load(server: PluginServerInterface, old)->None:
     global mc_connector
     global gugubot_config
     global startup_command_system
+    global style_manager
 
     gugubot_config = BotConfig(Path(server.get_data_folder()) / "config.yml")
     gugubot_config.addNewConfig(server)
@@ -48,8 +50,13 @@ async def on_load(server: PluginServerInterface, old)->None:
     for connector in connectors:
         await connector_manager.register_connector(connector)
 
+    # 初始化风格管理器
+    style_manager = StyleManager(server, gugubot_config)
+    style_manager.scan_styles()
+
     # 注册系统管理器
     system_manager = SystemManager(server, connector_manager=connector_manager, config=gugubot_config)
+    system_manager.style_manager = style_manager
     
     # 创建系统实例，enable状态在各系统__init__中从config自动读取
     systems = [EchoSystem(enable=True, config=gugubot_config)]
@@ -60,17 +67,23 @@ async def on_load(server: PluginServerInterface, old)->None:
         key_word_system = KeyWordSystem(server, config=gugubot_config)
         whitelist_system = WhitelistSystem(server, config=gugubot_config)
         bound_system = BoundSystem(server, config=gugubot_config)
+        bound_notice_system = BoundNoticeSystem(config=gugubot_config)
         startup_command_system = StartupCommandSystem(server, config=gugubot_config)
+        style_system = StyleSystem(server, style_manager, config=gugubot_config)
 
         # 设置白名单系统引用
         bound_system.set_whitelist_system(whitelist_system)
+        # 设置绑定提醒系统对绑定系统的引用
+        bound_notice_system.set_bound_system(bound_system)
 
         systems.insert(0, general_help_system)
         systems.insert(1, ban_word_system)
-        systems.insert(2, key_word_system)
-        systems.insert(3, bound_system)
-        systems.insert(4, whitelist_system)
-        systems.insert(5, startup_command_system)
+        systems.insert(2, bound_system)
+        systems.insert(3, bound_notice_system)
+        systems.insert(4, key_word_system)
+        systems.insert(5, whitelist_system)
+        systems.insert(6, startup_command_system)
+        systems.insert(7, style_system)
 
     for system in systems:
         system_manager.register_system(system)
