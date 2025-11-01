@@ -39,6 +39,12 @@ connector:
       custom_group_name:       # 自定义游戏内显示群名 :: （可选）不设置默认转发[群名称]
         726741344: 定制的显示群名         # 如无需自定义，无视这行
 
+    chat_templates:       # MC到QQ的聊天消息模板 :: 转发消息时随机选择一个模板
+      - "({display_name}) {sender}: "
+      - "[{display_name}] {sender}: "
+      - "{display_name} | {sender} 说："
+      - "{display_name} 的 {sender} : "
+
     others:
       forward_other_bot: false       # 转发官方机器人回复
 

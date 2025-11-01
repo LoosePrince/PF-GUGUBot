@@ -2,6 +2,7 @@ import logging
 import traceback
 import time
 import uuid
+import random
 
 import asyncio
 
@@ -181,7 +182,15 @@ class QQWebSocketConnector(BasicConnector):
                 source_id = str(source_id)
             display_name = custom_group_name.get(source_id, source)
             
-            source_message = MessageBuilder.text(f"[{display_name}] {processed_info.sender}: ")
+            # 从配置文件获取随机模板
+            chat_templates = self.config.get_keys(["connector", "QQ", "chat_templates"], [])
+            if isinstance(chat_templates, list) and len(chat_templates) > 0:
+                template = random.choice(chat_templates)
+                formatted_message = template.format(display_name=display_name, sender=processed_info.sender)
+                source_message = MessageBuilder.text(formatted_message)
+            else:
+                # 回退到默认模板
+                source_message = MessageBuilder.text(f"[{display_name}] {processed_info.sender}: ")
             message = [source_message] + message
 
         for target_id, target_type in target.items():
