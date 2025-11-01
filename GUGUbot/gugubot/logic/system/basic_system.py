@@ -146,11 +146,17 @@ class BasicSystem:
         )
 
     def get_tr(self, key: str, global_key: bool = False, **kwargs) -> str:
-        server = self.system_manager.server 
-        if global_key:
-            return server.tr(key, **kwargs)
-        else:
-            return server.tr(f"gugubot.system.{self.name}.{key}", **kwargs)
+        server = self.system_manager.server
+        full_key = key if global_key else f"gugubot.system.{self.name}.{key}"
+        
+        # 优先从风格管理器获取翻译
+        if getattr(self.system_manager, 'style_manager', None):
+            custom_translation = self.system_manager.style_manager.get_translation(full_key, **kwargs)
+            if custom_translation is not None:
+                return custom_translation
+        
+        # 回退到默认翻译
+        return server.tr(full_key, **kwargs)
 
     async def handle_enable_disable(self, boardcast_info: BoardcastInfo) -> bool:
         """处理开启/关闭命令

@@ -8,4 +8,5 @@ from gugubot.logic.system.general_help import GeneralHelpSystem
 from gugubot.logic.system.key_word import KeyWordSystem
 from gugubot.logic.system.startup_command import StartupCommandSystem
 from gugubot.logic.system.whitelist import WhitelistSystem
+from gugubot.logic.system.style import StyleSystem
 from gugubot.logic.system.system_manager import SystemManager

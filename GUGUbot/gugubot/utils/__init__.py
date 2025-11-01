@@ -1,3 +1,4 @@
 from gugubot.utils.message import str_to_array
 from gugubot.utils.player_manager import PlayerManager
 from gugubot.utils.update_checker import check_plugin_version
+from gugubot.utils.style_manager import StyleManager
