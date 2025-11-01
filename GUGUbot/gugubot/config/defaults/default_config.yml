@@ -109,12 +109,14 @@ system:
   bound:   # 绑定系统
     enable: false
 
-    bound_notice: true     # 绑定提示 :: 是否进行绑定提示
     max_bedrock_bound: 1
     max_java_bound: 1
 
     whitelist_add_with_bound: false   # 绑定ID自动绑定服务器白名单
     whitelist_remove_with_leave: true   # 退群时移除白名单
+
+  bound_notice:   # 绑定提示
+    enable: false
 
   echo:   # 转发系统
     enable: true
