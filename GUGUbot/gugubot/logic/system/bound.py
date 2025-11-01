@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import asyncio
 
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Union
 
 from mcdreforged.api.types import PluginServerInterface
 
@@ -263,6 +263,9 @@ class BoundSystem(BasicSystem):
             await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("no_bindings"))])
             return True
         
+        # 从白名单中删除玩家名
+        self._remove_from_whitelist(player.java_name)
+        
         # 清空Java版玩家名列表
         player.java_name.clear()
         self.player_manager.save()
@@ -281,6 +284,9 @@ class BoundSystem(BasicSystem):
         if not player.bedrock_name:
             await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("no_bindings"))])
             return True
+        
+        # 从白名单中删除玩家名
+        self._remove_from_whitelist(player.bedrock_name)
         
         # 清空基岩版玩家名列表
         player.bedrock_name.clear()
@@ -306,6 +312,9 @@ class BoundSystem(BasicSystem):
         if is_bedrock:
             # 只解绑基岩版玩家名
             if player_name in player.bedrock_name:
+                # 从白名单中删除玩家名
+                self._remove_from_whitelist(player_name)
+                
                 player.bedrock_name.remove(player_name)
                 await self._clean_bound(player, self.player_manager)
                 await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("unbind_success"))])
@@ -316,6 +325,9 @@ class BoundSystem(BasicSystem):
         else:
             # 只解绑Java版玩家名
             if player_name in player.java_name:
+                # 从白名单中删除玩家名
+                self._remove_from_whitelist(player_name)
+                
                 player.java_name.remove(player_name)
                 await self._clean_bound(player, self.player_manager)
                 await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("unbind_success"))])
@@ -323,6 +335,24 @@ class BoundSystem(BasicSystem):
             else:
                 await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("player_not_found"))])
                 return True
+
+    def _remove_from_whitelist(self, player_names: Union[str, List[str]]) -> None:
+        """从白名单中删除玩家名的辅助函数
+        
+        Parameters
+        ----------
+        player_names : Union[str, List[str]]
+            要删除的玩家名，可以是单个字符串或字符串列表
+        """
+        if not self.config.get("system", {}).get("bound", {}).get("whitelist_remove_with_leave", False) or not self.whitelist:
+            return
+        
+        # 统一转换为列表处理
+        if isinstance(player_names, str):
+            player_names = [player_names]
+        
+        for name in player_names:
+            self.whitelist.remove_player(name)
 
     async def _clean_bound(self, player: Player, player_manager: PlayerManager) -> bool:
         """清理绑定"""
