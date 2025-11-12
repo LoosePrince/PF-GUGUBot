@@ -81,6 +81,7 @@ class GeneralHelpSystem(BasicSystem):
         whitelist_name = self.server.tr("gugubot.system.whitelist.name")
         startup_command_name = self.server.tr("gugubot.system.startup_command.name")
         style_name = self.server.tr("gugubot.system.style.name")
+        todo_name = self.server.tr("gugubot.system.todo.name")
         
         # 根据是否是管理员显示不同的帮助信息
         if is_admin:
@@ -92,7 +93,8 @@ class GeneralHelpSystem(BasicSystem):
                 bound=bound_name,
                 whitelist=whitelist_name,
                 startup_command=startup_command_name,
-                style=style_name
+                style=style_name,
+                todo=todo_name
             )
         else:
             help_msg = self.get_tr(
@@ -100,7 +102,8 @@ class GeneralHelpSystem(BasicSystem):
                 command_prefix=command_prefix,
                 key_words=key_words_name,
                 bound=bound_name,
-                style=style_name
+                style=style_name,
+                todo=todo_name
             )
         
         await self.reply(boardcast_info, [MessageBuilder.text(help_msg)])

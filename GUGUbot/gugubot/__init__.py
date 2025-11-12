@@ -8,7 +8,7 @@ from gugubot.connector import (
 )
 from gugubot.logic.system import (
     BanWordSystem, BoundSystem, BoundNoticeSystem, EchoSystem, GeneralHelpSystem, KeyWordSystem, 
-    StartupCommandSystem, SystemManager, WhitelistSystem, StyleSystem
+    StartupCommandSystem, SystemManager, WhitelistSystem, StyleSystem, TodoSystem
 )
 from gugubot.config import BotConfig
 from gugubot.utils import check_plugin_version, StyleManager
@@ -70,6 +70,7 @@ async def on_load(server: PluginServerInterface, old)->None:
         bound_notice_system = BoundNoticeSystem(config=gugubot_config)
         startup_command_system = StartupCommandSystem(server, config=gugubot_config)
         style_system = StyleSystem(server, style_manager, config=gugubot_config)
+        todo_system = TodoSystem(server, config=gugubot_config)
 
         # 设置白名单系统引用
         bound_system.set_whitelist_system(whitelist_system)
@@ -84,6 +85,7 @@ async def on_load(server: PluginServerInterface, old)->None:
         systems.insert(5, whitelist_system)
         systems.insert(6, startup_command_system)
         systems.insert(7, style_system)
+        systems.insert(8, todo_system)
 
     for system in systems:
         system_manager.register_system(system)

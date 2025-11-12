@@ -54,8 +54,8 @@ gugubot:
         general_help:
             name: "帮助"
             help_command: "帮助"
-            help_msg: "GUGUBot 帮助信息\n\n可用系统：\n• {command_prefix}{key_words} - 关键词回复系统\n• {command_prefix}{bound} - 玩家绑定系统\n• {command_prefix}{style} - 风格切换系统\n\n使用 {command_prefix}<系统名> 查看具体系统的帮助信息"
-            admin_help_msg: "GUGUBot 管理员帮助信息\n\n可用系统：\n• {command_prefix}{key_words} - 关键词回复系统\n• {command_prefix}{ban_words} - 违禁词管理系统\n• {command_prefix}{bound} - 玩家绑定系统\n• {command_prefix}{whitelist} - 白名单管理系统\n• {command_prefix}{startup_command} - 启动指令管理系统\n• {command_prefix}{style} - 风格切换系统\n\n使用 {command_prefix}<系统名> 查看具体系统的帮助信息"
+            help_msg: "GUGUBot 帮助信息\n\n可用系统：\n• {command_prefix}{key_words} - 关键词回复系统\n• {command_prefix}{bound} - 玩家绑定系统\n• {command_prefix}{style} - 风格切换系统\n• {command_prefix}{todo} - 待办管理系统\n\n使用 {command_prefix}<系统名> 查看具体系统的帮助信息"
+            admin_help_msg: "GUGUBot 管理员帮助信息\n\n可用系统：\n• {command_prefix}{key_words} - 关键词回复系统\n• {command_prefix}{ban_words} - 违禁词管理系统\n• {command_prefix}{bound} - 玩家绑定系统\n• {command_prefix}{whitelist} - 白名单管理系统\n• {command_prefix}{startup_command} - 启动指令管理系统\n• {command_prefix}{execute} - 命令执行系统\n  - {command_prefix}{execute_execute} <命令> - 执行 MC 原生命令\n  - {command_prefix}{execute_mcdr} <命令> - 执行 MCDR 命令\n• {command_prefix}{style} - 风格切换系统\n• {command_prefix}{todo} - 待办管理系统\n\n使用 {command_prefix}<系统名> 查看具体系统的帮助信息"
 
         # 关键词系统 / Keyword system
         key_words:
@@ -223,3 +223,43 @@ gugubot:
             reload_failed: "重新加载风格失败: {error}"
             
             help_msg: "风格系统相关指令：\n{command_prefix}{name} -> 显示此帮助信息\n{command_prefix}{name} {list} -> 列出所有可用风格（显示当前风格）\n{command_prefix}{name} <风格名> -> 切换到指定风格\n{command_prefix}{name} {reload} -> 重新加载风格文件\n\n风格文件放置在 style 目录下，格式与 lang 文件相同"
+
+        # 待办系统 / Todo system
+        todo:
+            name: "待办"
+            add: "添加"
+            remove: "删除"
+            complete: "完成"
+            undo: "撤回"
+            list: "列表"
+
+            add_success: "待办事项已添加 (ID: {id})"
+            add_instruction: "请提供待办内容，格式：{command_prefix}{name} {add} <内容>"
+
+            remove_success: "待办事项已删除 (ID: {id})"
+            remove_not_exist: "待办事项不存在 (ID: {id})"
+            remove_instruction: "请提供要删除的待办ID，格式：{command_prefix}{name} {remove} <ID>"
+
+            complete_success: "待办事项已标记为完成 (ID: {id})"
+            complete_not_exist: "待办事项不存在 (ID: {id})"
+            complete_already: "待办事项已完成 (ID: {id})"
+            complete_instruction: "请提供要完成的待办ID，格式：{command_prefix}{name} {complete} <ID>"
+
+            undo_success: "已撤回待办事项的完成状态 (ID: {id})"
+            undo_not_exist: "待办事项不存在 (ID: {id})"
+            undo_not_completed: "待办事项未完成，无需撤回 (ID: {id})"
+            undo_instruction: "请提供要撤回完成的待办ID，格式：{command_prefix}{name} {undo} <ID>"
+
+            list_empty: "待办列表为空"
+            list_pending: "未完成待办:\n{todo_list}"
+            list_completed: "已完成待办:\n{todo_list}"
+            list_content: "待办列表:\n{todo_list}"
+
+            status_completed: "[完成]"
+            status_pending: "[待办]"
+            creator_label: "创建者:"
+            time_label: "时间:"
+            completed_time_label: ", 完成时间: "
+            unknown: "未知"
+
+            help_msg: "待办相关指令：\n{command_prefix}{name} {add} <内容> -> 添加待办事项\n{command_prefix}{name} {remove} <ID> -> 删除指定待办事项\n{command_prefix}{name} {complete} <ID> -> 标记待办为已完成\n{command_prefix}{name} {undo} <ID> -> 撤回待办的完成状态\n{command_prefix}{name} {list} -> 显示待办列表"
