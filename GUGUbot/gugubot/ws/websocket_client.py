@@ -1,5 +1,6 @@
 import json
 import logging
+import traceback
 import threading
 import ssl
 from typing import Any, Optional, Callable, Dict
@@ -73,6 +74,8 @@ class WebSocketClient:
     def connect(
         self,
         reconnect: int = 5,
+        ping_interval: int = 20,
+        ping_timeout: int = 10,
         use_ssl: bool = False,
         verify: bool = True,
         ca_certs: Optional[str] = None,
@@ -85,6 +88,10 @@ class WebSocketClient:
         ----------
         reconnect : int
             重连间隔时间（秒），默认5秒
+        ping_interval : int
+            心跳间隔时间（秒），默认20秒
+        ping_timeout : int
+            心跳超时时间（秒），默认10秒
         use_ssl : bool
             是否使用SSL/TLS加密连接
         verify : bool
@@ -108,7 +115,11 @@ class WebSocketClient:
         )
         
         # 构建run_forever参数
-        run_kwargs = {'reconnect': reconnect}
+        run_kwargs = {
+            'reconnect': reconnect,
+            'ping_interval': ping_interval,
+            'ping_timeout': ping_timeout
+        }
         
         # 配置SSL选项
         if use_ssl:
@@ -157,7 +168,7 @@ class WebSocketClient:
                 self.logger.debug(f"发送消息: {message}")
                 return True
             except Exception as e:
-                self.logger.error(f"发送消息失败: {e}")
+                self.logger.error(f"发送消息失败: {e}\n{traceback.format_exc()}")
                 return False
         else:
             self.logger.warning("WebSocket未连接，无法发送消息")
@@ -178,7 +189,7 @@ class WebSocketClient:
                 self.listener_thread.join(timeout=timeout)
             self.logger.info("WebSocket连接已关闭")
         except Exception as e:
-            self.logger.warning(f"关闭WebSocket连接时发生错误: {e}")
+            self.logger.warning(f"关闭WebSocket连接时发生错误: {e}\n{traceback.format_exc()}")
             raise
     
     def is_connected(self) -> bool:

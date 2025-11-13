@@ -34,6 +34,8 @@ class BridgeConnector(BasicConnector):
         
         # 获取配置
         self.reconnect = config.get_keys(["connector", "minecraft_bridge", "connection", "reconnect"], 5)
+        self.ping_interval = config.get_keys(["connector", "minecraft_bridge", "connection", "ping_interval"], 20)
+        self.ping_timeout = config.get_keys(["connector", "minecraft_bridge", "connection", "ping_timeout"], 10)
         self.use_ssl = config.get_keys(["connector", "minecraft_bridge", "connection", "use_ssl"], False)
         self.verify = config.get_keys(["connector", "minecraft_bridge", "connection", "verify"], True)
         self.ca_certs = config.get_keys(["connector", "minecraft_bridge", "connection", "ca_certs"], None)
@@ -90,6 +92,8 @@ class BridgeConnector(BasicConnector):
         # 连接到服务器
         self.ws_client.connect(
             reconnect=self.reconnect,
+            ping_interval=self.ping_interval,
+            ping_timeout=self.ping_timeout,
             use_ssl=self.use_ssl,
             verify=self.verify,
             ca_certs=self.ca_certs,
@@ -101,11 +105,13 @@ class BridgeConnector(BasicConnector):
 
     def _on_client_connect(self, client: Dict, server: Any) -> None:
         """新客户端连接到服务器时"""
-        self.logger.info(f"{self.log_prefix} 新桥接客户端连接: {client.get('address', 'unknown')}")
+        client_address = client.get('address') if client else 'unknown'
+        self.logger.info(f"{self.log_prefix} 新桥接客户端连接: {client_address}")
 
     def _on_client_disconnect(self, client: Dict, server: Any) -> None:
         """客户端从服务器断开时"""
-        self.logger.info(f"{self.log_prefix} 桥接客户端断开: {client.get('address', 'unknown')}")
+        client_address = client.get('address') if client else 'unknown'
+        self.logger.info(f"{self.log_prefix} 桥接客户端断开: {client_address}")
 
     def _on_client_open(self, ws) -> None:
         """客户端连接建立时"""
@@ -163,6 +169,12 @@ class BridgeConnector(BasicConnector):
             server = self.server
             logger = self.logger
             raw = message_data.get("raw", message_data)
+            target = message_data.get("target", {})
+            is_admin = message_data.get("is_admin", False) or self._is_admin(sender_id)
+
+            # 如果 target 存在且 self.source 不在 target 中，则不处理消息
+            if target and self.source not in target:
+                return
 
             processed_info = BoardcastInfo(
                 event_type="message",
@@ -170,11 +182,13 @@ class BridgeConnector(BasicConnector):
                 message=processed_message,
                 sender=sender,
                 sender_id=sender_id,
-                source=self.source,
+                source=source,  # 保留远程服务器的 source
                 source_id=source_id,
+                receiver_source=self.source,  # 本地接收消息的 connector 的 source
                 raw=raw,
                 server=server,
-                logger=logger
+                logger=logger,
+                is_admin=is_admin
             )
 
             await self.parser(self).system_manager.broadcast_command(processed_info)
@@ -192,10 +206,12 @@ class BridgeConnector(BasicConnector):
             "sender": processed_info.sender or "System",
             "sender_id": processed_info.sender_id,
             "receiver": processed_info.receiver,
-            "source": processed_info.source,
+            "source": self.source,
             "source_id": processed_info.source_id,
             "raw": processed_info.raw,
             "processed_message": processed_info.processed_message,
+            "target": processed_info.target,
+            "is_admin": self._is_admin(processed_info.sender_id)
         }
         
         if self.is_main_server:
@@ -239,4 +255,11 @@ class BridgeConnector(BasicConnector):
         return None
 
     def _is_admin(self, sender_id) -> bool:
-        return False
+        """检查是否是管理员"""
+        bound_system = self.connector_manager.system_manager.get_system("bound")
+
+        if not bound_system:
+            return False
+
+        player_manager = bound_system.player_manager
+        return player_manager.is_admin(sender_id)

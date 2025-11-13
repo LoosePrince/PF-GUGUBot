@@ -184,10 +184,13 @@ class QQWebSocketConnector(BasicConnector):
             
             # 从配置文件获取随机模板
             chat_templates = self.config.get_keys(["connector", "QQ", "chat_templates"], [])
-            if isinstance(chat_templates, list) and len(chat_templates) > 0:
+            has_sender = processed_info.sender != ""
+            if isinstance(chat_templates, list) and len(chat_templates) > 0 and has_sender:
                 template = random.choice(chat_templates)
                 formatted_message = template.format(display_name=display_name, sender=processed_info.sender)
                 source_message = MessageBuilder.text(formatted_message)
+            elif not has_sender:
+                source_message = MessageBuilder.text(f"[{display_name}]")
             else:
                 # 回退到默认模板
                 source_message = MessageBuilder.text(f"[{display_name}] {processed_info.sender}: ")

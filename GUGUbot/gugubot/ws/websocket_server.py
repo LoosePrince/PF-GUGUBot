@@ -5,6 +5,7 @@
 """
 import json
 import logging
+import traceback
 import threading
 from typing import Any, Optional, Callable, Dict, List
 
@@ -111,7 +112,8 @@ class WebSocketServer:
         """
         if client in self.clients:
             self.clients.remove(client)
-        self.logger.info(f"客户端断开: {client['address']}")
+        client_address = client.get('address') if client else 'unknown'
+        self.logger.info(f"客户端断开: {client_address}")
         
         if self._on_client_disconnect_callback:
             try:
@@ -131,7 +133,8 @@ class WebSocketServer:
         message : str
             接收到的消息内容
         """
-        self.logger.debug(f"收到来自 {client['address']} 的消息: {message}")
+        client_address = client.get('address') if client else 'unknown'
+        self.logger.debug(f"收到来自 {client_address} 的消息: {message}")
         
         if self._on_message_callback:
             try:
@@ -178,7 +181,7 @@ class WebSocketServer:
             self.logger.info(f"WebSocket服务器已启动在 {self.host}:{self.port}")
         
         except Exception as e:
-            self.logger.error(f"启动WebSocket服务器失败: {e}")
+            self.logger.error(f"启动WebSocket服务器失败: {e}\n{traceback.format_exc()}")
             raise
     
     def _run_server(self) -> None:
@@ -186,7 +189,7 @@ class WebSocketServer:
         try:
             self.server.run_forever()
         except Exception as e:
-            self.logger.error(f"WebSocket服务器运行出错: {e}")
+            self.logger.error(f"WebSocket服务器运行出错: {e}\n{traceback.format_exc()}")
         finally:
             self._is_running = False
     
@@ -206,7 +209,7 @@ class WebSocketServer:
             self.logger.info("正在停止WebSocket服务器...")
             
             if self.server:
-                self.server.shutdown_gracefully()
+                self.server.shutdown_abruptly()
             
             if self.server_thread and self.server_thread.is_alive():
                 self.server_thread.join(timeout=timeout)
@@ -216,7 +219,7 @@ class WebSocketServer:
             self.logger.info("WebSocket服务器已停止")
         
         except Exception as e:
-            self.logger.error(f"停止WebSocket服务器时出错: {e}")
+            self.logger.error(f"停止WebSocket服务器时出错: {e}\n{traceback.format_exc()}")
             raise
     
     def send_message(self, client: Dict, message: Any) -> bool:
@@ -247,7 +250,7 @@ class WebSocketServer:
             return True
         
         except Exception as e:
-            self.logger.error(f"发送消息失败: {e}")
+            self.logger.error(f"发送消息失败: {e}\n{traceback.format_exc()}")
             return False
     
     def broadcast(self, message: Any) -> int:
@@ -277,7 +280,7 @@ class WebSocketServer:
             return count
         
         except Exception as e:
-            self.logger.error(f"广播消息失败: {e}")
+            self.logger.error(f"广播消息失败: {e}\n{traceback.format_exc()}")
             return 0
     
     def is_running(self) -> bool:

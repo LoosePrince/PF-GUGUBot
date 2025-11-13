@@ -217,7 +217,14 @@ gugubot:
             execute_failed: "执行命令失败: {error}"
             command_ignored: "该命令已被配置忽略，无法执行"
 
-            help_msg: "命令执行相关指令：\n{command_prefix}{name} {enable} -> 开启命令执行系统\n{command_prefix}{name} {disable} -> 关闭命令执行系统\n{command_prefix}{execute} <命令> -> 执行 MC 原生命令\n{command_prefix}{mcdr} <命令> -> 执行 MCDR 命令"
+            bridge_execute_success: "命令已通过 bridge 发送到 {target}"
+            bridge_execute_failed: "通过 bridge 发送命令失败: {error}"
+            bridge_target_not_found: "未找到目标服务器: {target}"
+            bridge_execute_disabled: "通过 bridge 执行命令功能已禁用"
+            bridge_not_found: "未找到 bridge 连接器"
+            bridge_all_servers: "所有服务器"
+
+            help_msg: "命令执行相关指令：\n{command_prefix}{name} {enable} -> 开启命令执行系统\n{command_prefix}{name} {disable} -> 关闭命令执行系统\n{command_prefix}{execute} <命令> -> 执行 MC 原生命令\n{command_prefix}{mcdr} <命令> -> 执行 MCDR 命令\n{command_prefix}{execute}@bridge <命令> -> 通过 bridge 发送命令到所有服务器\n{command_prefix}{execute}@<服务器名> <命令> -> 通过 bridge 发送命令到指定服务器"
 
         # 风格系统 / Style system
         style:
