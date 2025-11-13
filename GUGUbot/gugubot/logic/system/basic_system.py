@@ -127,6 +127,17 @@ class BasicSystem:
         )
 
     async def reply(self, boardcast_info: BoardcastInfo, message: List[dict]) -> None:
+        # 构造基础 target
+        target = {boardcast_info.receiver_source: boardcast_info.event_sub_type}
+        
+        # 检查是否是 bridge 回复（receiver_source 是 Bridge，但 source 不是 Bridge）
+        bridge_name = self.config.get_keys(
+            ["connector", "minecraft_bridge", "source_name"],
+            "Bridge"
+        )
+        if boardcast_info.receiver_source == bridge_name and boardcast_info.source != bridge_name:
+            # 如果 receiver_source 是 Bridge，但 source 不是 Bridge, 则将 target 设置为 source
+            target[boardcast_info.source] = boardcast_info.event_sub_type
 
         respond = ProcessedInfo(
             processed_message=message,
@@ -137,12 +148,13 @@ class BasicSystem:
             raw=boardcast_info.raw,
             server=boardcast_info.server,
             logger=boardcast_info.logger,
-            target={boardcast_info.source_id: boardcast_info.event_sub_type}
+            target=target
         )
 
+        receiver_source = boardcast_info.receiver_source if boardcast_info.receiver_source else boardcast_info.source
         await self.system_manager.connector_manager.broadcast_processed_info(
             respond,
-            include=[boardcast_info.source]
+            include=[receiver_source]
         )
 
     def get_tr(self, key: str, global_key: bool = False, **kwargs) -> str:

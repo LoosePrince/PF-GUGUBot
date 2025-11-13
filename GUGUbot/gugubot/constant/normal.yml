@@ -205,6 +205,20 @@ gugubot:
 
             help_msg: "启动指令相关指令：\n{command_prefix}{name} {enable} -> 开启启动指令系统\n{command_prefix}{name} {disable} -> 关闭启动指令系统\n{command_prefix}{name} {add} <指令> -> 添加启动指令\n{command_prefix}{name} {remove} <指令> -> 删除启动指令\n{command_prefix}{name} {list} -> 显示启动指令列表\n{command_prefix}{name} {execute} -> 执行所有启动指令"
 
+        # 命令执行系统 / Command execution system
+        execute:
+            name: "执行"
+            execute: "执行"
+            mcdr: "mcdr"
+
+            execute_instruction: "请提供要执行的 MC 原生命令，格式：{command_prefix}{execute} <命令>"
+            mcdr_instruction: "请提供要执行的 MCDR 命令，格式：{command_prefix}{mcdr} <命令>"
+            execute_success: "指令已执行"
+            execute_failed: "执行命令失败: {error}"
+            command_ignored: "该命令已被配置忽略，无法执行"
+
+            help_msg: "命令执行相关指令：\n{command_prefix}{name} {enable} -> 开启命令执行系统\n{command_prefix}{name} {disable} -> 关闭命令执行系统\n{command_prefix}{execute} <命令> -> 执行 MC 原生命令\n{command_prefix}{mcdr} <命令> -> 执行 MCDR 命令"
+
         # 风格系统 / Style system
         style:
             name: "风格"

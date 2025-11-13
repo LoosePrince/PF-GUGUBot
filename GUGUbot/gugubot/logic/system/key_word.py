@@ -88,9 +88,11 @@ class KeyWordSystem(BasicConfig, BasicSystem):
                 logger=boardcast_info.logger
             )
 
+            # 使用 receiver_source 如果存在，否则回退到 source
+            exclude_source = boardcast_info.receiver_source if boardcast_info.receiver_source else boardcast_info.source
             await self.system_manager.connector_manager.broadcast_processed_info(
                 original_processed_info,
-                exclude=[boardcast_info.source]
+                exclude=[exclude_source]
             )
 
             await self.system_manager.connector_manager.broadcast_processed_info(

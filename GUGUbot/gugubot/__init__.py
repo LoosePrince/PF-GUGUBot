@@ -7,7 +7,7 @@ from gugubot.connector import (
     ConnectorManager, MCConnector, QQWebSocketConnector, TestConnector, BridgeConnector
 )
 from gugubot.logic.system import (
-    BanWordSystem, BoundSystem, BoundNoticeSystem, EchoSystem, GeneralHelpSystem, KeyWordSystem, 
+    BanWordSystem, BoundSystem, BoundNoticeSystem, EchoSystem, ExecuteSystem, GeneralHelpSystem, KeyWordSystem, 
     StartupCommandSystem, SystemManager, WhitelistSystem, StyleSystem, TodoSystem
 )
 from gugubot.config import BotConfig
@@ -61,6 +61,10 @@ async def on_load(server: PluginServerInterface, old)->None:
     # 创建系统实例，enable状态在各系统__init__中从config自动读取
     systems = [EchoSystem(enable=True, config=gugubot_config)]
     
+    # Execute 系统在所有服务器上都需要创建，以便处理从 bridge 收到的命令
+    execute_system = ExecuteSystem(server, config=gugubot_config)
+    systems.insert(0, execute_system)
+    
     if is_main_server:
         general_help_system = GeneralHelpSystem(server, config=gugubot_config)
         ban_word_system = BanWordSystem(server, config=gugubot_config)
@@ -69,6 +73,7 @@ async def on_load(server: PluginServerInterface, old)->None:
         bound_system = BoundSystem(server, config=gugubot_config)
         bound_notice_system = BoundNoticeSystem(config=gugubot_config)
         startup_command_system = StartupCommandSystem(server, config=gugubot_config)
+        execute_system = ExecuteSystem(server, config=gugubot_config)
         style_system = StyleSystem(server, style_manager, config=gugubot_config)
         todo_system = TodoSystem(server, config=gugubot_config)
 
@@ -84,8 +89,9 @@ async def on_load(server: PluginServerInterface, old)->None:
         systems.insert(4, key_word_system)
         systems.insert(5, whitelist_system)
         systems.insert(6, startup_command_system)
-        systems.insert(7, style_system)
-        systems.insert(8, todo_system)
+        systems.insert(7, execute_system)
+        systems.insert(8, style_system)
+        systems.insert(9, todo_system)
 
     for system in systems:
         system_manager.register_system(system)

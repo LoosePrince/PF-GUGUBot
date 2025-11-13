@@ -80,6 +80,9 @@ class GeneralHelpSystem(BasicSystem):
         bound_name = self.server.tr("gugubot.system.bound.name")
         whitelist_name = self.server.tr("gugubot.system.whitelist.name")
         startup_command_name = self.server.tr("gugubot.system.startup_command.name")
+        execute_name = self.server.tr("gugubot.system.execute.name")
+        execute_execute_cmd = self.server.tr("gugubot.system.execute.execute")
+        execute_mcdr_cmd = self.server.tr("gugubot.system.execute.mcdr")
         style_name = self.server.tr("gugubot.system.style.name")
         todo_name = self.server.tr("gugubot.system.todo.name")
         
@@ -93,6 +96,9 @@ class GeneralHelpSystem(BasicSystem):
                 bound=bound_name,
                 whitelist=whitelist_name,
                 startup_command=startup_command_name,
+                execute=execute_name,
+                execute_execute=execute_execute_cmd,
+                execute_mcdr=execute_mcdr_cmd,
                 style=style_name,
                 todo=todo_name
             )

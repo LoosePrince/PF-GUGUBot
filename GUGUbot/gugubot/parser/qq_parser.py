@@ -69,6 +69,7 @@ class QQParser(BasicParser):
                     logger=self.logger,
                     source=self.connector.source,
                     source_id=str(source_id),
+                    receiver_source=self.connector.source,  # 对于非桥接消息，receiver_source 等于 source
                     sender=sender_name,
                     sender_id=sender_id,
                     is_admin=self._is_admin(source_id) or self._is_admin(sender_id)
@@ -86,6 +87,7 @@ class QQParser(BasicParser):
                     logger=self.logger,
                     source=self.connector.source,
                     source_id=message_data.get("user_id"),
+                    receiver_source=self.connector.source,  # 对于非桥接消息，receiver_source 等于 source
                 )
             
             return boardcase_info

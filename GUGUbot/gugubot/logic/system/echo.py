@@ -49,11 +49,13 @@ class EchoSystem(BasicSystem):
         try:
             # 准备转发的消息
             processed_info = self.create_processed_info(boardcast_info)
-            
-            # 转发到其他平台（排除源平台）
+
+            # 转发到其他平台（排除接收消息的本地 connector）
+            # 使用 receiver_source 如果存在，否则回退到 source
+            exclude_source = boardcast_info.receiver_source if boardcast_info.receiver_source else boardcast_info.source
             await self.system_manager.connector_manager.broadcast_processed_info(
                 processed_info,
-                exclude=[boardcast_info.source]
+                exclude=[exclude_source]
             )
 
             return True
