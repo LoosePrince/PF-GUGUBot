@@ -73,7 +73,6 @@ async def on_load(server: PluginServerInterface, old)->None:
         bound_system = BoundSystem(server, config=gugubot_config)
         bound_notice_system = BoundNoticeSystem(config=gugubot_config)
         startup_command_system = StartupCommandSystem(server, config=gugubot_config)
-        execute_system = ExecuteSystem(server, config=gugubot_config)
         style_system = StyleSystem(server, style_manager, config=gugubot_config)
         todo_system = TodoSystem(server, config=gugubot_config)
 
@@ -89,9 +88,8 @@ async def on_load(server: PluginServerInterface, old)->None:
         systems.insert(4, key_word_system)
         systems.insert(5, whitelist_system)
         systems.insert(6, startup_command_system)
-        systems.insert(7, execute_system)
-        systems.insert(8, style_system)
-        systems.insert(9, todo_system)
+        systems.insert(7, style_system)
+        systems.insert(8, todo_system)
 
     for system in systems:
         system_manager.register_system(system)

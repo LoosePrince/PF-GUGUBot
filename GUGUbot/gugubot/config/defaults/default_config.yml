@@ -67,7 +67,7 @@ connector:
     image_previewer: false     # 使用 ImagePreview 显示图片
     
     player_join_patterns:   # 玩家加入消息的正则表达式模式（第一个捕获组为玩家名）
-    - "([^\\[]+)\\[.*?\\] logged in with entity id"  # 标准格式：PlayerName[/IP] logged in with entity id
+    # - "([^\\[]+)\\[.*?\\] logged in with entity id"  # 标准格式：PlayerName[/IP] logged in with entity id
     - "([^\\s]+) joined the game"                     # 简单格式：PlayerName joined the game
     
     player_left_patterns:   # 玩家离开消息的正则表达式模式（第一个捕获组为玩家名）
