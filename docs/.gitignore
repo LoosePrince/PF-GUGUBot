@@ -1,0 +1,14 @@
+# MkDocs 构建输出
+/site/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 临时文件
+*.swp
+*.swo
+*~
+.DS_Store
+

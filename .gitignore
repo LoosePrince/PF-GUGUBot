@@ -1,6 +1,6 @@
-proxy_command.txt
 /GUGUBot/lang/
 **/test.py
 **/__pycache__/
 **.mcdr
 **.docx
+tests/build_deploy.py
