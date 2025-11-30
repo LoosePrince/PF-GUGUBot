@@ -12,7 +12,7 @@ from gugubot.logic.system import (
 )
 from gugubot.logic.plugins import UnboundCheckSystem, InactiveCheckSystem
 from gugubot.config import BotConfig
-from gugubot.utils import check_plugin_version, StyleManager
+from gugubot.utils import check_plugin_version, StyleManager, migrate_config_v1_to_v2
 
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.command import *
@@ -35,7 +35,17 @@ async def on_load(server: PluginServerInterface, old)->None:
     global unbound_check_system
     global inactive_check_system
 
-    gugubot_config = BotConfig(Path(server.get_data_folder()) / "config.yml")
+    # 尝试迁移旧版本配置
+    config_path = Path(server.get_data_folder()) / "config.yml"
+    if config_path.exists():
+        try:
+            with server.open_bundled_file("gugubot/config/defaults/default_config.yml") as file_handler:
+                default_config_content = file_handler.read().decode('utf-8')
+            migrate_config_v1_to_v2(config_path, default_config_content, logger=server.logger)
+        except Exception as e:
+            server.logger.error(f"迁移配置失败: {e}")
+
+    gugubot_config = BotConfig(config_path)
     gugubot_config.addNewConfig(server)
 
     is_main_server = gugubot_config.get_keys(["connector", "minecraft_bridge", "is_main_server"], True)
