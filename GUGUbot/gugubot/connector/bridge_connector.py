@@ -134,6 +134,8 @@ class BridgeConnector(BasicConnector):
             if self.ws_server and self.ws_server.get_client_count() > 1:
                 # 添加来源标识
                 message_data["bridge_source"] = client.get('address', ['unknown', 0])[0]
+                sender_id = message_data.get("sender_id", None)
+                message_data['is_admin'] = self._is_admin(sender_id)
                 
                 # 广播给其他客户端
                 for other_client in self.ws_server.get_clients():
@@ -170,7 +172,7 @@ class BridgeConnector(BasicConnector):
             logger = self.logger
             raw = message_data.get("raw", message_data)
             target = message_data.get("target", {})
-            is_admin = message_data.get("is_admin", False) or self._is_admin(sender_id)
+            is_admin = message_data.get("is_admin", False) and self._is_admin(sender_id)
 
             # 如果 target 存在且 self.source 不在 target 中，则不处理消息
             if target and self.source not in target:

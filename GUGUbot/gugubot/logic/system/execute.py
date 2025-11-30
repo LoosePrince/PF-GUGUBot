@@ -39,6 +39,7 @@ class ExecuteSystem(BasicSystem):
         BasicSystem.__init__(self, "execute", enable=True, config=config)
         self.server = server
         self.rcon_manager = RconManager(server)
+        self.logger = server.logger
 
     def initialize(self) -> None:
         """初始化系统。"""
@@ -94,9 +95,6 @@ class ExecuteSystem(BasicSystem):
         if not self.is_command(boardcast_info):
             return False
 
-        if not boardcast_info.is_admin:
-            return False
-
         message = boardcast_info.message
         if not message:
             return False
@@ -107,6 +105,10 @@ class ExecuteSystem(BasicSystem):
 
         content = first_message.get("data", {}).get("text", "").strip()
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
+        bridge_name = self.config.get_keys(
+            ["connector", "minecraft_bridge", "source_name"],
+            "Bridge"
+        )
         
         # 检查是否是 #执行 命令
         execute_cmd = self.get_tr("execute")
@@ -136,14 +138,17 @@ class ExecuteSystem(BasicSystem):
                 return True
             
             # 如果包含 @<服务器名> 格式，则通过 bridge 发送命令
-            if bridge_match and target_server:
+            if bridge_match and target_server and target_server not in [bridge_name]:
                 return await self._send_command_via_bridge(
                     command, 
                     boardcast_info, 
                     target_server=target_server,
                     use_mcdr=False
                 )
-            
+
+            if not self.is_command(boardcast_info) or not self._is_admin(boardcast_info.sender_id):
+                return False
+
             # 执行 MC 原生命令
             return await self._handle_execute_command(command, boardcast_info, use_mcdr=False)
         
@@ -166,13 +171,16 @@ class ExecuteSystem(BasicSystem):
                 return True
             
             # 如果包含 @<服务器名> 格式，则通过 bridge 发送命令
-            if bridge_match and target_server:
+            if bridge_match and target_server and target_server != bridge_name:
                 return await self._send_command_via_bridge(
                     command, 
                     boardcast_info, 
                     target_server=target_server,
                     use_mcdr=True
                 )
+
+            if not self.is_command(boardcast_info) or not self._is_admin(boardcast_info.sender_id):
+                return False
             
             # 执行 MCDR 命令
             return await self._handle_execute_command(command, boardcast_info, use_mcdr=True)
@@ -347,3 +355,13 @@ class ExecuteSystem(BasicSystem):
             )
             return True
 
+
+    def _is_admin(self, sender_id) -> bool:
+        """检查是否是管理员"""
+        bound_system = self.system_manager.get_system("bound")
+
+        if not bound_system:
+            return False
+
+        player_manager = bound_system.player_manager
+        return player_manager.is_admin(sender_id)
