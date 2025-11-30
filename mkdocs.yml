@@ -1,0 +1,194 @@
+site_name: GUGUBot 文档
+site_description: 功能强大的 MCDR QQ 机器人插件
+site_author: LoosePrince & XueK__
+site_url: https://looseprince.github.io/PF-GUGUBot/
+
+# 仓库信息
+repo_name: LoosePrince/PF-GUGUBot
+repo_url: https://github.com/LoosePrince/PF-GUGUBot
+edit_uri: edit/main/docs/
+
+# 版权信息
+copyright: Copyright &copy; 2023-2024 LoosePrince & XueK__
+
+# 主题配置
+theme:
+  name: material
+  language: zh
+  
+  # 图标
+  icon:
+    logo: material/robot
+    repo: fontawesome/brands/github
+  
+  # 配色方案
+  palette:
+    # 浅色模式
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: 切换到深色模式
+    
+    # 深色模式
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: 切换到浅色模式
+  
+  # 功能特性
+  features:
+    # 导航
+    - navigation.instant        # 即时加载
+    - navigation.instant.progress  # 加载进度条
+    - navigation.tracking       # 地址栏跟踪
+    - navigation.tabs           # 标签导航
+    - navigation.tabs.sticky    # 粘性标签
+    - navigation.sections       # 导航分组
+    - navigation.expand         # 默认展开导航
+    - navigation.indexes        # 分组索引页
+    - navigation.top            # 返回顶部按钮
+    - navigation.footer         # 页脚导航
+    
+    # 搜索
+    - search.suggest            # 搜索建议
+    - search.highlight          # 搜索高亮
+    - search.share              # 搜索分享
+    
+    # 内容
+    - content.code.copy         # 代码复制按钮
+    - content.code.select       # 代码选择按钮
+    - content.code.annotate     # 代码注释
+    - content.tabs.link         # 内容标签链接
+    - content.tooltips          # 工具提示
+    
+    # 顶部
+    - header.autohide           # 自动隐藏顶栏
+    
+    # 目录
+    - toc.follow                # 目录跟随
+    - toc.integrate             # 目录集成
+
+# 导航结构
+nav:
+  - 首页: index.md
+  - 快速开始:
+    - 安装指南: installation.md
+    - 配置说明: configuration.md
+  - 使用指南:
+    - 功能详解: features.md
+    - 多服互联: multi-server.md
+    - 疑难解答: troubleshooting.md
+  - 开发者:
+    - API 文档: api.md
+  - 关于:
+    - GitHub: https://github.com/LoosePrince/PF-GUGUBot
+    - QQ 交流群: https://qm.qq.com/q/TqmRHmTmcU
+    - 问题反馈: https://github.com/LoosePrince/PF-GUGUBot/issues
+
+# Markdown 扩展
+markdown_extensions:
+  # Python Markdown
+  - abbr                        # 缩写
+  - admonition                  # 警告框
+  - attr_list                   # 属性列表
+  - def_list                    # 定义列表
+  - footnotes                   # 脚注
+  - md_in_html                  # HTML 中的 Markdown
+  - toc:                        # 目录
+      permalink: true           # 永久链接
+      permalink_title: 锚点链接
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  
+  # Python Markdown Extensions
+  - pymdownx.arithmatex:        # 数学公式
+      generic: true
+  - pymdownx.betterem:          # 改进的强调
+      smart_enable: all
+  - pymdownx.caret              # 上标下标
+  - pymdownx.details            # 可折叠内容
+  - pymdownx.emoji:             # Emoji
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:         # 代码高亮
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite       # 行内代码高亮
+  - pymdownx.keys               # 键盘按键
+  - pymdownx.magiclink:         # 自动链接
+      repo_url_shorthand: true
+      user: LoosePrince
+      repo: PF-GUGUBot
+  - pymdownx.mark               # 标记
+  - pymdownx.smartsymbols       # 智能符号
+  - pymdownx.superfences:       # 超级围栏
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:            # 标签页
+      alternate_style: true
+      combine_header_slug: true
+  - pymdownx.tasklist:          # 任务列表
+      custom_checkbox: true
+  - pymdownx.tilde              # 删除线
+
+# 插件
+plugins:
+  - search:                     # 搜索插件
+      lang:
+        - zh
+        - en
+      separator: '[\s\u200b\-]'
+  - git-revision-date-localized: # Git 修订日期
+      enable_creation_date: true
+      type: datetime
+      timezone: Asia/Shanghai
+      locale: zh
+      fallback_to_build_date: true
+
+# 额外配置
+extra:
+  # 社交链接
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/LoosePrince/PF-GUGUBot
+      name: GitHub 仓库
+    - icon: fontawesome/brands/qq
+      link: https://qm.qq.com/q/TqmRHmTmcU
+      name: QQ 交流群
+  
+  # 版本
+  version:
+    provider: mike
+  
+  # 分析（可选）
+  # analytics:
+  #   provider: google
+  #   property: G-XXXXXXXXXX
+
+# 额外 CSS（可选）
+# extra_css:
+#   - stylesheets/extra.css
+
+# 额外 JavaScript（可选）
+# extra_javascript:
+#   - javascripts/extra.js
+
+# 严格模式
+strict: false
+
+# 站点目录
+site_dir: site
+
+# 文档目录
+docs_dir: docs
+
