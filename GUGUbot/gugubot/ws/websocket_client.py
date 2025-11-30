@@ -80,7 +80,8 @@ class WebSocketClient:
         verify: bool = True,
         ca_certs: Optional[str] = None,
         extra_sslopt: Optional[Dict[str, Any]] = None,
-        thread_name: str = "WebSocketClient"
+        thread_name: str = "WebSocketClient",
+        suppress_origin: bool = True
     ) -> None:
         """建立WebSocket连接
         
@@ -103,7 +104,7 @@ class WebSocketClient:
         thread_name : str
             监听线程名称
         """
-        self.logger.info(f"正在连接到WebSocket服务器: {self.url}")
+        self.logger.debug(f"正在连接到WebSocket服务器: {self.url}")
         
         self.ws = websocket.WebSocketApp(
             self.url,
@@ -115,11 +116,15 @@ class WebSocketClient:
         )
         
         # 构建run_forever参数
-        run_kwargs = {
-            'reconnect': reconnect,
-            'ping_interval': ping_interval,
-            'ping_timeout': ping_timeout
-        }
+        run_kwargs = {}
+        
+        if reconnect > 0:
+            run_kwargs['reconnect'] = reconnect
+        
+        if ping_interval > 0:
+            run_kwargs['ping_interval'] = ping_interval
+            if ping_timeout > 0:
+                run_kwargs['ping_timeout'] = ping_timeout
         
         # 配置SSL选项
         if use_ssl:
@@ -137,6 +142,9 @@ class WebSocketClient:
             
             run_kwargs['sslopt'] = sslopt
         
+        if suppress_origin:
+            run_kwargs['suppress_origin'] = True
+        
         # 启动监听线程
         self.listener_thread = threading.Thread(
             target=self.ws.run_forever,
@@ -145,7 +153,6 @@ class WebSocketClient:
         )
         self.listener_thread.daemon = True
         self.listener_thread.start()
-        self.logger.info("WebSocket连接线程已启动")
     
     def send(self, message: Any) -> bool:
         """发送消息

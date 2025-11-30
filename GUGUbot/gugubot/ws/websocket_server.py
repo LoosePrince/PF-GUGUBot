@@ -206,17 +206,44 @@ class WebSocketServer:
             return
         
         try:
-            self.logger.info("正在停止WebSocket服务器...")
-            
             if self.server:
-                self.server.shutdown_abruptly()
+                client_count = len(self.clients)
+                if client_count > 0:
+                    self.logger.info(f"正在断开 {client_count} 个客户端...")
+                    
+                    # 通知所有客户端服务器即将关闭
+                    for client in self.clients.copy():
+                        try:
+                            self.server.send_message(client, json.dumps({"type": "server_shutdown"}))
+                        except:
+                            pass
+                        
+                        # 尝试关闭连接
+                        try:
+                            if hasattr(self.server, 'disconnect_client'):
+                                self.server.disconnect_client(client, status=1000, reason="Server shutdown")
+                            elif 'handler' in client:
+                                handler = client['handler']
+                                if hasattr(handler, 'request'):
+                                    handler.request.close()
+                        except:
+                            pass
+                    
+                    # 等待关闭完成
+                    import time
+                    time.sleep(0.5)
+                
+                # 关闭服务器
+                if hasattr(self.server, 'shutdown_gracefully'):
+                    self.server.shutdown_gracefully()
+                else:
+                    self.server.shutdown_abruptly()
             
             if self.server_thread and self.server_thread.is_alive():
                 self.server_thread.join(timeout=timeout)
             
             self._is_running = False
             self.clients.clear()
-            self.logger.info("WebSocket服务器已停止")
         
         except Exception as e:
             self.logger.error(f"停止WebSocket服务器时出错: {e}\n{traceback.format_exc()}")

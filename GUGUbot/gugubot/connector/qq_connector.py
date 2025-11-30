@@ -76,6 +76,8 @@ class QQWebSocketConnector(BasicConnector):
         
         self.token = config.get_keys(["connector", "QQ", "connection", "token"], None)
         self.reconnect = config.get_keys(["connector", "QQ", "connection", "reconnect"], 5)
+        self.ping_interval = config.get_keys(["connector", "QQ", "connection", "ping_interval"], 20)
+        self.ping_timeout = config.get_keys(["connector", "QQ", "connection", "ping_timeout"], 10)
         self.verify = config.get_keys(["connector", "QQ", "connection", "verify"], True)
         self.ca_certs = config.get_keys(["connector", "QQ", "connection", "ca_certs"], None)
         self.extra_sslopt = config.get_keys(["connector", "QQ", "connection", "sslopt"], {})
@@ -111,6 +113,8 @@ class QQWebSocketConnector(BasicConnector):
         # 连接到服务器
         self.ws_client.connect(
             reconnect=self.reconnect,
+            ping_interval=self.ping_interval,
+            ping_timeout=self.ping_timeout,
             use_ssl=self.use_ssl,
             verify=self.verify,
             ca_certs=self.ca_certs,

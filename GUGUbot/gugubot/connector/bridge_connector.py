@@ -1,6 +1,7 @@
 import json
 import time
 import asyncio
+import threading
 from typing import Any, Dict, override
 
 from mcdreforged.api.types import Info
@@ -25,17 +26,23 @@ class BridgeConnector(BasicConnector):
         super().__init__(source=source_name, parser=MCParser, config=config)
         self.server = server
         
-        # 存储日志前缀
+        # 存储日志前缀和唯一标识
         connector_basic_name = self.server.tr("gugubot.connector.name")
         self.log_prefix = f"[{connector_basic_name}{self.source}]"
+        
+        # 添加连接计数器和状态标志
+        import time
+        self._connect_count = 0
+        self._client_id = f"{source_name}_{int(time.time() * 1000)}"
+        self._is_reconnecting = False  # 防止多个重连线程同时运行
         
         # 判断是否为服务器模式
         self.is_main_server = config.get_keys(["connector", "minecraft_bridge", "is_main_server"], True)
         
         # 获取配置
         self.reconnect = config.get_keys(["connector", "minecraft_bridge", "connection", "reconnect"], 5)
-        self.ping_interval = config.get_keys(["connector", "minecraft_bridge", "connection", "ping_interval"], 20)
-        self.ping_timeout = config.get_keys(["connector", "minecraft_bridge", "connection", "ping_timeout"], 10)
+        self.ping_interval = config.get_keys(["connector", "minecraft_bridge", "connection", "ping_interval"], 5)
+        self.ping_timeout = config.get_keys(["connector", "minecraft_bridge", "connection", "ping_timeout"], 5)
         self.use_ssl = config.get_keys(["connector", "minecraft_bridge", "connection", "use_ssl"], False)
         self.verify = config.get_keys(["connector", "minecraft_bridge", "connection", "verify"], True)
         self.ca_certs = config.get_keys(["connector", "minecraft_bridge", "connection", "ca_certs"], None)
@@ -57,16 +64,14 @@ class BridgeConnector(BasicConnector):
         """启动WebSocket服务器"""
         self.logger.info(f"{self.log_prefix} 正在启动桥接服务器")
         
-        # 创建服务器并设置回调
+        # 创建服务器并传递回调函数
         self.ws_server = WebSocketFactory.create_bridge_server(
             self.config,
+            on_message=self._handle_server_message,
+            on_client_connect=self._on_client_connect,
+            on_client_disconnect=self._on_client_disconnect,
             logger=self.logger
         )
-        
-        # 设置回调（在创建服务器后）
-        self.ws_server._on_message_callback = self._handle_server_message
-        self.ws_server._on_client_connect_callback = self._on_client_connect
-        self.ws_server._on_client_disconnect_callback = self._on_client_disconnect
         
         # 启动服务器（守护线程）
         self.ws_server.start(daemon=True)
@@ -75,19 +80,30 @@ class BridgeConnector(BasicConnector):
 
     def _connect_to_server(self) -> None:
         """连接到主服务器"""
-        self.logger.info(f"{self.log_prefix} 正在连接到桥接服务器")
+        # 清理旧连接
+        if self.ws_client:
+            try:
+                if self.ws_client.is_connected():
+                    self.ws_client.disconnect(timeout=1)
+            except:
+                pass
         
-        # 创建客户端并设置回调
+        self._connect_count += 1
+        
+        if self._connect_count > 1:
+            self.logger.info(f"{self.log_prefix} 正在重连桥接服务器 (第 {self._connect_count} 次连接)")
+        else:
+            self.logger.info(f"{self.log_prefix} 正在连接到桥接服务器")
+        
+        # 创建客户端
         self.ws_client = WebSocketFactory.create_bridge_client(
             self.config,
+            on_message=self._handle_client_message,
+            on_open=self._on_client_open,
+            on_error=self._on_client_error,
+            on_close=self._on_client_close,
             logger=self.logger
         )
-        
-        # 设置回调
-        self.ws_client._on_message_callback = self._handle_client_message
-        self.ws_client._on_open_callback = self._on_client_open
-        self.ws_client._on_error_callback = self._on_client_error
-        self.ws_client._on_close_callback = self._on_client_close
         
         # 连接到服务器
         self.ws_client.connect(
@@ -98,20 +114,20 @@ class BridgeConnector(BasicConnector):
             verify=self.verify,
             ca_certs=self.ca_certs,
             extra_sslopt=self.extra_sslopt,
-            thread_name="[GUGUBot]Bridge_Client"
+            thread_name=f"[GUGUBot]Bridge_{self._client_id}"
         )
-        
-        self.logger.info(f"{self.log_prefix} 连接线程已启动 ~")
 
     def _on_client_connect(self, client: Dict, server: Any) -> None:
         """新客户端连接到服务器时"""
         client_address = client.get('address') if client else 'unknown'
-        self.logger.info(f"{self.log_prefix} 新桥接客户端连接: {client_address}")
+        client_count = self.ws_server.get_client_count() if self.ws_server else 0
+        self.logger.info(f"{self.log_prefix} 新客户端连接: {client_address} (总数: {client_count})")
 
     def _on_client_disconnect(self, client: Dict, server: Any) -> None:
         """客户端从服务器断开时"""
         client_address = client.get('address') if client else 'unknown'
-        self.logger.info(f"{self.log_prefix} 桥接客户端断开: {client_address}")
+        client_count = self.ws_server.get_client_count() if self.ws_server else 0
+        self.logger.info(f"{self.log_prefix} 客户端断开: {client_address} (剩余: {client_count})")
 
     def _on_client_open(self, ws) -> None:
         """客户端连接建立时"""
@@ -119,78 +135,124 @@ class BridgeConnector(BasicConnector):
 
     def _on_client_error(self, ws, error: Exception) -> None:
         """客户端连接错误时"""
-        self.logger.error(f"{self.log_prefix} 连接错误: {error}")
+        self.logger.error(f"{self.log_prefix} 连接错误: {type(error).__name__} - {error}")
 
     def _on_client_close(self, ws, status_code: int, reason: str) -> None:
         """客户端连接关闭时"""
-        self.logger.info(f"{self.log_prefix} 连接关闭: {status_code} - {reason}")
+        import threading
+        
+        # 检查是否是当前活动的连接
+        if self.ws_client and self.ws_client.ws and self.ws_client.ws != ws:
+            return
+        
+        reason_text = f"({reason})" if reason else ""
+        self.logger.info(f"{self.log_prefix} 连接已断开 {reason_text}")
+        
+        # 实现持续重连
+        if self.reconnect > 0 and self.enable and not self._is_reconnecting:
+            self._is_reconnecting = True
+            self.logger.info(f"{self.log_prefix} 将在 {self.reconnect} 秒后重连...")
+            
+            def delayed_reconnect():
+                import time
+                attempt = 0
+                
+                try:
+                    while self.enable:
+                        attempt += 1
+                        time.sleep(self.reconnect)
+                        
+                        if not self.enable or (self.ws_client and self.ws_client.is_connected()):
+                            return
+                        
+                        if attempt > 1:
+                            self.logger.info(f"{self.log_prefix} 尝试重连 (第 {attempt} 次)...")
+                        else:
+                            self.logger.info(f"{self.log_prefix} 开始重连...")
+                        
+                        try:
+                            self._connect_to_server()
+                            return
+                        except Exception as e:
+                            self.logger.error(f"{self.log_prefix} 重连失败: {e}")
+                finally:
+                    self._is_reconnecting = False
+            
+            threading.Thread(
+                target=delayed_reconnect,
+                name=f"[GUGUBot]Reconnect_{self._client_id}",
+                daemon=True
+            ).start()
 
     def _handle_server_message(self, client: Dict, server: Any, message: str) -> None:
-        """处理服务器端接收到的消息（同步方法）"""
+        """处理服务器端接收到的消息"""
         try:
             message_data = json.loads(message) if isinstance(message, str) else message
             
-            # 广播消息给所有其他客户端（除了发送者）
+            # 广播给其他客户端
             if self.ws_server and self.ws_server.get_client_count() > 1:
-                # 添加来源标识
                 message_data["bridge_source"] = client.get('address', ['unknown', 0])[0]
                 sender_id = message_data.get("sender_id", None)
                 message_data['is_admin'] = self._is_admin(sender_id)
                 
-                # 广播给其他客户端
                 for other_client in self.ws_server.get_clients():
                     if other_client['id'] != client['id']:
                         self.ws_server.send_message(other_client, message_data)
             
-            # 处理消息并传递给本地系统
-            asyncio.run(self._process_bridge_message(message_data))
+            # 在新线程中处理消息
+            threading.Thread(
+                target=self._process_message_in_thread,
+                args=(message_data,),
+                daemon=True
+            ).start()
             
         except Exception as e:
-            self.logger.error(f"{self.log_prefix} 服务器消息处理失败: {e}")
+            self.logger.error(f"{self.log_prefix} 消息处理失败: {e}")
 
     def _handle_client_message(self, ws, message: str) -> None:
-        """处理客户端接收到的消息（同步方法）"""
+        """处理客户端接收到的消息"""
         try:
             message_data = json.loads(message) if isinstance(message, str) else message 
             
-            # 处理消息并传递给本地系统
-            asyncio.run(self._process_bridge_message(message_data))
+            if isinstance(message_data, dict) and message_data.get("type") == "server_shutdown":
+                return
+            
+            threading.Thread(
+                target=self._process_message_in_thread,
+                args=(message_data,),
+                daemon=True
+            ).start()
             
         except Exception as e:
-            self.logger.error(f"{self.log_prefix} 客户端消息处理失败: {e}")
+            self.logger.error(f"{self.log_prefix} 消息处理失败: {e}")
+    
+    def _process_message_in_thread(self, message_data: Dict) -> None:
+        """在独立线程中处理消息"""
+        try:
+            asyncio.run(self._process_bridge_message(message_data))
+        except Exception as e:
+            self.logger.error(f"{self.log_prefix} 消息处理失败: {e}")
 
     async def _process_bridge_message(self, message_data: Dict) -> None:
-        """处理桥接消息的实际逻辑"""
+        """处理桥接消息"""
         try:
-            # 解析消息类型和内容
-            processed_message = message_data.get("processed_message", [])
-            sender = message_data.get("sender", "System")
-            sender_id = message_data.get("sender_id", None)
-            source = message_data.get("source", "")
-            source_id = message_data.get("source_id", "")
-            server = self.server
-            logger = self.logger
-            raw = message_data.get("raw", message_data)
             target = message_data.get("target", {})
-            is_admin = message_data.get("is_admin", False) and self._is_admin(sender_id)
-
-            # 如果 target 存在且 self.source 不在 target 中，则不处理消息
             if target and self.source not in target:
                 return
 
             processed_info = BoardcastInfo(
                 event_type="message",
                 event_sub_type="group",
-                message=processed_message,
-                sender=sender,
-                sender_id=sender_id,
-                source=source,  # 保留远程服务器的 source
-                source_id=source_id,
-                receiver_source=self.source,  # 本地接收消息的 connector 的 source
-                raw=raw,
-                server=server,
-                logger=logger,
-                is_admin=is_admin
+                message=message_data.get("processed_message", []),
+                sender=message_data.get("sender", "System"),
+                sender_id=message_data.get("sender_id", None),
+                source=message_data.get("source", ""),
+                source_id=message_data.get("source_id", ""),
+                receiver_source=self.source,
+                raw=message_data.get("raw", message_data),
+                server=self.server,
+                logger=self.logger,
+                is_admin=message_data.get("is_admin", False) and self._is_admin(message_data.get("sender_id"))
             )
 
             await self.parser(self).system_manager.broadcast_command(processed_info)
@@ -233,16 +295,16 @@ class BridgeConnector(BasicConnector):
     async def disconnect(self) -> None:
         """断开连接"""
         try:
+            self.enable = False
+            
             if self.is_main_server:
-                # 关闭服务器
                 if self.ws_server and self.ws_server.is_running():
                     self.ws_server.stop()
-                self.logger.info(f"{self.log_prefix} 已断开 ~")
             else:
-                # 关闭客户端连接
                 if self.ws_client:
                     self.ws_client.disconnect()
-                self.logger.info(f"{self.log_prefix} 已断开 ~")
+            
+            self.logger.info(f"{self.log_prefix} 已断开 ~")
         except Exception as e:
             self.logger.warning(f"{self.log_prefix} 断开连接时出错: {e}")
 
