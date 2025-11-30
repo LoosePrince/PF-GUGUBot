@@ -105,16 +105,16 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
             return False
 
         if self.is_command(boardcast_info):
-            # 检查权限：所有命令都需要管理员权限
-            if not boardcast_info.is_admin:
-                await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("permission_denied"))])
-                return True
             return await self._handle_command(boardcast_info)
 
         return False
 
     async def _handle_command(self, boardcast_info: BoardcastInfo) -> bool:
         """处理不活跃检查相关命令"""
+
+        if not boardcast_info.is_admin:
+            return False
+
         command = boardcast_info.message[0].get("data", {}).get("text", "")
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
         system_name = self.get_tr("name")

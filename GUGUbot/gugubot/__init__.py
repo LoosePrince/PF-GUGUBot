@@ -8,7 +8,7 @@ from gugubot.connector import (
 )
 from gugubot.logic.system import (
     BanWordSystem, BoundSystem, BoundNoticeSystem, EchoSystem, ExecuteSystem, GeneralHelpSystem, KeyWordSystem, 
-    StartupCommandSystem, SystemManager, WhitelistSystem, StyleSystem, TodoSystem
+    StartupCommandSystem, SystemManager, WhitelistSystem, StyleSystem, TodoSystem, PlayerListSystem
 )
 from gugubot.logic.plugins import UnboundCheckSystem, InactiveCheckSystem
 from gugubot.config import BotConfig
@@ -70,6 +70,10 @@ async def on_load(server: PluginServerInterface, old)->None:
     execute_system = ExecuteSystem(server, config=gugubot_config)
     systems.insert(0, execute_system)
     
+    # PlayerList 系统 (需要在所有服务器上运行)
+    player_list_system = PlayerListSystem(server, config=gugubot_config)
+    systems.insert(1, player_list_system)
+    
     if is_main_server:
         general_help_system = GeneralHelpSystem(server, config=gugubot_config)
         ban_word_system = BanWordSystem(server, config=gugubot_config)
@@ -101,7 +105,7 @@ async def on_load(server: PluginServerInterface, old)->None:
         systems.insert(1, ban_word_system)
         systems.insert(2, bound_system)
         systems.insert(3, bound_notice_system)
-        systems.insert(4, key_word_system)
+        systems.insert(1, key_word_system)
         systems.insert(5, whitelist_system)
         systems.insert(6, startup_command_system)
         systems.insert(7, style_system)
@@ -148,51 +152,10 @@ async def on_info(server:PluginServerInterface, info:Info)->None:
         await on_player_left(server, info)
 
 
-# def on_info(server:PluginServerInterface, info:Info)->None:
-#     # Why I don't use on_player_join & on_player_left?
-#     # -> Some player with illegal name will not trigger the those events.
-
-#     if not isinstance(qq_bot, GUGUBotCore) or not is_qq_connected(server):
-#         return 
-
-#     # player list
-#     while ("players online:" in info.content or "：" in info.content) and\
-#         qq_bot._list_callback:
-#         func = qq_bot._list_callback.pop()
-#         func(info.content)
-
-#     is_player_login = "logged in with entity id" in info.content
-#     is_player_left = "left the game" in info.content
-
-#     if is_player_login:
-#         _on_player_join(server, info)
-    
-#     if is_player_left:
-#         _on_player_left(server, info)
-
-#     # forward server msg
-#     if qq_bot.config['forward']['mc_to_qq'] and \
-#         "[Server]" in info.content:
-#         qq_bot.send_msg_to_all_qq(info.content.replace("[Not Secure] ", "", 1))
-
-# def _on_player_join(server:PluginServerInterface, info:Info):
-#     # 机器人名字更新
-#     if qq_bot.config["command"]["name"]:
-#         qq_bot.set_number_as_name(server)
-    
-#     # 玩家上线通知
-#     if qq_bot.config["forward"].get("player_notice", False):
-#         player_name = info.content.split(" logged in with entity id")[0].split("[/")[0]
-
-#         if (qq_bot.config['forward'].get("player_notice", False) and is_player(server, qq_bot, player_name)) or \
-#             (qq_bot.config['forward'].get("bot_notice", False) and not is_player(server, qq_bot, player_name)):
-            
-#             qq_bot.send_msg_to_all_qq(get_style_template('player_notice_join').format(player=player_name))
-
 #     # 玩家上线显示群公告
 #     if qq_bot.config["forward"].get("show_group_notice", False):
 #         player_name = "[".join(info.content.split(" logged in with entity id")[0].split("[")[:-1])
-        
+#        
 #         latest_notice = get_latest_group_notice(qq_bot, logger=server.logger)
 
 #         if latest_notice:
@@ -204,19 +167,6 @@ async def on_info(server:PluginServerInterface, info:Info)->None:
 #             }
 #             server.execute(f'tellraw {player_name} {json.dumps(latest_notice_json)}')
 
-# def _on_player_left(server:PluginServerInterface, info:Info):
-#     # 机器人名字更新
-#     if qq_bot.config["command"]["name"]:
-#         qq_bot.set_number_as_name(server)
-
-#     # 玩家下线通知
-#     if qq_bot.config["forward"].get("player_notice", False):
-#         player_name = info.content.replace("left the game", "").strip()
-
-#         if (qq_bot.config['forward'].get("player_notice", False) and is_player(server, qq_bot, player_name)) or \
-#             (qq_bot.config['forward'].get("bot_notice", False) and not is_player(server, qq_bot, player_name)):
-
-#             qq_bot.send_msg_to_all_qq(get_style_template('player_notice_leave').format(player=player_name))
 
 async def on_user_info(server: PluginServerInterface, info: Info) -> None:
     if mc_connector is not None:

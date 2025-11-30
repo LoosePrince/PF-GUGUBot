@@ -76,7 +76,7 @@ class BoundSystem(BasicSystem):
 
         command = command.replace(command_prefix, "", 1).strip()
 
-        valid_commands = [system_name, self.get_tr("bind"), self.get_tr("unbind"), self.get_tr("list"), self.get_tr("search")]
+        valid_commands = [system_name, self.get_tr("bind"), self.get_tr("unbind"), self.get_tr("search")]
         if not any(command.startswith(i) for i in valid_commands):
             return False
         
