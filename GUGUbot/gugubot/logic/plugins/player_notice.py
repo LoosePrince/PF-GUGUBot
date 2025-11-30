@@ -50,7 +50,8 @@ def create_on_player_join(connector_manager:ConnectorManager, config: BotConfig)
                 sender="",
                 raw=None,
                 server=server,
-                logger=server.logger
+                logger=server.logger,
+                event_sub_type="group"
             )
             
             # 广播消息（排除Minecraft等平台）
@@ -104,7 +105,8 @@ def create_on_player_left(connector_manager:ConnectorManager, config: BotConfig)
                 sender="",
                 raw=None,
                 server=server,
-                logger=server.logger
+                logger=server.logger,
+                event_sub_type="group"
             )
             
             # 广播消息（排除Minecraft等平台）

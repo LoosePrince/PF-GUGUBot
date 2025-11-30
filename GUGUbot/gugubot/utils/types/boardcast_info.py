@@ -24,3 +24,5 @@ class BoardcastInfo:
 	receiver_source: str = ""  # 接收消息的本地 connector 的 source
 
 	is_admin: bool = False
+
+	target: Optional[dict] = None  # e.g., {"123456789": "group", "987654321": "private"}   

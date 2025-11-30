@@ -46,7 +46,8 @@ async def broadcast_msg(message:str, config:BotConfig, server:PluginServerInterf
             sender="",
             raw=None,
             server=server,
-            logger=server.logger
+            logger=server.logger,
+            event_sub_type="group"
         ),
         exclude=[config.get_keys(["connector", "minecraft", "source_name"], "Minecraft")]
     )

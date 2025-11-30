@@ -4,7 +4,7 @@ GUGUBot:
   command_prefix: "#"   # 命令前缀
   group_admin: false   # 群指令 :: 只能被咱们的管理员执行
 
-  show_message_in_console: true   # 展示上报消息
+  show_message_in_console: false   # 展示超详细上报消息
 
 ########################### 连接设置 ##################################
 

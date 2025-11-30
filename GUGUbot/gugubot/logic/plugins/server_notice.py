@@ -59,7 +59,8 @@ async def broadcast_server_start(
             sender=server.tr("gugubot.bot_name"),
             raw=None,
             server=server,
-            logger=server.logger
+            logger=server.logger,
+            event_sub_type="group"
         )
         
         # 广播消息（排除Minecraft等平台）
@@ -122,7 +123,8 @@ async def broadcast_server_stop(
             sender=server.tr("gugubot.bot_name"),
             raw=None,
             server=server,
-            logger=server.logger
+            logger=server.logger,
+            event_sub_type="group"
         )
         
         # 广播消息（排除Minecraft等平台）

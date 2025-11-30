@@ -6,6 +6,7 @@ from typing import Any, List, Literal, Optional
 @dataclass
 class ProcessedInfo:
     processed_message: List[dict]
+    
 
     source: str
     source_id: str
@@ -18,6 +19,7 @@ class ProcessedInfo:
 
     sender_id: Optional[str] = None
     receiver: Optional[str] = None
+    event_sub_type: str = "group"
 
     target: Optional[dict] = None  # e.g., {"123456789": "group", "987654321": "private"}   
     

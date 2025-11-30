@@ -199,12 +199,8 @@ class BridgeConnector(BasicConnector):
                     if other_client['id'] != client['id']:
                         self.ws_server.send_message(other_client, message_data)
             
-            # 在新线程中处理消息
-            threading.Thread(
-                target=self._process_message_in_thread,
-                args=(message_data,),
-                daemon=True
-            ).start()
+            # 处理消息并传递给本地系统
+            asyncio.run(self._process_bridge_message(message_data))
             
         except Exception as e:
             self.logger.error(f"{self.log_prefix} 消息处理失败: {e}")
@@ -217,32 +213,22 @@ class BridgeConnector(BasicConnector):
             if isinstance(message_data, dict) and message_data.get("type") == "server_shutdown":
                 return
             
-            threading.Thread(
-                target=self._process_message_in_thread,
-                args=(message_data,),
-                daemon=True
-            ).start()
-            
-        except Exception as e:
-            self.logger.error(f"{self.log_prefix} 消息处理失败: {e}")
-    
-    def _process_message_in_thread(self, message_data: Dict) -> None:
-        """在独立线程中处理消息"""
-        try:
+            # 处理消息并传递给本地系统
             asyncio.run(self._process_bridge_message(message_data))
+            
         except Exception as e:
             self.logger.error(f"{self.log_prefix} 消息处理失败: {e}")
 
     async def _process_bridge_message(self, message_data: Dict) -> None:
         """处理桥接消息"""
         try:
-            target = message_data.get("target", {})
-            if target and self.source not in target:
+            target = message_data.get("target", {}) or {}
+            if target and self.source not in target and len(target) == 1:
                 return
 
             processed_info = BoardcastInfo(
                 event_type="message",
-                event_sub_type="group",
+                event_sub_type=message_data.get("event_sub_type", "group"),
                 message=message_data.get("processed_message", []),
                 sender=message_data.get("sender", "System"),
                 sender_id=message_data.get("sender_id", None),
@@ -252,7 +238,8 @@ class BridgeConnector(BasicConnector):
                 raw=message_data.get("raw", message_data),
                 server=self.server,
                 logger=self.logger,
-                is_admin=message_data.get("is_admin", False) and self._is_admin(message_data.get("sender_id"))
+                is_admin=message_data.get("is_admin") if message_data.get("is_admin") is not None else self._is_admin(message_data.get("sender_id")),
+                target=target
             )
 
             await self.parser(self).system_manager.broadcast_command(processed_info)
@@ -269,6 +256,7 @@ class BridgeConnector(BasicConnector):
         message_data = {
             "sender": processed_info.sender or "System",
             "sender_id": processed_info.sender_id,
+            "event_sub_type": processed_info.event_sub_type,
             "receiver": processed_info.receiver,
             "source": self.source,
             "source_id": processed_info.source_id,

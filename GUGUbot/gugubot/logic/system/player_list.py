@@ -72,8 +72,6 @@ class PlayerListSystem(BasicSystem):
             if not server_name:
                 # If server_name is not set in GUGUBot, try to get from bridge config or use default
                 server_name = self.config.get_keys(["connector", "minecraft_bridge", "source_name"], "Server")
-            
-            prefix = f"[{server_name}] " if is_bridge_query else ""
 
             # Try using RCON first
             if self.server.is_rcon_running():
@@ -83,12 +81,12 @@ class PlayerListSystem(BasicSystem):
                 formatted_result = self._format_player_list(result)
 
                 if formatted_result:
-                     await self.reply(boardcast_info, [MessageBuilder.text(f"{prefix}{formatted_result}")])
+                     await self.reply(boardcast_info, [MessageBuilder.text(f"{formatted_result}")])
                      return
 
             # Fallback if RCON is not running
             self.logger.warning(self.get_tr('rcon_not_running'))
-            await self.reply(boardcast_info, [MessageBuilder.text(f"{prefix}{self.get_tr('rcon_not_running')}")])
+            await self.reply(boardcast_info, [MessageBuilder.text(f"{self.get_tr('rcon_not_running')}")])
 
         except Exception as e:
              self.logger.error(f"Query player list failed: {e}")
@@ -191,6 +189,7 @@ class PlayerListSystem(BasicSystem):
                 raw=boardcast_info.raw,
                 server=boardcast_info.server,
                 logger=boardcast_info.logger,
+                event_sub_type=boardcast_info.event_sub_type,
                 # We don't specify target to broadcast to all
             )
 

@@ -30,6 +30,7 @@ class TestConnector(BasicConnector):
         super().__init__(source="test", config=config)
         self.server = server
         self.logger = logger or server.logger
+        self.enable = config.get_keys(["show_message_in_console"], True)
         
     async def connect(self) -> None:
         """连接到TEST服务器。
@@ -63,6 +64,7 @@ class TestConnector(BasicConnector):
             return
         
         self.logger.info(f"[GUGUBot]发送消息: {boardcast_info}")
+        # self.logger.info(f"[GUGUBot]发送消息: {getattr(boardcast_info, 'processed_message', '')}")
 
     async def on_message(self, raw: Any) -> None:
         """处理从TEST服务器接收的消息。

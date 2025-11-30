@@ -146,7 +146,8 @@ class ExecuteSystem(BasicSystem):
                     use_mcdr=False
                 )
 
-            if not self.is_command(boardcast_info) or not self._is_admin(boardcast_info.sender_id):
+            if not self.is_command(boardcast_info) or \
+                (not self._is_admin(boardcast_info.sender_id) and not boardcast_info.is_admin):
                 return False
 
             # 执行 MC 原生命令
@@ -179,7 +180,8 @@ class ExecuteSystem(BasicSystem):
                     use_mcdr=True
                 )
 
-            if not self.is_command(boardcast_info) or not self._is_admin(boardcast_info.sender_id):
+            if not self.is_command(boardcast_info) or \
+                (not self._is_admin(boardcast_info.sender_id) and not boardcast_info.is_admin):
                 return False
             
             # 执行 MCDR 命令
@@ -331,6 +333,7 @@ class ExecuteSystem(BasicSystem):
                 raw=boardcast_info.raw,
                 server=boardcast_info.server,
                 logger=boardcast_info.logger,
+                event_sub_type=boardcast_info.event_sub_type,
                 target={target_server: boardcast_info.event_sub_type} # 指定目标服务器
             )
 

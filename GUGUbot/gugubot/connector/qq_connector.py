@@ -200,6 +200,9 @@ class QQWebSocketConnector(BasicConnector):
             message = [source_message] + message
 
         for target_id, target_type in target.items():
+            if not target_id.isdigit():
+                continue
+
             if target_type == "group":
                 await self.bot.send_group_msg(
                     group_id=int(target_id),

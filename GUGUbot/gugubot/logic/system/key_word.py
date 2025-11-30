@@ -85,7 +85,8 @@ class KeyWordSystem(BasicConfig, BasicSystem):
                 sender=self.get_tr("gugubot.bot_name", global_key=True),
                 raw=boardcast_info.raw,
                 server=boardcast_info.server,
-                logger=boardcast_info.logger
+                logger=boardcast_info.logger,
+                event_sub_type=boardcast_info.event_sub_type
             )
 
             # 使用 receiver_source 如果存在，否则回退到 source

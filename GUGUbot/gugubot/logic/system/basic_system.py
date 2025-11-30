@@ -130,12 +130,15 @@ class BasicSystem:
             sender_id=boardcast_info.sender_id,
             raw=boardcast_info.raw,
             server=boardcast_info.server,
-            logger=boardcast_info.logger
+            logger=boardcast_info.logger,
+            event_sub_type=boardcast_info.event_sub_type,
+            target=boardcast_info.target
         )
 
     async def reply(self, boardcast_info: BoardcastInfo, message: List[dict]) -> None:
         # 构造基础 target
-        target = {boardcast_info.source: boardcast_info.event_sub_type}
+        target_source = boardcast_info.source_id if boardcast_info.source_id and boardcast_info.source_id.isdigit() else boardcast_info.source  
+        target = {target_source: boardcast_info.event_sub_type}
         
         # 检查是否是 bridge 回复（receiver_source 是 Bridge，但 source 不是 Bridge）
         bridge_name = self.config.get_keys(
@@ -156,6 +159,7 @@ class BasicSystem:
             raw=boardcast_info.raw,
             server=boardcast_info.server,
             logger=boardcast_info.logger,
+            event_sub_type=boardcast_info.event_sub_type,
             target=target
         )
 

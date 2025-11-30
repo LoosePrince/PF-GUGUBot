@@ -3,3 +3,4 @@
 **/__pycache__/
 **.mcdr
 **.docx
+tests/build_deploy.py
