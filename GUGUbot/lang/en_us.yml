@@ -1,0 +1,317 @@
+gugubot:
+    bot_name: "GUGUbot"
+    
+    # Common translations
+    enable: "enable"
+    disable: "disable"
+    enable_success: "System enabled"
+    disable_success: "System disabled"
+    
+    notice:
+        server_start: "Server started"
+        server_stop: "Server stopped"
+        player_join: "Player {player} joined the server"
+        player_left: "Player {player} left the server"
+        player_notice_error: "Player notice failed: {error}"
+    
+    connector:
+        QQ:
+            try_connect: "Trying to connect to: {url}"
+            start_connect: "Starting QQ bot connection"
+            received_message: "Received message: {message}"
+            error_connect: "Connection error: {error}"
+            close_connect: "Connection closed (status_code: {status_code}, reason: {reason})"
+            send_message: "Sending message: {message}"
+            send_message_failed: "Failed to send message: {error}"
+            retry_connect: "Connection lost, trying to reconnect"
+            close_info: "QQ connection closed"
+            error_close: "Error closing connection: {error}"
+            message_handle_failed: "Failed to handle message: {error}\n{trace}"
+            connect_success: "~ Connected successfully ~"
+
+    system:
+        general_help:
+            name: "help"
+            help_command: "help"
+            help_msg: "GUGUBot Help Information\n\nAvailable Systems:\n• {command_prefix}{key_words} - Keyword reply system\n• {command_prefix}{bound} - Player binding system\n• {command_prefix}{style} - Style switching system\n• {command_prefix}{todo} - Todo system\n\nUse {command_prefix}<system_name> to view help for specific system"
+            admin_help_msg: "GUGUBot Admin Help Information\n\nAvailable Systems:\n• {command_prefix}{key_words} - Keyword reply system\n• {command_prefix}{ban_words} - Ban word management system\n• {command_prefix}{bound} - Player binding system\n• {command_prefix}{whitelist} - Whitelist management system\n• {command_prefix}{startup_command} - Startup command system\n• {command_prefix}{execute} - Command execution system\n• {command_prefix}{style} - Style switching system\n• {command_prefix}{todo} - Todo system\n\nUse {command_prefix}<system_name> to view help for specific system"
+
+        echo:
+            name: "echo"
+            help_msg: "Echo system related commands:\n{command_prefix}{name} {enable} -> Enable echo system\n{command_prefix}{name} {disable} -> Disable echo system"
+
+        key_word:
+            name: "keyword"
+            add: "add"
+            remove: "remove"
+            list: "list"
+            cancel: "cancel"
+
+            add_success: "Add successfully"
+            add_existed: "Keyword already exists"
+            add_timeout: "Add timeout: {command}"
+            add_instruction: "Please send the keyword/image you want to add"
+
+            remove_success: "Remove successfully"
+            remove_not_exist: "Keyword not exist"
+
+            list_empty: "Keyword list is empty"
+            keyword_list: "Keyword list: \n{keyword_list}"
+
+            cancel_success: "Cancel successfully"
+            cancel_not_exist: "Not in adding process"
+
+            help_msg: "Keyword related commands:\n{command_prefix}{name} {enable} -> Enable keyword system\n{command_prefix}{name} {disable} -> Disable keyword system\n{command_prefix}{name} {list} -> Show keyword list\n{command_prefix}{add} <keyword> -> Add keyword\n{command_prefix}{remove} <keyword> -> Delete specified keyword\n{command_prefix}{cancel} -> Cancel adding keyword"
+
+        ban_word:
+            name: "banword"
+            add: "add"
+            remove: "remove"
+            list: "list"
+            cancel: "cancel"
+
+            add_success: "Ban word added successfully"
+            add_existed: "Ban word already exists"
+            add_timeout: "Add timeout: {ban_word}"
+            add_instruction: "Please send the reason for banning"
+            add_format_error: "Format error, please use: {command_prefix}banword add <word> [reason]"
+
+            remove_success: "Ban word removed successfully"
+            remove_not_exist: "Ban word not exist"
+
+            list_empty: "Ban word list is empty"
+            ban_word_list: "Ban word list:\n{ban_word_list}"
+
+            cancel_success: "Cancel add ban word successfully"
+            cancel_not_exist: "Not adding ban word currently"
+
+            ban_word_detected: "Message contains banned word: {ban_word} and cannot be forwarded.\nReason: {reason}"
+
+            help_msg: "Ban word related commands:\n{command_prefix}{name} {enable} -> Enable ban word system\n{command_prefix}{name} {disable} -> Disable ban word system\n{command_prefix}{name} {list} -> Show ban word list\n{command_prefix}{name} {add} <word> [reason] -> Add ban word\n{command_prefix}{name} {remove} <word> -> Remove specified ban word\n{command_prefix}{name} {cancel} -> Cancel current add operation"
+
+        bound:
+            name: "bind"
+            bind: "bind"
+            unbind: "unbind"
+            list: "list"
+            search: "search"
+
+            bind_success: "Bind successfully"
+            bind_existed: "Player already exists"
+            bind_failed: "Bind failed"
+            bind_instruction: "Please provide the player name to bind, format:\n{command_prefix}{name} {bind} mc_name [bedrock] - bind yourself\n{command_prefix}{name} {bind} [@123456] mc_name [bedrock] - bind others\nExample: {command_prefix}{name} {bind} Steve bedrock"
+            already_bound: "Player already bound"
+            max_bound_reached: "Binding limit reached"
+
+            unbind_success: "Unbind successfully"
+            no_bindings: "You have no bindings"
+            no_bindings_for_player: "Player {player_name} has no bindings"
+            player_not_found: "Player not found"
+            no_permission: "You don't have permission to unbind this player"
+
+            bind_list: "Your binding list:\n{player_list}"
+            bind_info: "Player {player_name} binding info:\n{info}"
+
+            search_instruction: "Please provide player name or QQ number to search"
+
+            help_msg: "Bind related commands:\n{command_prefix}{name} {enable} -> Enable bind system\n{command_prefix}{name} {disable} -> Disable bind system\n{command_prefix}{name} {bind} <player_name> [bedrock] -> Bind player\n{command_prefix}{name} {bind} [@QQ] <player_name> [bedrock] -> Bind for others\n{command_prefix}{name} {unbind} -> Unbind all Java players (default)\n{command_prefix}{name} {unbind} [player_name] [bedrock] -> Unbind player\n{command_prefix}{name} {unbind} bedrock -> Unbind all Bedrock players\n{command_prefix}{name} {list} -> Show binding list\n\nParameter description:\n- Bedrock: bedrock, be, true, 1 (default false)\n- Unbind with bedrock parameter unbinds corresponding version only\n- Unbind bedrock unbinds all Bedrock players of current user"
+
+        bound_notice:
+            name: "bind_notice"
+            notice_message: "You have not bound your game account yet. Please use {command_prefix}{bound_name} command to bind your account for full functionality"
+            help_msg: "Bind notice related commands:\n{command_prefix}{name} {enable} -> Enable bind notice\n{command_prefix}{name} {disable} -> Disable bind notice"
+
+        whitelist:
+            name: "whitelist"
+            add: "add"
+            remove: "remove"
+            list: "list"
+            whitelist_enable: "server_whitelist_on"
+            whitelist_disable: "server_whitelist_off"
+
+            add_success: "Player added to whitelist"
+            add_existed: "Player already in whitelist"
+            add_instruction: "Please provide player name, format: player_name [mode]\nMode: online/offline/bedrock"
+
+            remove_success: "Player removed from whitelist"
+            remove_not_exist: "Player not in whitelist"
+            remove_instruction: "Please provide player name to remove"
+
+            list_empty: "Whitelist is empty"
+            list_content: "Whitelist:\n{player_list}"
+            list_failed: "Failed to get whitelist"
+
+            whitelist_enable_success: "Server whitelist enabled"
+            whitelist_enable_failed: "Failed to enable server whitelist"
+
+            whitelist_disable_success: "Server whitelist disabled"
+            whitelist_disable_failed: "Failed to disable server whitelist"
+
+            api_not_available: "Whitelist API not available"
+
+            help_msg: "Whitelist related commands:\n{command_prefix}{name} {list} -> Show whitelist\n{command_prefix}{name} {add} <player_name> [mode] -> Add player to whitelist\n{command_prefix}{name} {remove} <player_name> -> Remove player from whitelist\n{command_prefix}{name} {enable} -> Enable server whitelist\n{command_prefix}{name} {disable} -> Disable server whitelist\n\nMode description:\n- online -> Online mode\n- offline -> Offline mode\n- bedrock/be -> Bedrock mode"
+
+        mg_event:
+            name: "Game Events"
+
+        startup_command:
+            name: "startup"
+            add: "add"
+            remove: "remove"
+            list: "list"
+            execute: "execute"
+            help_command: "help"
+
+            enable_success: "Startup command system enabled"
+            disable_success: "Startup command system disabled"
+
+            add_success: "Startup command added successfully"
+            add_existed: "Startup command already exists"
+            add_instruction: "Please provide the startup command, format: {command_prefix}{name} {add} <command>"
+
+            remove_success: "Startup command removed successfully"
+            remove_not_exist: "Startup command not exist"
+            remove_instruction: "Please provide the startup command to remove, format: {command_prefix}{name} {remove} <command>"
+
+            list_empty: "Startup command list is empty"
+            list_content: "Startup command list:\n{command_list}"
+
+            execute_success: "Successfully executed {count} startup commands"
+            execute_partial: "Execution completed, succeeded {executed}, failed {failed}"
+            execute_empty: "No startup commands to execute"
+
+            help_msg: "Startup command related commands:\n{command_prefix}{name} {enable} -> Enable startup command system\n{command_prefix}{name} {disable} -> Disable startup command system\n{command_prefix}{name} {add} <command> -> Add startup command\n{command_prefix}{name} {remove} <command> -> Remove startup command\n{command_prefix}{name} {list} -> Show startup command list\n{command_prefix}{name} {execute} -> Execute all startup commands"
+
+        execute:
+            name: "execute"
+            execute: "execute"
+            mcdr: "mcdr"
+
+            execute_instruction: "Please provide the MC native command to execute, format: {command_prefix}{execute} <command>"
+            mcdr_instruction: "Please provide the MCDR command to execute, format: {command_prefix}{mcdr} <command>"
+            execute_success: "Command executed"
+            execute_failed: "Failed to execute command: {error}"
+            command_ignored: "This command has been configured to be ignored and cannot be executed"
+
+            bridge_execute_success: "Command sent via bridge to {target}"
+            bridge_execute_failed: "Failed to send command via bridge: {error}"
+            bridge_target_not_found: "Target server not found: {target}"
+            bridge_execute_disabled: "Bridge execute feature is disabled"
+            bridge_not_found: "Bridge connector not found"
+
+            help_msg: "Command execution related commands:\n{command_prefix}{name} {enable} -> Enable command execution system\n{command_prefix}{name} {disable} -> Disable command execution system\n{command_prefix}{execute} <command> -> Execute MC native command\n{command_prefix}{mcdr} <command> -> Execute MCDR command\n{command_prefix}{execute}@<server_name> <command> -> Send command via bridge to specified server\n{command_prefix}{mcdr}@<server_name> <command> -> Send MCDR command via bridge to specified server"
+
+        style:
+            name: "style"
+            list: "list"
+            reload: "reload"
+            help: "help"
+            
+            list_empty: "No styles available\nPlease place .yml style files in the style directory"
+            style_list: "Available styles:\n{style_list}"
+            
+            switch_success: "Switched to style: {style_name}"
+            switch_failed: "Failed to switch style: {style_name} does not exist"
+            switch_cooldown: "Style switching is on cooldown, please wait {remaining} before trying again"
+            
+            reload_success: "Reloaded styles, total {count}"
+            reload_failed: "Failed to reload styles: {error}"
+            
+            help_msg: "Style system related commands:\n{command_prefix}{name} -> Show this help message\n{command_prefix}{name} {list} -> List all available styles (shows current style)\n{command_prefix}{name} <style_name> -> Switch to specified style\n{command_prefix}{name} {reload} -> Reload style files\n\nStyle files are placed in the style directory, format is the same as lang files"
+
+        todo:
+            name: "todo"
+            add: "add"
+            remove: "remove"
+            complete: "complete"
+            undo: "undo"
+            list: "list"
+
+            add_success: "Todo item added (ID: {id})"
+            add_instruction: "Please provide todo content, format: {command_prefix}{name} {add} <content>"
+
+            remove_success: "Todo item removed (ID: {id})"
+            remove_not_exist: "Todo item does not exist (ID: {id})"
+            remove_instruction: "Please provide the todo ID to remove, format: {command_prefix}{name} {remove} <ID>"
+
+            complete_success: "Todo item marked as completed (ID: {id})"
+            complete_not_exist: "Todo item does not exist (ID: {id})"
+            complete_already: "Todo item already completed (ID: {id})"
+            complete_instruction: "Please provide the todo ID to complete, format: {command_prefix}{name} {complete} <ID>"
+
+            undo_success: "Todo item completion status undone (ID: {id})"
+            undo_not_exist: "Todo item does not exist (ID: {id})"
+            undo_not_completed: "Todo item is not completed, no need to undo (ID: {id})"
+            undo_instruction: "Please provide the todo ID to undo completion, format: {command_prefix}{name} {undo} <ID>"
+
+            list_empty: "Todo list is empty"
+            list_pending: "Pending todos:\n{todo_list}"
+            list_completed: "Completed todos:\n{todo_list}"
+            list_content: "Todo list:\n{todo_list}"
+
+            status_completed: "[Completed]"
+            status_pending: "[Pending]"
+            creator_label: "Creator:"
+            time_label: "Time:"
+            completed_time_label: ", Completed at: "
+            unknown: "Unknown"
+
+            help_msg: "Todo related commands:\n{command_prefix}{name} {add} <content> -> Add todo item\n{command_prefix}{name} {remove} <ID> -> Remove specified todo item\n{command_prefix}{name} {complete} <ID> -> Mark todo as completed\n{command_prefix}{name} {undo} <ID> -> Undo todo completion status\n{command_prefix}{name} {list} -> Show todo list"
+
+        list:
+            name: "player_list"
+            list: "player"
+            help_msg: "Player list related commands:\n{command_prefix}{name} {list} -> Show online player list"
+            query_failed: "Failed to query player list: {error}"
+            rcon_not_running: "Cannot query player list: RCON is not connected or not supported."
+            list_empty: "No players online"
+            list_content: "Online players({count}): {players}"
+
+        unbound_check:
+            name: "unbound_check"
+            check: "check"
+            next: "next"
+
+            check_start: "Starting unbound user check..."
+            check_complete: "Check completed, found {total_count} unbound users"
+            no_unbound_users: "All group members are bound"
+            checking: "Checking in progress, please wait..."
+
+            notification_title: "【Unbound User Alert】"
+            notification_group: "Group {group_name}({group_id}) has {count} users who joined more than {days} days ago and are still unbound:\n{user_list}"
+            user_item: "  • {nickname}({user_id}) - Joined {days_ago} days ago"
+
+            next_check_time: "Next automatic check time: {time}"
+            manual_check_success: "Manual check completed"
+
+            qq_connector_not_found: "QQ connector not initialized"
+            bound_system_not_found: "Bound system not initialized"
+
+            help_msg: "Unbound check system (Admin only):\n{command_prefix}{name} {enable} -> Enable system\n{command_prefix}{name} {disable} -> Disable system\n{command_prefix}{name} {check} -> Manual check\n{command_prefix}{name} {next} -> View next check time"
+
+        inactive_check:
+            name: "inactive_check"
+            check: "check"
+            next: "next"
+
+            check_start: "Starting inactive player check..."
+            check_complete: "Check completed, found {total_count} problematic players (Inactive: {inactive_count}, Never played: {never_played_count})"
+            no_inactive_players: "All players are active"
+            checking: "Checking in progress, please wait..."
+
+            notification_title: "【Inactive Player Alert】"
+            notification_content: "Group {group_name}({group_id}) has {count} players who haven't logged in for more than {days} days:\n{player_list}"
+            player_item: "  • {player_name} (QQ: {qq_accounts}) - Inactive for {days_inactive} days"
+            
+            never_played_content: "Group {group_name}({group_id}) has {count} players who haven't joined the game for more than {days} days after joining the group:\n{player_list}"
+            never_played_player_item: "  • {player_name} (QQ: {qq_accounts}) - Never played after {days_since_bind} days in group"
+            never_played_player_item_no_time: "  • {player_name} (QQ: {qq_accounts}) - Bound but never played (No join time record)"
+
+            next_check_time: "Next automatic check time: {time}"
+            manual_check_success: "Manual check completed"
+
+            qq_connector_not_found: "QQ connector not initialized"
+            bound_system_not_found: "Bound system not initialized"
+            whitelist_not_found: "Whitelist system not initialized or enabled"
+
+            help_msg: "Inactive check system (Admin only):\n{command_prefix}{name} {enable} -> Enable system\n{command_prefix}{name} {disable} -> Disable system\n{command_prefix}{name} {check} -> Manual check\n{command_prefix}{name} {next} -> View next check time"
