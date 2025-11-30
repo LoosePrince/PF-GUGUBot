@@ -97,7 +97,14 @@ class BasicSystem:
         content = first_message.get("data",{}).get("text", "")
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
 
-        return content.startswith(command_prefix)
+        if not content.startswith(command_prefix):
+            return False
+
+        group_admin = self.config.get_keys(["command", "group_admin"], False)
+        if group_admin and not boardcast_info.is_admin:
+            return False
+
+        return True
 
     @staticmethod
     def create_processed_info(boardcast_info: BoardcastInfo) -> ProcessedInfo:
@@ -128,16 +135,17 @@ class BasicSystem:
 
     async def reply(self, boardcast_info: BoardcastInfo, message: List[dict]) -> None:
         # 构造基础 target
-        target = {boardcast_info.receiver_source: boardcast_info.event_sub_type}
+        target = {boardcast_info.source: boardcast_info.event_sub_type}
         
         # 检查是否是 bridge 回复（receiver_source 是 Bridge，但 source 不是 Bridge）
         bridge_name = self.config.get_keys(
             ["connector", "minecraft_bridge", "source_name"],
             "Bridge"
         )
+        
         if boardcast_info.receiver_source == bridge_name and boardcast_info.source != bridge_name:
             # 如果 receiver_source 是 Bridge，但 source 不是 Bridge, 则将 target 设置为 source
-            target[boardcast_info.source] = boardcast_info.event_sub_type
+            target[boardcast_info.receiver_source] = boardcast_info.event_sub_type
 
         respond = ProcessedInfo(
             processed_message=message,
