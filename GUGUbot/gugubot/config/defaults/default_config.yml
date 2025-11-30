@@ -153,3 +153,22 @@ system:
 
   whitelist:   # 白名单
     enable: false
+
+  unbound_check:   # 未绑定用户检查
+    enable: false
+    timeout_days: 7   # 入群后未绑定的超时时间（天）
+    check_interval: 86400   # 定时检查间隔（秒，默认24小时）
+    notify_targets:   # 通知目标配置
+      admin_private: true   # 私聊管理员
+      admin_groups: true   # 发送到管理群
+      origin_group: false   # 发送到原群
+
+  inactive_check:   # 不活跃玩家检查
+    enable: false
+    inactive_days: 30   # 进过游戏但不活跃的天数阈值（天）
+    never_played_days: 7   # 进群后从未进入游戏的天数阈值（天）
+    check_interval: 86400   # 定时检查间隔（秒，默认24小时）
+    notify_targets:   # 通知目标配置
+      admin_private: true   # 私聊管理员
+      admin_groups: true   # 发送到管理群
+      origin_group: false   # 发送到原群

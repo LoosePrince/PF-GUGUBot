@@ -10,6 +10,7 @@ from gugubot.logic.system import (
     BanWordSystem, BoundSystem, BoundNoticeSystem, EchoSystem, ExecuteSystem, GeneralHelpSystem, KeyWordSystem, 
     StartupCommandSystem, SystemManager, WhitelistSystem, StyleSystem, TodoSystem
 )
+from gugubot.logic.plugins import UnboundCheckSystem, InactiveCheckSystem
 from gugubot.config import BotConfig
 from gugubot.utils import check_plugin_version, StyleManager
 
@@ -21,6 +22,8 @@ mc_connector: MCConnector = None
 gugubot_config: BotConfig = None
 startup_command_system: StartupCommandSystem = None
 style_manager: StyleManager = None
+unbound_check_system: UnboundCheckSystem = None
+inactive_check_system: InactiveCheckSystem = None
 
 #+---------------------------------------------------------------------+
 async def on_load(server: PluginServerInterface, old)->None:
@@ -29,6 +32,8 @@ async def on_load(server: PluginServerInterface, old)->None:
     global gugubot_config
     global startup_command_system
     global style_manager
+    global unbound_check_system
+    global inactive_check_system
 
     gugubot_config = BotConfig(Path(server.get_data_folder()) / "config.yml")
     gugubot_config.addNewConfig(server)
@@ -76,10 +81,21 @@ async def on_load(server: PluginServerInterface, old)->None:
         style_system = StyleSystem(server, style_manager, config=gugubot_config)
         todo_system = TodoSystem(server, config=gugubot_config)
 
+        # 创建未绑定检查系统
+        unbound_check_system = UnboundCheckSystem(server, config=gugubot_config)
+        
+        # 创建不活跃检查系统
+        inactive_check_system = InactiveCheckSystem(server, config=gugubot_config)
+        
         # 设置白名单系统引用
         bound_system.set_whitelist_system(whitelist_system)
         # 设置绑定提醒系统对绑定系统的引用
         bound_notice_system.set_bound_system(bound_system)
+        # 设置未绑定检查系统的依赖
+        unbound_check_system.set_bound_system(bound_system)
+        # 设置不活跃检查系统的依赖
+        inactive_check_system.set_bound_system(bound_system)
+        inactive_check_system.set_whitelist_system(whitelist_system)
 
         systems.insert(0, general_help_system)
         systems.insert(1, ban_word_system)
@@ -90,11 +106,20 @@ async def on_load(server: PluginServerInterface, old)->None:
         systems.insert(6, startup_command_system)
         systems.insert(7, style_system)
         systems.insert(8, todo_system)
+        systems.insert(9, unbound_check_system)
+        systems.insert(10, inactive_check_system)
 
     for system in systems:
         system_manager.register_system(system)
     
     connector_manager.register_system_manager(system_manager)
+
+    # 为未绑定检查系统设置 QQ 连接器（仅在主服务器）
+    if is_main_server:
+        qq_connector = connector_manager.get_connector("QQ")
+        if qq_connector:
+            unbound_check_system.set_qq_connector(qq_connector)
+            inactive_check_system.set_qq_connector(qq_connector)
 
     # 检查插件版本
     server.schedule_task(check_plugin_version(server))
@@ -200,6 +225,14 @@ async def on_user_info(server: PluginServerInterface, info: Info) -> None:
 # 卸载
 async def on_unload(server:PluginServerInterface)->None:
     try:
+        # 停止未绑定检查定时任务
+        if unbound_check_system:
+            unbound_check_system.stop_schedule_task()
+        
+        # 停止不活跃检查定时任务
+        if inactive_check_system:
+            inactive_check_system.stop_schedule_task()
+        
         if connector_manager:
             await connector_manager.disconnect_all()
     except:

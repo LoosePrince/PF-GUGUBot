@@ -32,6 +32,11 @@ class QQParser(BasicParser):
         try:
             message_data: Dict = json.loads(raw_message)
 
+            echo = message_data.get("echo")# 处理API调用的返回结果
+            if echo:
+                self.connector.bot.function_return[echo] = message_data
+                return None
+            
             if not self._is_valid_source(message_data):
                 return None
 
@@ -39,11 +44,7 @@ class QQParser(BasicParser):
             if event_type not in self.PROCESS_TYPE:
                 return None
 
-            # 处理API调用的返回结果
-            echo = message_data.get("echo")
-            if echo:
-                self.connector.bot.function_return[echo] = message_data
-            elif event_type == "message":
+            if event_type == "message":
                 # 处理事件消息
                 self_id = message_data.get("self_id")
                 if self_id is not None:

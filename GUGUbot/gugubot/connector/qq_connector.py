@@ -51,7 +51,6 @@ class Bot:
 
                     await asyncio.sleep(0.2)
                     if time.time() - start_time >= self.max_wait_time:
-                        del self.function_return[function_return_id]
                         return None
         else:
             async def handler(**kwargs):
