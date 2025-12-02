@@ -45,6 +45,13 @@ class EchoSystem(BasicSystem):
         # 先检查是否是开启/关闭命令
         if await self.handle_enable_disable(boardcast_info):
             return True
+        
+        # 检查是否是QQ管理群的消息，如果是则不广播
+        if boardcast_info.source == "QQ" and boardcast_info.event_sub_type == "group":
+            admin_group_ids = self.config.get_keys(["connector", "QQ", "permissions", "admin_group_ids"], [])
+            if boardcast_info.source_id and str(boardcast_info.source_id) in [str(i) for i in admin_group_ids if i]:
+                # 管理群消息不广播，直接返回False
+                return False
             
         try:
             # 准备转发的消息
