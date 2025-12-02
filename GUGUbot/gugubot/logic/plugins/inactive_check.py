@@ -39,6 +39,7 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
         self.bound_system = None
         self.qq_connector = None
         self.whitelist_system = None
+        self.active_whitelist_system = None  # 活跃白名单系统，用于过滤玩家
         
         # 检查状态
         self._checking = False
@@ -75,6 +76,10 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
     def set_whitelist_system(self, whitelist_system) -> None:
         """设置白名单系统引用"""
         self.whitelist_system = whitelist_system
+
+    def set_active_whitelist_system(self, active_whitelist_system) -> None:
+        """设置活跃白名单系统引用"""
+        self.active_whitelist_system = active_whitelist_system
 
     async def process_boardcast_info(self, boardcast_info: BoardcastInfo) -> bool:
         """处理接收到的命令。
@@ -300,6 +305,14 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
                     qq_accounts = player.accounts.get(QQ_connector_name, [])
                     if not qq_accounts:
                         continue
+                    
+                    # 检查玩家是否在活跃白名单中，如果是则跳过
+                    if self.active_whitelist_system:
+                        # 检查玩家的所有名称（Java和Bedrock）是否在活跃白名单中
+                        player_names = player.java_name + player.bedrock_name
+                        if any(self.active_whitelist_system.is_in_whitelist(name) for name in player_names):
+                            self.logger.debug(f"玩家 {player.name} 在活跃白名单中，跳过不活跃检查")
+                            continue
                     
                     # 检查该玩家是否在当前群，并获取进群时间
                     player_in_group = False

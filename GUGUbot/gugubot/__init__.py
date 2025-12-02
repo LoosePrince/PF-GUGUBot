@@ -10,7 +10,7 @@ from gugubot.logic.system import (
     BanWordSystem, BoundSystem, BoundNoticeSystem, EchoSystem, ExecuteSystem, GeneralHelpSystem, KeyWordSystem, 
     StartupCommandSystem, SystemManager, WhitelistSystem, StyleSystem, TodoSystem, PlayerListSystem
 )
-from gugubot.logic.plugins import UnboundCheckSystem, InactiveCheckSystem
+from gugubot.logic.plugins import UnboundCheckSystem, InactiveCheckSystem, ActiveWhiteListSystem
 from gugubot.config import BotConfig
 from gugubot.utils import check_plugin_version, StyleManager, migrate_config_v1_to_v2
 
@@ -95,6 +95,9 @@ async def on_load(server: PluginServerInterface, old)->None:
         style_system = StyleSystem(server, style_manager, config=gugubot_config)
         todo_system = TodoSystem(server, config=gugubot_config)
 
+        # 创建活跃白名单系统
+        active_whitelist_system = ActiveWhiteListSystem(server, config=gugubot_config)
+        
         # 创建未绑定检查系统
         unbound_check_system = UnboundCheckSystem(server, config=gugubot_config)
         
@@ -110,6 +113,7 @@ async def on_load(server: PluginServerInterface, old)->None:
         # 设置不活跃检查系统的依赖
         inactive_check_system.set_bound_system(bound_system)
         inactive_check_system.set_whitelist_system(whitelist_system)
+        inactive_check_system.set_active_whitelist_system(active_whitelist_system)
 
         systems.insert(0, general_help_system)
         systems.insert(1, ban_word_system)
@@ -122,6 +126,7 @@ async def on_load(server: PluginServerInterface, old)->None:
         systems.insert(8, todo_system)
         systems.insert(9, unbound_check_system)
         systems.insert(10, inactive_check_system)
+        systems.insert(11, active_whitelist_system)
 
     for system in systems:
         system_manager.register_system(system)

@@ -13,6 +13,7 @@ from gugubot.logic.plugins.player_notice import (
 )
 from gugubot.logic.plugins.unbound_check import UnboundCheckSystem
 from gugubot.logic.plugins.inactive_check import InactiveCheckSystem
+from gugubot.logic.plugins.active_whitelist import ActiveWhiteListSystem
 
 __all__ = [
     'broadcast_server_start',
@@ -21,5 +22,6 @@ __all__ = [
     'create_on_player_left',
     'UnboundCheckSystem',
     'InactiveCheckSystem',
+    'ActiveWhiteListSystem',
 ]
 
