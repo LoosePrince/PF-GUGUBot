@@ -12,7 +12,7 @@ from gugubot.logic.system import (
 )
 from gugubot.logic.plugins import UnboundCheckSystem, InactiveCheckSystem, ActiveWhiteListSystem
 from gugubot.config import BotConfig
-from gugubot.utils import check_plugin_version, StyleManager, migrate_config_v1_to_v2
+from gugubot.utils import check_plugin_version, StyleManager, migrate_config_v1_to_v2, help_msg_register
 
 from mcdreforged.api.types import PluginServerInterface, Info
 from mcdreforged.api.command import *
@@ -148,6 +148,9 @@ async def on_load(server: PluginServerInterface, old)->None:
     help_name = server.tr("gugubot.system.general_help.name")
     main_help_msg = f"GUGUBot {help_name}"
     server.register_help_message(f'{command_prefix}{help_name}', main_help_msg)
+    
+    # 注册 !!gugubot 命令
+    help_msg_register(server, gugubot_config)
 
     # # 注册监听任务
     from gugubot.logic.plugins.mg_event import create_on_mc_achievement, create_on_mc_death
