@@ -177,26 +177,8 @@ class QQWebSocketConnector(BasicConnector):
         source = processed_info.source
         source_id = processed_info.source_id
         
-        # 如果source_id在custom_group_name中，使用自定义名称
         if source != "QQ" and source != "":
-            custom_group_name = self.config.get_keys(["connector", "QQ", "permissions", "custom_group_name"], {})
-            
-            if isinstance(source_id, int):
-                source_id = str(source_id)
-            display_name = custom_group_name.get(source_id, source)
-            
-            # 从配置文件获取随机模板
-            chat_templates = self.config.get_keys(["connector", "QQ", "chat_templates"], [])
-            has_sender = processed_info.sender != ""
-            if isinstance(chat_templates, list) and len(chat_templates) > 0 and has_sender:
-                template = random.choice(chat_templates)
-                formatted_message = template.format(display_name=display_name, sender=processed_info.sender)
-                source_message = MessageBuilder.text(formatted_message)
-            elif not has_sender:
-                source_message = MessageBuilder.text(f"[{display_name}]")
-            else:
-                # 回退到默认模板
-                source_message = MessageBuilder.text(f"[{display_name}] {processed_info.sender}: ")
+            source_message = MessageBuilder.text(f"[{source}] {processed_info.sender}: ")
             message = [source_message] + message
 
         for target_id, target_type in target.items():
