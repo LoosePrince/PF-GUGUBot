@@ -35,7 +35,7 @@ def help_msg_register(server: PluginServerInterface, config: Optional[BotConfig]
         help_name = "帮助"
     
     # 构建帮助信息
-    help_message = f"# 召唤帮助菜单\n\n使用 {command_prefix} 或 {command_prefix}{help_name} 查看详细帮助信息"
+    help_message = f"在非控制台环境下使用 {command_prefix} 或 {command_prefix}{help_name} 查看详细帮助信息"
     
     def help_handler(source: CommandSource):
         """处理 !!gugubot 命令"""
