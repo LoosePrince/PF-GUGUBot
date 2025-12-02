@@ -3,6 +3,7 @@
 
 该模块提供了处理 Minecraft 游戏事件的功能，包括成就获得和玩家死亡事件的广播。
 """
+import asyncio
 from mcdreforged.api.types import PluginServerInterface
 
 from gugubot.builder import MessageBuilder
@@ -12,8 +13,8 @@ from gugubot.utils.types import ProcessedInfo
 
 
 # 转发死亡
-async def create_on_mc_death(config:BotConfig, connector_manager:ConnectorManager):
-    async def on_mc_death(server:PluginServerInterface, player, event, content):
+def create_on_mc_death(config:BotConfig, connector_manager:ConnectorManager):
+    def on_mc_death(server:PluginServerInterface, player, event, content):
         if not config.get_keys(["connector", "minecraft", "mc_death"], True):
             return
 
@@ -22,11 +23,12 @@ async def create_on_mc_death(config:BotConfig, connector_manager:ConnectorManage
         for i in content:
             if i.locale != server.get_mcdr_language(): # get the correct language
                 continue
-            await broadcast_msg(i.raw, config, server, connector_manager)
+            server.schedule_task(broadcast_msg(i.raw, config, server, connector_manager))
+    return on_mc_death
 
 # 转发成就
 def create_on_mc_achievement(config:BotConfig, connector_manager:ConnectorManager):
-    async def on_mc_achievement(server:PluginServerInterface, player, event, content):
+    def on_mc_achievement(server:PluginServerInterface, player, event, content):
         if not config.get_keys(["connector", "minecraft", "mc_achievement"], True):
             return
 
@@ -35,7 +37,8 @@ def create_on_mc_achievement(config:BotConfig, connector_manager:ConnectorManage
         for i in content:
             if i.locale != server.get_mcdr_language(): # get the correct language
                 continue
-            await broadcast_msg(i.raw, config, server, connector_manager)
+            server.schedule_task(broadcast_msg(i.raw, config, server, connector_manager))
+    return on_mc_achievement
 
 async def broadcast_msg(message:str, config:BotConfig, server:PluginServerInterface, connector_manager:ConnectorManager):
     await connector_manager.broadcast_processed_info(
