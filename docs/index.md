@@ -145,7 +145,6 @@ connector:
 重载插件即可开始使用：
 
 ```bash
-!!MCDR plugin reload cq_qq_api
 !!MCDR plugin reload gugubot
 ```
 

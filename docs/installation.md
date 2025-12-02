@@ -20,7 +20,6 @@
 
 | 插件 | 版本要求 | 说明 | 安装命令 |
 |------|---------|------|----------|
-| **cq_qq_api** | 最新版 | QQ 机器人接口插件 | `!!MCDR plugin install cq_qq_api` |
 | **whitelist_api** | ≥ 1.3.0 | 白名单 API 插件 | `!!MCDR plugin install whitelist_api` |
 | **mg_events** | ≥ 0.2.3 | 游戏事件监听插件 | `!!MCDR plugin install mg_events` |
 
@@ -58,7 +57,6 @@ MCDR 会自动下载并安装 GUGUBot 及其依赖插件。
 
 你应该能看到以下插件：
 - `gugubot`
-- `cq_qq_api`
 - `whitelist_api`
 - `mg_events`
 
@@ -76,7 +74,6 @@ MCDR 会自动下载并安装 GUGUBot 及其依赖插件。
 #### 步骤 2：下载依赖插件
 
 分别下载以下插件：
-- [cq_qq_api](https://github.com/LoosePrince/CQ-QQ-API/releases)
 - [whitelist_api](https://github.com/TISUnion/whitelist_api/releases)
 - [mg_events](https://github.com/AnzhiZhang/MCDReforgedPlugins/releases)
 
@@ -88,7 +85,6 @@ MCDR 会自动下载并安装 GUGUBot 及其依赖插件。
 MCDReforged/
 └── plugins/
     ├── gugubot-vX.X.X.mcdr
-    ├── cq_qq_api-vX.X.X.mcdr
     ├── whitelist_api-vX.X.X.mcdr
     └── mg_events-vX.X.X.mcdr
 ```
@@ -188,52 +184,6 @@ GUGUBot 需要连接到 QQ 机器人才能工作。目前推荐使用以下方�
 
 ---
 
-## 配置 CQ-QQ-API
-
-cq_qq_api 是 GUGUBot 和 QQ 机器人之间的桥梁。
-
-### 配置文件位置
-
-```
-config/cq_qq_api/config.json
-```
-
-### 基础配置
-
-编辑配置文件：
-
-```json
-{
-  "ws_configs": [
-    {
-      "name": "QQ机器人",
-      "ws_url": "ws://127.0.0.1:8080",
-      "access_token": "",
-      "reconnect_interval": 5,
-      "enable": true
-    }
-  ],
-  "debug": false
-}
-```
-
-### 配置项说明
-
-| 配置项 | 说明 | 示例 |
-|--------|------|------|
-| `ws_url` | QQ 机器人的 WebSocket 地址 | `ws://127.0.0.1:8080` |
-| `access_token` | 访问令牌（如果机器人设置了） | `"your_token_here"` |
-| `reconnect_interval` | 重连间隔（秒） | `5` |
-| `enable` | 是否启用此连接 | `true` |
-
-### 重载配置
-
-```bash
-!!MCDR plugin reload cq_qq_api
-```
-
----
-
 ## 配置 GUGUBot
 
 ### 配置文件位置
@@ -250,7 +200,7 @@ config/GUGUbot/config.yml
 connector:
   QQ:
     connection:
-      port: 8777  # 与 cq_qq_api 的端口保持一致
+      port: 8777
     permissions:
       admin_ids:  # 管理员 QQ 号
         - 1234567890
@@ -327,7 +277,7 @@ tail -f logs/latest.log
 1. 确认 QQ 机器人已启动并登录
 2. 检查 WebSocket 端口是否正确
 3. 确认防火墙没有阻止连接
-4. 检查 cq_qq_api 的配置是否正确
+4. 检查 GUGUBot 的配置是否正确
 
 ### 消息无法转发
 

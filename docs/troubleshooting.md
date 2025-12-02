@@ -39,14 +39,13 @@ source /path/to/venv/bin/activate  # Linux/Mac
 
 ### 依赖插件未安装
 
-**症状**：提示缺少 `cq_qq_api`、`whitelist_api` 或 `mg_events`
+**症状**：提示缺少 `whitelist_api` 或 `mg_events`
 
 **解决方案**：
 
 安装缺失的依赖插件：
 
 ```bash
-!!MCDR plugin install cq_qq_api
 !!MCDR plugin install whitelist_api
 !!MCDR plugin install mg_events
 ```
@@ -82,7 +81,7 @@ source /path/to/venv/bin/activate  # Linux/Mac
 1. QQ 机器人未启动
 2. WebSocket 端口配置错误
 3. 防火墙阻止连接
-4. cq_qq_api 配置错误
+4. GUGUBot 配置错误
 
 **解决方案**：
 
@@ -91,18 +90,6 @@ source /path/to/venv/bin/activate  # Linux/Mac
 确认 QQ 机器人（NapCat/LLOneBot）已启动并成功登录。
 
 #### 2. 检查端口配置
-
-**cq_qq_api 配置**（`config/cq_qq_api/config.json`）：
-```json
-{
-  "ws_configs": [
-    {
-      "ws_url": "ws://127.0.0.1:8080",  # 必须与QQ机器人端口一致
-      "enable": true
-    }
-  ]
-}
-```
 
 **QQ 机器人配置**：
 - NapCat: 检查 WebSocket 端口设置
