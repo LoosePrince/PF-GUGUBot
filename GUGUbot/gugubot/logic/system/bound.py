@@ -386,21 +386,33 @@ class BoundSystem(BasicSystem):
         """绑定指令帮助"""
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
         system_name = self.get_tr("name")
-        enable_cmd = self.get_tr("gugubot.enable", global_key=True)
-        disable_cmd = self.get_tr("gugubot.disable", global_key=True)
         bind_cmd = self.get_tr("bind")
         unbind_cmd = self.get_tr("unbind")
         list_cmd = self.get_tr("list")
-        help_msg = self.get_tr(
-            "help_msg", 
-            command_prefix=command_prefix, 
-            name=system_name,
-            enable=enable_cmd,
-            disable=disable_cmd,
-            bind=bind_cmd,
-            unbind=unbind_cmd,
-            list=list_cmd
-        )
+        
+        # 根据用户权限选择不同的帮助信息
+        if boardcast_info.is_admin:
+            enable_cmd = self.get_tr("gugubot.enable", global_key=True)
+            disable_cmd = self.get_tr("gugubot.disable", global_key=True)
+            help_msg = self.get_tr(
+                "help_msg", 
+                command_prefix=command_prefix, 
+                name=system_name,
+                enable=enable_cmd,
+                disable=disable_cmd,
+                bind=bind_cmd,
+                unbind=unbind_cmd,
+                list=list_cmd
+            )
+        else:
+            help_msg = self.get_tr(
+                "user_help_msg", 
+                command_prefix=command_prefix, 
+                name=system_name,
+                bind=bind_cmd,
+                unbind=unbind_cmd,
+                list=list_cmd
+            )
         await self.reply(boardcast_info, [MessageBuilder.text(help_msg)])
         return True
 

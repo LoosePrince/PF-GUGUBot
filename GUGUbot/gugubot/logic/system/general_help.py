@@ -74,38 +74,60 @@ class GeneralHelpSystem(BasicSystem):
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
         is_admin = boardcast_info.is_admin
         
+        # 获取快捷指令的翻译名称
+        player_list_cmd = self.server.tr("gugubot.system.list.list")
+        key_word_add_cmd = self.server.tr("gugubot.system.key_words.add")
+        key_word_remove_cmd = self.server.tr("gugubot.system.key_words.remove")
+        key_word_list_cmd = self.server.tr("gugubot.system.key_words.list")
+        
         # 获取各系统的翻译名称
         key_words_name = self.server.tr("gugubot.system.key_words.name")
         ban_words_name = self.server.tr("gugubot.system.ban_words.name")
         bound_name = self.server.tr("gugubot.system.bound.name")
+        bound_notice_name = self.server.tr("gugubot.system.bound_notice.name")
         whitelist_name = self.server.tr("gugubot.system.whitelist.name")
+        active_whitelist_name = self.server.tr("gugubot.system.active_whitelist.name")
         startup_command_name = self.server.tr("gugubot.system.startup_command.name")
         execute_name = self.server.tr("gugubot.system.execute.name")
         execute_execute_cmd = self.server.tr("gugubot.system.execute.execute")
         execute_mcdr_cmd = self.server.tr("gugubot.system.execute.mcdr")
         style_name = self.server.tr("gugubot.system.style.name")
         todo_name = self.server.tr("gugubot.system.todo.name")
+        unbound_check_name = self.server.tr("gugubot.system.unbound_check.name")
+        inactive_check_name = self.server.tr("gugubot.system.inactive_check.name")
         
         # 根据是否是管理员显示不同的帮助信息
         if is_admin:
             help_msg = self.get_tr(
                 "admin_help_msg", 
                 command_prefix=command_prefix,
+                player_list=player_list_cmd,
+                key_word_add=key_word_add_cmd,
+                key_word_remove=key_word_remove_cmd,
+                key_word_list=key_word_list_cmd,
                 key_words=key_words_name,
                 ban_words=ban_words_name,
                 bound=bound_name,
+                bound_notice=bound_notice_name,
                 whitelist=whitelist_name,
+                active_whitelist=active_whitelist_name,
                 startup_command=startup_command_name,
                 execute=execute_name,
                 execute_execute=execute_execute_cmd,
                 execute_mcdr=execute_mcdr_cmd,
                 style=style_name,
-                todo=todo_name
+                todo=todo_name,
+                unbound_check=unbound_check_name,
+                inactive_check=inactive_check_name
             )
         else:
             help_msg = self.get_tr(
                 "help_msg", 
                 command_prefix=command_prefix,
+                player_list=player_list_cmd,
+                key_word_add=key_word_add_cmd,
+                key_word_remove=key_word_remove_cmd,
+                key_word_list=key_word_list_cmd,
                 key_words=key_words_name,
                 bound=bound_name,
                 style=style_name,

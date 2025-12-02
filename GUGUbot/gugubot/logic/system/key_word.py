@@ -210,22 +210,35 @@ class KeyWordSystem(BasicConfig, BasicSystem):
         """关键词指令帮助"""
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
         system_name = self.get_tr("name")
-        enable_cmd = self.get_tr("gugubot.enable", global_key=True)
-        disable_cmd = self.get_tr("gugubot.disable", global_key=True)
         add_cmd = self.get_tr("add")
         remove_cmd = self.get_tr("remove")
         list_cmd = self.get_tr("list")
         cancel_cmd = self.get_tr("cancel")
-        help_msg = self.get_tr(
-            "help_msg", 
-            command_prefix=command_prefix, 
-            name=system_name,
-            enable=enable_cmd,
-            disable=disable_cmd,
-            add=add_cmd,
-            remove=remove_cmd,
-            list=list_cmd,
-            cancel=cancel_cmd
-        )
+        
+        # 根据用户权限选择不同的帮助信息
+        if boardcast_info.is_admin:
+            enable_cmd = self.get_tr("gugubot.enable", global_key=True)
+            disable_cmd = self.get_tr("gugubot.disable", global_key=True)
+            help_msg = self.get_tr(
+                "help_msg", 
+                command_prefix=command_prefix, 
+                name=system_name,
+                enable=enable_cmd,
+                disable=disable_cmd,
+                add=add_cmd,
+                remove=remove_cmd,
+                list=list_cmd,
+                cancel=cancel_cmd
+            )
+        else:
+            help_msg = self.get_tr(
+                "user_help_msg", 
+                command_prefix=command_prefix, 
+                name=system_name,
+                add=add_cmd,
+                remove=remove_cmd,
+                list=list_cmd,
+                cancel=cancel_cmd
+            )
         await self.reply(boardcast_info, [MessageBuilder.text(help_msg)])
         return True
