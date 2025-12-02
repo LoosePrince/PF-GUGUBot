@@ -2,10 +2,11 @@
 
 <div align="center">
 
-**一个功能强大的 MCDR 插件，实现 Minecraft 服务器与 QQ 群的无缝互通**
+<strong>一个功能强大的 MCDR 插件，实现 Minecraft 服务器与 QQ 群的无缝互通</strong>
 
-[![最新版](https://img.shields.io/github/v/release/LoosePrince/PF-GUGUBot?style=flat-square&label=最新版)](https://github.com/LoosePrince/PF-GUGUBot/releases/latest)
-[![下载量](https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/total?style=flat-square&label=下载量)](https://github.com/LoosePrince/PF-GUGUBot/releases)
+<a href="https://github.com/LoosePrince/PF-GUGUBot/releases/latest"><img src="https://img.shields.io/github/v/release/LoosePrince/PF-GUGUBot?style=flat-square&label=最新版" alt="最新版"></a>
+<a href="https://github.com/LoosePrince/PF-GUGUBot/releases"><img src="https://img.shields.io/github/downloads/LoosePrince/PF-GUGUBot/total?style=flat-square&label=下载量" alt="下载量"></a>
+
 
 </div>
 
@@ -221,10 +222,10 @@ GUGUBot 是开源项目，欢迎各种形式的贡献：
 
 <div align="center">
 
-**准备好了吗？让我们开始吧！**
+<strong>准备好了吗？让我们开始吧！</strong>
 
-[开始安装](installation.md){ .md-button .md-button--primary }
-[查看功能](features.md){ .md-button }
+<a href="installation/" class="md-button md-button--primary">开始安装</a>
+<a href="features/" class="md-button">查看功能</a>
 
 </div>
 
