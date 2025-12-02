@@ -98,6 +98,14 @@ class MCConnector(BasicConnector):
                 player_manager=player_manager
             )
 
+            if player_manager:
+                sender = getattr(player_manager.get_player(str(sender_id)), "name", None) or sender
+                receiver = getattr(player_manager.get_player(str(receiver)), "name", None) or receiver
+
+            
+            custom_group_name = self.config.get_keys(["connector", "QQ", "permissions", "custom_group_name"], {})
+            source = custom_group_name.get(source_id, source)
+
             main_content = self.builder.build(Rtext_conect, 
                                               group_name=source,
                                               group_id=source_id,

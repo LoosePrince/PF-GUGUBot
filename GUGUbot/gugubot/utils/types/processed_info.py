@@ -7,7 +7,6 @@ from typing import Any, List, Literal, Optional
 class ProcessedInfo:
     processed_message: List[dict]
     
-
     source: str
     source_id: str
 
