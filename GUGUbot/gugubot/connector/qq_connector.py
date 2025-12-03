@@ -1,8 +1,7 @@
-import logging
 import traceback
 import time
 import uuid
-import random
+import re
 
 import asyncio
 
@@ -14,6 +13,22 @@ from gugubot.config.BotConfig import BotConfig
 from gugubot.utils.types import ProcessedInfo
 from gugubot.parser.qq_parser import QQParser
 from gugubot.ws import WebSocketFactory
+
+def strip_minecraft_color_codes(text: str) -> str:
+    """去除 Minecraft 颜色/格式代码（如 §a, §l, §r 等）
+    
+    Parameters
+    ----------
+    text : str
+        可能包含 Minecraft 颜色代码的文本
+    
+    Returns
+    -------
+    str
+        去除颜色代码后的文本
+    """
+    return re.sub(r'§[0-9a-fk-or]', '', text, flags=re.IGNORECASE)
+
 
 class Bot:
     def __init__(self, send_message, max_wait_time: int = 9) -> None:
@@ -164,6 +179,33 @@ class QQWebSocketConnector(BasicConnector):
         else:
             self.logger.warning(self.server.tr("gugubot.connector.QQ.retry_connect"))
 
+    def _strip_color_codes_from_message(self, message: list) -> list:
+        """去除消息列表中的 Minecraft 颜色代码
+        
+        Parameters
+        ----------
+        message : list
+            消息列表，每个元素是包含 'type' 和 'data' 的字典
+        
+        Returns
+        -------
+        list
+            处理后的消息列表
+        """
+        result = []
+        for item in message:
+            if isinstance(item, dict) and item.get('type') == 'text':
+                # 复制 item 以避免修改原始数据
+                new_item = item.copy()
+                new_data = item.get('data', {}).copy()
+                if 'text' in new_data:
+                    new_data['text'] = strip_minecraft_color_codes(new_data['text'])
+                new_item['data'] = new_data
+                result.append(new_item)
+            else:
+                result.append(item)
+        return result
+
 
     async def send_message(self, processed_info: ProcessedInfo) -> None:
         if not self.enable:
@@ -176,6 +218,9 @@ class QQWebSocketConnector(BasicConnector):
         message = processed_info.processed_message
         source = processed_info.source
         source_id = processed_info.source_id
+        
+        # 去除消息中的 Minecraft 颜色代码
+        message = self._strip_color_codes_from_message(message)
         
         if source != "QQ" and source != "":
             source_message = MessageBuilder.text(f"[{source}] {processed_info.sender}: ")
