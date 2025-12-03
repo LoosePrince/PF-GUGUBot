@@ -55,7 +55,6 @@ GUGUBot 是一个专为 MCDReforged 设计的 QQ 机器人插件，支持离线�
 | 依赖项 | 版本要求 | 说明 |
 |--------|---------|------|
 | [MCDReforged](https://github.com/Fallen-Breath/MCDReforged) | ≥ 2.0.0 | Minecraft 服务器管理框架 |
-| [cq_qq_api](https://github.com/LoosePrince/CQ-QQ-API) | 最新版 | QQ 机器人接口插件 |
 | [whitelist_api](https://github.com/TISUnion/whitelist_api) | ≥ 1.3.0 | 白名单 API 插件 |
 | [mg_events](https://github.com/AnzhiZhang/MCDReforgedPlugins/tree/master/src/mg_events) | ≥ 0.2.3 | 游戏事件监听插件 |
 
@@ -68,15 +67,14 @@ GUGUBot 是一个专为 MCDReforged 设计的 QQ 机器人插件，支持离线�
 ```
 
 安装完成后：
-1. 配置 `/config/cq_qq_api/config.json`（配置 WebSocket 连接）
-2. 配置 `/config/GUGUbot/config.yml`（配置机器人基本信息）
-3. 重载 cq_qq_api：`!!MCDR plugin reload cq_qq_api`
+1. 配置 `/config/GUGUbot/config.yml`（配置机器人基本信息）
+2. 重载 gugubot：`!!MCDR plugin reload gugubot`
 
 #### 方式二：手动安装
 
 1. 下载前置插件并放入 `/plugins` 目录
-2. 前往 [Releases](https://github.com/LoosePrince/PF-GUGUBot/releases) 下载 `gugubot.mcdr`
-3. 将 `gugubot.mcdr` 放入 `/plugins` 目录
+2. 前往 [Releases](https://github.com/LoosePrince/PF-GUGUBot/releases) 下载 `gugubot-vX.X.X.mcdr`
+3. 将 `gugubot-vX.X.X.mcdr` 放入 `/plugins` 目录
 4. 按照上述步骤配置文件
 5. 重启或重载插件
 
@@ -89,18 +87,7 @@ GUGUBot 是一个专为 MCDReforged 设计的 QQ 机器人插件，支持离线�
 - **[NapCat](https://napneko.github.io/)** - 推荐，稳定高效
 - **[LiteLoaderQQNT + LLOneBot](https://github.com/LLOneBot/LLOneBot)** - 轻量级方案
 
-配置 WebSocket 服务端口（如 `8080`），消息上报格式选择 **CQ 码**。
-
-#### 2. CQ-QQ-API 配置
-
-编辑 `/config/cq_qq_api/config.json`：
-
-```json
-{
-  "host": "127.0.0.1",
-  "port": 8080
-}
-```
+配置 WebSocket 服务端口（如 `8080`），消息上报格式选择 **CQ 码** 或者 **消息体**。
 
 #### 3. GUGUBot 配置
 
