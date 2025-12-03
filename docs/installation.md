@@ -89,10 +89,12 @@ MCDReforged/
     └── mg_events-vX.X.X.mcdr
 ```
 
-#### 步骤 4：重载插件
+#### 步骤 4：加载插件
 
 ```bash
-!!MCDR plugin reload --all
+!!MCDR plugin load MoreGameEvents-vX.X.X.mcdr
+!!MCDR plugin load WhitelistAPI-vX.X.X.mcdr
+!!MCDR plugin load gugubot-vX.X.X.mcdr
 ```
 
 或重启 MCDR 服务器。
@@ -119,15 +121,21 @@ pip install -r requirements.txt
 
 #### 步骤 3：创建符号链接
 
+在 `plugins` 目录下创建 `gugubot` 文件夹，并创建 `mcdreforged.linked_directory_plugin.json`
+
+文件内容：
 ```bash
-cd /path/to/MCDReforged/plugins
-ln -s /path/to/PF-GUGUBot/GUGUbot gugubot
+{
+  "target": "/path/to/PF-GUGUBot/GUGUbot/"
+}
 ```
 
-#### 步骤 4：重载插件
+#### 步骤 4：加载插件
 
 ```bash
-!!MCDR plugin reload gugubot
+!!MCDR plugin load MoreGameEvents-vX.X.X.mcdr
+!!MCDR plugin load WhitelistAPI-vX.X.X.mcdr
+!!MCDR plugin load gugubot
 ```
 
 ---
@@ -180,7 +188,7 @@ GUGUBot 需要连接到 QQ 机器人才能工作。目前推荐使用以下方�
 
 1. 启用正向 WebSocket 服务
 2. 设置端口为 `8080`
-3. 消息格式选择 **CQ 码**
+3. 消息格式可选择 **CQ 码** 或 **消息体**
 
 ---
 
@@ -200,7 +208,7 @@ config/GUGUbot/config.yml
 connector:
   QQ:
     connection:
-      port: 8777
+      port: 8080 # QQ 机器人所配置的端口
     permissions:
       admin_ids:  # 管理员 QQ 号
         - 1234567890
@@ -226,10 +234,6 @@ connector:
 ### 检查连接状态
 
 查看 MCDR 日志，确认连接成功：
-
-```bash
-tail -f logs/latest.log
-```
 
 应该看到类似输出：
 - `[GUGUBot] QQ连接器: ~ 连接成功 ~`
@@ -263,11 +267,24 @@ tail -f logs/latest.log
 **解决方案**：
 1. 检查 Python 版本：`python --version`（需要 ≥ 3.8）
 2. 安装缺失的依赖：
-   ```bash
-   cd plugins/gugubot
-   pip install -r requirements.txt
-   ```
-3. 查看详细错误日志：`logs/latest.log`
+  ```bash
+  cd plugins/gugubot
+  pip install -r requirements.txt
+  ```
+3. 查看详细错误日志：`logs/MCDR.log`
+
+**问题**：报错 `ImportError: No module named XXX`
+
+**解决方案**：
+1. 在MCDR根目录打开终端
+2. 安装缺失的依赖：
+  ```bash
+  pip install XXX
+  ```
+3. 尝试加载gugubot
+  ```bash
+  !!MCDR plg load gugubot-vX.X.X.mcdr
+  ```
 
 ### 无法连接到 QQ 机器人
 
@@ -278,6 +295,7 @@ tail -f logs/latest.log
 2. 检查 WebSocket 端口是否正确
 3. 确认防火墙没有阻止连接
 4. 检查 GUGUBot 的配置是否正确
+5. 检查 GUGUBot 和 QQ 机器人的 token 设置是否一样
 
 ### 消息无法转发
 
