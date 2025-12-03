@@ -144,7 +144,7 @@ class McMessageBuilder:
         image_link = url or file
 
         if chat_image:
-            return f'[[CICode,url={image_link},name={summary}]]'
+            return f'[[CICode,url={image_link},name={summary or "图片"}]]'
         
         text = f"[图片:{summary}]" if summary else "[图片]"
         result = RText(text, color=RColor.gold)
