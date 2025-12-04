@@ -134,6 +134,8 @@ connector:
 
 #### 绑定基岩版
 
+gugubot 会尝试调用 Floodgate 来添加白名单 （如启动绑定时添加白名单）
+
 ```
 #绑定 Steve1234 基岩
 ```
@@ -268,7 +270,7 @@ system:
 
 #### 默认模式
 
-如果不指定模式，使用离线模式：
+如果不指定模式，使用服务器目前的模式（正版验证开/关）：
 
 ```
 #白名单 添加 Steve
@@ -292,8 +294,6 @@ system:
 #白名单 开启   # 启用服务器白名单
 #白名单 关闭   # 禁用服务器白名单
 ```
-
-**注意**：需要 `whitelist_api` 插件支持。
 
 ---
 
@@ -476,17 +476,20 @@ system:
 
 在 `config/GUGUbot/style/` 目录下创建 `.yml` 文件：
 
-**示例：`可爱.yml`**
+示例 `config/GUGUbot/style/可爱.yml`：
 
 ```yaml
 gugubot:
   system:
     bound:
-      bind_success: "绑定成功啦~ (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧"
-      unbind_success: "解绑成功啦~ ヾ(•ω•`)o"
+      bind_success: "绑定成功啦~ ✨"
+      unbind_success: "已经解绑啦~ 👋"
     key_words:
-      add_success: "关键词添加成功哦~ ✨"
+      name: "喵" # 默认: "关键词"
+      add: "喵" # 默认: "添加"
 ```
+
+> 命令也可以更改，如上述关键词添加指令会从 `#关键词 添加 <关键词>` 变成 `#喵 喵 <关键词>`
 
 ### 风格切换冷却
 
@@ -579,11 +582,18 @@ style:
 
 ### 系统要求
 
-查询在线玩家需要以下之一：
+*开启 RCON 连接*
 
-- 配置 RCON 连接
-- 使用支持的服务器版本
-- 安装 `online_player_api` 插件
+开启步骤如下:
+1. 修改 `服务器根目录/config.yml`
+  - `rcon` - `enable` -> `false`
+  - 记录 `rcon` - `password` 和 `rcon` - `port`
+2. 修改 `服务器根目录/server/server.properties`
+  - `enable-rcon` -> `true`
+  - `rcon.password` -> 记录的 `password`
+  - `rcon.port` -> 记录的 `port`
+
+> RCON 的端口不要跟游戏端口冲突
 
 ---
 
@@ -855,16 +865,6 @@ GUGUBot:
 ---
 
 ## 使用技巧
-
-### 批量管理
-
-使用脚本批量添加白名单：
-
-```python
-players = ["Steve", "Alex", "Notch"]
-for player in players:
-    # 发送: #白名单 添加 {player}
-```
 
 ### 自定义消息模板
 

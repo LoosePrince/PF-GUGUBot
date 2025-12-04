@@ -14,26 +14,27 @@
 
 **解决方案**：
 
-1. 检查 Python 版本：
+1. 在服务器目录打开终端
+
+2. 检查 Python 版本：
 ```bash
 python --version
 ```
 确保 ≥ 3.8
 
-2. 安装依赖：
+3. 安装依赖：
 ```bash
-cd plugins/gugubot
-pip install -r requirements.txt
+pip install "缺失的依赖"
 ```
 
-3. 如果使用虚拟环境，确保激活了正确的环境：
+4. 如果使用虚拟环境，确保激活了正确的环境：
 ```bash
 source /path/to/venv/bin/activate  # Linux/Mac
 # 或
 \path\to\venv\Scripts\activate  # Windows
 ```
 
-4. 检查日志文件 `logs/latest.log` 查看详细错误信息
+5. 检查日志文件 `logs/latest.log` 查看详细错误信息
 
 ---
 
@@ -412,7 +413,7 @@ rcon.password=your_rcon_password
 
 **解决方案**：
 
-#### 方案一：使用 ChatImage
+#### 方案一：使用 [ChatImage](https://github.com/kitUIN/ChatImage/blob/fabric-1.19.3/README.md)
 
 1. 安装 ChatImage 插件
 2. 配置：

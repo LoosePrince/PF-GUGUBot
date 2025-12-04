@@ -55,7 +55,7 @@ connector:
     
     connection:               # 连接设置
       host: 127.0.0.1         # 主机地址
-      port: 8777              # 端口
+      port: 8777              # 端口（跟QQ机器人设置的端口一样）
       post_path: ""           # 路径（通常为空）
       use_ssl: false          # 是否使用 SSL
       verify: true            # 是否验证证书
@@ -63,7 +63,7 @@ connector:
       sslopt: {}              # SSL 选项
       reconnect: 5            # 重连时间（秒）
       max_wait_time: 5        # 最大等待时间（秒）
-      token: ""               # 令牌（如果需要）
+      token: ""               # 令牌（强力推荐，跟QQ机器人设置的token一样即可）
     
     permissions:              # 权限配置
       admin_ids:              # 管理员 QQ 号列表
@@ -98,14 +98,14 @@ connector:
 | `host` | WebSocket 服务器地址 | `127.0.0.1`（本地） |
 | `port` | WebSocket 端口 | `8777` |
 | `reconnect` | 断线后重连间隔 | `5` 秒 |
-| `token` | 访问令牌 | 留空（除非机器人设置了） |
+| `token` | 访问令牌 | 默认留空，但强烈推荐设置！（与QQ机器人设置一样） |
 
 #### 权限配置说明
 
 | 配置项 | 说明 |
 |--------|------|
 | `admin_ids` | 拥有管理权限的 QQ 号，可执行所有管理命令 |
-| `admin_group_ids` | 管理群，群内所有成员拥有管理权限 |
+| `admin_group_ids` | 管理群，群内所有成员拥有管理权限，群内消息不会转发 |
 | `group_ids` | 要监听和转发消息的群号 |
 | `friend_is_admin` | 是否给机器人的所有好友管理权限 |
 | `custom_group_name` | 自定义群名在游戏内的显示 |
@@ -117,7 +117,6 @@ connector:
 可用变量：
 - `{display_name}` - 服务器显示名称
 - `{sender}` - 玩家名称
-- `{message}` - 消息内容（自动添加）
 
 ---
 
@@ -163,7 +162,7 @@ connector:
       - ".*bot.*"
       - "^[A-Za-z]+Bot$"
     
-    # 忽略的 MC 命令模式
+    # 忽略转发的 MC 命令模式
     ignore_mc_command_patterns:
       - "!!.*"                          # MCDR 指令
       - ".*?\\[Command: /.*\\]"         # Carpet 指令记录
@@ -183,7 +182,7 @@ connector:
 | `server_start_notice` | 是否通知服务器启动 |
 | `server_stop_notice` | 是否通知服务器停止 |
 
-#### 正则表达式配置
+#### 正则表达式配置 （[参考](https://www.runoob.com/regexp/regexp-syntax.html)）
 
 - **player_join_patterns**: 用于识别玩家加入消息的正则表达式，第一个捕获组应为玩家名
 - **player_left_patterns**: 用于识别玩家离开消息的正则表达式
@@ -214,7 +213,7 @@ connector:
       ping_interval: 5        # 心跳间隔（秒）
       ping_timeout: 5         # 心跳超时（秒）
       max_wait_time: 5        # 最大等待时间（秒）
-      token: ""               # 令牌
+      token: ""               # 令牌（强力推荐设置）
 ```
 
 #### 配置项说明
@@ -241,7 +240,7 @@ style:
 
 ### 自定义风格
 
-你可以在 `config/GUGUbot/style/` 目录下创建自定义风格文件（.yml 格式），格式与语言文件相同。
+你可以在 `config/GUGUbot/style/` 目录下创建自定义风格文件（xx风格.yml 格式），格式与[语言文件](https://github.com/LoosePrince/PF-GUGUBot/blob/main/GUGUbot/lang/zh_cn.yml)相同。
 
 示例 `config/GUGUbot/style/可爱.yml`：
 
@@ -251,7 +250,12 @@ gugubot:
     bound:
       bind_success: "绑定成功啦~ ✨"
       unbind_success: "已经解绑啦~ 👋"
+    key_words:
+      name: "喵" # 默认: "关键词"
+      add: "喵" # 默认: "添加"
 ```
+
+> 命令也可以更改，如上述关键词添加指令会从 `#关键词 添加 <关键词>` 变成 `#喵 喵 <关键词>`
 
 ---
 
@@ -265,7 +269,7 @@ system:
     enable: false           # 是否启用
 ```
 
-启用后，机器人会自动撤回包含违禁词的消息。
+启用后，机器人不会转发包含违禁词的消息。
 
 管理违禁词：
 - `#违禁词 添加 <词> [理由]` - 添加违禁词
@@ -317,7 +321,7 @@ system:
     enable: true            # 是否启用
 ```
 
-这是核心功能，控制 QQ 和 MC 之间的消息转发。
+这是核心功能，控制所有消息转发。
 
 ---
 
@@ -360,7 +364,7 @@ system:
     enable: false           # 是否启用
 ```
 
-启用后可使用 `#玩家` 或 `#在线` 查询在线玩家。
+启用后可使用 `#玩家` 或 `#list` 查询在线玩家。
 
 **注意**：需要配置 RCON 或使用支持的服务器版本。
 
@@ -378,18 +382,6 @@ system:
 
 ---
 
-### 开服指令
-
-```yaml
-system:
-  start_command:
-    enable: false           # 是否启用
-```
-
-允许管理员远程启动服务器。
-
----
-
 ### 启动指令
 
 ```yaml
@@ -398,7 +390,7 @@ system:
     enable: false           # 是否启用
 ```
 
-服务器启动时自动执行预设的命令列表。
+会在开服时执行指定指令（地毯反作弊指令等）。
 
 使用方法：
 - `#启动指令 添加 <指令>` - 添加启动指令
@@ -416,7 +408,7 @@ system:
     enable: false           # 是否启用
 ```
 
-提供白名单管理功能，需要 `whitelist_api` 插件支持。
+提供白名单管理功能，需要 `whitelist_api` 插件支持(会自动安装的前置插件)。
 
 ---
 
@@ -547,12 +539,6 @@ system:
 
 ```bash
 !!MCDR plugin reload gugubot
-```
-
-或者使用热重载（部分配置支持）：
-
-```bash
-#重载配置
 ```
 
 ---
