@@ -28,10 +28,11 @@ class McMessageBuilder:
                 .set_click_event(action=RAction.suggest_command, value=f"[CQ:at,qq={sender_id}]" if sender_id else "")
         if receiver is not None:
             rtext += RText(f"[@{receiver}]", color=RColor.aqua)
+        rtext += RText(" ")
         if isinstance(forward_content, RTextBase):
-            rtext += RText(" ") + forward_content
+            rtext += forward_content
         else:
-            rtext += RText(f" {forward_content}", color=RColor.white)
+            rtext += RText(f"{forward_content}", color=RColor.white)
 
         return rtext
     
@@ -141,10 +142,10 @@ class McMessageBuilder:
         file = data.get('file', '')
         summary = data.get('summary', '').strip('[]')
 
-        image_link = url or file
+        image_link = url or rf"file:///{file}"
 
         if chat_image:
-            return f'[[CICode,url={image_link},name={summary or "图片"}]]'
+            return RText(f'[[CICode,url={image_link},name={summary or "图片"}]]')
         
         text = f"[图片:{summary}]" if summary else "[图片]"
         result = RText(text, color=RColor.gold)
@@ -157,7 +158,3 @@ class McMessageBuilder:
             result = result.set_hover_text(image_link)\
                            .set_click_event(action=RAction.open_url, value=image_link)
         return result
-
-
-
-
