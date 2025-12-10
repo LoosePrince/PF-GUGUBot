@@ -87,7 +87,8 @@ class MCConnector(BasicConnector):
         use_image_previewer = self.config.get_keys(["connector", "minecraft", "image_previewer"], False)
 
         try:
-            game_version = self.server.get_server_information().version.lower() or ""
+            game_version = self.server.get_server_information().version or ""
+            game_version = game_version.lower() if game_version else ""
             is_low_version = self.builder.is_low_game_version(game_version)
 
             player_manager = getattr(self.connector_manager.system_manager.get_system("bound"), "player_manager", None)
