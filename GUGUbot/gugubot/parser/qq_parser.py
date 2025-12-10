@@ -90,6 +90,8 @@ class QQParser(BasicParser):
                     source_id=message_data.get("user_id"),
                     receiver_source=self.connector.source,  # 对于非桥接消息，receiver_source 等于 source
                 )
+
+                return None
             
             return boardcase_info
 
