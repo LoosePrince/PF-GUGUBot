@@ -256,7 +256,7 @@ class BridgeConnector(BasicConnector):
             "sender_id": processed_info.sender_id,
             "event_sub_type": processed_info.event_sub_type,
             "receiver": processed_info.receiver,
-            "source": self.source,
+            "source": processed_info.source,
             "source_id": processed_info.source_id,
             "raw": processed_info.raw,
             "processed_message": processed_info.processed_message,
