@@ -140,9 +140,11 @@ class McMessageBuilder:
     def process_image(data: Dict[str, str], chat_image: bool = False, image_previewer: bool = False) -> RText:
         url = data.get('url', '')
         file = data.get('file', '')
+        file = rf"file:///{file}" if not file.startswith('http') else file
+
         summary = data.get('summary', '').strip('[]')
 
-        image_link = url or rf"file:///{file}"
+        image_link = url or file
 
         if chat_image:
             return RText(f'[[CICode,url={image_link},name={summary or "图片"}]]')
