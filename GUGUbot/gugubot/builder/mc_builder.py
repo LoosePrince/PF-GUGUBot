@@ -1,7 +1,7 @@
 import re
 
 from packaging import version
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Union
 
 from mcdreforged.api.rtext import RText, RAction, RColor, RTextBase
 
@@ -12,7 +12,7 @@ from gugubot.utils.player_manager import PlayerManager
 class McMessageBuilder:
     @staticmethod
     def build(
-        forward_content: str | RText, *,
+        forward_content: Union[str, RText], *,
         group_name: str = "QQ",
         group_id: Optional[str] = None,
         sender: Optional[str] = None,

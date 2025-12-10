@@ -1,8 +1,9 @@
 import json
+from typing import Union
 
 
 class BasicConstructor:
-    def __init__(self, raw_data: str | dict):
+    def __init__(self, raw_data: Union[str, dict]):
         if isinstance(raw_data, str):
             raw_data = json.loads(raw_data)
         self.raw_data = raw_data

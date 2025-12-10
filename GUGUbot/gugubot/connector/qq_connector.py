@@ -5,7 +5,7 @@ import re
 
 import asyncio
 
-from typing import Any, Optional, override
+from typing import Any, Optional
 
 from gugubot.builder import MessageBuilder
 from gugubot.connector.basic_connector import BasicConnector
@@ -109,7 +109,6 @@ class QQWebSocketConnector(BasicConnector):
 
         return url
 
-    @override
     async def connect(self) -> None:
         """建立到QQ WebSocket服务器的连接"""
         self.logger.info(f"{self.log_prefix} {self.server.tr('gugubot.connector.QQ.try_connect', url=self.url)}")
@@ -247,7 +246,6 @@ class QQWebSocketConnector(BasicConnector):
                     message=message
                 )
 
-    @override
     async def disconnect(self) -> None:
         """断开与QQ WebSocket服务器的连接"""
         try:
@@ -258,7 +256,6 @@ class QQWebSocketConnector(BasicConnector):
             self.logger.warning(f"{self.log_prefix} {self.server.tr('gugubot.connector.QQ.error_close', error=str(e) + f'\n{traceback.format_exc()}')}")
             raise
 
-    @override
     def on_message(self, _, raw_message: str) -> None:
         """处理并分发WebSocket消息。
 

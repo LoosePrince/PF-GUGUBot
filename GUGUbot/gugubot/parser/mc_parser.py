@@ -1,7 +1,7 @@
 import re
 import traceback
 
-from typing import Any, Optional, override
+from typing import Any, Optional
 
 from mcdreforged.api.types import PluginServerInterface, Info
 
@@ -16,7 +16,6 @@ class MCParser(BasicParser):
     处理来自Minecraft服务器的消息，包括玩家聊天、系统消息等。
     """
 
-    @override
     async def parse(self, raw_message: Info, server: PluginServerInterface) -> Optional[BoardcastInfo]:
         """解析Minecraft消息。
 

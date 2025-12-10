@@ -2,7 +2,7 @@ import json
 import time
 import asyncio
 import threading
-from typing import Any, Dict, override
+from typing import Any, Dict
 
 from mcdreforged.api.types import Info
 
@@ -52,7 +52,6 @@ class BridgeConnector(BasicConnector):
         self.ws_server = None
         self.ws_client = None
 
-    @override
     async def connect(self) -> None:
         """建立连接"""
         if self.is_main_server:
@@ -247,7 +246,6 @@ class BridgeConnector(BasicConnector):
         except Exception as e:
             self.logger.error(f"{self.log_prefix} 处理桥接消息失败: {e}")
 
-    @override
     async def send_message(self, processed_info: ProcessedInfo) -> None:
         """发送消息"""
         if not self.enable:
@@ -279,7 +277,6 @@ class BridgeConnector(BasicConnector):
                 else:
                     self.logger.warning(f"{self.log_prefix} 发送消息失败")
 
-    @override
     async def disconnect(self) -> None:
         """断开连接"""
         try:
@@ -296,7 +293,6 @@ class BridgeConnector(BasicConnector):
         except Exception as e:
             self.logger.warning(f"{self.log_prefix} 断开连接时出错: {e}")
 
-    @override
     async def on_message(self, raw: Any) -> BoardcastInfo:
         """处理接收到的消息"""
         if not self.enable:
