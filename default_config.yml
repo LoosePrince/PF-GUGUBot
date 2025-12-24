@@ -125,6 +125,9 @@ system:
 
   bound_notice:   # 绑定提示
     enable: false
+    exclude_ids:   # 排除用户列表（这些用户的消息会被完全忽略，不会被任何系统处理）
+    - 2854196310 # Q群管家
+    - # QQ号2
 
   echo:   # 转发系统
     enable: true
