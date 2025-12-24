@@ -554,8 +554,11 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
                     next_check_str = datetime.fromtimestamp(next_check_time).strftime('%Y-%m-%d %H:%M:%S')
                     self.logger.debug(f"下次检查时间: {next_check_str}")
                 
-                # 等待到下次检查时间
-                await asyncio.sleep(wait_time)
+                # 等待到下次检查时间（分割成小段以便快速响应停止信号）
+                while wait_time > 0 and self._schedule_task_running:
+                    sleep_time = min(wait_time, 1.0)  # 每次最多睡眠1秒
+                    await asyncio.sleep(sleep_time)
+                    wait_time -= sleep_time
 
                 if not self._schedule_task_running:
                     break
@@ -591,8 +594,11 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
             
             except Exception as e:
                 self.logger.error(f"定时检查任务出错: {e}\n{traceback.format_exc()}")
-                # 出错后等待一段时间再继续
-                await asyncio.sleep(60)
+                # 出错后等待一段时间再继续（分割成小段以便快速响应停止信号）
+                for _ in range(60):
+                    if not self._schedule_task_running:
+                        break
+                    await asyncio.sleep(1.0)
         
         self.logger.info("不活跃检查定时任务已停止")
 
