@@ -78,25 +78,50 @@ class StyleManager:
             self.current_style = config.get_keys(["GUGUBot", "style"], None)
     
     def _ensure_style_directory(self) -> None:
-        """确保风格目录存在，并复制默认样本文件"""
+        """确保风格目录存在，并复制默认样本文件（仅复制不存在的文件）"""
+        # 确保风格目录存在
         if not self.style_dir.exists():
             self.style_dir.mkdir(parents=True, exist_ok=True)
             self.server.logger.info(f"[GUGUBot] 已创建风格目录: {self.style_dir}")
+        
+        # 复制样本文件到风格目录（只复制不存在的文件）
+        try:
+            # 所有风格示例文件列表
+            style_files = [
+                "normal.yml",
+                "傲娇.yml",
+                "雌小鬼.yml",
+                "御姐.yml",
+                "萝莉.yml",
+                "波奇酱.yml",
+                "病娇.yml",
+                "中二病.yml"
+            ]
             
-            # 复制样本文件到风格目录
-            try:
-                # 获取插件包目录
-                with self.server.open_bundled_file("gugubot/constant/normal.yml") as f:
-                    normal_content = f.read().decode('utf-8')
-                
-                # 写入样本文件
-                normal_sample = self.style_dir / "normal.yml"
-                
-                normal_sample.write_text(normal_content, encoding='utf-8')
-                
-                self.server.logger.info(f"[GUGUBot] 已复制样本风格文件到: {self.style_dir}")
-            except Exception as e:
-                self.server.logger.warning(f"[GUGUBot] 复制样本风格文件失败: {e}")
+            copied_count = 0
+            for style_file in style_files:
+                try:
+                    # 检查目标文件是否已存在
+                    sample_file = self.style_dir / style_file
+                    if sample_file.exists():
+                        self.server.logger.debug(f"[GUGUBot] 风格文件已存在，跳过: {style_file}")
+                        continue
+                    
+                    # 获取插件包目录中的风格文件
+                    with self.server.open_bundled_file(f"gugubot/constant/{style_file}") as f:
+                        content = f.read().decode('utf-8')
+                    
+                    # 写入样本文件
+                    sample_file.write_text(content, encoding='utf-8')
+                    copied_count += 1
+                    self.server.logger.debug(f"[GUGUBot] 已复制风格文件: {style_file}")
+                except Exception as e:
+                    self.server.logger.debug(f"[GUGUBot] 复制风格文件 {style_file} 失败: {e}")
+            
+            if copied_count > 0:
+                self.server.logger.info(f"[GUGUBot] 已复制 {copied_count} 个风格示例文件到: {self.style_dir}")
+        except Exception as e:
+            self.server.logger.warning(f"[GUGUBot] 复制风格示例文件失败: {e}")
     
     def scan_styles(self) -> None:
         """扫描风格目录并加载所有 .yml 文件"""

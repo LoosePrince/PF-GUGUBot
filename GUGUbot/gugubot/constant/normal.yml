@@ -54,8 +54,8 @@ gugubot:
         general_help:
             name: "帮助"
             help_command: "帮助"
-            help_msg: "GUGUBot 帮助信息\n\n可用系统：\n• {command_prefix}{key_words} - 关键词回复系统\n• {command_prefix}{bound} - 玩家绑定系统\n• {command_prefix}{style} - 风格切换系统\n• {command_prefix}{todo} - 待办管理系统\n\n使用 {command_prefix}<系统名> 查看具体系统的帮助信息"
-            admin_help_msg: "GUGUBot 管理员帮助信息\n\n可用系统：\n• {command_prefix}{key_words} - 关键词回复系统\n• {command_prefix}{ban_words} - 违禁词管理系统\n• {command_prefix}{bound} - 玩家绑定系统\n• {command_prefix}{whitelist} - 白名单管理系统\n• {command_prefix}{startup_command} - 启动指令管理系统\n• {command_prefix}{execute} - 命令执行系统\n  - {command_prefix}{execute_execute} <命令> - 执行 MC 原生命令\n  - {command_prefix}{execute_mcdr} <命令> - 执行 MCDR 命令\n• {command_prefix}{style} - 风格切换系统\n• {command_prefix}{todo} - 待办管理系统\n\n使用 {command_prefix}<系统名> 查看具体系统的帮助信息"
+            help_msg: "GUGUBot 帮助信息\n\n快捷指令：\n• {command_prefix}{player_list} -> 显示在线玩家列表\n• {command_prefix}{key_word_add} <关键词> -> 添加关键词\n• {command_prefix}{key_word_remove} <关键词> -> 删除关键词\n• {command_prefix}{key_word_list} -> 显示关键词列表\n\n可用系统：\n• {command_prefix}{key_words} - 关键词回复系统\n• {command_prefix}{bound} - 玩家绑定系统\n• {command_prefix}{style} - 风格切换系统\n• {command_prefix}{todo} - 待办管理系统\n\n使用 {command_prefix}<系统名> 查看具体系统的帮助信息"
+            admin_help_msg: "GUGUBot 管理员帮助信息\n\n快捷指令：\n• {command_prefix}{player_list} -> 显示在线玩家列表\n• {command_prefix}{key_word_add} <关键词> -> 添加关键词\n• {command_prefix}{key_word_remove} <关键词> -> 删除关键词\n• {command_prefix}{key_word_list} -> 显示关键词列表\n\n可用系统：\n• {command_prefix}{key_words} - 关键词回复系统\n• {command_prefix}{ban_words} - 违禁词管理系统\n• {command_prefix}{bound} - 玩家绑定系统\n• {command_prefix}{bound_notice} - 绑定提醒系统\n• {command_prefix}{whitelist} - 白名单管理系统\n• {command_prefix}{active_whitelist} - 活跃白名单系统\n• {command_prefix}{startup_command} - 启动指令管理系统\n• {command_prefix}{execute} - 命令执行系统\n• {command_prefix}{style} - 风格切换系统\n• {command_prefix}{todo} - 待办管理系统\n• {command_prefix}{unbound_check} - 未绑定检查系统\n• {command_prefix}{inactive_check} - 不活跃检查系统\n\n使用 {command_prefix}<系统名> 查看具体系统的帮助信息"
 
         # 关键词系统 / Keyword system
         key_words:
@@ -80,6 +80,7 @@ gugubot:
             cancel_not_exist: "未在添加过程中"
 
             help_msg: "关键词相关指令：\n{command_prefix}{name} {enable} -> 开启关键词系统\n{command_prefix}{name} {disable} -> 关闭关键词系统\n{command_prefix}{name} {list} -> 显示关键词列表\n{command_prefix}{add} <关键词> -> 添加关键词\n{command_prefix}{remove} <关键词> -> 删除指定关键词\n{command_prefix}{cancel} -> 取消添加关键词"
+            user_help_msg: "关键词相关指令：\n{command_prefix}{name} {list} -> 显示关键词列表\n{command_prefix}{add} <关键词> -> 添加关键词\n{command_prefix}{remove} <关键词> -> 删除指定关键词\n{command_prefix}{cancel} -> 取消添加关键词"
 
         # 转发系统 / Echo system
         echo:
@@ -136,6 +137,7 @@ gugubot:
             search_instruction: "请提供要查询的玩家名称或QQ号"
 
             help_msg: "绑定相关指令：\n{command_prefix}{name} {enable} -> 开启绑定系统\n{command_prefix}{name} {disable} -> 关闭绑定系统\n{command_prefix}{name} {bind} <玩家名> [基岩] -> 绑定玩家\n{command_prefix}{name} {bind} [@QQ号] <玩家名> [基岩] -> 为他人绑定\n{command_prefix}{name} {unbind} -> 解绑所有Java版玩家名（默认）\n{command_prefix}{name} {unbind} [玩家名] [基岩] -> 解绑玩家\n{command_prefix}{name} {unbind} 基岩 -> 解绑所有基岩版玩家名\n{command_prefix}{name} {list} -> 显示绑定列表\n\n参数说明：\n- 基岩版：bedrock, 基岩, be, true, 1（默认false）\n- 解绑时指定基岩版参数可只解绑对应版本的玩家名\n- 解绑 基岩 可解绑当前用户的所有基岩版玩家名"
+            user_help_msg: "绑定相关指令：\n{command_prefix}{name} {bind} <玩家名> [基岩] -> 绑定玩家\n{command_prefix}{name} {unbind} -> 解绑所有Java版玩家名（默认）\n{command_prefix}{name} {unbind} [玩家名] [基岩] -> 解绑玩家\n{command_prefix}{name} {unbind} 基岩 -> 解绑所有基岩版玩家名\n{command_prefix}{name} {list} -> 显示绑定列表\n\n参数说明：\n- 基岩版：bedrock, 基岩, be, true, 1（默认false）\n- 解绑时指定基岩版参数可只解绑对应版本的玩家名\n- 解绑 基岩 可解绑当前用户的所有基岩版玩家名"
 
         # 绑定提醒系统 / Bound notice system
         bound_notice:
@@ -170,7 +172,7 @@ gugubot:
 
             api_not_available: "白名单API不可用"
 
-            help_msg: "白名单相关指令：\n{command_prefix}{name} {enable} -> 开启白名单系统\n{command_prefix}{name} {disable} -> 关闭白名单系统\n{command_prefix}{name} {add} <玩家名> [模式] -> 添加玩家到白名单\n{command_prefix}{name} {remove} <玩家名> -> 从白名单移除玩家\n{command_prefix}{name} {list} -> 显示白名单列表\n{command_prefix}{name} {enable} -> 启用服务器白名单\n{command_prefix}{name} {disable} -> 禁用服务器白名单\n\n模式说明：\n- online/在线/正版 -> 在线模式\n- offline/离线 -> 离线模式\n- bedrock/基岩/be -> 基岩版模式"
+            help_msg: "白名单相关指令：\n{command_prefix}{name} {list} -> 显示白名单列表\n{command_prefix}{name} {add} <玩家名> [模式] -> 添加玩家到白名单\n{command_prefix}{name} {remove} <玩家名> -> 从白名单移除玩家\n{command_prefix}{name} {enable} -> 启用服务器白名单\n{command_prefix}{name} {disable} -> 禁用服务器白名单\n\n模式说明：\n- online/在线/正版 -> 在线模式\n- offline/离线 -> 离线模式\n- bedrock/基岩/be -> 基岩版模式"
 
         # 游戏事件系统 / Game event system
         mg_event:
@@ -222,9 +224,8 @@ gugubot:
             bridge_target_not_found: "未找到目标服务器: {target}"
             bridge_execute_disabled: "通过 bridge 执行命令功能已禁用"
             bridge_not_found: "未找到 bridge 连接器"
-            bridge_all_servers: "所有服务器"
 
-            help_msg: "命令执行相关指令：\n{command_prefix}{name} {enable} -> 开启命令执行系统\n{command_prefix}{name} {disable} -> 关闭命令执行系统\n{command_prefix}{execute} <命令> -> 执行 MC 原生命令\n{command_prefix}{mcdr} <命令> -> 执行 MCDR 命令\n{command_prefix}{execute}@bridge <命令> -> 通过 bridge 发送命令到所有服务器\n{command_prefix}{execute}@<服务器名> <命令> -> 通过 bridge 发送命令到指定服务器"
+            help_msg: "命令执行相关指令：\n{command_prefix}{execute} <命令> -> 执行 MC 原生命令\n{command_prefix}{mcdr} <命令> -> 执行 MCDR 命令\n{command_prefix}{execute}@<服务器名> <命令> -> 通过 bridge 发送命令到指定服务器\n{command_prefix}{mcdr}@<服务器名> <命令> -> 通过 bridge 发送 MCDR 命令到指定服务器"
 
         # 风格系统 / Style system
         style:
@@ -284,3 +285,112 @@ gugubot:
             unknown: "未知"
 
             help_msg: "待办相关指令：\n{command_prefix}{name} {add} <内容> -> 添加待办事项\n{command_prefix}{name} {remove} <ID> -> 删除指定待办事项\n{command_prefix}{name} {complete} <ID> -> 标记待办为已完成\n{command_prefix}{name} {undo} <ID> -> 撤回待办的完成状态\n{command_prefix}{name} {list} -> 显示待办列表"
+
+        # 玩家列表系统 / Player list system
+        list:
+            name: "玩家"
+            list: "玩家"
+            bot: "假人"
+            server: "服务器"
+            help_msg: "列表相关指令：\n{command_prefix}玩家 -> 显示在线玩家列表\n{command_prefix}假人 -> 显示假人列表\n{command_prefix}服务器 -> 显示服务器完整状态"
+            query_failed: "获取列表失败: {error}"
+            rcon_not_running: "无法获取列表：RCON未连接或不支持。"
+            list_empty: "当前没有玩家和假人在线"
+            list_content: "在线玩家({count}): {players}"
+            players_empty: "当前没有玩家在线"
+            players_content: "在线玩家({count}人): {players}"
+            bots_empty: "当前没有假人在线"
+            bots_content: "在线假人({count}个): {bots}"
+            server_content: "服务器状态 (玩家{player_count}人, 假人{bot_count}个)\n\n{details}"
+            merged_list_content: "在线玩家总数: {total_count}人 ({server_count}个服务器)\n\n{details}"
+            merged_players_content: "在线玩家总数: {total_count}人 ({server_count}个服务器)\n\n{details}"
+            merged_bots_content: "在线假人总数: {total_count}个 ({server_count}个服务器)\n\n{details}"
+            merged_server_content: "服务器状态 (玩家{player_count}人, 假人{bot_count}个, {server_count}个服务器)\n\n{details}"
+            
+            # 服务器名称标签
+            server_label: "【{server_name}】"
+            server_players_count: "【{server_name}】({count}人)\n{player_list}"
+            server_bots_count: "【{server_name}】({count}个)\n{player_list}"
+            server_no_players: "【{server_name}】(0人)"
+            server_no_bots: "【{server_name}】(0个)"
+            
+            # 单服务器详情
+            local_players_label: "玩家({count}人):\n{player_list}"
+            local_bots_label: "假人({count}个):\n{player_list}"
+            local_no_players: "玩家(0人)"
+            local_no_bots: "假人(0个)"
+            
+            # 多服务器详情
+            merged_players_label: "  玩家({count}人):\n{player_list}"
+            merged_bots_label: "  假人({count}个):\n{player_list}"
+            merged_no_players: "  玩家(0人)"
+            merged_no_bots: "  假人(0个)"
+
+        # 未绑定检查系统 / Unbound check system
+        unbound_check:
+            name: "未绑定检查"
+            check: "检查"
+            next: "下次检查"
+
+            check_start: "开始检查未绑定用户..."
+            check_complete: "检查完成，共发现 {total_count} 名未绑定用户"
+            no_unbound_users: "所有群成员均已绑定"
+            checking: "正在检查中，请稍候..."
+
+            notification_title: "【未绑定用户提醒】"
+            notification_group: "群 {group_name}({group_id}) 中有 {count} 名用户入群超过 {days} 天仍未绑定：\n{user_list}"
+            user_item: "  • {nickname}({user_id}) - 入群 {days_ago} 天"
+
+            next_check_time: "下次自动检查时间: {time}"
+            manual_check_success: "手动检查已完成"
+
+            qq_connector_not_found: "QQ连接器未初始化"
+            bound_system_not_found: "绑定系统未初始化"
+
+            help_msg: "未绑定检查系统（仅管理员）：\n{command_prefix}{name} {enable} -> 开启系统\n{command_prefix}{name} {disable} -> 关闭系统\n{command_prefix}{name} {check} -> 手动检查\n{command_prefix}{name} {next} -> 查看下次检查时间"
+
+        # 不活跃检查系统 / Inactive check system
+        inactive_check:
+            name: "不活跃检查"
+            check: "检查"
+            next: "下次检查"
+
+            check_start: "开始检查不活跃玩家..."
+            check_complete: "检查完成，共发现 {total_count} 名问题玩家（不活跃: {inactive_count} 名，从未进入游戏: {never_played_count} 名）"
+            no_inactive_players: "所有玩家均活跃"
+            checking: "正在检查中，请稍候..."
+
+            notification_title: "【不活跃玩家提醒】"
+            notification_content: "群 {group_name}({group_id}) 中有 {count} 名玩家超过 {days} 天未登录游戏：\n{player_list}"
+            player_item: "  • {player_name} (QQ: {qq_accounts}) - 已不活跃 {days_inactive} 天"
+            
+            never_played_content: "群 {group_name}({group_id}) 中有 {count} 名玩家进群超过 {days} 天仍未进入游戏：\n{player_list}"
+            never_played_player_item: "  • {player_name} (QQ: {qq_accounts}) - 进群 {days_since_bind} 天后未进入游戏"
+            never_played_player_item_no_time: "  • {player_name} (QQ: {qq_accounts}) - 已绑定但从未进入游戏（无进群时间）"
+
+            next_check_time: "下次自动检查时间: {time}"
+            manual_check_success: "手动检查已完成"
+
+            qq_connector_not_found: "QQ连接器未初始化"
+            bound_system_not_found: "绑定系统未初始化"
+            whitelist_not_found: "白名单系统未初始化或未启用"
+
+            help_msg: "不活跃检查系统（仅管理员）：\n{command_prefix}{name} {enable} -> 开启系统\n{command_prefix}{name} {disable} -> 关闭系统\n{command_prefix}{name} {check} -> 手动检查\n{command_prefix}{name} {next} -> 查看下次检查时间"
+
+        # 活跃白名单系统 / Active whitelist system
+        active_whitelist:
+            name: "活跃白名单"
+            add: "添加"
+            remove: "删除"
+            list: "列表"
+
+            add_usage: "用法: {command_prefix}{name} {add} <玩家名>"
+            remove_usage: "用法: {command_prefix}{name} {remove} <玩家名>"
+            player_already_in_list: "{player_name} 已在活跃白名单中"
+            player_not_in_list: "{player_name} 不在活跃白名单中"
+            player_added: "{player_name} 已添加到活跃白名单"
+            player_removed: "{player_name} 已从活跃白名单移除"
+            list_empty: "活跃白名单为空"
+            list_content: "活跃白名单成员({count}):\n{players}"
+
+            help_msg: "活跃白名单系统（仅管理员）：\n{command_prefix}{name} {add} <玩家名> -> 添加玩家到活跃白名单\n{command_prefix}{name} {remove} <玩家名> -> 从活跃白名单移除玩家\n{command_prefix}{name} {list} -> 查看活跃白名单列表\n\n注意：在活跃白名单中的玩家不会被不活跃检查系统标记为不活跃"
