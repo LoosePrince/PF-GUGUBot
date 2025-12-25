@@ -274,6 +274,25 @@ gugubot:
             merged_players_content: "在线玩家总数: {total_count}人 ({server_count}个服务器)\n\n{details}"
             merged_bots_content: "在线假人总数: {total_count}个 ({server_count}个服务器)\n\n{details}"
             merged_server_content: "服务器状态 (玩家{player_count}人, 假人{bot_count}个, {server_count}个服务器)\n\n{details}"
+            
+            # 服务器名称标签
+            server_label: "【{server_name}】"
+            server_players_count: "【{server_name}】({count}人)\n{player_list}"
+            server_bots_count: "【{server_name}】({count}个)\n{player_list}"
+            server_no_players: "【{server_name}】(0人)"
+            server_no_bots: "【{server_name}】(0个)"
+            
+            # 单服务器详情
+            local_players_label: "玩家({count}人):\n{player_list}"
+            local_bots_label: "假人({count}个):\n{player_list}"
+            local_no_players: "玩家(0人)"
+            local_no_bots: "假人(0个)"
+            
+            # 多服务器详情
+            merged_players_label: "  玩家({count}人):\n{player_list}"
+            merged_bots_label: "  假人({count}个):\n{player_list}"
+            merged_no_players: "  玩家(0人)"
+            merged_no_bots: "  假人(0个)"
 
         unbound_check:
             name: "未绑定检查"

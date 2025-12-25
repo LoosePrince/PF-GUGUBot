@@ -283,35 +283,45 @@ class PlayerListSystem(BasicSystem):
                     if players:
                         players.sort()
                         players_list = [f"  {i+1}. {p}" for i, p in enumerate(players)]
-                        result_parts.append(f"【{server_name}】({len(players)}人)\n" + "\n".join(players_list))
+                        result_parts.append(self.get_tr("server_players_count", 
+                                                         server_name=server_name, 
+                                                         count=len(players), 
+                                                         player_list="\n".join(players_list)))
                     else:
-                        result_parts.append(f"【{server_name}】(0人)")
+                        result_parts.append(self.get_tr("server_no_players", server_name=server_name))
                         
                 elif list_type == ListType.BOTS:
                     if bots:
                         bots.sort()
                         bots_list = [f"  {i+1}. {b}" for i, b in enumerate(bots)]
-                        result_parts.append(f"【{server_name}】({len(bots)}个)\n" + "\n".join(bots_list))
+                        result_parts.append(self.get_tr("server_bots_count", 
+                                                         server_name=server_name, 
+                                                         count=len(bots), 
+                                                         player_list="\n".join(bots_list)))
                     else:
-                        result_parts.append(f"【{server_name}】(0个)")
+                        result_parts.append(self.get_tr("server_no_bots", server_name=server_name))
                         
                 else:  # ListType.ALL
-                    server_result = f"【{server_name}】"
+                    server_result = self.get_tr("server_label", server_name=server_name)
                     sub_parts = []
                     
                     if players:
                         players.sort()
                         players_list = [f"    {i+1}. {p}" for i, p in enumerate(players)]
-                        sub_parts.append(f"  玩家({len(players)}人):\n" + "\n".join(players_list))
+                        sub_parts.append(self.get_tr("merged_players_label", 
+                                                      count=len(players), 
+                                                      player_list="\n".join(players_list)))
                     else:
-                        sub_parts.append(f"  玩家(0人)")
+                        sub_parts.append(self.get_tr("merged_no_players"))
                     
                     if bots:
                         bots.sort()
                         bots_list = [f"    {i+1}. {b}" for i, b in enumerate(bots)]
-                        sub_parts.append(f"  假人({len(bots)}个):\n" + "\n".join(bots_list))
+                        sub_parts.append(self.get_tr("merged_bots_label", 
+                                                      count=len(bots), 
+                                                      player_list="\n".join(bots_list)))
                     else:
-                        sub_parts.append(f"  假人(0个)")
+                        sub_parts.append(self.get_tr("merged_no_bots"))
                     
                     result_parts.append(server_result + "\n" + "\n".join(sub_parts))
             
@@ -471,14 +481,18 @@ class PlayerListSystem(BasicSystem):
                     return self.get_tr("players_empty")
                 real_players.sort()
                 players_list = [f"{i+1}. {p}" for i, p in enumerate(real_players)]
-                return self.get_tr("players_content", count=len(real_players), players="\n" + "\n".join(players_list))
+                return self.get_tr("players_content", 
+                                   count=len(real_players), 
+                                   players="\n" + "\n".join(players_list))
                 
             elif list_type == ListType.BOTS:
                 if not bots:
                     return self.get_tr("bots_empty")
                 bots.sort()
                 bots_list = [f"{i+1}. {b}" for i, b in enumerate(bots)]
-                return self.get_tr("bots_content", count=len(bots), bots="\n" + "\n".join(bots_list))
+                return self.get_tr("bots_content", 
+                                   count=len(bots), 
+                                   bots="\n" + "\n".join(bots_list))
                 
             else:  # ListType.ALL
                 result_parts = []
@@ -486,16 +500,20 @@ class PlayerListSystem(BasicSystem):
                 if real_players:
                     real_players.sort()
                     players_list = [f"  {i+1}. {p}" for i, p in enumerate(real_players)]
-                    result_parts.append(f"玩家({len(real_players)}人):\n" + "\n".join(players_list))
+                    result_parts.append(self.get_tr("local_players_label", 
+                                                     count=len(real_players), 
+                                                     player_list="\n".join(players_list)))
                 else:
-                    result_parts.append("玩家(0人)")
+                    result_parts.append(self.get_tr("local_no_players"))
                 
                 if bots:
                     bots.sort()
                     bots_list = [f"  {i+1}. {b}" for i, b in enumerate(bots)]
-                    result_parts.append(f"假人({len(bots)}个):\n" + "\n".join(bots_list))
+                    result_parts.append(self.get_tr("local_bots_label", 
+                                                     count=len(bots), 
+                                                     player_list="\n".join(bots_list)))
                 else:
-                    result_parts.append("假人(0个)")
+                    result_parts.append(self.get_tr("local_no_bots"))
                 
                 return self.get_tr("server_content", 
                                    player_count=len(real_players), 
