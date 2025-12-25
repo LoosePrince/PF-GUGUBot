@@ -159,69 +159,6 @@ class QQParser(BasicParser):
             self.logger.debug(f"用户 {user_id} 在排除列表中，忽略消息")
             return True
         
-        # 2. 判断是否是QQ机器人（使用机器人QQ号段判断）
-        if await self._is_qq_robot(user_id, source_id, source_type):
-            self.logger.debug(f"用户 {user_id} 是QQ机器人，忽略消息")
-            return True
-        
         return False
 
-    async def _is_qq_robot(self, user_id: str, source_id: str, source_type: str) -> bool:
-        """判断用户是否是QQ机器人
-        
-        使用两种方法：
-        1. 通过 get_robot_uin_range 获取机器人QQ号段范围
-        2. 通过 get_group_member_info 检查 is_robot 字段
-        
-        Parameters
-        ----------
-        user_id : str
-            用户QQ号
-        source_id : str
-            消息来源ID（群号或用户号）
-        source_type : str
-            消息来源类型（group 或 private）
-        
-        Returns
-        -------
-        bool
-            True 表示是机器人，False 表示不是
-        """
-        try:
-            user_id_int = int(user_id)
-            bot = self.connector.bot
-            
-            # 方法1: 通过机器人QQ号段范围判断
-            try:
-                bot_range_result = await bot.get_robot_uin_range()
-                if bot_range_result and bot_range_result.get("status") == "ok":
-                    bot_range_data = bot_range_result.get("data", [])
-                    if bot_range_data:
-                        for uin_dict in bot_range_data:
-                            lower_bound = int(uin_dict.get("minUin", 0))
-                            upper_bound = int(uin_dict.get("maxUin", 0))
-                            if lower_bound <= user_id_int <= upper_bound:
-                                return True
-            except Exception as e:
-                self.logger.debug(f"获取机器人号段范围失败: {e}")
-            
-            # 方法2: 通过群成员信息判断（如果消息来自群聊）
-            if source_type == "group":
-                try:
-                    group_id = int(source_id)
-                    user_info_result = await bot.get_group_member_info(
-                        group_id=group_id, 
-                        user_id=user_id_int
-                    )
-                    if user_info_result and user_info_result.get("status") == "ok":
-                        user_data = user_info_result.get("data", {})
-                        if user_data.get("is_robot", False):
-                            return True
-                except Exception as e:
-                    self.logger.debug(f"获取群成员信息失败: {e}")
-            
-        except Exception as e:
-            self.logger.warning(f"判断是否是机器人时出错: {e}")
-        
-        return False
 
