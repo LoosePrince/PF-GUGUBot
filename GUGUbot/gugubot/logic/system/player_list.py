@@ -214,10 +214,7 @@ class PlayerListSystem(BasicSystem):
 
     def _get_server_name(self) -> str:
         """获取当前服务器名称"""
-        server_name = self.config.get("GUGUBot", {}).get("server_name", "")
-        if not server_name:
-            server_name = self.config.get_keys(["connector", "minecraft_bridge", "source_name"], "Server")
-        return server_name
+        return self.config.get_keys(["connector", "minecraft_bridge", "source_name"], "Server")
 
     async def _handle_bridge_query(self, boardcast_info: BoardcastInfo, command: str) -> None:
         """处理来自 bridge 的查询请求"""
@@ -464,7 +461,7 @@ class PlayerListSystem(BasicSystem):
             
             all_players = self.parse_player_list(raw_result, colon_separator, comma_separator)
             
-            if not all_players:
+            if len(all_players) == 0:
                 if " 0 " in raw_result or "0/" in raw_result:
                     if list_type == ListType.PLAYERS:
                         return self.get_tr("players_empty")
