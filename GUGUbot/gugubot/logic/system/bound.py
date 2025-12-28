@@ -191,6 +191,15 @@ class BoundSystem(BasicSystem):
                         force_online=is_online,
                         force_bedrock=is_bedrock
                     )
+            
+            async def _set_group_card_if_qq(player_name: str, platform: str, boardcast_info: BoardcastInfo, target_id: str):
+                """如果是QQ来源，则设置群名片"""
+                if platform == "QQ":
+                    await self.system_manager.connector_manager.get_connector("QQ").bot.set_group_card(
+                        group_id=int(boardcast_info.source_id),
+                        user_id=int(target_id),
+                        card=player_name
+                    )
 
             # 检查是否已存在该玩家
             existing_player = self.player_manager.get_player(target_id, platform=platform)
@@ -200,12 +209,14 @@ class BoundSystem(BasicSystem):
                     existing_player.add_name(player_name, is_bedrock)
                     self.player_manager.save()
                     _bound_whitelist(player_name, is_offline, is_online, is_bedrock)
+                    await _set_group_card_if_qq(player_name, platform, boardcast_info, target_id)
                     return True
 
                 elif player_name not in existing_player.accounts.get(platform, []):
                     existing_player.add_account(platform, target_id)
                     self.player_manager.save()
                     _bound_whitelist(player_name, is_offline, is_online, is_bedrock)
+                    await _set_group_card_if_qq(player_name, platform, boardcast_info, target_id)
                     return True
 
                 return False
@@ -216,6 +227,7 @@ class BoundSystem(BasicSystem):
             )
             self.player_manager.save()
             _bound_whitelist(player_name, is_offline, is_online, is_bedrock)
+            await _set_group_card_if_qq(player_name, platform, boardcast_info, target_id)
 
             return True
         except Exception as e:
