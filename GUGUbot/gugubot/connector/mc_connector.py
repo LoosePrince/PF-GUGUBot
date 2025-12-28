@@ -92,11 +92,12 @@ class MCConnector(BasicConnector):
             is_low_version = self.builder.is_low_game_version(game_version)
 
             player_manager = getattr(self.connector_manager.system_manager.get_system("bound"), "player_manager", None)
+            is_admin = player_manager.is_admin(sender_id) if player_manager else False
 
             Rtext_conect = self.builder.array_to_RText(
                 message, sender_id=sender_id, 
                 low_game_version=is_low_version, chat_image=use_chat_image, image_previewer=use_image_previewer,
-                player_manager=player_manager
+                player_manager=player_manager, is_admin=is_admin
             )
 
             if player_manager:

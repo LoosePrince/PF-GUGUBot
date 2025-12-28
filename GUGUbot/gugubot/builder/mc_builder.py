@@ -45,6 +45,7 @@ class McMessageBuilder:
         chat_image: bool = False,
         image_previewer: bool = False,
         player_manager: PlayerManager = None,
+        is_admin: bool = False,
     ) -> RText:
         def get_player_name(player_id: str) -> str:
             if player_manager:
@@ -53,14 +54,21 @@ class McMessageBuilder:
                     return player.name
             return player_id
         
+        def process_at(data: Dict[str, str]) -> RText:
+            player_name = get_player_name(data['qq'])
+            if is_admin:
+                return RText(f"[@{player_name}]", color=RColor.aqua) \
+                    .set_hover_text(f"点击草稿 @{player_name} 的消息") \
+                    .set_click_event(action=RAction.suggest_command, value=f"[CQ:at,qq={data['qq']}]")
+            else:
+                return RText(f"[@{player_name}]", color=RColor.aqua)
+
         process_functions = {
             "text": lambda data: RText(
                 data['text'] if not low_game_version 
                 else McMessageBuilder.replace_emoji_with_placeholder(data['text'])
             ),
-            "at": lambda data: RText(f"[@{get_player_name(data['qq'])}]", color=RColor.aqua)
-                .set_hover_text(f"点击草稿 @{get_player_name(data['qq'])} 的消息")
-                .set_click_event(action=RAction.suggest_command, value=f"[CQ:at,qq={data['qq']}]"),
+            "at": process_at,
             "image": lambda data: McMessageBuilder.process_image(data, chat_image=chat_image, image_previewer=image_previewer),
             "record": lambda _: RText("[语音]"),
             "video": lambda _: RText("[视频]"),
