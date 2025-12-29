@@ -150,9 +150,10 @@ class WhitelistSystem(BasicSystem):
         try:
             whitelist = self._api.get_whitelist_names()
             
-            if player_name.lower() in [i.lower() for i in whitelist]:
-                self._api.remove_player(player_name, force_offline=True)
-                return True
+            for player in whitelist:
+                if player_name.lower() == player.lower():
+                    self._api.remove_player(player, force_offline=True)
+                    return True
             
             return False
         except Exception as e:
