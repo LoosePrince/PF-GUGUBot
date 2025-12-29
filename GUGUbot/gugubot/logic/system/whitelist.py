@@ -113,6 +113,10 @@ class WhitelistSystem(BasicSystem):
 
         try:
             whitelist = self._api.get_whitelist_names()
+
+            if force_bedrock:
+                self._api.add_floodgate_player(player_name, "")
+                return True
             
             if player_name not in whitelist:
                 # 自动模式
@@ -123,10 +127,6 @@ class WhitelistSystem(BasicSystem):
                 elif force_offline:
                     self._api.add_offline_player(player_name)
                 
-                return True
-            
-            if force_bedrock:
-                self._api.add_floodgate_player(player_name, "")
                 return True
             
             return False
