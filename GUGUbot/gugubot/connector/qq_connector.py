@@ -124,11 +124,11 @@ class QQWebSocketConnector(BasicConnector):
             logger=self.logger
         )
         
-        # 连接到服务器
+        # 连接到服务器（禁用 pingpong）
         self.ws_client.connect(
             reconnect=self.reconnect,
-            ping_interval=self.ping_interval,
-            ping_timeout=self.ping_timeout,
+            ping_interval=0,  # 禁用 pingpong
+            ping_timeout=0,   # 禁用 pingpong
             use_ssl=self.use_ssl,
             verify=self.verify,
             ca_certs=self.ca_certs,
