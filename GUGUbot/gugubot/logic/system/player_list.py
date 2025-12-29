@@ -52,11 +52,18 @@ class PlayerListSystem(BasicSystem):
 
     def _separate_players_and_bots(self, all_players: List[str]) -> Tuple[List[str], List[str]]:
         """将玩家列表分离为真实玩家和假人"""
+        # 有人绑定 -> 识别假人
+        ip_logger = self.server.get_plugin_instance("player_ip_logger")
+        
         real_players = []
         bots = []
         
         for player in all_players:
+            # 先检查名称模式
             if self._is_bot(player):
+                bots.append(player)
+            # 再使用插件辅助判断
+            elif ip_logger and not ip_logger.is_player(player):
                 bots.append(player)
             else:
                 real_players.append(player)

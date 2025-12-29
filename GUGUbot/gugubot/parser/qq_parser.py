@@ -36,12 +36,12 @@ class QQParser(BasicParser):
             if echo:
                 self.connector.bot.function_return[echo] = message_data
                 return None
-            
-            if not self._is_valid_source(message_data):
-                return None
 
             event_type = message_data.get("post_type", "")
             if event_type not in self.PROCESS_TYPE:
+                return None
+            
+            if not self._is_valid_source(message_data, event_type):
                 return None
 
             if event_type == "message":
@@ -95,8 +95,6 @@ class QQParser(BasicParser):
                     source_id=message_data.get("user_id"),
                     receiver_source=self.connector.source,  # 对于非桥接消息，receiver_source 等于 source
                 )
-
-                return None
             
             return boardcase_info
 
@@ -114,8 +112,11 @@ class QQParser(BasicParser):
             return True
         return False
 
-    def _friend_is_admin(self, message_data) -> bool:
+    def _friend_is_admin(self, message_data, event_type: str) -> bool:
         """检查是否是好友管理员"""
+        if event_type != "message":
+            return False
+        
         config = self.connector.config
         friend_is_admin = config.get_keys(["connector", "QQ", "permissions", "friend_is_admin"], False)
         
@@ -123,10 +124,14 @@ class QQParser(BasicParser):
 
         return friend_is_admin and is_private_chat
 
-    def _is_valid_source(self, message_data) -> bool:
-        friend_is_admin = self._friend_is_admin(message_data)
+    def _is_valid_source(self, message_data, event_type: str) -> bool:
+        friend_is_admin = self._friend_is_admin(message_data, event_type)
 
-        source_id = message_data.get("user_id") if message_data.get("message_type") == 'private' else message_data.get("group_id")
+        if event_type == "message":
+            source_id = message_data.get("user_id") if message_data.get("message_type") == 'private' else message_data.get("group_id")
+        else:
+            # 对于 notice 和 request 类型，直接使用 user_id 或 group_id
+            source_id = message_data.get("group_id") or message_data.get("user_id")
 
         admin_ids = self.connector.config.get_keys(["connector", "QQ", "permissions", "admin_ids"], [])
         admin_groups = self.connector.config.get_keys(["connector", "QQ", "permissions", "admin_group_ids"], [])

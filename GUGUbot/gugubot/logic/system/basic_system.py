@@ -86,6 +86,9 @@ class BasicSystem:
         bool
             是否是命令
         """
+        if boardcast_info.event_type != "message":
+            return False
+        
         message = boardcast_info.message
         if not message:
             return False

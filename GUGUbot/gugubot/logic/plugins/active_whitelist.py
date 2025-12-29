@@ -51,6 +51,9 @@ class ActiveWhiteListSystem(BasicConfig, BasicSystem):
         boardcast_info: BoardcastInfo
             广播信息，包含消息内容
         """
+        if boardcast_info.event_type != "message":
+            return False
+        
         message = boardcast_info.message
 
         if not message:

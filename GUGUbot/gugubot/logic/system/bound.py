@@ -43,6 +43,16 @@ class BoundSystem(BasicSystem):
         boardcast_info: BoardcastInfo
             广播信息，包含消息内容
         """
+        # 处理退群事件
+        if boardcast_info.event_type == "notice" and boardcast_info.event_sub_type == "group_decrease":
+            if boardcast_info.source == "QQ":
+                return await self._handle_quit_member(boardcast_info)
+            return False
+        
+        # 处理消息类型事件
+        if boardcast_info.event_type != "message":
+            return False
+        
         message = boardcast_info.message
 
         if not message:
@@ -365,6 +375,187 @@ class BoundSystem(BasicSystem):
         
         for name in player_names:
             self.whitelist.remove_player(name)
+
+    async def _get_member_in_all_groups(self) -> set:
+        """获取所有群（包括普通群和管理群）中的成员ID集合
+        
+        Returns
+        -------
+        set
+            所有群成员的QQ ID集合
+        """
+        member_id_set = set()
+        
+        # 获取配置中的群ID列表
+        group_ids = self.config.get_keys(["connector", "QQ", "permissions", "group_ids"], [])
+        admin_group_ids = self.config.get_keys(["connector", "QQ", "permissions", "admin_group_ids"], [])
+        
+        # 合并所有群ID
+        all_group_ids = set(group_ids + admin_group_ids)
+        
+        if not all_group_ids:
+            return member_id_set
+        
+        # 获取QQ连接器
+        try:
+            qq_connector = self.system_manager.connector_manager.get_connector("QQ")
+            if not qq_connector or not qq_connector.bot:
+                return member_id_set
+            
+            # 遍历所有群，获取成员列表
+            for group_id in all_group_ids:
+                if not group_id:
+                    continue
+                try:
+                    member_list_result = await qq_connector.bot.get_group_member_list(group_id=int(group_id))
+                    if member_list_result and member_list_result.get("status") == "ok":
+                        members = member_list_result.get("data", [])
+                        for member in members:
+                            user_id = str(member.get("user_id", ""))
+                            if user_id:
+                                member_id_set.add(user_id)
+                except Exception as e:
+                    self.logger.error(f"获取群 {group_id} 成员列表失败: {e}")
+                    continue
+        except Exception as e:
+            self.logger.error(f"获取群成员列表失败: {e}")
+        
+        return member_id_set
+
+    async def _send_quit_notification_to_admin_groups(self, user_id: str, group_id: str, player: Optional[Player] = None) -> None:
+        """向管理群发送退群通知
+        
+        Parameters
+        ----------
+        user_id : str
+            退群用户的QQ号
+        group_id : str
+            退群的群号
+        player : Optional[Player]
+            退群用户的绑定信息，如果为None则不包含绑定信息
+        """
+        try:
+            # 获取管理群ID列表
+            admin_group_ids = self.config.get_keys(["connector", "QQ", "permissions", "admin_group_ids"], [])
+            if not admin_group_ids:
+                return
+            
+            # 构建通知消息
+            notification_parts = [f"群 {group_id} 有成员退群"]
+            notification_parts.append(f"QQ号: {user_id}")
+            
+            if player:
+                # 获取所有绑定的玩家名
+                all_player_names = player.java_name + player.bedrock_name
+                if all_player_names:
+                    player_names_str = ", ".join(all_player_names)
+                    notification_parts.append(f"绑定玩家: {player_names_str}")
+                else:
+                    notification_parts.append("未绑定玩家")
+            else:
+                notification_parts.append("未绑定玩家")
+            
+            notification_msg = "\n".join(notification_parts)
+            
+            # 获取QQ连接器
+            qq_connector = self.system_manager.connector_manager.get_connector("QQ")
+            if not qq_connector or not qq_connector.bot:
+                return
+            
+            # 向所有管理群发送通知
+            for admin_group_id in admin_group_ids:
+                if not admin_group_id:
+                    continue
+                try:
+                    await qq_connector.bot.send_group_msg(
+                        group_id=int(admin_group_id),
+                        message=[MessageBuilder.text(notification_msg)]
+                    )
+                except Exception as e:
+                    self.logger.error(f"发送退群通知到管理群 {admin_group_id} 失败: {e}")
+        except Exception as e:
+            self.logger.error(f"发送退群通知失败: {e}")
+
+    async def _handle_quit_member(self, boardcast_info: BoardcastInfo) -> bool:
+        """处理退群事件
+        
+        Parameters
+        ----------
+        boardcast_info : BoardcastInfo
+            退群事件信息
+            
+        Returns
+        -------
+        bool
+            是否处理了该事件
+        """
+        try:
+            # 从 raw 中获取退群用户信息
+            raw_data = boardcast_info.raw
+            if not isinstance(raw_data, dict):
+                return False
+            
+            user_id = str(raw_data.get("user_id", ""))
+            group_id = str(raw_data.get("group_id", ""))
+            
+            if not user_id or not group_id:
+                return False
+            
+            # 判断退群的群是否是普通群（不是管理群）
+            group_ids = self.config.get_keys(["connector", "QQ", "permissions", "group_ids"], [])
+            admin_group_ids = self.config.get_keys(["connector", "QQ", "permissions", "admin_group_ids"], [])
+            
+            is_normal_group = str(group_id) in [str(gid) for gid in group_ids if gid]
+            is_admin_group = str(group_id) in [str(gid) for gid in admin_group_ids if gid]
+            
+            # 获取该用户的绑定信息
+            player = self.player_manager.get_player(user_id, platform="QQ")
+            
+            # 如果退群的是普通群，发送通知到管理群
+            if is_normal_group and not is_admin_group:
+                await self._send_quit_notification_to_admin_groups(user_id, group_id, player)
+            
+            # 检查该用户是否还在其他群中
+            all_member_ids = await self._get_member_in_all_groups()
+            
+            # 如果用户不在任何群中，执行清理
+            if user_id not in all_member_ids and player:
+                # 获取所有玩家名
+                all_player_names = player.java_name + player.bedrock_name
+                
+                # 从白名单中移除玩家名
+                if all_player_names:
+                    self._remove_from_whitelist(all_player_names)
+                
+                # 检查该用户是否还有其他平台的账户绑定
+                has_other_platform_accounts = False
+                for platform, accounts in player.accounts.items():
+                    if platform != "QQ" and accounts:
+                        has_other_platform_accounts = True
+                        break
+                
+                # 从绑定数据中删除该用户的QQ账户绑定
+                if "QQ" in player.accounts and user_id in player.accounts["QQ"]:
+                    player.accounts["QQ"].remove(user_id)
+                    # 如果QQ账户列表为空，删除该平台
+                    if not player.accounts["QQ"]:
+                        del player.accounts["QQ"]
+                
+                # 如果该用户没有其他平台的账户绑定，删除整个 Player（包括所有玩家名）
+                # 参考 bound_system.py 的逻辑：退群时删除整个绑定
+                if not has_other_platform_accounts:
+                    self.player_manager.remove_player(player.name)
+                else:
+                    # 如果还有其他平台的账户，只删除QQ账户绑定，保留玩家名和其他平台绑定
+                    self.player_manager.save()
+                
+                self.logger.info(f"已清理退群用户 {user_id} 的绑定信息")
+                return True
+            
+            return False
+        except Exception as e:
+            self.logger.error(f"处理退群事件失败: {e}")
+            return False
 
     async def _clean_bound(self, player: Player, player_manager: PlayerManager) -> bool:
         """清理绑定"""

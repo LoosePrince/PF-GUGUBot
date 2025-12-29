@@ -57,6 +57,9 @@ class EchoSystem(BasicSystem):
                 # 管理群消息不广播，直接返回False
                 return False
             
+        if boardcast_info.event_type == "notice" or boardcast_info.event_type == "request":
+            return False
+        
         try:
             # 准备转发的消息
             processed_info = self.create_processed_info(boardcast_info)

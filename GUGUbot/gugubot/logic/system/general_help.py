@@ -49,6 +49,9 @@ class GeneralHelpSystem(BasicSystem):
         bool
             是否处理了该消息
         """
+        if boardcast_info.event_type != "message":
+            return False
+        
         message = boardcast_info.message
 
         if not message:
