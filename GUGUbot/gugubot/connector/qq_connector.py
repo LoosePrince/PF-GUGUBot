@@ -2,6 +2,7 @@ import traceback
 import time
 import uuid
 import re
+import random
 
 import asyncio
 
@@ -222,7 +223,19 @@ class QQWebSocketConnector(BasicConnector):
         message = self._strip_color_codes_from_message(message)
         
         if source != "QQ" and source != "":
-            source_message = MessageBuilder.text(f"[{source}] {processed_info.sender}: ")
+            # 从config中获取聊天模板列表
+            chat_templates = self.config.get_keys(["connector", "QQ", "chat_templates"], [])
+            
+            # 如果配置了模板，随机选择一个；否则使用默认格式
+            if chat_templates and isinstance(chat_templates, list) and len(chat_templates) > 0:
+                template = random.choice(chat_templates)
+                # 使用模板格式化消息，{display_name}对应source，{sender}对应processed_info.sender
+                formatted_text = template.format(display_name=source, sender=processed_info.sender)
+            else:
+                # 默认格式（向后兼容）
+                formatted_text = f"[{source}] {processed_info.sender}: "
+            
+            source_message = MessageBuilder.text(formatted_text)
             message = [source_message] + message
 
         for target_id, target_type in target.items():
