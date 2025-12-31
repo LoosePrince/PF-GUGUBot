@@ -129,8 +129,8 @@ class WebSocketFactory:
         WebSocketServer
             配置好的桥接服务器实例
         """
-        host = config.get_keys(["connector", "minecraft_bridge", "server", "host"], "0.0.0.0")
-        port = config.get_keys(["connector", "minecraft_bridge", "server", "port"], 8787)
+        host = config.get_keys(["connector", "minecraft_bridge", "connection", "host"], "0.0.0.0")
+        port = config.get_keys(["connector", "minecraft_bridge", "connection", "port"], 8787)
         
         return WebSocketServer(
             host=host,
