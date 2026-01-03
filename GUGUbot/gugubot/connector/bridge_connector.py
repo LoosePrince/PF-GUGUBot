@@ -54,9 +54,9 @@ class BridgeConnector(BasicConnector):
 
     async def connect(self) -> None:
         """建立连接"""
-        if self.is_main_server:
+        if self.is_main_server and self.enable:
             self._start_server()
-        else:
+        elif not self.is_main_server and self.enable:
             self._connect_to_server()
 
     def _start_server(self) -> None:
