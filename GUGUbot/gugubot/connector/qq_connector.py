@@ -283,12 +283,29 @@ class QQWebSocketConnector(BasicConnector):
         ----------
         raw_message : str
             WebSocket接收到的JSON格式消息
+        
+        注意:
+            WebSocket 回调运行在独立线程中，需要将异步任务正确调度到事件循环
         """
         if not self.enable:
             return
         
         try:
-            asyncio.run(self.parser(self).process_message(raw_message))
+            import json
+            # 先快速检查是否是 API 响应（echo），直接在当前线程处理
+            try:
+                message_data = json.loads(raw_message)
+                echo = message_data.get("echo")
+                if echo:
+                    # API 响应，直接存储到 function_return（线程安全）
+                    self.bot.function_return[echo] = message_data
+                    return
+            except:
+                pass
+            
+            # 对于事件消息，调度到 MCDR 主线程的事件循环
+            # 使用 server.schedule_task 确保在正确的事件循环中执行
+            self.server.schedule_task(self.parser(self).process_message(raw_message))
 
         except Exception as e:
             # 使用翻译条目并包含堆栈信息
