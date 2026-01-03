@@ -8,7 +8,7 @@ import asyncio
 
 from typing import Any, Optional
 
-from gugubot.builder import MessageBuilder
+from gugubot.builder.qq_builder import CQHandler
 from gugubot.connector.basic_connector import BasicConnector
 from gugubot.config.BotConfig import BotConfig
 from gugubot.utils.types import ProcessedInfo
@@ -235,8 +235,8 @@ class QQWebSocketConnector(BasicConnector):
                 # 默认格式（向后兼容）
                 formatted_text = f"[{source}] {processed_info.sender}: "
             
-            source_message = MessageBuilder.text(formatted_text)
-            message = [source_message] + message
+            source_message = CQHandler.parse(formatted_text)
+            message = source_message + message
 
         for target_id, target_type in target.items():
             if not target_id.isdigit():
