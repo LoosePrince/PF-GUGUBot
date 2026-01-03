@@ -217,6 +217,10 @@ class ExecuteSystem(BasicSystem):
             是否成功处理
         """
         try:
+            # 如果是 MCDR 命令且没有 !! 前缀，自动添加
+            if use_mcdr and not command.startswith("!!"):
+                command = f"!!{command}"
+            
             result = self.rcon_manager.execute(command, use_mcdr_command=use_mcdr)
             
             if result:
