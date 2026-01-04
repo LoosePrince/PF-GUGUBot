@@ -11,6 +11,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
+import requests
+
 from mcdreforged.api.types import PluginServerInterface
 
 from gugubot.builder import MessageBuilder
@@ -29,6 +31,7 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
         """初始化不活跃用户检查系统。"""
         BasicSystem.__init__(self, "inactive_check", enable=False, config=config)
         self.server = server
+        self.logger = server.logger
         
         # 设置数据文件路径
         data_path = Path(server.get_data_folder()) / "plugins" / "inactive_check.json"
@@ -53,7 +56,12 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
         # 如果没有上次检查时间，初始化为0
         if "last_check_time" not in self:
             self["last_check_time"] = 0
-            self.save()
+        
+        # 初始化基岩版玩家 API 数据缓存
+        if "bedrock_cache" not in self:
+            self["bedrock_cache"] = {}
+        
+        self.save()
         
         last_check_time = self.get("last_check_time", 0)
         if last_check_time > 0:
@@ -61,6 +69,11 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
             self.logger.info(f"不活跃检查系统已加载，上次检查时间: {last_check_str}")
         else:
             self.logger.info("不活跃检查系统已加载，尚未进行过检查")
+        
+        # 统计缓存数据
+        cache_count = len(self.get("bedrock_cache", {}))
+        if cache_count > 0:
+            self.logger.debug(f"已加载 {cache_count} 个基岩版玩家的 API 缓存数据")
         
         # 启动定时检查任务
         self.server.schedule_task(self._schedule_check())
@@ -250,6 +263,116 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
         
         return None
 
+    def _get_bedrock_player_uuid(self, player_name: str) -> Optional[str]:
+        """通过 MCProfile.io API 获取基岩版玩家的 UUID（XUID 或 Floodgate UUID）
+        
+        使用缓存机制，避免频繁调用 API。
+        
+        Parameters
+        ----------
+        player_name : str
+            基岩版玩家名 (gamertag)
+            
+        Returns
+        -------
+        Optional[str]
+            玩家 UUID（优先返回 Floodgate UUID，如果没有则返回 XUID），如果获取失败则返回None
+        """
+        # 获取缓存配置（默认缓存 6 个月，因为 UUID 不会经常变化）
+        # 6 个月 = 180 天 = 15,552,000 秒
+        cache_ttl = self.config.get_keys(["system", "inactive_check", "bedrock_cache_ttl"], 15552000)
+        
+        # 检查缓存
+        bedrock_cache = self.get("bedrock_cache", {})
+        player_name_lower = player_name.lower()
+        
+        if player_name_lower in bedrock_cache:
+            cache_data = bedrock_cache[player_name_lower]
+            cached_at = cache_data.get("cached_at", 0)
+            current_time = time.time()
+            
+            # 检查缓存是否过期
+            if (current_time - cached_at) < cache_ttl:
+                # 缓存有效，直接返回
+                uuid = cache_data.get("uuid")
+                if uuid:
+                    self.logger.debug(f"使用缓存的基岩版玩家 {player_name} 的 UUID: {uuid}")
+                    return uuid
+                else:
+                    # 缓存中标记为 None（之前查询失败），也直接返回 None
+                    self.logger.debug(f"使用缓存的基岩版玩家 {player_name} 的查询结果（无 UUID）")
+                    return None
+            else:
+                # 缓存已过期，删除旧缓存
+                self.logger.debug(f"基岩版玩家 {player_name} 的缓存已过期，将重新获取")
+                del bedrock_cache[player_name_lower]
+                # 更新缓存字典以触发保存
+                self["bedrock_cache"] = bedrock_cache
+                self.save()
+        
+        # 缓存不存在或已过期，调用 API
+        url = f"https://mcprofile.io/api/v1/bedrock/gamertag/{player_name}"
+        
+        headers = {
+            'Accept': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # 优先使用 Floodgate UUID（用于 Floodgate 服务器）
+                uuid = None
+                if 'floodgateuid' in data and data['floodgateuid']:
+                    uuid = data['floodgateuid']
+                    self.logger.debug(f"获取到基岩版玩家 {player_name} 的 Floodgate UUID: {uuid}")
+                else:
+                    self.logger.debug(f"基岩版玩家 {player_name} 的 API 响应中未找到有效的 Floodgate UUID")
+                    return None 
+                
+                # 保存到缓存
+                bedrock_cache[player_name_lower] = {
+                    "uuid": uuid,
+                    "cached_at": time.time(),
+                    "player_name": player_name  # 保存原始玩家名（大小写）
+                }
+                self["bedrock_cache"] = bedrock_cache
+                self.save()
+                if uuid:
+                    self.logger.debug(f"已缓存基岩版玩家 {player_name} 的 UUID")
+                else:
+                    self.logger.debug(f"基岩版玩家 {player_name} 的 API 响应中未找到有效的 UUID")
+                
+                return uuid
+                
+            elif response.status_code == 404:
+                # 玩家不存在，也记录到缓存（避免重复查询）
+                bedrock_cache[player_name_lower] = {
+                    "uuid": None,
+                    "cached_at": time.time(),
+                    "player_name": player_name
+                }
+                self["bedrock_cache"] = bedrock_cache
+                self.save()
+                self.logger.debug(f"基岩版玩家 {player_name} 不存在于 MCProfile.io")
+                return None
+            else:
+                self.logger.warning(f"查询基岩版玩家 {player_name} 信息失败: HTTP {response.status_code}")
+                return None
+                
+        except requests.exceptions.Timeout:
+            self.logger.warning(f"查询基岩版玩家 {player_name} 信息超时")
+            return None
+        except requests.exceptions.RequestException as e:
+            self.logger.warning(f"查询基岩版玩家 {player_name} 信息出错: {e}")
+            return None
+        except Exception as e:
+            self.logger.warning(f"解析基岩版玩家 {player_name} 信息时出错: {e}")
+            return None
+
     async def _check_inactive_players(self) -> Dict[int, Dict[str, List[Dict]]]:
         """检查不活跃玩家的核心逻辑
         
@@ -364,8 +487,22 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
                     latest_mtime = 0
                     found_any_file = False
                     
-                    for player_name in (player.java_name + player.bedrock_name):
-                        uuid = self._get_player_uuid(player_name)
+                    # 先检查基岩版玩家，通过 API 获取 UUID 然后检查本地存档
+                    for bedrock_name in player.bedrock_name:
+                        uuid = self._get_bedrock_player_uuid(bedrock_name)
+
+                        if uuid:
+                            self.logger.debug(f"基岩版玩家 {bedrock_name} 的 UUID: {uuid}")
+                            player_file = player_data_dir / f"{uuid}.dat"
+                            if player_file.exists():
+                                found_any_file = True
+                                mtime = player_file.stat().st_mtime
+                                latest_mtime = max(latest_mtime, mtime)
+                                self.logger.debug(f"找到基岩版玩家 {bedrock_name} (UUID: {uuid}) 的存档文件，修改时间: {datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')}")
+                    
+                    # 检查 Java 版玩家，使用文件修改时间
+                    for java_name in player.java_name:
+                        uuid = self._get_player_uuid(java_name)
                         if uuid:
                             player_file = player_data_dir / f"{uuid}.dat"
                             if player_file.exists():
