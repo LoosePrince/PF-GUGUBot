@@ -221,6 +221,28 @@ class UnboundCheckSystem(BasicConfig, BasicSystem):
             current_time = time.time()
             QQ_connector_name = self.config.get_keys(["connector", "QQ", "source_name"], "QQ")
             
+            # 获取管理员ID列表（用于跳过管理员）
+            admin_ids = set(str(admin_id) for admin_id in self.config.get_keys(["connector", "QQ", "permissions", "admin_ids"], []))
+            
+            # 获取管理群成员ID列表（通过API获取管理群的所有成员）
+            admin_group_member_ids = set()
+            admin_group_ids = self.config.get_keys(["connector", "QQ", "permissions", "admin_group_ids"], [])
+            for admin_group_id in admin_group_ids:
+                try:
+                    member_list_result = await self.qq_connector.bot.get_group_member_list(group_id=int(admin_group_id))
+                    if member_list_result and member_list_result.get("status") == "ok":
+                        members = member_list_result.get("data", [])
+                        for member in members:
+                            user_id = str(member.get("user_id", ""))
+                            if user_id:
+                                admin_group_member_ids.add(user_id)
+                        self.logger.debug(f"从管理群 {admin_group_id} 获取到 {len(members)} 名成员")
+                except Exception as e:
+                    self.logger.warning(f"获取管理群 {admin_group_id} 成员列表失败: {e}")
+            
+            # 合并管理员ID和管理群成员ID
+            skip_user_ids = admin_ids | admin_group_member_ids
+            
             # 遍历每个群
             for group_id in group_ids:
                 try:
@@ -239,6 +261,10 @@ class UnboundCheckSystem(BasicConfig, BasicSystem):
                         user_id = str(member.get("user_id", ""))
                         join_time = member.get("join_time", 0)
                         nickname = member.get("nickname", "未知")
+                        
+                        # 检查是否是管理员或在管理群中，如果是则跳过
+                        if user_id in skip_user_ids:
+                            continue
                         
                         # 检查是否超时
                         if current_time - join_time <= timeout_seconds:

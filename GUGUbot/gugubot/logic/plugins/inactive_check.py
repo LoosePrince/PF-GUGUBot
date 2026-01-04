@@ -283,6 +283,28 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
             # 获取所有玩家
             all_players = self.bound_system.player_manager.get_all_players()
             
+            # 获取管理员ID列表（用于跳过管理员）
+            admin_ids = set(str(admin_id) for admin_id in self.config.get_keys(["connector", "QQ", "permissions", "admin_ids"], []))
+            
+            # 获取管理群成员ID列表（通过API获取管理群的所有成员）
+            admin_group_member_ids = set()
+            admin_group_ids = self.config.get_keys(["connector", "QQ", "permissions", "admin_group_ids"], [])
+            for admin_group_id in admin_group_ids:
+                try:
+                    member_list_result = await self.qq_connector.bot.get_group_member_list(group_id=int(admin_group_id))
+                    if member_list_result and member_list_result.get("status") == "ok":
+                        members = member_list_result.get("data", [])
+                        for member in members:
+                            user_id = str(member.get("user_id", ""))
+                            if user_id:
+                                admin_group_member_ids.add(user_id)
+                        self.logger.debug(f"从管理群 {admin_group_id} 获取到 {len(members)} 名成员")
+                except Exception as e:
+                    self.logger.warning(f"获取管理群 {admin_group_id} 成员列表失败: {e}")
+            
+            # 合并管理员ID和管理群成员ID
+            skip_user_ids = admin_ids | admin_group_member_ids
+            
             # 遍历每个群，收集该群的不活跃玩家
             for group_id in group_ids:
                 inactive_players = []  # 进过游戏但长时间未登录的玩家
@@ -307,6 +329,11 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
                     # 只检查有QQ绑定的玩家
                     qq_accounts = player.accounts.get(QQ_connector_name, [])
                     if not qq_accounts:
+                        continue
+                    
+                    # 检查玩家是否是管理员或在管理群中，如果是则跳过
+                    if any(str(qq_account) in skip_user_ids for qq_account in qq_accounts):
+                        self.logger.debug(f"玩家 {player.name} 是管理员或在管理群中，跳过不活跃检查")
                         continue
                     
                     # 检查玩家是否在活跃白名单中，如果是则跳过
