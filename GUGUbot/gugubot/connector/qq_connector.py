@@ -266,7 +266,8 @@ class QQWebSocketConnector(BasicConnector):
                 self.ws_client.disconnect(timeout=5)
             self.logger.info(f"{self.log_prefix} {self.server.tr('gugubot.connector.QQ.close_info')}")
         except Exception as e:
-            self.logger.warning(f"{self.log_prefix} {self.server.tr('gugubot.connector.QQ.error_close', error=str(e) + f'\n{traceback.format_exc()}')}")
+            error_msg = str(e) + '\n' + traceback.format_exc()
+            self.logger.warning(f"{self.log_prefix} {self.server.tr('gugubot.connector.QQ.error_close', error=error_msg)}")
             raise
 
     def on_message(self, _, raw_message: str) -> None:
@@ -309,4 +310,5 @@ class QQWebSocketConnector(BasicConnector):
 
         except Exception as e:
             # 使用翻译条目并包含堆栈信息
-            self.logger.error(self.server.tr("gugubot.connector.QQ.message_handle_failed", error=str(e) + f"\n{traceback.format_exc()}"))
+            error_msg = str(e) + "\n" + traceback.format_exc()
+            self.logger.error(self.server.tr("gugubot.connector.QQ.message_handle_failed", error=error_msg))

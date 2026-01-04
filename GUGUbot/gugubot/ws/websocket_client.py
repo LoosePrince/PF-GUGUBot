@@ -175,7 +175,8 @@ class WebSocketClient:
                 self.logger.debug(f"发送消息: {message}")
                 return True
             except Exception as e:
-                self.logger.error(f"发送消息失败: {e}\n{traceback.format_exc()}")
+                error_msg = str(e) + "\n" + traceback.format_exc()
+                self.logger.error(f"发送消息失败: {error_msg}")
                 return False
         else:
             self.logger.warning("WebSocket未连接，无法发送消息")
@@ -196,7 +197,8 @@ class WebSocketClient:
                 self.listener_thread.join(timeout=timeout)
             self.logger.info("WebSocket连接已关闭")
         except Exception as e:
-            self.logger.warning(f"关闭WebSocket连接时发生错误: {e}\n{traceback.format_exc()}")
+            error_msg = str(e) + "\n" + traceback.format_exc()
+            self.logger.warning(f"关闭WebSocket连接时发生错误: {error_msg}")
             raise
     
     def is_connected(self) -> bool:

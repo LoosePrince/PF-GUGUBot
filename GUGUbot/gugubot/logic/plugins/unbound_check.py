@@ -261,7 +261,8 @@ class UnboundCheckSystem(BasicConfig, BasicSystem):
                         self.logger.info(f"群 {group_id} 发现 {len(unbound_users)} 名未绑定用户")
                 
                 except Exception as e:
-                    self.logger.error(f"检查群 {group_id} 时出错: {e}\n{traceback.format_exc()}")
+                    error_msg = str(e) + "\n" + traceback.format_exc()
+                    self.logger.error(f"检查群 {group_id} 时出错: {error_msg}")
                     continue
             
             # 更新最后检查时间
@@ -332,7 +333,8 @@ class UnboundCheckSystem(BasicConfig, BasicSystem):
                                 message=[MessageBuilder.text(notification_msg)]
                             )
                         except Exception as e:
-                            self.logger.error(f"发送私聊消息到管理员 {admin_id} 失败: {e}\n{traceback.format_exc()}")
+                            error_msg = str(e) + "\n" + traceback.format_exc()
+                            self.logger.error(f"发送私聊消息到管理员 {admin_id} 失败: {error_msg}")
                 
                 # 发送到管理群
                 if admin_groups:
@@ -346,7 +348,8 @@ class UnboundCheckSystem(BasicConfig, BasicSystem):
                                 message=[MessageBuilder.text(notification_msg)]
                             )
                         except Exception as e:
-                            self.logger.error(f"发送消息到管理群 {admin_group_id} 失败: {e}\n{traceback.format_exc()}")
+                            error_msg = str(e) + "\n" + traceback.format_exc()
+                            self.logger.error(f"发送消息到管理群 {admin_group_id} 失败: {error_msg}")
                 
                 # 发送到原群
                 if origin_group:
@@ -356,10 +359,12 @@ class UnboundCheckSystem(BasicConfig, BasicSystem):
                             message=[MessageBuilder.text(notification_msg)]
                         )
                     except Exception as e:
-                        self.logger.error(f"发送消息到原群 {group_id} 失败: {e}\n{traceback.format_exc()}")
+                        error_msg = str(e) + "\n" + traceback.format_exc()
+                        self.logger.error(f"发送消息到原群 {group_id} 失败: {error_msg}")
             
             except Exception as e:
-                self.logger.error(f"发送通知时出错: {e}\n{traceback.format_exc()}")
+                error_msg = str(e) + "\n" + traceback.format_exc()
+                self.logger.error(f"发送通知时出错: {error_msg}")
 
     async def _schedule_check(self) -> None:
         """定时检查任务"""

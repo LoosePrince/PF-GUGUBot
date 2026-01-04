@@ -64,4 +64,5 @@ class BasicParser(ABC):
                 await self.system_manager.broadcast_command(boardcast_info)
         except Exception as e:
             if self.logger:
-                self.logger.error(f"消息处理失败: {str(e)}\n{traceback.format_exc()}")
+                error_msg = str(e) + "\n" + traceback.format_exc()
+                self.logger.error(f"消息处理失败: {error_msg}")

@@ -181,7 +181,8 @@ class WebSocketServer:
             self.logger.info(f"WebSocket服务器已启动在 {self.host}:{self.port}")
         
         except Exception as e:
-            self.logger.error(f"启动WebSocket服务器失败: {e}\n{traceback.format_exc()}")
+            error_msg = str(e) + "\n" + traceback.format_exc()
+            self.logger.error(f"启动WebSocket服务器失败: {error_msg}")
             raise
     
     def _run_server(self) -> None:
@@ -189,7 +190,8 @@ class WebSocketServer:
         try:
             self.server.run_forever()
         except Exception as e:
-            self.logger.error(f"WebSocket服务器运行出错: {e}\n{traceback.format_exc()}")
+            error_msg = str(e) + "\n" + traceback.format_exc()
+            self.logger.error(f"WebSocket服务器运行出错: {error_msg}")
         finally:
             self._is_running = False
     
@@ -246,7 +248,8 @@ class WebSocketServer:
             self.clients.clear()
         
         except Exception as e:
-            self.logger.error(f"停止WebSocket服务器时出错: {e}\n{traceback.format_exc()}")
+            error_msg = str(e) + "\n" + traceback.format_exc()
+            self.logger.error(f"停止WebSocket服务器时出错: {error_msg}")
             raise
     
     def send_message(self, client: Dict, message: Any) -> bool:
@@ -277,7 +280,8 @@ class WebSocketServer:
             return True
         
         except Exception as e:
-            self.logger.error(f"发送消息失败: {e}\n{traceback.format_exc()}")
+            error_msg = str(e) + "\n" + traceback.format_exc()
+            self.logger.error(f"发送消息失败: {error_msg}")
             return False
     
     def broadcast(self, message: Any) -> int:
@@ -307,7 +311,8 @@ class WebSocketServer:
             return count
         
         except Exception as e:
-            self.logger.error(f"广播消息失败: {e}\n{traceback.format_exc()}")
+            error_msg = str(e) + "\n" + traceback.format_exc()
+            self.logger.error(f"广播消息失败: {error_msg}")
             return 0
     
     def is_running(self) -> bool:

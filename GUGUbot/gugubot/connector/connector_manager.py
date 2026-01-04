@@ -92,7 +92,8 @@ class ConnectorManager:
             
             self.logger.info(f"已添加并连接到连接器: {connector.source}")
         except Exception as e:
-            self.logger.error(f"连接到 {connector.source} 失败: {str(e)}\n{traceback.format_exc()}")
+            error_msg = str(e) + "\n" + traceback.format_exc()
+            self.logger.error(f"连接到 {connector.source} 失败: {error_msg}")
             raise
 
     async def remove_connector(self, connector: BasicConnector) -> None:
@@ -116,7 +117,8 @@ class ConnectorManager:
             self.connectors.remove(connector)
             self.logger.info(f"已断开并移除连接器: {connector.source}")
         except Exception as e:
-            self.logger.error(f"断开 {connector.source} 失败: {str(e)}\n{traceback.format_exc()}")
+            error_msg = str(e) + "\n" + traceback.format_exc()
+            self.logger.error(f"断开 {connector.source} 失败: {error_msg}")
             # 仍然从列表中移除，即使断开连接失败
             self.connectors.remove(connector)
             raise
@@ -158,7 +160,10 @@ class ConnectorManager:
                 if not any(re.match(p, c.source) for p in exclude)
             ]
 
-        self.logger.debug(f"广播消息到连接器: {to_conectors}\n消息内容: {processed_info}")
+        connector_info = f"广播消息到连接器: {to_conectors}"
+        message_info = f"消息内容: {processed_info}"
+        debug_msg = connector_info + "\n" + message_info
+        self.logger.debug(debug_msg)
 
         # 创建所有发送任务
         for connector in to_conectors:
@@ -195,7 +200,8 @@ class ConnectorManager:
         try:
             await connector.send_message(message)
         except Exception as e:
-            self.logger.error(f"发送消息到 {connector.source} 失败: {str(e)}\n{traceback.format_exc()}")
+            error_msg = str(e) + "\n" + traceback.format_exc()
+            self.logger.error(f"发送消息到 {connector.source} 失败: {error_msg}")
             raise
 
     async def disconnect_all(self) -> Dict[str, Exception]:
@@ -218,4 +224,5 @@ class ConnectorManager:
             try:
                 await task
             except Exception as e:
-                self.logger.error(f"[gugubot]断开 {connector.source} 失败: {str(e)}\n{traceback.format_exc()}")
+                error_msg = str(e) + "\n" + traceback.format_exc()
+                self.logger.error(f"[gugubot]断开 {connector.source} 失败: {error_msg}")

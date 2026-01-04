@@ -99,7 +99,8 @@ class QQParser(BasicParser):
             return boardcase_info
 
         except Exception as e:
-            self.logger.error(f"QQ消息解析失败: {str(e)}\n{traceback.format_exc()}")
+            error_msg = str(e) + "\n" + traceback.format_exc()
+            self.logger.error(f"QQ消息解析失败: {error_msg}")
             raise
 
     def _is_admin(self, sender_id) -> bool:

@@ -355,7 +355,8 @@ class ExecuteSystem(BasicSystem):
             return True
 
         except Exception as e:
-            self.logger.error(f"通过 bridge 发送命令失败: {command}, 错误: {str(e)}\n{traceback.format_exc()}")
+            error_msg = str(e) + "\n" + traceback.format_exc()
+            self.logger.error(f"通过 bridge 发送命令失败: {command}, 错误: {error_msg}")
             await self.reply(
                 boardcast_info,
                 [MessageBuilder.text(self.get_tr("bridge_execute_failed", error=str(e)))]

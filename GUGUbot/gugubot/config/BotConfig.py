@@ -76,16 +76,24 @@ class BotConfig(BasicConfig):
             if self.yaml_format:
                 mark = getattr(e, 'problem_mark', None)
                 if mark:
-                    msg = f"YAML 配置文件语法错误: 出错位置：第 {mark.line + 1} 行，第 {mark.column + 1} 列\n详细信息: {e}"
+                    error_detail = f"详细信息: {e}"
+                    location_info = f"出错位置：第 {mark.line + 1} 行，第 {mark.column + 1} 列"
+                    msg = f"YAML 配置文件语法错误: {location_info}" + "\n" + error_detail
                 else:
-                    msg = f"YAML 配置文件语法错误: {e}\n请检查 YAML 文件的缩进和冒号(:)是否正确。"
+                    error_detail = f"YAML 配置文件语法错误: {e}"
+                    check_hint = "请检查 YAML 文件的缩进和冒号(:)是否正确。"
+                    msg = error_detail + "\n" + check_hint
             else:
                 lineno = getattr(e, 'lineno', None)
                 colno = getattr(e, 'colno', None)
                 if lineno and colno:
-                    msg = f"JSON 配置文件语法错误: 出错位置：第 {lineno} 行，第 {colno} 列\n详细信息: {e}"
+                    error_detail = f"详细信息: {e}"
+                    location_info = f"出错位置：第 {lineno} 行，第 {colno} 列"
+                    msg = f"JSON 配置文件语法错误: {location_info}" + "\n" + error_detail
                 else:
-                    msg = f"JSON 配置文件语法错误: {e}\n请检查 JSON 文件的格式是否正确。"
+                    error_detail = f"JSON 配置文件语法错误: {e}"
+                    check_hint = "请检查 JSON 文件的格式是否正确。"
+                    msg = error_detail + "\n" + check_hint
 
                 if self.logger:
                     self.logger.error(msg)

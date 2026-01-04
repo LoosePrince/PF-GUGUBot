@@ -60,7 +60,8 @@ class MCParser(BasicParser):
             return boardcast_info
 
         except Exception as e:
-            self.logger.error(f"MC消息解析失败: {str(e)}\n{traceback.format_exc()}")
+            error_msg = str(e) + "\n" + traceback.format_exc()
+            self.logger.error(f"MC消息解析失败: {error_msg}")
             raise
 
     def _ignore_message(self, content: str) -> bool:

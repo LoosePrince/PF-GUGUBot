@@ -118,7 +118,8 @@ class MCConnector(BasicConnector):
             self.server.say(main_content)
 
         except Exception as e:
-            self.logger.error(f"{self.log_prefix} 发送消息失败: {e}\n{traceback.format_exc()}")
+            error_msg = str(e) + "\n" + traceback.format_exc()
+            self.logger.error(f"{self.log_prefix} 发送消息失败: {error_msg}")
             raise
 
     async def on_message(self, server:PluginServerInterface, info:Info) -> None:

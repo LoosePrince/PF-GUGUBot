@@ -393,7 +393,8 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
             self.save()
             
         except Exception as e:
-            self.logger.error(f"检查不活跃玩家时出错: {e}\n{traceback.format_exc()}")
+            error_msg = str(e) + "\n" + traceback.format_exc()
+            self.logger.error(f"检查不活跃玩家时出错: {error_msg}")
         finally:
             self._checking = False
         
@@ -508,7 +509,8 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
                                 message=[MessageBuilder.text(notification_msg)]
                             )
                         except Exception as e:
-                            self.logger.error(f"发送私聊消息到管理员 {admin_id} 失败: {e}\n{traceback.format_exc()}")
+                            error_msg = str(e) + "\n" + traceback.format_exc()
+                            self.logger.error(f"发送私聊消息到管理员 {admin_id} 失败: {error_msg}")
                 
                 # 发送到管理群
                 if admin_groups:
@@ -522,7 +524,8 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
                                 message=[MessageBuilder.text(notification_msg)]
                             )
                         except Exception as e:
-                            self.logger.error(f"发送消息到管理群 {admin_group_id} 失败: {e}\n{traceback.format_exc()}")
+                            error_msg = str(e) + "\n" + traceback.format_exc()
+                            self.logger.error(f"发送消息到管理群 {admin_group_id} 失败: {error_msg}")
                 
                 # 发送到原群
                 if origin_group:
@@ -532,10 +535,12 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
                             message=[MessageBuilder.text(notification_msg)]
                         )
                     except Exception as e:
-                        self.logger.error(f"发送消息到原群 {group_id} 失败: {e}\n{traceback.format_exc()}")
+                        error_msg = str(e) + "\n" + traceback.format_exc()
+                        self.logger.error(f"发送消息到原群 {group_id} 失败: {error_msg}")
             
             except Exception as e:
-                self.logger.error(f"发送通知时出错: {e}\n{traceback.format_exc()}")
+                error_msg = str(e) + "\n" + traceback.format_exc()
+                self.logger.error(f"发送通知时出错: {error_msg}")
 
     async def _schedule_check(self) -> None:
         """定时检查任务"""
@@ -596,7 +601,8 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
                     self.logger.info("定时检查完成，所有玩家均活跃")
             
             except Exception as e:
-                self.logger.error(f"定时检查任务出错: {e}\n{traceback.format_exc()}")
+                error_msg = str(e) + "\n" + traceback.format_exc()
+                self.logger.error(f"定时检查任务出错: {error_msg}")
                 # 出错后等待一段时间再继续（分割成小段以便快速响应停止信号）
                 for _ in range(60):
                     if not self._schedule_task_running:

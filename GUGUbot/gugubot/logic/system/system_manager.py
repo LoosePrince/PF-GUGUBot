@@ -99,7 +99,8 @@ class SystemManager:
             
             self.logger.info(f"已添加并初始化系统: {system.name}")
         except Exception as e:
-            self.logger.error(f"初始化 {system.name} 失败: {str(e)}\n{traceback.format_exc()}")
+            error_msg = str(e) + "\n" + traceback.format_exc()
+            self.logger.error(f"初始化 {system.name} 失败: {error_msg}")
             raise
 
     def remove_system(self, system_name: str) -> bool:
@@ -157,7 +158,10 @@ class SystemManager:
                 if not any(re.match(p, s.name) for p in exclude)
             ]
 
-        self.logger.debug(f"广播命令到系统: {to_systems}\n命令内容: {boardcast_info}")
+        system_info = f"广播命令到系统: {to_systems}"
+        command_info = f"命令内容: {boardcast_info}"
+        debug_msg = system_info + "\n" + command_info
+        self.logger.debug(debug_msg)
 
         # 创建处理任务
         result = False
@@ -189,5 +193,6 @@ class SystemManager:
             result = await system.process_boardcast_info(boardcast_info)
             return result if isinstance(result, bool) else False
         except Exception as e:
-            self.logger.error(f"系统 {system.name} 处理命令失败: {str(e)}\n{traceback.format_exc()}")
+            error_msg = str(e) + "\n" + traceback.format_exc()
+            self.logger.error(f"系统 {system.name} 处理命令失败: {error_msg}")
             return False
