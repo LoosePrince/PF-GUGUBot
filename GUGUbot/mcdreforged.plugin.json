@@ -13,6 +13,7 @@
 	"link": "https://github.com/LoosePrince/PF-GUGUBot",
 	"dependencies": {
 		"whitelist_api": ">=1.3.0",
-		"mg_events": ">=0.2.3"
+		"mg_events": ">=0.2.3",
+		"player_ip_logger": ">=1.1.0"
 	}
 }
