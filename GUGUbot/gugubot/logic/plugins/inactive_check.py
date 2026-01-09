@@ -61,6 +61,10 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
         if "bedrock_cache" not in self:
             self["bedrock_cache"] = {}
         
+        # 初始化 QQ号 -> 最后游玩时间的映射（用于追踪改ID的玩家）
+        if "qq_last_play_time" not in self:
+            self["qq_last_play_time"] = {}
+        
         self.save()
         
         last_check_time = self.get("last_check_time", 0)
@@ -510,6 +514,26 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
                                 mtime = player_file.stat().st_mtime
                                 latest_mtime = max(latest_mtime, mtime)
                     
+                    # 从历史记录中获取该QQ号的最后游玩时间（处理改ID的情况）
+                    qq_last_play_time = self.get("qq_last_play_time", {})
+                    for qq_account in qq_accounts:
+                        qq_str = str(qq_account)
+                        if qq_str in qq_last_play_time:
+                            latest_mtime = max(latest_mtime, qq_last_play_time[qq_str])
+                            found_any_file = True  # 标记为找到记录
+                    
+                    # 如果从 playerdata 获取到了新的时间，更新 QQ 的最后游玩时间记录
+                    if found_any_file and latest_mtime > 0:
+                        for qq_account in qq_accounts:
+                            qq_str = str(qq_account)
+                            # 更新或创建该 QQ 的游玩时间记录
+                            current_recorded_time = qq_last_play_time.get(qq_str, 0)
+                            if latest_mtime > current_recorded_time:
+                                qq_last_play_time[qq_str] = latest_mtime
+                                self.logger.debug(f"更新 QQ {qq_str} 的游玩时间记录: {datetime.fromtimestamp(latest_mtime).strftime('%Y-%m-%d %H:%M:%S')}")
+                        # 保存更新
+                        self["qq_last_play_time"] = qq_last_play_time
+                    
                     # 区分两种情况
                     if not found_any_file:
                         # 从未进入过游戏，使用进群时间作为参考
@@ -552,7 +576,7 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
                         f"{len(never_played_players)} 名从未进入游戏的玩家"
                     )
             
-            # 更新最后检查时间
+            # 更新最后检查时间并保存所有数据（包括 qq_last_play_time 的更新）
             self["last_check_time"] = int(current_time)
             self.save()
             
