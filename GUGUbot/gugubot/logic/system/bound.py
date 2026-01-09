@@ -98,6 +98,16 @@ class BoundSystem(BasicSystem):
             return await self._handle_unbind(boardcast_info)
         elif command.startswith(self.get_tr("list")):
             return await self._handle_list(boardcast_info)
+        elif boardcast_info.is_admin:
+            # 管理员专属命令
+            if command in ["白名单检查", "whitelist_check"]:
+                return await self._handle_check_whitelist(boardcast_info)
+            elif command in ["移除未绑定白名单", "remove_unbound_whitelist"]:
+                return await self._handle_remove_unbound_whitelist(boardcast_info)
+            elif command in ["多余绑定检查", "extra_bound_check"]:
+                return await self._handle_check_extra_bound(boardcast_info)
+            elif command in ["移除多余绑定", "remove_extra_bound"]:
+                return await self._handle_remove_extra_bound(boardcast_info)
         
         return await self._handle_bind(boardcast_info)
 
@@ -626,3 +636,161 @@ class BoundSystem(BasicSystem):
     def get_player_by_name(self, player_name: str) -> Optional[Player]:
         """通过玩家名获取玩家信息"""
         return self.player_manager.get_player(player_name)
+
+    ############################################################## 白名单检查 ##############################################################
+    
+    def _get_unbound_whitelist(self) -> List[tuple]:
+        """获取白名单中未绑定的玩家
+        
+        Returns
+        -------
+        List[tuple]
+            未绑定的玩家列表，元组格式: (uuid, player_name)
+        """
+        if not self.whitelist:
+            return []
+        
+        result = []
+        
+        # 获取所有已绑定的玩家名（转小写以便比较）
+        all_bound_player_names = set()
+        for player in self.player_manager.get_all_players():
+            all_bound_player_names.update([name.lower() for name in player.java_name])
+            all_bound_player_names.update([name.lower() for name in player.bedrock_name])
+        
+        # 检查白名单中的玩家是否在绑定列表中
+        for whitelist_player in self.whitelist._api.get_whitelist():
+            if whitelist_player.name.lower() not in all_bound_player_names:
+                result.append((whitelist_player.uuid, whitelist_player.name))
+        
+        return result
+    
+    async def _handle_check_whitelist(self, boardcast_info: BoardcastInfo) -> bool:
+        """处理白名单检查命令
+        
+        检查白名单中有哪些玩家未绑定
+        """
+        if not self.whitelist:
+            await self.reply(boardcast_info, [MessageBuilder.text("白名单系统未启用")])
+            return True
+        
+        result = self._get_unbound_whitelist()
+        
+        if not result:
+            await self.reply(boardcast_info, [MessageBuilder.text("白名单检查: 所有玩家都已绑定~")])
+            return True
+        
+        reply_msg = ["白名单检查:"]
+        for uuid, player_name in result:
+            reply_msg.append(f"{player_name}({uuid}) 未绑定")
+        
+        await self.reply(boardcast_info, [MessageBuilder.text("\n".join(reply_msg))])
+        return True
+    
+    async def _handle_remove_unbound_whitelist(self, boardcast_info: BoardcastInfo) -> bool:
+        """处理移除未绑定白名单命令
+        
+        从白名单中移除所有未绑定的玩家
+        """
+        if not self.whitelist:
+            await self.reply(boardcast_info, [MessageBuilder.text("白名单系统未启用")])
+            return True
+        
+        result = self._get_unbound_whitelist()
+        
+        if not result:
+            await self.reply(boardcast_info, [MessageBuilder.text("没有未绑定的白名单成员~")])
+            return True
+        
+        reply_msg = ["已将未绑定的白名单成员移除:"]
+        for uuid, player_name in result:
+            self.whitelist.remove_player(player_name)
+            reply_msg.append(f"{player_name}({uuid}) 已从白名单中移除")
+        
+        await self.reply(boardcast_info, [MessageBuilder.text("\n".join(reply_msg))])
+        return True
+    
+    ############################################################## 多余绑定检查 ##############################################################
+    
+    async def _get_extra_bound_member(self) -> List[tuple]:
+        """获取不在群里的多余绑定成员
+        
+        Returns
+        -------
+        List[tuple]
+            多余绑定成员列表，元组格式: (qq_id, player_names)
+        """
+        extra_bound_members = []
+        
+        # 获取所有群成员ID
+        all_member_ids = await self._get_member_in_all_groups()
+        
+        # 检查每个绑定的QQ账号是否还在群中
+        for player in self.player_manager.get_all_players():
+            qq_accounts = player.accounts.get("QQ", [])
+            for qq_id in qq_accounts:
+                if qq_id not in all_member_ids:
+                    # 获取该QQ绑定的所有玩家名
+                    player_names = player.java_name + player.bedrock_name
+                    extra_bound_members.append((qq_id, player_names))
+        
+        return extra_bound_members
+    
+    async def _handle_check_extra_bound(self, boardcast_info: BoardcastInfo) -> bool:
+        """处理多余绑定检查命令
+        
+        检查有哪些绑定的用户不在群里
+        """
+        result = await self._get_extra_bound_member()
+        
+        if not result:
+            await self.reply(boardcast_info, [MessageBuilder.text("多余绑定检查: 绑定成员都在群里~")])
+            return True
+        
+        reply_msg = ["多余绑定检查:"]
+        for qq_id, player_names in result:
+            player_name_str = ", ".join(player_names)
+            reply_msg.append(f"{qq_id}({player_name_str}) 未在群里")
+        
+        await self.reply(boardcast_info, [MessageBuilder.text("\n".join(reply_msg))])
+        return True
+    
+    async def _handle_remove_extra_bound(self, boardcast_info: BoardcastInfo) -> bool:
+        """处理移除多余绑定命令
+        
+        移除所有不在群里的绑定成员
+        """
+        result = await self._get_extra_bound_member()
+        
+        if not result:
+            await self.reply(boardcast_info, [MessageBuilder.text("绑定成员都在群里~")])
+            return True
+        
+        reply_msg = ["已将多余已绑定成员移除:"]
+        for qq_id, player_names in result:
+            # 从白名单中移除玩家名
+            if player_names:
+                self._remove_from_whitelist(player_names)
+            
+            # 从绑定数据中移除该QQ账号
+            # 由于新架构中是以玩家为中心，需要找到对应的玩家并移除QQ账号绑定
+            for player in self.player_manager.get_all_players():
+                if "QQ" in player.accounts and qq_id in player.accounts["QQ"]:
+                    player.accounts["QQ"].remove(qq_id)
+                    # 如果QQ账户列表为空，删除该平台
+                    if not player.accounts["QQ"]:
+                        del player.accounts["QQ"]
+                    
+                    # 如果该玩家没有任何平台绑定了，删除整个玩家
+                    has_any_account = any(accounts for accounts in player.accounts.values() if accounts)
+                    if not has_any_account:
+                        self.player_manager.remove_player(player.name)
+                    break
+            
+            self.player_manager.save()
+            
+            player_name_str = ", ".join(player_names)
+            reply_msg.append(f"{qq_id}({player_name_str}) 已从绑定中移除")
+        
+        await self.reply(boardcast_info, [MessageBuilder.text("\n".join(reply_msg))])
+        return True

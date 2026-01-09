@@ -96,6 +96,10 @@ gugubot:
             unbind: "unbind"
             list: "list"
             search: "search"
+            check_whitelist: "whitelist_check"
+            remove_unbound_whitelist: "remove_unbound_whitelist"
+            check_extra_bound: "extra_bound_check"
+            remove_extra_bound: "remove_extra_bound"
 
             bind_success: "Bind successfully"
             bind_existed: "Player already exists"
@@ -115,7 +119,18 @@ gugubot:
 
             search_instruction: "Please provide player name or QQ number to search"
 
-            help_msg: "Bind related commands:\n{command_prefix}{name} {enable} -> Enable bind system\n{command_prefix}{name} {disable} -> Disable bind system\n{command_prefix}{name} {bind} <player_name> [bedrock] -> Bind player\n{command_prefix}{name} {bind} [@QQ] <player_name> [bedrock] -> Bind for others\n{command_prefix}{name} {unbind} -> Unbind all Java players (default)\n{command_prefix}{name} {unbind} [player_name] [bedrock] -> Unbind player\n{command_prefix}{name} {unbind} bedrock -> Unbind all Bedrock players\n{command_prefix}{name} {list} -> Show binding list\n\nParameter description:\n- Bedrock: bedrock, be, true, 1 (default false)\n- Unbind with bedrock parameter unbinds corresponding version only\n- Unbind bedrock unbinds all Bedrock players of current user"
+            whitelist_check_pass: "Whitelist check: All players are bound~"
+            whitelist_check_result: "Whitelist check:\n{result}"
+            whitelist_not_enabled: "Whitelist system is not enabled"
+            no_unbound_whitelist: "No unbound whitelist members~"
+            unbound_whitelist_removed: "Unbound whitelist members removed:\n{result}"
+
+            extra_bound_check_pass: "Extra binding check: All bound members are in groups~"
+            extra_bound_check_result: "Extra binding check:\n{result}"
+            no_extra_bound: "All bound members are in groups~"
+            extra_bound_removed: "Extra bound members removed:\n{result}"
+
+            help_msg: "Bind related commands:\n{command_prefix}{name} {enable} -> Enable bind system\n{command_prefix}{name} {disable} -> Disable bind system\n{command_prefix}{name} {bind} <player_name> [bedrock] -> Bind player\n{command_prefix}{name} {bind} [@QQ] <player_name> [bedrock] -> Bind for others\n{command_prefix}{name} {unbind} -> Unbind all Java players (default)\n{command_prefix}{name} {unbind} [player_name] [bedrock] -> Unbind player\n{command_prefix}{name} {unbind} bedrock -> Unbind all Bedrock players\n{command_prefix}{name} {list} -> Show binding list\n\n【Admin-only Commands】\n{command_prefix}{name} 白名单检查 (whitelist_check) -> Check unbound players in whitelist\n{command_prefix}{name} 移除未绑定白名单 (remove_unbound_whitelist) -> Remove unbound players from whitelist\n{command_prefix}{name} 多余绑定检查 (extra_bound_check) -> Check bound members not in groups\n{command_prefix}{name} 移除多余绑定 (remove_extra_bound) -> Remove bound members not in groups\n\n【Parameter Description】\n- Bedrock: bedrock, be, true, 1 (default false)\n- Unbind with bedrock parameter unbinds corresponding version only\n- Unbind bedrock unbinds all Bedrock players of current user"
             user_help_msg: "Bind related commands:\n{command_prefix}{name} {bind} <player_name> [bedrock] -> Bind player\n{command_prefix}{name} {unbind} -> Unbind all Java players (default)\n{command_prefix}{name} {unbind} [player_name] [bedrock] -> Unbind player\n{command_prefix}{name} {unbind} bedrock -> Unbind all Bedrock players\n{command_prefix}{name} {list} -> Show binding list\n\nParameter description:\n- Bedrock: bedrock, be, true, 1 (default false)\n- Unbind with bedrock parameter unbinds corresponding version only\n- Unbind bedrock unbinds all Bedrock players of current user"
 
         bound_notice:
