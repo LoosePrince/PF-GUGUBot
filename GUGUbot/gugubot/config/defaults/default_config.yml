@@ -39,11 +39,11 @@ connector:
       custom_group_name:       # 自定义游戏内显示群名 :: （可选）不设置默认转发[群名称]
         "726741344": 定制的显示群名         # 如无需自定义，无视这行
 
-    chat_templates:       # MC到QQ的聊天消息模板 :: 转发消息时随机选择一个模板
-      - "({display_name}) {sender}: "
-      - "[{display_name}] {sender}: "
-      - "{display_name} | {sender} 说："
-      - "{display_name} 的 {sender} : "
+    chat_templates:       # MC到QQ的聊天消息模板 :: 转发消息时根据权重随机选择模板（权重越高被选中概率越大）
+      - "({display_name}) {sender}: ": 1
+      - "[{display_name}] {sender}: ": 1
+      - "{display_name} | {sender} 说：": 1
+      - "{display_name} 的 {sender} : ": 1
 
     others:
       forward_other_bot: false       # 转发官方机器人回复

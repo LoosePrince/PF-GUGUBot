@@ -226,9 +226,29 @@ class QQWebSocketConnector(BasicConnector):
             # 从config中获取聊天模板列表
             chat_templates = self.config.get_keys(["connector", "QQ", "chat_templates"], [])
             
-            # 如果配置了模板，随机选择一个；否则使用默认格式
+            # 如果配置了模板，根据权重随机选择一个；否则使用默认格式
             if chat_templates and isinstance(chat_templates, list) and len(chat_templates) > 0:
-                template = random.choice(chat_templates)
+                # 检查是否为字典格式（带权重）
+                if isinstance(chat_templates[0], dict):
+                    # 字典格式: {"模板字符串": 权重值}
+                    templates = []
+                    weights = []
+                    for item in chat_templates:
+                        for template_str, weight in item.items():
+                            templates.append(template_str)
+                            weights.append(weight if isinstance(weight, (int, float)) else 1)
+                    # 使用权重随机选择
+                    template = random.choices(templates, weights=weights, k=1)[0]
+                else:
+                    # 旧格式：转换为新格式并保存
+                    new_templates = [{tmpl: 1} for tmpl in chat_templates]
+                    self.config["connector"]["QQ"]["chat_templates"] = new_templates
+                    self.config.save()  # 手动保存配置
+                    if self.logger:
+                        self.logger.info("已自动将 chat_templates 从旧格式更新为新格式（默认权重为1）")
+                    # 从转换后的新格式中随机选择
+                    template = random.choice(chat_templates)
+                
                 # 使用模板格式化消息，{display_name}对应source，{sender}对应processed_info.sender
                 formatted_text = template.format(display_name=source, sender=processed_info.sender)
             else:
