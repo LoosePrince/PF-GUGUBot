@@ -222,7 +222,7 @@ class QQWebSocketConnector(BasicConnector):
         # 去除消息中的 Minecraft 颜色代码
         message = self._strip_color_codes_from_message(message)
         
-        if source != "QQ" and source != "":
+        if source != "QQ" and source != "" and processed_info.sender != "":
             # 从config中获取聊天模板列表
             chat_templates = self.config.get_keys(["connector", "QQ", "chat_templates"], [])
             
@@ -237,6 +237,10 @@ class QQWebSocketConnector(BasicConnector):
             
             source_message = CQHandler.parse(formatted_text)
             message = source_message + message
+        
+        # 如果是玩家进出服务器消息，不显示发送者
+        elif source != "QQ" and source != "" and processed_info.sender == "":
+            message = CQHandler.parse(f"[{source}] ") + message
 
         for target_id, target_type in target.items():
             if not target_id.isdigit():
