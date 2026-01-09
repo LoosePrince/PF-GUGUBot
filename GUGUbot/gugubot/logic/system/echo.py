@@ -57,7 +57,7 @@ class EchoSystem(BasicSystem):
                 # 管理群消息不广播，直接返回False
                 return False
             
-        if boardcast_info.event_type == "notice" or boardcast_info.event_type == "request":
+        if boardcast_info.event_type != "message":
             return False
         
         try:
