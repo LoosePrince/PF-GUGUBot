@@ -102,6 +102,8 @@ gugubot:
             bind_existed: "该玩家已存在"
             bind_failed: "绑定失败"
             bind_instruction: "请提供要绑定的玩家名称，格式：\n{command_prefix}{name} {bind} mc名称 [基岩] - 绑定自己\n{command_prefix}{name} {bind} [@123456] mc名称 [基岩] - 绑定他人\n示例：{command_prefix}{name} {bind} Steve bedrock"
+            bind_invalid_name: "玩家名 '{player_name}' 不符合要求的格式\n正则表达式: {pattern}"
+            bind_pattern_error: "正则表达式配置错误，请联系管理员"
             already_bound: "该玩家已被绑定"
             max_bound_reached: "绑定数量已达上限"
 

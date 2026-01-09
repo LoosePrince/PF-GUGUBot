@@ -105,6 +105,8 @@ gugubot:
             bind_existed: "Player already exists"
             bind_failed: "Bind failed"
             bind_instruction: "Please provide the player name to bind, format:\n{command_prefix}{name} {bind} mc_name [bedrock] - bind yourself\n{command_prefix}{name} {bind} [@123456] mc_name [bedrock] - bind others\nExample: {command_prefix}{name} {bind} Steve bedrock"
+            bind_invalid_name: "Player name '{player_name}' does not match the required format\nRegex pattern: {pattern}"
+            bind_pattern_error: "Regex pattern configuration error, please contact administrator"
             already_bound: "Player already bound"
             max_bound_reached: "Binding limit reached"
 

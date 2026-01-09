@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import asyncio
+import re
 
 from typing import Dict, List, Optional, Union
 
@@ -159,6 +160,22 @@ class BoundSystem(BasicSystem):
                 self.get_tr("bind_instruction", command_prefix=command_prefix, name=system_name, bind=bind_cmd)
             )])
             return True
+
+        # 验证玩家名是否符合正则表达式
+        player_name_pattern = self.config.get("system", {}).get("bound", {}).get("player_name_pattern", "")
+        if player_name_pattern:
+            try:
+                if not re.match(player_name_pattern, player_name):
+                    await self.reply(boardcast_info, [MessageBuilder.text(
+                        self.get_tr("bind_invalid_name", player_name=player_name, pattern=player_name_pattern)
+                    )])
+                    return True
+            except re.error as e:
+                self.logger.error(f"正则表达式 '{player_name_pattern}' 格式错误: {e}")
+                await self.reply(boardcast_info, [MessageBuilder.text(
+                    self.get_tr("bind_pattern_error")
+                )])
+                return True
 
         # 检查是否达到绑定上限
         player = self.player_manager.get_player(target_id or player_name, platform=source)

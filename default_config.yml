@@ -122,6 +122,9 @@ system:
 
     whitelist_add_with_bound: false   # 绑定ID自动绑定服务器白名单
     whitelist_remove_with_leave: true   # 退群时移除白名单
+    
+    player_name_pattern: ""   # 玩家名正则表达式 :: 限制绑定的玩家名格式，为空则不限制
+                               # 示例: "^[a-zA-Z0-9_]{3,16}$" (3-16位字母数字下划线)
 
   bound_notice:   # 绑定提示
     enable: false
