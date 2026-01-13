@@ -241,8 +241,11 @@ class BoundSystem(BasicSystem):
             # 检查是否已存在该玩家
             existing_player = self.player_manager.get_player(target_id, platform=platform)
             if existing_player:
-                if (is_bedrock and player_name not in existing_player.bedrock_name) \
-                    or (not is_bedrock and player_name not in existing_player.java_name):
+                # 将列表中的元素转换为字符串进行比较
+                bedrock_names_str = [str(name) for name in existing_player.bedrock_name]
+                java_names_str = [str(name) for name in existing_player.java_name]
+                if (is_bedrock and player_name not in bedrock_names_str) \
+                    or (not is_bedrock and player_name not in java_names_str):
                     existing_player.add_name(player_name, is_bedrock)
                     self.player_manager.save()
                     _bound_whitelist(player_name, is_offline, is_online, is_bedrock)
@@ -312,8 +315,8 @@ class BoundSystem(BasicSystem):
             await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("no_bindings"))])
             return True
         
-        # 从白名单中删除玩家名
-        self._remove_from_whitelist(player.java_name)
+        # 从白名单中删除玩家名（转换为字符串）
+        self._remove_from_whitelist([str(name) for name in player.java_name])
         
         # 清空Java版玩家名列表
         player.java_name.clear()
@@ -334,8 +337,8 @@ class BoundSystem(BasicSystem):
             await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("no_bindings"))])
             return True
         
-        # 从白名单中删除玩家名
-        self._remove_from_whitelist(player.bedrock_name)
+        # 从白名单中删除玩家名（转换为字符串）
+        self._remove_from_whitelist([str(name) for name in player.bedrock_name])
         
         # 清空基岩版玩家名列表
         player.bedrock_name.clear()
@@ -359,8 +362,9 @@ class BoundSystem(BasicSystem):
         
         # 根据基岩版参数选择性解绑
         if is_bedrock:
-            # 只解绑基岩版玩家名
-            if player_name in player.bedrock_name:
+            # 只解绑基岩版玩家名（转换为字符串进行比较）
+            bedrock_names_str = [str(name) for name in player.bedrock_name]
+            if player_name in bedrock_names_str:
                 # 从白名单中删除玩家名
                 self._remove_from_whitelist(player_name)
                 
@@ -372,8 +376,9 @@ class BoundSystem(BasicSystem):
                 await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("player_not_found"))])
                 return True
         else:
-            # 只解绑Java版玩家名
-            if player_name in player.java_name:
+            # 只解绑Java版玩家名（转换为字符串进行比较）
+            java_names_str = [str(name) for name in player.java_name]
+            if player_name in java_names_str:
                 # 从白名单中删除玩家名
                 self._remove_from_whitelist(player_name)
                 
@@ -472,8 +477,8 @@ class BoundSystem(BasicSystem):
             notification_parts.append(f"QQ号: {user_id}")
             
             if player:
-                # 获取所有绑定的玩家名
-                all_player_names = player.java_name + player.bedrock_name
+                # 获取所有绑定的玩家名（转换为字符串）
+                all_player_names = [str(name) for name in player.java_name] + [str(name) for name in player.bedrock_name]
                 if all_player_names:
                     player_names_str = ", ".join(all_player_names)
                     notification_parts.append(f"绑定玩家: {player_names_str}")
@@ -547,8 +552,8 @@ class BoundSystem(BasicSystem):
             
             # 如果用户不在任何群中，执行清理
             if user_id not in all_member_ids and player:
-                # 获取所有玩家名
-                all_player_names = player.java_name + player.bedrock_name
+                # 获取所有玩家名（转换为字符串）
+                all_player_names = [str(name) for name in player.java_name] + [str(name) for name in player.bedrock_name]
                 
                 # 从白名单中移除玩家名
                 if all_player_names:
@@ -672,8 +677,8 @@ class BoundSystem(BasicSystem):
         # 获取所有已绑定的玩家名（转小写以便比较）
         all_bound_player_names = set()
         for player in self.player_manager.get_all_players():
-            all_bound_player_names.update([name.lower() for name in player.java_name])
-            all_bound_player_names.update([name.lower() for name in player.bedrock_name])
+            all_bound_player_names.update([str(name).lower() for name in player.java_name])
+            all_bound_player_names.update([str(name).lower() for name in player.bedrock_name])
         
         # 检查白名单中的玩家是否在绑定列表中
         for whitelist_player in self.whitelist._api.get_whitelist():
@@ -747,8 +752,8 @@ class BoundSystem(BasicSystem):
             qq_accounts = player.accounts.get("QQ", [])
             for qq_id in qq_accounts:
                 if qq_id not in all_member_ids:
-                    # 获取该QQ绑定的所有玩家名
-                    player_names = player.java_name + player.bedrock_name
+                    # 获取该QQ绑定的所有玩家名（转换为字符串）
+                    player_names = [str(name) for name in player.java_name] + [str(name) for name in player.bedrock_name]
                     extra_bound_members.append((qq_id, player_names))
         
         return extra_bound_members
