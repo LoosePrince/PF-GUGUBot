@@ -73,6 +73,9 @@ class MCConnector(BasicConnector):
         """
         if not self.enable:
             return
+
+        if not self.server.is_server_running():
+            return 
         
         self.builder: McMessageBuilder
 
