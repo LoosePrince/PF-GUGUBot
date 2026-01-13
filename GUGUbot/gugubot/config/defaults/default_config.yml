@@ -178,6 +178,7 @@ system:
     inactive_days: 30   # 进过游戏但不活跃的天数阈值（天）
     never_played_days: 7   # 进群后从未进入游戏的天数阈值（天）
     check_interval: 86400   # 定时检查间隔（秒，默认24小时）
+    auto_fix_card: true   # 自动修正群名片为第一个Java或基岩版游戏名
     notify_targets:   # 通知目标配置
       admin_private: true   # 私聊管理员
       admin_groups: true   # 发送到管理群

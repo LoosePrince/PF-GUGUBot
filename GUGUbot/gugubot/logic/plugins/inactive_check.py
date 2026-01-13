@@ -2,6 +2,7 @@
 """不活跃用户检查插件模块。
 
 该模块提供检查QQ绑定玩家长期未登录游戏的功能，支持定时自动检查和手动命令触发。
+同时检查群名片是否为第一个Java或基岩版游戏名，并支持自动修复不匹配的群名片。
 """
 
 import asyncio
@@ -25,6 +26,7 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
     """不活跃用户检查系统，用于检查和提醒QQ绑定玩家长期未登录。
     
     提供定时自动检查和手动触发检查功能。
+    同时检查群名片是否为第一个Java或基岩版游戏名，支持自动修复不匹配的群名片。
     """
 
     def __init__(self, server: PluginServerInterface, config=None) -> None:
@@ -471,9 +473,10 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
                             self.logger.debug(f"玩家 {player.name} 在活跃白名单中，跳过不活跃检查")
                             continue
                     
-                    # 检查该玩家是否在当前群，并获取进群时间
+                    # 检查该玩家是否在当前群，并获取进群时间和群名片
                     player_in_group = False
                     join_time = None
+                    group_card = None
                     
                     # 检查玩家的任一QQ账号是否在该群
                     for qq_account in qq_accounts:
@@ -482,10 +485,32 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
                             player_in_group = True
                             # 获取进群时间
                             join_time = group_members[qq_str].get("join_time", 0)
+                            # 获取群名片
+                            group_card = group_members[qq_str].get("card", "")
                             break
                     
                     if not player_in_group:
                         continue
+                    
+                    # 检查群名片是否为第一个Java或基岩名字，并自动修改
+                    expected_name = None
+                    if player.java_name:
+                        expected_name = player.java_name[0]
+                    elif player.bedrock_name:
+                        expected_name = player.bedrock_name[0]
+                    
+                    # 如果有预期名字，且群名片不匹配，自动修改
+                    if expected_name and group_card != expected_name:
+                        auto_fix_enabled = self.config.get_keys(["system", "inactive_check", "auto_fix_card"], True)
+                        if auto_fix_enabled:
+                            try:
+                                await self.qq_connector.bot.set_group_card(
+                                    group_id=int(group_id),
+                                    user_id=int(qq_str),
+                                    card=expected_name
+                                )
+                            except Exception:
+                                pass
                     
                     # 检查玩家的所有UUID对应的playerdata文件，找最新的修改时间
                     latest_mtime = 0
@@ -669,6 +694,7 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
                                 player_name=player["player_name"],
                                 qq_accounts=qq_accounts_str
                             )
+                        
                         never_played_list.append(player_item)
                     never_played_list_str = "\n".join(never_played_list)
                     
