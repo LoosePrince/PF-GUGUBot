@@ -101,8 +101,20 @@ class MCConnector(BasicConnector):
             )
 
             if player_manager:
-                sender = getattr(player_manager.get_player(str(sender_id)), "name", None) or sender
-                receiver = getattr(player_manager.get_player(str(receiver)), "name", None) or receiver
+                sender_player = player_manager.get_player(str(sender_id))
+                if sender_player:
+                    # 优先使用 Java 或基岩版的第一个名字
+                    sender = (sender_player.java_name[0] if sender_player.java_name 
+                             else sender_player.bedrock_name[0] if sender_player.bedrock_name 
+                             else sender_player.name) or sender
+                
+                if receiver:
+                    receiver_player = player_manager.get_player(str(receiver))
+                    if receiver_player:
+                        # 优先使用 Java 或基岩版的第一个名字
+                        receiver = (receiver_player.java_name[0] if receiver_player.java_name 
+                                   else receiver_player.bedrock_name[0] if receiver_player.bedrock_name 
+                                   else receiver_player.name) or receiver
 
             
             custom_group_name = self.config.get_keys(["connector", "QQ", "permissions", "custom_group_name"], {})
