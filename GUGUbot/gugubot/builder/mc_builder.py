@@ -151,20 +151,21 @@ class McMessageBuilder:
         file = rf"file:///{file}" if not file.startswith('http') else file
 
         summary = data.get('summary', '').strip('[]')
+        result = None
 
         image_link = url or file
 
         if chat_image:
-            return RText(f'[[CICode,url={image_link},name={summary or "图片"}]]')
+            result = RText(f'[[CICode,url={image_link},name={summary or "图片"}]]')
         
         text = f"[图片:{summary}]" if summary else "[图片]"
-        result = RText(text, color=RColor.gold)
+        result = RText(text, color=RColor.gold) if result is None else result
 
         if image_previewer:
-            return result.set_hover_text(image_link) \
+            result = result.set_hover_text(image_link) \
                          .set_click_event(RAction.run_command, f"/imagepreview preview {image_link} 60")
 
-        if image_link:
-            result = result.set_hover_text(image_link)\
+        elif image_link:
+            result = result.set_hover_text(image_link) \
                            .set_click_event(action=RAction.open_url, value=image_link)
         return result
