@@ -186,8 +186,7 @@ class PlayerListSystem(BasicSystem):
             query_id = f"{boardcast_info.sender_id}_{int(time.time() * 1000)}"
             server_name = self._get_server_name()
             
-            all_players = await self._get_local_players()
-            real_players, bots = self._separate_players_and_bots(all_players)
+            real_players, bots = self._get_local_players_and_bots()
             
             self._pending_queries[query_id] = {
                 "boardcast_info": boardcast_info,
@@ -207,8 +206,8 @@ class PlayerListSystem(BasicSystem):
             self.logger.error(f"处理合并列表查询失败: {e}")
             await self._reply_to_source(boardcast_info, [MessageBuilder.text(self.get_tr("query_failed", error=str(e)))])
 
-    async def _get_local_players(self) -> List[str]:
-        """获取本地服务器的玩家列表"""
+    def _get_local_players(self) -> List[str]:
+        """获取本地服务器的玩家列表（不包含假人，如果启用了 use_bot_list）"""
         try:
             if self.server.is_rcon_running():
                 result = self.server.rcon_query("list")
@@ -218,6 +217,71 @@ class PlayerListSystem(BasicSystem):
         except Exception as e:
             self.logger.warning(f"获取本地玩家列表失败: {e}")
         return []
+
+    def _get_local_bots(self) -> List[str]:
+        """获取本地服务器的假人列表（通过 /bot list 命令）
+        
+        返回格式示例:
+            Total number: (1/10)
+            world_the_end(0):
+            world(1): sese
+            world_nether(0):
+        """
+        try:
+            if self.server.is_rcon_running():
+                result = self.server.rcon_query("bot list")
+                if not result:
+                    return []
+                return self._parse_bot_list(result)
+        except Exception as e:
+            self.logger.warning(f"获取本地假人列表失败: {e}")
+        return []
+
+    def _parse_bot_list(self, raw_result: str) -> List[str]:
+        """解析 /bot list 返回的假人列表
+        
+        格式:
+            Total number: (1/10)
+            world_the_end(0):
+            world(1): bot1, bot2
+            world_nether(0):
+        """
+        bots = []
+        comma_separator = self.config.get_keys(["system", "list", "comma_separator"], ",")
+        
+        for line in raw_result.strip().split("\n"):
+            line = line.strip()
+            # 跳过总数行和空行
+            if not line or line.startswith("Total number"):
+                continue
+            # 解析维度行: world(1): bot1, bot2
+            # 查找冒号后的假人列表
+            if "):" in line:
+                parts = line.split("):", 1)
+                if len(parts) == 2 and parts[1].strip():
+                    bot_names = [b.strip() for b in re.split(comma_separator, parts[1]) if b.strip()]
+                    bots.extend(bot_names)
+        
+        return bots
+
+    def _get_local_players_and_bots(self) -> Tuple[List[str], List[str]]:
+        """获取本地服务器的玩家和假人列表
+        
+        Returns:
+            Tuple[List[str], List[str]]: (真实玩家列表, 假人列表)
+        """
+        use_bot_list = self.config.get_keys(["system", "list", "use_bot_list"], False)
+        
+        if use_bot_list:
+            # leaves/lophine 端：使用 /list 获取玩家，使用 /bot list 获取假人
+            all_players = self._get_local_players()
+            bots = self._get_local_bots()
+            # /list 在这些端只返回真实玩家，不需要额外分离
+            return all_players, bots
+        else:
+            # 其他端：使用 /list 获取所有，然后通过名称模式分离
+            all_players = self._get_local_players()
+            return self._separate_players_and_bots(all_players)
 
     def _get_server_name(self) -> str:
         """获取当前服务器名称"""
@@ -404,8 +468,16 @@ class PlayerListSystem(BasicSystem):
         """处理本地列表命令"""
         try:
             if self.server.is_rcon_running():
-                result = self.server.rcon_query("list")
-                formatted_result = self._format_player_list(result, list_type)
+                use_bot_list = self.config.get_keys(["system", "list", "use_bot_list"], False)
+                
+                if use_bot_list:
+                    # leaves/lophine 端：使用专门的方法获取分离的玩家和假人列表
+                    real_players, bots = self._get_local_players_and_bots()
+                    formatted_result = self._format_separated_list(real_players, bots, list_type)
+                else:
+                    # 其他端：使用传统方式，从 /list 结果中分离
+                    result = self.server.rcon_query("list")
+                    formatted_result = self._format_player_list(result, list_type)
 
                 if formatted_result:
                     await self._reply_to_source(boardcast_info, [MessageBuilder.text(formatted_result)])
@@ -431,8 +503,7 @@ class PlayerListSystem(BasicSystem):
                 return
 
             server_name = self._get_server_name()
-            all_players = await self._get_local_players()
-            real_players, bots = self._separate_players_and_bots(all_players)
+            real_players, bots = self._get_local_players_and_bots()
             
             players_str = ",".join(real_players) if real_players else ""
             bots_str = ",".join(bots) if bots else ""
@@ -459,6 +530,57 @@ class PlayerListSystem(BasicSystem):
             
         except Exception as e:
             self.logger.error(f"发送响应到 bridge 失败: {e}")
+
+    def _format_separated_list(self, real_players: List[str], bots: List[str], list_type: ListType = ListType.PLAYERS) -> str:
+        """格式化已分离的玩家和假人列表输出（用于 leaves/lophine 端）"""
+        try:
+            if list_type == ListType.PLAYERS:
+                if not real_players:
+                    return self.get_tr("players_empty")
+                real_players.sort()
+                players_list = [f"{i+1}. {p}" for i, p in enumerate(real_players)]
+                return self.get_tr("players_content", 
+                                   count=len(real_players), 
+                                   players="\n" + "\n".join(players_list))
+                
+            elif list_type == ListType.BOTS:
+                if not bots:
+                    return self.get_tr("bots_empty")
+                bots.sort()
+                bots_list = [f"{i+1}. {b}" for i, b in enumerate(bots)]
+                return self.get_tr("bots_content", 
+                                   count=len(bots), 
+                                   bots="\n" + "\n".join(bots_list))
+                
+            else:  # ListType.ALL
+                result_parts = []
+                
+                if real_players:
+                    real_players.sort()
+                    players_list = [f"  {i+1}. {p}" for i, p in enumerate(real_players)]
+                    result_parts.append(self.get_tr("local_players_label", 
+                                                     count=len(real_players), 
+                                                     player_list="\n".join(players_list)))
+                else:
+                    result_parts.append(self.get_tr("local_no_players"))
+                
+                if bots:
+                    bots.sort()
+                    bots_list = [f"  {i+1}. {b}" for i, b in enumerate(bots)]
+                    result_parts.append(self.get_tr("local_bots_label", 
+                                                     count=len(bots), 
+                                                     player_list="\n".join(bots_list)))
+                else:
+                    result_parts.append(self.get_tr("local_no_bots"))
+                
+                return self.get_tr("server_content", 
+                                   player_count=len(real_players), 
+                                   bot_count=len(bots),
+                                   details="\n\n".join(result_parts))
+            
+        except Exception as e:
+            self.logger.warning(f"Failed to format separated list: {e}")
+            return ""
 
     def _format_player_list(self, raw_result: str, list_type: ListType = ListType.PLAYERS) -> str:
         """格式化玩家列表输出"""

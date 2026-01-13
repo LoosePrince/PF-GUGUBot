@@ -151,6 +151,7 @@ system:
     bridge_timeout: 3   # 等待其他服务器响应的超时时间（秒）
     colon_separator: ":" # 列分隔符
     comma_separator: "," # 列分隔符
+    use_bot_list: false   # 使用 /bot list 获取假人列表 :: leaves/lophine 端需要开启此选项
 
   name:   # 机器人昵称
     enable: false
