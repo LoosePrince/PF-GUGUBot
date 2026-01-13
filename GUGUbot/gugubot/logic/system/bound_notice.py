@@ -60,6 +60,16 @@ class BoundNoticeSystem(BasicSystem):
         if not boardcast_info.sender_id:
             return False
 
+        # 排除管理员
+        if boardcast_info.is_admin:
+            return False
+
+        # 排除管理群消息
+        if boardcast_info.source_id:
+            admin_group_ids = self.config.get_keys(["connector", "QQ", "permissions", "admin_group_ids"], [])
+            if str(boardcast_info.source_id) in [str(gid) for gid in admin_group_ids if gid]:
+                return False
+
         # 检查玩家是否在玩家管理器中
         player = self.bound_system.player_manager.get_player(
             boardcast_info.sender_id, 
