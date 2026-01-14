@@ -104,11 +104,17 @@ gugubot:
             unbind: "解绑"
             list: "列表"
             search: "查询"
+            check_whitelist: "白名单检查"
+            remove_unbound_whitelist: "移除未绑定白名单"
+            check_extra_bound: "多余绑定检查"
+            remove_extra_bound: "移除多余绑定"
             
             bind_success: "绑定成功了！嘻嘻嘻~现在你永远都是我的了！"
             bind_existed: "已经有一个你了呢，嘻嘻。"
             bind_failed: "失败了...为什么会失败呢..."
             bind_instruction: "格式在这里哦，看清楚：\n{command_prefix}{name} {bind} mc名称 [基岩]\n{command_prefix}{name} {bind} [@123456] mc名称 [基岩]"
+            bind_invalid_name: "玩家名 '{player_name}' 不对...嘻嘻嘻，你想骗我吗？\n规则是: {pattern}"
+            bind_pattern_error: "正则表达式出错了...嘻嘻嘻，快找管理员，我会一直盯着你的..."
             already_bound: "已经绑定了，嘻嘻。"
             max_bound_reached: "你绑得太多了，是不是想背着我找别人？！"
             
@@ -123,7 +129,18 @@ gugubot:
             
             search_instruction: "想查什么？告诉我..."
             
-            help_msg: "绑定指令，你跑不掉的：\n{command_prefix}{name} {enable} -> 开启系统\n{command_prefix}{name} {disable} -> 关闭系统\n{command_prefix}{name} {bind} <玩家名> [基岩] -> 绑定玩家\n{command_prefix}{name} {bind} [@QQ号] <玩家名> [基岩] -> 为他人绑定\n{command_prefix}{name} {unbind} -> 解绑\n{command_prefix}{name} {list} -> 列表"
+            whitelist_check_pass: "白名单检查: 所有人都绑定了...嘻嘻嘻~真乖！"
+            whitelist_check_result: "白名单检查:\n{result}"
+            whitelist_not_enabled: "白名单系统没开，嘻嘻。"
+            no_unbound_whitelist: "没有未绑定的白名单成员...嘻嘻嘻~"
+            unbound_whitelist_removed: "未绑定的白名单成员都移除了...嘻嘻嘻，他们跑不掉的:\n{result}"
+            
+            extra_bound_check_pass: "多余绑定检查: 绑定的人都在群里...嘻嘻~"
+            extra_bound_check_result: "多余绑定检查:\n{result}"
+            no_extra_bound: "绑定的人都在群里...嘻嘻嘻，没人能逃走~"
+            extra_bound_removed: "多余的绑定成员移除了...嘻嘻嘻，背叛者都被清除了:\n{result}"
+            
+            help_msg: "绑定指令，你跑不掉的：\n{command_prefix}{name} {enable} -> 开启系统\n{command_prefix}{name} {disable} -> 关闭系统\n{command_prefix}{name} {bind} <玩家名> [基岩] -> 绑定玩家\n{command_prefix}{name} {bind} [@QQ号] <玩家名> [基岩] -> 为他人绑定\n{command_prefix}{name} {unbind} -> 解绑\n{command_prefix}{name} {list} -> 列表\n\n【管理员专用命令】\n{command_prefix}{name} 白名单检查 -> 检查白名单中未绑定的玩家\n{command_prefix}{name} 移除未绑定白名单 -> 移除白名单中未绑定的玩家\n{command_prefix}{name} 多余绑定检查 -> 检查不在群里的绑定成员\n{command_prefix}{name} 移除多余绑定 -> 移除不在群里的绑定成员"
             user_help_msg: "绑定指令，乖乖听话：\n{command_prefix}{name} {bind} <玩家名> [基岩] -> 绑定玩家\n{command_prefix}{name} {unbind} -> 解绑\n{command_prefix}{name} {list} -> 列表"
         
         # 绑定提醒系统

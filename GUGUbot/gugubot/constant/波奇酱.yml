@@ -103,11 +103,17 @@ gugubot:
             unbind: "解绑"
             list: "列表"
             search: "查询"
+            check_whitelist: "白名单检查"
+            remove_unbound_whitelist: "移除未绑定白名单"
+            check_extra_bound: "多余绑定检查"
+            remove_extra_bound: "移除多余绑定"
             
             bind_success: "绑...绑定成功了...唔，我会记住你的..."
             bind_existed: "这个玩家已经有了...唔。"
             bind_failed: "绑、绑定失败了...唔。"
             bind_instruction: "格式是、是这样的：\n{command_prefix}{name} {bind} mc名称 [基岩]\n{command_prefix}{name} {bind} [@123456] mc名称 [基岩]"
+            bind_invalid_name: "玩家名 '{player_name}' 格、格式不对...唔。\n要符合这个规则: {pattern}"
+            bind_pattern_error: "正则表达式配置出、出错了...唔，快找管理员..."
             already_bound: "已经绑定了...唔。"
             max_bound_reached: "绑定太、太多了...唔。"
             
@@ -122,7 +128,18 @@ gugubot:
             
             search_instruction: "请、请告诉我要查什么...唔。"
             
-            help_msg: "绑定指令...唔：\n{command_prefix}{name} {enable} -> 开启系统\n{command_prefix}{name} {disable} -> 关闭系统\n{command_prefix}{name} {bind} <玩家名> [基岩] -> 绑定玩家\n{command_prefix}{name} {bind} [@QQ号] <玩家名> [基岩] -> 为他人绑定\n{command_prefix}{name} {unbind} -> 解绑所有Java版玩家名（默认）\n{command_prefix}{name} {unbind} [玩家名] [基岩] -> 解绑玩家\n{command_prefix}{name} {unbind} 基岩 -> 解绑所有基岩版玩家名\n{command_prefix}{name} {list} -> 显示绑定列表"
+            whitelist_check_pass: "白名单检查: 大、大家都绑定了...唔，真好。"
+            whitelist_check_result: "白名单检查:\n{result}"
+            whitelist_not_enabled: "白名单系统没、没开...唔。"
+            no_unbound_whitelist: "没、没有未绑定的白名单成员...唔，太好了。"
+            unbound_whitelist_removed: "未绑定的白名单成员移、移除了:\n{result}"
+            
+            extra_bound_check_pass: "多余绑定检查: 绑、绑定的人都在群里...唔。"
+            extra_bound_check_result: "多余绑定检查:\n{result}"
+            no_extra_bound: "绑、绑定的人都在群里...呼。"
+            extra_bound_removed: "多、多余的绑定成员移除了:\n{result}"
+            
+            help_msg: "绑定指令...唔：\n{command_prefix}{name} {enable} -> 开启系统\n{command_prefix}{name} {disable} -> 关闭系统\n{command_prefix}{name} {bind} <玩家名> [基岩] -> 绑定玩家\n{command_prefix}{name} {bind} [@QQ号] <玩家名> [基岩] -> 为他人绑定\n{command_prefix}{name} {unbind} -> 解绑所有Java版玩家名（默认）\n{command_prefix}{name} {unbind} [玩家名] [基岩] -> 解绑玩家\n{command_prefix}{name} {unbind} 基岩 -> 解绑所有基岩版玩家名\n{command_prefix}{name} {list} -> 显示绑定列表\n\n【管理员专用命令】\n{command_prefix}{name} 白名单检查 -> 检、检查白名单中未绑定的...\n{command_prefix}{name} 移除未绑定白名单 -> 移除白名单中未绑定的...\n{command_prefix}{name} 多余绑定检查 -> 检、检查不在群里的...\n{command_prefix}{name} 移除多余绑定 -> 移除不在群里的..."
             user_help_msg: "绑定指令...唔：\n{command_prefix}{name} {bind} <玩家名> [基岩] -> 绑定玩家\n{command_prefix}{name} {unbind} -> 解绑所有Java版玩家名（默认）\n{command_prefix}{name} {unbind} [玩家名] [基岩] -> 解绑玩家\n{command_prefix}{name} {unbind} 基岩 -> 解绑所有基岩版玩家名\n{command_prefix}{name} {list} -> 显示绑定列表"
         
         # 绑定提醒系统

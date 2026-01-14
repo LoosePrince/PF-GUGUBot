@@ -103,11 +103,17 @@ gugubot:
             unbind: "解绑"
             list: "列表"
             search: "查询"
+            check_whitelist: "白名单检查"
+            remove_unbound_whitelist: "移除未绑定白名单"
+            check_extra_bound: "多余绑定检查"
+            remove_extra_bound: "移除多余绑定"
             
             bind_success: "绑定成功咯！以后我们就是好朋友啦~"
             bind_existed: "已经有一个你了呢，嘻嘻。"
             bind_failed: "失败了...呜呜。"
             bind_instruction: "格式在这里哦：\n{command_prefix}{name} {bind} mc名称 [基岩]"
+            bind_invalid_name: "呜呜，玩家名 '{player_name}' 格式不对呢~\n要符合这个规则哦: {pattern}"
+            bind_pattern_error: "正则表达式配置出错啦...呜呜，快找大哥哥大姐姐帮忙！"
             already_bound: "已经绑定过啦，嘻嘻。"
             max_bound_reached: "你绑得太多了，我记不住啦！"
             
@@ -122,7 +128,18 @@ gugubot:
             
             search_instruction: "想查谁？告诉我就好啦~"
             
-            help_msg: "绑定指令，我们要一直做好朋友哦：\n{command_prefix}{name} {bind} <名> -> 绑定\n{command_prefix}{name} {unbind} -> 解绑\n{command_prefix}{name} {list} -> 列表"
+            whitelist_check_pass: "白名单检查: 大家都绑定啦~嘻嘻，真棒！"
+            whitelist_check_result: "白名单检查:\n{result}"
+            whitelist_not_enabled: "白名单系统没开呢，呜呜。"
+            no_unbound_whitelist: "没有未绑定的白名单成员~大家都好乖！"
+            unbound_whitelist_removed: "未绑定的白名单成员都移除啦:\n{result}"
+            
+            extra_bound_check_pass: "多余绑定检查: 绑定的朋友都在群里呢~嘻嘻！"
+            extra_bound_check_result: "多余绑定检查:\n{result}"
+            no_extra_bound: "绑定的朋友都在群里~嘻嘻！"
+            extra_bound_removed: "多余的绑定成员都移除啦:\n{result}"
+            
+            help_msg: "绑定指令，我们要一直做好朋友哦：\n{command_prefix}{name} {bind} <名> -> 绑定\n{command_prefix}{name} {unbind} -> 解绑\n{command_prefix}{name} {list} -> 列表\n\n【管理员专用命令】\n{command_prefix}{name} 白名单检查 -> 检查白名单中未绑定的玩家\n{command_prefix}{name} 移除未绑定白名单 -> 移除白名单中未绑定的玩家"
             user_help_msg: "绑定指令，快来绑定吧：\n{command_prefix}{name} {bind} <名> -> 绑定\n{command_prefix}{name} {unbind} -> 解绑\n{command_prefix}{name} {list} -> 列表"
         
         # 绑定提醒系统

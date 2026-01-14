@@ -103,11 +103,17 @@ gugubot:
             unbind: "解绑"
             list: "列表"
             search: "查询"
+            check_whitelist: "白名单检查"
+            remove_unbound_whitelist: "移除未绑定白名单"
+            check_extra_bound: "多余绑定检查"
+            remove_extra_bound: "移除多余绑定"
             
             bind_success: "绑定成功咯！杂鱼大叔也能做对事情嘛~"
             bind_existed: "这个玩家已经有了~杂鱼！"
             bind_failed: "绑定失败了...杂鱼大叔肯定哪里搞错了！"
             bind_instruction: "格式要对哦~杂鱼：\n{command_prefix}{name} {bind} mc名称 [基岩]\n{command_prefix}{name} {bind} [@123456] mc名称 [基岩]"
+            bind_invalid_name: "玩家名 '{player_name}' 格式不对~杂鱼大叔连名字都写错！\n规则是: {pattern}"
+            bind_pattern_error: "正则表达式配置出错了...杂鱼管理员快来修！"
             already_bound: "这个玩家已经被绑定了~杂鱼！"
             max_bound_reached: "绑定满了！杂鱼大叔绑太多了吧！"
             
@@ -122,7 +128,18 @@ gugubot:
             
             search_instruction: "告诉我玩家名或QQ号~本小姐帮你查！"
             
-            help_msg: "绑定相关指令~杂鱼要看清楚哦：\n{command_prefix}{name} {enable} -> 开启绑定系统\n{command_prefix}{name} {disable} -> 关闭绑定系统\n{command_prefix}{name} {bind} <玩家名> [基岩] -> 绑定玩家\n{command_prefix}{name} {bind} [@QQ号] <玩家名> [基岩] -> 为他人绑定\n{command_prefix}{name} {unbind} -> 解绑所有Java版玩家名（默认）\n{command_prefix}{name} {unbind} [玩家名] [基岩] -> 解绑玩家\n{command_prefix}{name} {unbind} 基岩 -> 解绑所有基岩版玩家名\n{command_prefix}{name} {list} -> 显示绑定列表\n\n参数说明：\n- 基岩版：bedrock, 基岩, be, true, 1（默认false）\n- 解绑时指定基岩版参数可只解绑对应版本的玩家名\n- 解绑 基岩 可解绑当前用户的所有基岩版玩家名"
+            whitelist_check_pass: "白名单检查: 大家都绑定了~嘻嘻，杂鱼们都很乖嘛！"
+            whitelist_check_result: "白名单检查:\n{result}"
+            whitelist_not_enabled: "白名单系统没开~杂鱼管理员没配置好！"
+            no_unbound_whitelist: "没有未绑定的白名单成员~杂鱼们都很乖！"
+            unbound_whitelist_removed: "未绑定的白名单杂鱼都移除了:\n{result}"
+            
+            extra_bound_check_pass: "多余绑定检查: 绑定的杂鱼都在群里~"
+            extra_bound_check_result: "多余绑定检查:\n{result}"
+            no_extra_bound: "绑定的杂鱼都在群里~不用本小姐操心！"
+            extra_bound_removed: "多余的绑定杂鱼都移除了:\n{result}"
+            
+            help_msg: "绑定相关指令~杂鱼要看清楚哦：\n{command_prefix}{name} {enable} -> 开启绑定系统\n{command_prefix}{name} {disable} -> 关闭绑定系统\n{command_prefix}{name} {bind} <玩家名> [基岩] -> 绑定玩家\n{command_prefix}{name} {bind} [@QQ号] <玩家名> [基岩] -> 为他人绑定\n{command_prefix}{name} {unbind} -> 解绑所有Java版玩家名（默认）\n{command_prefix}{name} {unbind} [玩家名] [基岩] -> 解绑玩家\n{command_prefix}{name} {unbind} 基岩 -> 解绑所有基岩版玩家名\n{command_prefix}{name} {list} -> 显示绑定列表\n\n【管理员专用命令】\n{command_prefix}{name} 白名单检查 -> 检查白名单中未绑定的杂鱼\n{command_prefix}{name} 移除未绑定白名单 -> 移除白名单中未绑定的杂鱼\n{command_prefix}{name} 多余绑定检查 -> 检查不在群里的绑定杂鱼\n{command_prefix}{name} 移除多余绑定 -> 移除不在群里的绑定杂鱼"
             user_help_msg: "绑定相关指令~杂鱼要看清楚哦：\n{command_prefix}{name} {bind} <玩家名> [基岩] -> 绑定玩家\n{command_prefix}{name} {unbind} -> 解绑所有Java版玩家名（默认）\n{command_prefix}{name} {unbind} [玩家名] [基岩] -> 解绑玩家\n{command_prefix}{name} {unbind} 基岩 -> 解绑所有基岩版玩家名\n{command_prefix}{name} {list} -> 显示绑定列表\n\n参数说明：\n- 基岩版：bedrock, 基岩, be, true, 1（默认false）\n- 解绑时指定基岩版参数可只解绑对应版本的玩家名\n- 解绑 基岩 可解绑当前用户的所有基岩版玩家名"
         
         # 绑定提醒系统
@@ -286,7 +303,7 @@ gugubot:
             players_empty: "呜呜，为什么没有人陪我玩呢？难道大家都讨厌我了吗？唔唔唔"
             players_content: "大叔连这都不会，真是杂鱼！杂鱼杂鱼！\n现在有 {count} 个人: {players}"
             bots_empty: "没有假人哦~杂鱼大叔是不是不会用？"
-            bots_content: "假人有{count}个呢~都是杂鱼大叔的小帮手吧！"
+            bots_content: "假人有{count}个呢~都是杂鱼大叔的小帮手吧！\n{bots}"
             server_content: "服务器状态 (玩家{player_count}人, 假人{bot_count}个)\n\n{details}"
             merged_list_content: "在线玩家总数: {total_count}人 ({server_count}个服务器)\n\n{details}"
             merged_players_content: "在线玩家总数: {total_count}人 ({server_count}个服务器)\n\n{details}"
