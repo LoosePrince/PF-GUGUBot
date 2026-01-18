@@ -39,11 +39,11 @@ connector:
       custom_group_name:       # 自定义游戏内显示群名 :: （可选）不设置默认转发[群名称]
         "726741344": 定制的显示群名         # 如无需自定义，无视这行
 
-    chat_templates:       # MC到QQ的聊天消息模板 :: 转发消息时随机选择一个模板
-      - "({display_name}) {sender}: "
-      - "[{display_name}] {sender}: "
-      - "{display_name} | {sender} 说："
-      - "{display_name} 的 {sender} : "
+    chat_templates:       # MC到QQ的聊天消息模板 :: 转发消息时根据权重随机选择模板（权重越高被选中概率越大）
+      - "({display_name}) {sender}: ": 1
+      - "[{display_name}] {sender}: ": 1
+      - "{display_name} | {sender} 说：": 1
+      - "{display_name} 的 {sender} : ": 1
 
     others:
       forward_other_bot: false       # 转发官方机器人回复
@@ -151,6 +151,7 @@ system:
     bridge_timeout: 3   # 等待其他服务器响应的超时时间（秒）
     colon_separator: ":" # 列分隔符
     comma_separator: "," # 列分隔符
+    use_bot_list: false   # 使用 /bot list 获取假人列表 :: leaves/lophine 端需要开启此选项
 
   name:   # 机器人昵称
     enable: false
@@ -178,6 +179,7 @@ system:
     inactive_days: 30   # 进过游戏但不活跃的天数阈值（天）
     never_played_days: 7   # 进群后从未进入游戏的天数阈值（天）
     check_interval: 86400   # 定时检查间隔（秒，默认24小时）
+    auto_fix_card: true   # 自动修正群名片为第一个Java或基岩版游戏名
     notify_targets:   # 通知目标配置
       admin_private: true   # 私聊管理员
       admin_groups: true   # 发送到管理群
