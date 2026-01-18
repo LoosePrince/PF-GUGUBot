@@ -10,7 +10,7 @@ from gugubot.utils.types import BoardcastInfo
 
 class BoundNoticeSystem(BasicSystem):
     """绑定提醒系统，用于提醒未绑定的玩家进行账号绑定。
-    
+
     当玩家发送消息时，如果该玩家未在玩家管理器中绑定账号，
     则提醒其进行绑定。不会拦截消息，让其他系统继续处理。
     """
@@ -38,7 +38,7 @@ class BoundNoticeSystem(BasicSystem):
         """
         if boardcast_info.event_type != "message":
             return False
-        
+
         message = boardcast_info.message
 
         if not message:
@@ -66,14 +66,17 @@ class BoundNoticeSystem(BasicSystem):
 
         # 排除管理群消息
         if boardcast_info.source_id:
-            admin_group_ids = self.config.get_keys(["connector", "QQ", "permissions", "admin_group_ids"], [])
-            if str(boardcast_info.source_id) in [str(gid) for gid in admin_group_ids if gid]:
+            admin_group_ids = self.config.get_keys(
+                ["connector", "QQ", "permissions", "admin_group_ids"], []
+            )
+            if str(boardcast_info.source_id) in [
+                str(gid) for gid in admin_group_ids if gid
+            ]:
                 return False
 
         # 检查玩家是否在玩家管理器中
         player = self.bound_system.player_manager.get_player(
-            boardcast_info.sender_id, 
-            platform=boardcast_info.source
+            boardcast_info.sender_id, platform=boardcast_info.source
         )
 
         # 如果玩家未绑定，发送提醒消息
@@ -81,14 +84,17 @@ class BoundNoticeSystem(BasicSystem):
             command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
             # 获取绑定系统的名称
             bound_name = self.bound_system.get_tr("name")
-            
+
             notice_msg = self.get_tr(
-                "notice_message", 
-                command_prefix=command_prefix,
-                bound_name=bound_name
+                "notice_message", command_prefix=command_prefix, bound_name=bound_name
             )
-            await self.reply(boardcast_info, [MessageBuilder.at(boardcast_info.sender_id), MessageBuilder.text(notice_msg)])
+            await self.reply(
+                boardcast_info,
+                [
+                    MessageBuilder.at(boardcast_info.sender_id),
+                    MessageBuilder.text(notice_msg),
+                ],
+            )
 
         # 不拦截消息，让其他系统继续处理
         return False
-

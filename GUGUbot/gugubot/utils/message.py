@@ -1,5 +1,6 @@
 from typing import List
 
+
 def str_to_array(message: str) -> List[dict]:
     """将字符串消息转换为消息数组格式。
 

@@ -54,7 +54,7 @@ class MCParser(BasicParser):
                 receiver_source=self.connector.source,  # 对于非桥接消息，receiver_source 等于 source
                 sender=raw_message.player,
                 sender_id=raw_message.player,
-                is_admin=self.connector._is_admin(raw_message.player)
+                is_admin=await self.connector._is_admin(raw_message.player)
             )
 
             return boardcast_info

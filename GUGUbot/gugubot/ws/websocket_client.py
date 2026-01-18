@@ -13,9 +13,9 @@ logging.getLogger("websocket").setLevel(logging.WARNING)
 
 class WebSocketClient:
     """WebSocket客户端基类
-    
+
     封装了websocket连接的基本功能，包括连接、断开、发送消息等。
-    
+
     Attributes
     ----------
     url : str
@@ -29,7 +29,7 @@ class WebSocketClient:
     logger : logging.Logger
         日志记录器
     """
-    
+
     def __init__(
         self,
         url: str,
@@ -38,10 +38,10 @@ class WebSocketClient:
         on_open: Optional[Callable] = None,
         on_error: Optional[Callable] = None,
         on_close: Optional[Callable] = None,
-        logger: Optional[logging.Logger] = None
+        logger: Optional[logging.Logger] = None,
     ):
         """初始化WebSocket客户端
-        
+
         Parameters
         ----------
         url : str
@@ -64,13 +64,13 @@ class WebSocketClient:
         self.ws: Optional[websocket.WebSocketApp] = None
         self.listener_thread: Optional[threading.Thread] = None
         self.logger = logger or logging.getLogger(__name__)
-        
+
         # 回调函数
         self._on_message_callback = on_message
         self._on_open_callback = on_open
         self._on_error_callback = on_error
         self._on_close_callback = on_close
-    
+
     def connect(
         self,
         reconnect: int = 5,
@@ -81,10 +81,10 @@ class WebSocketClient:
         ca_certs: Optional[str] = None,
         extra_sslopt: Optional[Dict[str, Any]] = None,
         thread_name: str = "WebSocketClient",
-        suppress_origin: bool = True
+        suppress_origin: bool = True,
     ) -> None:
         """建立WebSocket连接
-        
+
         Parameters
         ----------
         reconnect : int
@@ -105,63 +105,61 @@ class WebSocketClient:
             监听线程名称
         """
         self.logger.debug(f"正在连接到WebSocket服务器: {self.url}")
-        
+
         self.ws = websocket.WebSocketApp(
             self.url,
             header=self.headers,
             on_message=self._on_message_callback,
             on_open=self._on_open_callback,
             on_error=self._on_error_callback,
-            on_close=self._on_close_callback
+            on_close=self._on_close_callback,
         )
-        
+
         # 构建run_forever参数
         run_kwargs = {}
-        
+
         if reconnect > 0:
-            run_kwargs['reconnect'] = reconnect
-        
+            run_kwargs["reconnect"] = reconnect
+
         if ping_interval > 0:
-            run_kwargs['ping_interval'] = ping_interval
+            run_kwargs["ping_interval"] = ping_interval
             if ping_timeout > 0:
-                run_kwargs['ping_timeout'] = ping_timeout
-        
+                run_kwargs["ping_timeout"] = ping_timeout
+
         # 配置SSL选项
         if use_ssl:
             sslopt = {}
             if not verify:
-                sslopt['cert_reqs'] = ssl.CERT_NONE
+                sslopt["cert_reqs"] = ssl.CERT_NONE
             else:
-                sslopt['cert_reqs'] = ssl.CERT_REQUIRED
+                sslopt["cert_reqs"] = ssl.CERT_REQUIRED
                 if ca_certs:
-                    sslopt['ca_certs'] = ca_certs
-            
+                    sslopt["ca_certs"] = ca_certs
+
             # 应用额外的SSL选项
             if extra_sslopt:
                 sslopt.update(extra_sslopt)
-            
-            run_kwargs['sslopt'] = sslopt
-        
+
+            run_kwargs["sslopt"] = sslopt
+
         if suppress_origin:
-            run_kwargs['suppress_origin'] = True
-        
+            run_kwargs["suppress_origin"] = True
+
         # 启动监听线程
         self.listener_thread = threading.Thread(
-            target=self.ws.run_forever,
-            name=thread_name,
-            kwargs=run_kwargs
+            target=self.ws.run_forever, name=thread_name, kwargs=run_kwargs
         )
         self.listener_thread.daemon = True
         self.listener_thread.start()
-    
+
     def send(self, message: Any) -> bool:
         """发送消息
-        
+
         Parameters
         ----------
         message : Any
             要发送的消息（会自动转换为JSON字符串）
-        
+
         Returns
         -------
         bool
@@ -181,10 +179,10 @@ class WebSocketClient:
         else:
             self.logger.warning("WebSocket未连接，无法发送消息")
             return False
-    
+
     def disconnect(self, timeout: int = 5) -> None:
         """断开WebSocket连接
-        
+
         Parameters
         ----------
         timeout : int
@@ -200,14 +198,15 @@ class WebSocketClient:
             error_msg = str(e) + "\n" + traceback.format_exc()
             self.logger.warning(f"关闭WebSocket连接时发生错误: {error_msg}")
             raise
-    
+
     def is_connected(self) -> bool:
         """检查连接状态
-        
+
         Returns
         -------
         bool
             是否已连接
         """
-        return self.ws is not None and self.ws.sock is not None and self.ws.sock.connected
-
+        return (
+            self.ws is not None and self.ws.sock is not None and self.ws.sock.connected
+        )

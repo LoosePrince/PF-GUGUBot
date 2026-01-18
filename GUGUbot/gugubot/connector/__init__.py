@@ -11,5 +11,5 @@ __all__ = [
     "ConnectorManager",
     "MCConnector",
     "QQWebSocketConnector",
-    "TestConnector"
+    "TestConnector",
 ]

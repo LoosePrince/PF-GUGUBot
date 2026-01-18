@@ -12,6 +12,7 @@ from gugubot.connector.connector_manager import ConnectorManager
 from gugubot.logic.system.basic_system import BasicSystem
 from gugubot.utils.types import BoardcastInfo
 
+
 class SystemManager:
     """管理多个系统实例的管理器。
 
@@ -25,9 +26,13 @@ class SystemManager:
         日志记录器实例
     """
 
-    def __init__(self, server: PluginServerInterface, logger: Optional[logging.Logger] = None, 
-                 connector_manager: Optional[ConnectorManager] = None,
-                 config: Optional[BotConfig] = None) -> None:
+    def __init__(
+        self,
+        server: PluginServerInterface,
+        logger: Optional[logging.Logger] = None,
+        connector_manager: Optional[ConnectorManager] = None,
+        config: Optional[BotConfig] = None,
+    ) -> None:
         """初始化系统管理器。
 
         Parameters
@@ -53,9 +58,12 @@ class SystemManager:
                 return system
         return None
 
-    def register_system(self, system: BasicSystem, 
-                        before: Optional[List[str]] = None,
-                        after: Optional[List[str]] = None) -> None:
+    def register_system(
+        self,
+        system: BasicSystem,
+        before: Optional[List[str]] = None,
+        after: Optional[List[str]] = None,
+    ) -> None:
         """添加一个新的系统实例。
 
         Parameters
@@ -82,7 +90,9 @@ class SystemManager:
             if before and after:
                 duplicate = set(before or []) & set(after or [])
                 if duplicate:
-                    raise ValueError(f"Circular dependency: {system.name} cannot be both before and after {duplicate}")
+                    raise ValueError(
+                        f"Circular dependency: {system.name} cannot be both before and after {duplicate}"
+                    )
 
             # Insert the system based on before and after dependencies
             if before or after:
@@ -96,7 +106,7 @@ class SystemManager:
                 self.systems.insert(insert_pos, system)
             else:
                 self.systems.append(system)
-            
+
             self.logger.info(f"已添加并初始化系统: {system.name}")
         except Exception as e:
             error_msg = str(e) + "\n" + traceback.format_exc()
@@ -124,10 +134,12 @@ class SystemManager:
                 return True
         return False
 
-    async def broadcast_command(self, boardcast_info: BoardcastInfo,
-                             include: Optional[List[str]]=None,
-                             exclude: Optional[List[str]]=None
-        ) -> bool:
+    async def broadcast_command(
+        self,
+        boardcast_info: BoardcastInfo,
+        include: Optional[List[str]] = None,
+        exclude: Optional[List[str]] = None,
+    ) -> bool:
         """向所有系统广播命令。
 
         Parameters
@@ -148,14 +160,12 @@ class SystemManager:
 
         if include is not None:
             to_systems = [
-                s for s in to_systems 
-                if any(re.match(p, s.name) for p in include)
+                s for s in to_systems if any(re.match(p, s.name) for p in include)
             ]
 
         if exclude is not None:
             to_systems = [
-                s for s in to_systems 
-                if not any(re.match(p, s.name) for p in exclude)
+                s for s in to_systems if not any(re.match(p, s.name) for p in exclude)
             ]
 
         system_info = f"广播命令到系统: {to_systems}"
@@ -174,7 +184,9 @@ class SystemManager:
         # 判断是否有系统成功处理了命令
         return result
 
-    async def _safe_process_boardcast_info(self, system: BasicSystem, boardcast_info: BoardcastInfo) -> bool:
+    async def _safe_process_boardcast_info(
+        self, system: BasicSystem, boardcast_info: BoardcastInfo
+    ) -> bool:
         """安全地向单个系统发送命令。
 
         Parameters

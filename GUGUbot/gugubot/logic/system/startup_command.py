@@ -34,16 +34,18 @@ class StartupCommandSystem(BasicConfig, BasicSystem):
         存储的启动指令列表（通过 self["commands"] 访问）
     """
 
-    def __init__(self, server: PluginServerInterface, config: Optional[BotConfig] = None) -> None:
+    def __init__(
+        self, server: PluginServerInterface, config: Optional[BotConfig] = None
+    ) -> None:
         """初始化启动指令系统。"""
         BasicSystem.__init__(self, "startup_command", enable=True, config=config)
         self.server = server
-        
+
         # 设置数据文件路径
         data_path = Path(server.get_data_folder()) / "system" / "startup_commands.json"
         data_path.parent.mkdir(parents=True, exist_ok=True)
         BasicConfig.__init__(self, data_path)
-        
+
         # 初始化默认数据结构
         if "commands" not in self:
             self["commands"] = []
@@ -62,7 +64,7 @@ class StartupCommandSystem(BasicConfig, BasicSystem):
         ----------
         boardcast_info: BoardcastInfo
             广播信息，包含消息内容
-        
+
         Returns
         -------
         bool
@@ -118,14 +120,18 @@ class StartupCommandSystem(BasicConfig, BasicSystem):
         """处理开启系统命令。"""
         self.enable = True
         self._save_enable_state()
-        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("enable_success"))])
+        await self.reply(
+            boardcast_info, [MessageBuilder.text(self.get_tr("enable_success"))]
+        )
         return True
 
     async def _handle_disable(self, boardcast_info: BoardcastInfo) -> bool:
         """处理关闭系统命令。"""
         self.enable = False
         self._save_enable_state()
-        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("disable_success"))])
+        await self.reply(
+            boardcast_info, [MessageBuilder.text(self.get_tr("disable_success"))]
+        )
         return True
 
     async def _handle_add(self, command: str, boardcast_info: BoardcastInfo) -> bool:
@@ -137,17 +143,23 @@ class StartupCommandSystem(BasicConfig, BasicSystem):
         # 提取指令内容
         command_content = command.replace(add_cmd, "", 1).strip()
         if not command_content:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("add_instruction"))])
+            await self.reply(
+                boardcast_info, [MessageBuilder.text(self.get_tr("add_instruction"))]
+            )
             return True
 
         # 检查指令是否已存在
         if command_content in self["commands"]:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("add_existed"))])
+            await self.reply(
+                boardcast_info, [MessageBuilder.text(self.get_tr("add_existed"))]
+            )
             return True
 
         # 添加指令
         self["commands"].append(command_content)
-        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("add_success"))])
+        await self.reply(
+            boardcast_info, [MessageBuilder.text(self.get_tr("add_success"))]
+        )
         self.save()
         return True
 
@@ -160,24 +172,32 @@ class StartupCommandSystem(BasicConfig, BasicSystem):
         # 提取指令内容
         command_content = command.replace(remove_cmd, "", 1).strip()
         if not command_content:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("remove_instruction"))])
+            await self.reply(
+                boardcast_info, [MessageBuilder.text(self.get_tr("remove_instruction"))]
+            )
             return True
 
         # 检查指令是否存在
         if command_content not in self["commands"]:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("remove_not_exist"))])
+            await self.reply(
+                boardcast_info, [MessageBuilder.text(self.get_tr("remove_not_exist"))]
+            )
             return True
 
         # 删除指令
         self["commands"].remove(command_content)
         self.save()
-        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("remove_success"))])
+        await self.reply(
+            boardcast_info, [MessageBuilder.text(self.get_tr("remove_success"))]
+        )
         return True
 
     async def _handle_list(self, boardcast_info: BoardcastInfo) -> bool:
         """处理列表命令。"""
         if not self["commands"]:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("list_empty"))])
+            await self.reply(
+                boardcast_info, [MessageBuilder.text(self.get_tr("list_empty"))]
+            )
             return True
 
         # 构建指令列表
@@ -186,13 +206,22 @@ class StartupCommandSystem(BasicConfig, BasicSystem):
             command_list.append(f"{i}. {cmd}")
 
         list_content = "\n".join(command_list)
-        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("list_content", command_list=list_content))])
+        await self.reply(
+            boardcast_info,
+            [
+                MessageBuilder.text(
+                    self.get_tr("list_content", command_list=list_content)
+                )
+            ],
+        )
         return True
 
     async def _handle_execute(self, boardcast_info: BoardcastInfo) -> bool:
         """处理执行所有启动指令命令。"""
         if not self["commands"]:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("execute_empty"))])
+            await self.reply(
+                boardcast_info, [MessageBuilder.text(self.get_tr("execute_empty"))]
+            )
             return True
 
         # 执行所有指令
@@ -208,17 +237,35 @@ class StartupCommandSystem(BasicConfig, BasicSystem):
                 failed_count += 1
 
         if failed_count == 0:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("execute_success", count=executed_count))])
+            await self.reply(
+                boardcast_info,
+                [
+                    MessageBuilder.text(
+                        self.get_tr("execute_success", count=executed_count)
+                    )
+                ],
+            )
         else:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("execute_partial", executed=executed_count, failed=failed_count))])
-        
+            await self.reply(
+                boardcast_info,
+                [
+                    MessageBuilder.text(
+                        self.get_tr(
+                            "execute_partial",
+                            executed=executed_count,
+                            failed=failed_count,
+                        )
+                    )
+                ],
+            )
+
         return True
 
     async def _handle_help(self, boardcast_info: BoardcastInfo) -> bool:
         """处理帮助命令。"""
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
         system_name = self.get_tr("name")
-        
+
         help_msg = self.get_tr(
             "help_msg",
             command_prefix=command_prefix,
@@ -228,9 +275,9 @@ class StartupCommandSystem(BasicConfig, BasicSystem):
             add=self.get_tr("add"),
             remove=self.get_tr("remove"),
             list=self.get_tr("list"),
-            execute=self.get_tr("execute")
+            execute=self.get_tr("execute"),
         )
-        
+
         await self.reply(boardcast_info, [MessageBuilder.text(help_msg)])
         return True
 
@@ -259,5 +306,5 @@ class StartupCommandSystem(BasicConfig, BasicSystem):
         return {
             "executed": executed_count,
             "failed": failed_count,
-            "total": len(self["commands"])
+            "total": len(self["commands"]),
         }

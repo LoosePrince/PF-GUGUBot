@@ -103,7 +103,7 @@ class BasicSystem:
         if not content.startswith(command_prefix):
             return False
 
-        group_admin = self.config.get_keys(["command", "group_admin"], False)
+        group_admin = self.config.get_keys(["GUGUBot", "group_admin"], False)
         if group_admin and not boardcast_info.is_admin:
             return False
 

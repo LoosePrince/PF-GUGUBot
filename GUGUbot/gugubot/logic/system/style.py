@@ -29,9 +29,14 @@ class StyleSystem(BasicSystem):
         风格管理器实例
     """
 
-    def __init__(self, server: PluginServerInterface, style_manager, config: Optional[BotConfig] = None) -> None:
+    def __init__(
+        self,
+        server: PluginServerInterface,
+        style_manager,
+        config: Optional[BotConfig] = None,
+    ) -> None:
         """初始化风格系统。
-        
+
         Parameters
         ----------
         server : PluginServerInterface
@@ -56,7 +61,7 @@ class StyleSystem(BasicSystem):
         ----------
         boardcast_info: BoardcastInfo
             广播信息，包含消息内容
-        
+
         Returns
         -------
         bool
@@ -69,12 +74,12 @@ class StyleSystem(BasicSystem):
 
     async def _handle_command(self, boardcast_info: BoardcastInfo) -> bool:
         """处理风格命令
-        
+
         Parameters
         ----------
         boardcast_info : BoardcastInfo
             广播信息
-            
+
         Returns
         -------
         bool
@@ -87,12 +92,12 @@ class StyleSystem(BasicSystem):
         content = message[0].get("data", {}).get("text", "")
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
         system_name = self.get_tr("name")
-        
+
         # 移除命令前缀和系统名称
         command = content.replace(command_prefix, "", 1).strip()
         if not command.startswith(system_name):
             return False
-        
+
         command = command.replace(system_name, "", 1).strip()
 
         # 处理不同的命令
@@ -100,12 +105,12 @@ class StyleSystem(BasicSystem):
             # 显示帮助
             await self._handle_help(boardcast_info)
             return True
-        
+
         # 获取命令关键词翻译
         list_cmd = self.get_tr("list")
         reload_cmd = self.get_tr("reload")
         help_cmd = self.get_tr("help")
-        
+
         if command == list_cmd:
             # 列出所有风格
             await self._handle_list(boardcast_info)
@@ -127,7 +132,7 @@ class StyleSystem(BasicSystem):
         """列出所有可用风格"""
         styles = self.style_manager.list_styles()
         current_style = self.style_manager.get_current_style()
-        
+
         if not styles:
             msg = self.get_tr("list_empty")
         else:
@@ -138,14 +143,16 @@ class StyleSystem(BasicSystem):
                     style_list.append(f"• {style} [当前]")
                 else:
                     style_list.append(f"• {style}")
-            
+
             msg = self.get_tr("style_list", style_list="\n".join(style_list))
-        
+
         await self.reply(boardcast_info, [MessageBuilder.text(msg)])
 
-    async def _handle_switch(self, boardcast_info: BoardcastInfo, style_name: str) -> None:
+    async def _handle_switch(
+        self, boardcast_info: BoardcastInfo, style_name: str
+    ) -> None:
         """切换到指定风格
-        
+
         Parameters
         ----------
         boardcast_info : BoardcastInfo
@@ -154,7 +161,7 @@ class StyleSystem(BasicSystem):
             要切换到的风格名称
         """
         success, reason, remaining = self.style_manager.set_current_style(style_name)
-        
+
         if success:
             msg = self.get_tr("switch_success", style_name=style_name)
         else:
@@ -169,31 +176,32 @@ class StyleSystem(BasicSystem):
                 msg = self.get_tr("switch_failed", style_name=style_name)
             else:
                 msg = self.get_tr("switch_failed", style_name=style_name)
-        
+
         await self.reply(boardcast_info, [MessageBuilder.text(msg)])
 
     async def _handle_reload(self, boardcast_info: BoardcastInfo) -> None:
         """重新加载所有风格文件"""
         try:
             self.style_manager.reload_styles()
-            msg = self.get_tr("reload_success", count=len(self.style_manager.list_styles()))
+            msg = self.get_tr(
+                "reload_success", count=len(self.style_manager.list_styles())
+            )
         except Exception as e:
             msg = self.get_tr("reload_failed", error=str(e))
-        
+
         await self.reply(boardcast_info, [MessageBuilder.text(msg)])
 
     async def _handle_help(self, boardcast_info: BoardcastInfo) -> None:
         """显示帮助信息"""
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
-        
+
         help_msg = self.get_tr(
             "help_msg",
             command_prefix=command_prefix,
             name=self.get_tr("name"),
             list=self.get_tr("list"),
             reload=self.get_tr("reload"),
-            help=self.get_tr("help")
+            help=self.get_tr("help"),
         )
-        
-        await self.reply(boardcast_info, [MessageBuilder.text(help_msg)])
 
+        await self.reply(boardcast_info, [MessageBuilder.text(help_msg)])

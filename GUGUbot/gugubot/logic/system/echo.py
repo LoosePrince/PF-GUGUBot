@@ -2,6 +2,7 @@
 
 该模块提供了回声功能，可以将一个平台的消息转发到其他平台。
 """
+
 from gugubot.config.BotConfig import BotConfig
 from gugubot.logic.system.basic_system import BasicSystem
 from gugubot.utils.types import BoardcastInfo
@@ -45,31 +46,38 @@ class EchoSystem(BasicSystem):
         # 先检查是否是开启/关闭命令
         if await self.handle_enable_disable(boardcast_info):
             return True
-        
+
         # 检查是否是QQ私聊消息，如果是则不广播
         if boardcast_info.source == "QQ" and boardcast_info.event_sub_type == "private":
             return False
-        
+
         # 检查是否是QQ管理群的消息，如果是则不广播
         if boardcast_info.source == "QQ" and boardcast_info.event_sub_type == "group":
-            admin_group_ids = self.config.get_keys(["connector", "QQ", "permissions", "admin_group_ids"], [])
-            if boardcast_info.source_id and str(boardcast_info.source_id) in [str(i) for i in admin_group_ids if i]:
+            admin_group_ids = self.config.get_keys(
+                ["connector", "QQ", "permissions", "admin_group_ids"], []
+            )
+            if boardcast_info.source_id and str(boardcast_info.source_id) in [
+                str(i) for i in admin_group_ids if i
+            ]:
                 # 管理群消息不广播，直接返回False
                 return False
-            
+
         if boardcast_info.event_type != "message":
             return False
-        
+
         try:
             # 准备转发的消息
             processed_info = self.create_processed_info(boardcast_info)
 
             # 转发到其他平台（排除接收消息的本地 connector）
             # 使用 receiver_source 如果存在，否则回退到 source
-            exclude_source = boardcast_info.receiver_source if boardcast_info.receiver_source else boardcast_info.source
+            exclude_source = (
+                boardcast_info.receiver_source
+                if boardcast_info.receiver_source
+                else boardcast_info.source
+            )
             await self.system_manager.connector_manager.broadcast_processed_info(
-                processed_info,
-                exclude=[exclude_source]
+                processed_info, exclude=[exclude_source]
             )
 
             return True
@@ -77,4 +85,3 @@ class EchoSystem(BasicSystem):
         except Exception as e:
             self.logger.error(f"Echo系统处理消息失败: {str(e)}", exc_info=True)
             return False
-

@@ -147,7 +147,7 @@ class ExecuteSystem(BasicSystem):
                 )
 
             if not self.is_command(boardcast_info) or \
-                (not self._is_admin(boardcast_info.sender_id) and not boardcast_info.is_admin):
+                (not await self._is_admin(boardcast_info.sender_id) and not boardcast_info.is_admin):
                 return False
 
             # 执行 MC 原生命令
@@ -181,7 +181,7 @@ class ExecuteSystem(BasicSystem):
                 )
 
             if not self.is_command(boardcast_info) or \
-                (not self._is_admin(boardcast_info.sender_id) and not boardcast_info.is_admin):
+                (not await self._is_admin(boardcast_info.sender_id) and not boardcast_info.is_admin):
                 return False
             
             # 执行 MCDR 命令
@@ -364,7 +364,7 @@ class ExecuteSystem(BasicSystem):
             return True
 
 
-    def _is_admin(self, sender_id) -> bool:
+    async def _is_admin(self, sender_id) -> bool:
         """检查是否是管理员"""
         bound_system = self.system_manager.get_system("bound")
 
@@ -372,4 +372,4 @@ class ExecuteSystem(BasicSystem):
             return False
 
         player_manager = bound_system.player_manager
-        return player_manager.is_admin(sender_id)
+        return await player_manager.is_admin(sender_id)

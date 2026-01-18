@@ -42,12 +42,12 @@ class KeyWordSystem(BasicConfig, BasicSystem):
         """
         if boardcast_info.event_type != "message":
             return False
-        
+
         message = boardcast_info.message
 
         if not message:
             return False
-        
+
         first_message = message[0]
         ACCEPTABLE_TYPES = ["text", "image"]
 
@@ -57,12 +57,12 @@ class KeyWordSystem(BasicConfig, BasicSystem):
         # 先检查是否是开启/关闭命令
         if await self.handle_enable_disable(boardcast_info):
             return True
-        
+
         return await self._handle_msg(boardcast_info)
 
     async def _handle_msg(self, boardcast_info: BoardcastInfo) -> bool:
         """处理消息"""
-        content = boardcast_info.message[0].get("data",{}).get("text", "")
+        content = boardcast_info.message[0].get("data", {}).get("text", "")
 
         if not self.enable:
             return False
@@ -75,7 +75,9 @@ class KeyWordSystem(BasicConfig, BasicSystem):
             del self.adding_request_dict[boardcast_info.sender_id]
             self[command] = boardcast_info.message
             self.save()
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("add_success"))])
+            await self.reply(
+                boardcast_info, [MessageBuilder.text(self.get_tr("add_success"))]
+            )
             return True
 
         if content in self:
@@ -89,14 +91,17 @@ class KeyWordSystem(BasicConfig, BasicSystem):
                 raw=boardcast_info.raw,
                 server=boardcast_info.server,
                 logger=boardcast_info.logger,
-                event_sub_type=boardcast_info.event_sub_type
+                event_sub_type=boardcast_info.event_sub_type,
             )
 
             # 使用 receiver_source 如果存在，否则回退到 source
-            exclude_source = boardcast_info.receiver_source if boardcast_info.receiver_source else boardcast_info.source
+            exclude_source = (
+                boardcast_info.receiver_source
+                if boardcast_info.receiver_source
+                else boardcast_info.source
+            )
             await self.system_manager.connector_manager.broadcast_processed_info(
-                original_processed_info,
-                exclude=[exclude_source]
+                original_processed_info, exclude=[exclude_source]
             )
 
             await self.system_manager.connector_manager.broadcast_processed_info(
@@ -104,22 +109,28 @@ class KeyWordSystem(BasicConfig, BasicSystem):
             )
 
             return True
-        
+
         return False
 
     async def _handle_command(self, boardcast_info: BoardcastInfo) -> bool:
-        command = boardcast_info.message[0].get("data",{}).get("text", "")
+        command = boardcast_info.message[0].get("data", {}).get("text", "")
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
         system_name = self.get_tr("name")
 
         command = command.replace(command_prefix, "", 1).strip()
 
-        valid_commands = [system_name, self.get_tr("add"), self.get_tr("remove"), self.get_tr("list"), self.get_tr("cancel")]
+        valid_commands = [
+            system_name,
+            self.get_tr("add"),
+            self.get_tr("remove"),
+            self.get_tr("list"),
+            self.get_tr("cancel"),
+        ]
         if not any(command.startswith(i) for i in valid_commands):
             return False
-        
+
         command = command.replace(system_name, "", 1).strip()
-        
+
         if command.startswith(self.get_tr("add")):
             return await self._handle_add(boardcast_info)
         elif command.startswith(self.get_tr("remove")):
@@ -128,11 +139,11 @@ class KeyWordSystem(BasicConfig, BasicSystem):
             return await self._handle_list(boardcast_info)
         elif command.startswith(self.get_tr("cancel")):
             return await self._handle_cancel(boardcast_info)
-        
+
         return await self._handle_help(boardcast_info)
 
     async def _handle_add(self, boardcast_info: BoardcastInfo) -> bool:
-        command = boardcast_info.message[0].get("data",{}).get("text", "")
+        command = boardcast_info.message[0].get("data", {}).get("text", "")
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
         system_name = self.get_tr("name")
         add_command = self.get_tr("add")
@@ -141,32 +152,43 @@ class KeyWordSystem(BasicConfig, BasicSystem):
             command = command.replace(i, "", 1).strip()
 
         if command in self:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("add_existed"))])
+            await self.reply(
+                boardcast_info, [MessageBuilder.text(self.get_tr("add_existed"))]
+            )
             return True
 
         self.adding_request_dict[boardcast_info.sender_id] = command
         self._add_task_timeout(boardcast_info.sender_id, boardcast_info)
-        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("add_instruction"))])
+        await self.reply(
+            boardcast_info, [MessageBuilder.text(self.get_tr("add_instruction"))]
+        )
 
         return True
 
     def _add_task_timeout(self, sender_id: str, boardcast_info: BoardcastInfo):
         """任务超时回调函数"""
-        max_add_time = self.config.get("system", {}).get("key_words", {}).get("max_add_time", 30)
+        max_add_time = (
+            self.config.get("system", {}).get("key_words", {}).get("max_add_time", 30)
+        )
+
         async def task():
             if sender_id not in self.adding_request_dict:
                 return
-            
+
             await asyncio.sleep(max_add_time)
             if sender_id in self.adding_request_dict:
                 command = self.adding_request_dict[sender_id]
                 del self.adding_request_dict[sender_id]
-                await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("add_timeout", command=command))])
+                await self.reply(
+                    boardcast_info,
+                    [MessageBuilder.text(self.get_tr("add_timeout", command=command))],
+                )
+
         self.system_manager.server.schedule_task(task)
-    
+
     async def _handle_remove(self, boardcast_info: BoardcastInfo) -> bool:
         """处理删除关键词命令"""
-        command = boardcast_info.message[0].get("data",{}).get("text", "")
+        command = boardcast_info.message[0].get("data", {}).get("text", "")
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
         system_name = self.get_tr("name")
         remove_command = self.get_tr("remove")
@@ -175,26 +197,39 @@ class KeyWordSystem(BasicConfig, BasicSystem):
             command = command.replace(i, "", 1).strip()
 
         if command not in self:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("remove_not_exist"))])
+            await self.reply(
+                boardcast_info, [MessageBuilder.text(self.get_tr("remove_not_exist"))]
+            )
             return True
-        
+
         del self[command]
         self.save()
-        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("remove_success"))])
+        await self.reply(
+            boardcast_info, [MessageBuilder.text(self.get_tr("remove_success"))]
+        )
         return True
 
     async def _handle_list(self, boardcast_info: BoardcastInfo) -> bool:
         """处理显示关键词列表命令"""
 
         if len(self) == 0:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("list_empty"))])
+            await self.reply(
+                boardcast_info, [MessageBuilder.text(self.get_tr("list_empty"))]
+            )
             return True
-        
+
         keyword_list = []
         for k, v in self.items():
             keyword_list.append(f"{k}: {McMessageBuilder.array_to_RText(v)}")
-        keyword_list = '\n'.join(keyword_list)
-        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("keyword_list", keyword_list=keyword_list))])
+        keyword_list = "\n".join(keyword_list)
+        await self.reply(
+            boardcast_info,
+            [
+                MessageBuilder.text(
+                    self.get_tr("keyword_list", keyword_list=keyword_list)
+                )
+            ],
+        )
         return True
 
     async def _handle_cancel(self, boardcast_info: BoardcastInfo) -> bool:
@@ -202,11 +237,15 @@ class KeyWordSystem(BasicConfig, BasicSystem):
         sender_id = boardcast_info.sender_id
 
         if sender_id not in self.adding_request_dict:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("cancel_not_exist"))])
+            await self.reply(
+                boardcast_info, [MessageBuilder.text(self.get_tr("cancel_not_exist"))]
+            )
             return True
-        
+
         del self.adding_request_dict[sender_id]
-        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("cancel_success"))])
+        await self.reply(
+            boardcast_info, [MessageBuilder.text(self.get_tr("cancel_success"))]
+        )
         return True
 
     async def _handle_help(self, boardcast_info: BoardcastInfo) -> bool:
@@ -217,31 +256,31 @@ class KeyWordSystem(BasicConfig, BasicSystem):
         remove_cmd = self.get_tr("remove")
         list_cmd = self.get_tr("list")
         cancel_cmd = self.get_tr("cancel")
-        
+
         # 根据用户权限选择不同的帮助信息
         if boardcast_info.is_admin:
             enable_cmd = self.get_tr("gugubot.enable", global_key=True)
             disable_cmd = self.get_tr("gugubot.disable", global_key=True)
             help_msg = self.get_tr(
-                "help_msg", 
-                command_prefix=command_prefix, 
+                "help_msg",
+                command_prefix=command_prefix,
                 name=system_name,
                 enable=enable_cmd,
                 disable=disable_cmd,
                 add=add_cmd,
                 remove=remove_cmd,
                 list=list_cmd,
-                cancel=cancel_cmd
+                cancel=cancel_cmd,
             )
         else:
             help_msg = self.get_tr(
-                "user_help_msg", 
-                command_prefix=command_prefix, 
+                "user_help_msg",
+                command_prefix=command_prefix,
                 name=system_name,
                 add=add_cmd,
                 remove=remove_cmd,
                 list=list_cmd,
-                cancel=cancel_cmd
+                cancel=cancel_cmd,
             )
         await self.reply(boardcast_info, [MessageBuilder.text(help_msg)])
         return True

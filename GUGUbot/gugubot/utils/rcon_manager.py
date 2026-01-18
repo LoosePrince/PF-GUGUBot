@@ -11,7 +11,7 @@ class RconManager:
     """RCON 管理器。
 
     提供统一的命令执行接口，自动根据 RCON 状态选择执行方式。
-    
+
     Attributes
     ----------
     server : PluginServerInterface
@@ -47,7 +47,7 @@ class RconManager:
         if use_mcdr_command:
             self.server.execute_command(command)
             return "指令已执行"
-        
+
         # 如果 RCON 可用，使用 RCON 查询
         if self.server.is_rcon_running():
             try:
@@ -57,10 +57,10 @@ class RconManager:
                 self.server.logger.error(f"[RconManager] RCON 查询失败: {e}")
                 # RCON 查询失败时降级到普通执行方式
                 return self._execute_fallback(command)
-        
+
         # RCON 不可用，使用降级策略
         return self._execute_fallback(command)
-    
+
     def _execute_fallback(self, command: str) -> str:
         """降级执行策略：RCON 不可用时的执行方式。
 
@@ -80,6 +80,5 @@ class RconManager:
         else:
             # 普通服务器指令
             self.server.execute(command)
-        
-        return "指令已执行"
 
+        return "指令已执行"

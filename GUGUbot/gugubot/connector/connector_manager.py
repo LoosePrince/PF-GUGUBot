@@ -9,6 +9,7 @@ from gugubot.connector.basic_connector import BasicConnector, BoardcastInfo
 from gugubot.config.BotConfig import BotConfig
 from gugubot.utils.types import ProcessedInfo
 
+
 class ConnectorManager:
     """管理多个连接器实例的管理器。
 
@@ -22,7 +23,9 @@ class ConnectorManager:
         日志记录器实例
     """
 
-    def __init__(self, server, bot_config: BotConfig, logger: Optional[logging.Logger] = None) -> None:
+    def __init__(
+        self, server, bot_config: BotConfig, logger: Optional[logging.Logger] = None
+    ) -> None:
         """初始化连接器管理器。
 
         Parameters
@@ -36,7 +39,7 @@ class ConnectorManager:
         self.config = bot_config
         self.logger = logger or server.logger
 
-        self.system_manager = None # gugubot.logic.system.system_manager.SystemManager
+        self.system_manager = None  # gugubot.logic.system.system_manager.SystemManager
 
     def register_system_manager(self, system_manager) -> None:
         """注册系统管理器实例。
@@ -89,7 +92,7 @@ class ConnectorManager:
 
             await connector.connect()
             self.connectors.append(connector)
-            
+
             self.logger.info(f"已添加并连接到连接器: {connector.source}")
         except Exception as e:
             error_msg = str(e) + "\n" + traceback.format_exc()
@@ -123,10 +126,12 @@ class ConnectorManager:
             self.connectors.remove(connector)
             raise
 
-    async def broadcast_processed_info(self, processed_info: ProcessedInfo,
-                                       include: Optional[List[str]] = None,
-                                       exclude: Optional[List[str]] = None
-                                       ) -> Dict[str, Exception]:
+    async def broadcast_processed_info(
+        self,
+        processed_info: ProcessedInfo,
+        include: Optional[List[str]] = None,
+        exclude: Optional[List[str]] = None,
+    ) -> Dict[str, Exception]:
         """向所有连接器广播消息。
 
         Parameters
@@ -147,16 +152,15 @@ class ConnectorManager:
         tasks = []
         to_conectors = self.connectors
 
-
         if include is not None:
             to_conectors = [
-                c for c in to_conectors 
-                if any(re.match(p, c.source) for p in include)
+                c for c in to_conectors if any(re.match(p, c.source) for p in include)
             ]
 
         if exclude is not None:
             to_conectors = [
-                c for c in to_conectors 
+                c
+                for c in to_conectors
                 if not any(re.match(p, c.source) for p in exclude)
             ]
 
@@ -167,9 +171,7 @@ class ConnectorManager:
 
         # 创建所有发送任务
         for connector in to_conectors:
-            task = asyncio.create_task(
-                self._safe_send(connector, processed_info)
-            )
+            task = asyncio.create_task(self._safe_send(connector, processed_info))
             tasks.append((connector, task))
 
         # 等待所有任务完成
@@ -180,9 +182,10 @@ class ConnectorManager:
                 failures[connector.source] = e
 
         return failures
-    
 
-    async def _safe_send(self, connector: BasicConnector, message: ProcessedInfo) -> None:
+    async def _safe_send(
+        self, connector: BasicConnector, message: ProcessedInfo
+    ) -> None:
         """安全地向单个连接器发送消息。
 
         Parameters

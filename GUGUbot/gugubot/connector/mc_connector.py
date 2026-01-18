@@ -95,7 +95,7 @@ class MCConnector(BasicConnector):
             is_low_version = self.builder.is_low_game_version(game_version)
 
             player_manager = getattr(self.connector_manager.system_manager.get_system("bound"), "player_manager", None)
-            is_admin = player_manager.is_admin(sender_id) if player_manager else False
+            is_admin = await player_manager.is_admin(sender_id) if player_manager else False
 
             Rtext_conect = self.builder.array_to_RText(
                 message, sender_id=sender_id, 
@@ -162,7 +162,7 @@ class MCConnector(BasicConnector):
             self.logger.error(f"{self.log_prefix} 处理消息失败: {e}")
             raise
 
-    def _is_admin(self, sender_id) -> bool:
+    async def _is_admin(self, sender_id) -> bool:
         """检查是否是管理员"""
         bound_system = self.connector_manager.system_manager.get_system("bound")
 
@@ -170,4 +170,4 @@ class MCConnector(BasicConnector):
             return False
 
         player_manager = bound_system.player_manager
-        return player_manager.is_admin(sender_id)
+        return await player_manager.is_admin(sender_id)

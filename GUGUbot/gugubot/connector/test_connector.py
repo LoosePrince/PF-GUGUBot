@@ -4,9 +4,10 @@ from typing import Any, Optional
 from gugubot.connector.basic_connector import BasicConnector, BoardcastInfo
 from gugubot.config import BotConfig
 
+
 class TestConnector(BasicConnector):
     """TEST服务器连接器。
-    
+
     用于与TEST服务器进行消息交互。
 
     Attributes
@@ -17,7 +18,12 @@ class TestConnector(BasicConnector):
         日志记录器
     """
 
-    def __init__(self, server: Any, config: BotConfig = None, logger: Optional[logging.Logger] = None) -> None:
+    def __init__(
+        self,
+        server: Any,
+        config: BotConfig = None,
+        logger: Optional[logging.Logger] = None,
+    ) -> None:
         """初始化TEST连接器。
 
         Parameters
@@ -31,7 +37,7 @@ class TestConnector(BasicConnector):
         self.server = server
         self.logger = logger or server.logger
         self.enable = config.get_keys(["show_message_in_console"], True)
-        
+
     async def connect(self) -> None:
         """连接到TEST服务器。
 
@@ -62,7 +68,7 @@ class TestConnector(BasicConnector):
         """
         if not self.enable:
             return
-        
+
         self.logger.info(f"[GUGUBot]发送消息: {boardcast_info}")
         # self.logger.info(f"[GUGUBot]发送消息: {getattr(boardcast_info, 'processed_message', '')}")
 
@@ -85,5 +91,5 @@ class TestConnector(BasicConnector):
         """
         if not self.enable:
             return
-        
+
         self.logger.debug(f"[GUGUBot]接收消息: {raw}")

@@ -6,9 +6,16 @@ from ruamel.yaml import YAML
 yaml = YAML()
 yaml.preserve_quotes = True
 
+
 class BasicConfig(dict):
     """Basic configuration class for loading and saving JSON/YAML files."""
-    def __init__(self, path: str = "./config.json", default_content: dict = None, yaml_format: bool = False) -> None:
+
+    def __init__(
+        self,
+        path: str = "./config.json",
+        default_content: dict = None,
+        yaml_format: bool = False,
+    ) -> None:
         super().__init__()
         self.yaml_format = yaml_format
         self.path = Path(path).with_suffix(".yml" if yaml_format else ".json")
@@ -18,7 +25,7 @@ class BasicConfig(dict):
     def load(self) -> None:
         """Load data from file."""
         if self.path.is_file() and self.path.stat().st_size > 0:
-            with self.path.open('r', encoding='UTF-8') as f:
+            with self.path.open("r", encoding="UTF-8") as f:
                 self.update(yaml.load(f) if self.yaml_format else json.load(f))
         else:
             self.update(self.default_content)
@@ -27,7 +34,7 @@ class BasicConfig(dict):
     def save(self) -> None:
         """Save data to file."""
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        with self.path.open('w', encoding='UTF-8') as f:
+        with self.path.open("w", encoding="UTF-8") as f:
             if self.yaml_format:
                 yaml.dump(dict(self), f)
             else:

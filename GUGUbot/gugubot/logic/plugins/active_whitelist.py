@@ -18,20 +18,20 @@ from gugubot.utils.types import BoardcastInfo
 
 class ActiveWhiteListSystem(BasicConfig, BasicSystem):
     """活跃白名单系统
-    
+
     用于管理活跃白名单玩家，这些玩家在 inactive_check 时会被过滤掉。
     """
 
     def __init__(self, server: PluginServerInterface, config: BotConfig = None) -> None:
         """初始化活跃白名单系统
-        
+
         Args:
             server: MCDR 服务器实例
             config: 机器人配置
         """
         BasicSystem.__init__(self, "active_whitelist", enable=False, config=config)
         self.server = server
-        
+
         # 设置数据文件路径
         data_path = Path(server.get_data_folder()) / "plugins" / "active_whitelist.json"
         data_path.parent.mkdir(parents=True, exist_ok=True)
@@ -53,12 +53,12 @@ class ActiveWhiteListSystem(BasicConfig, BasicSystem):
         """
         if boardcast_info.event_type != "message":
             return False
-        
+
         message = boardcast_info.message
 
         if not message:
             return False
-        
+
         first_message = message[0]
         if first_message.get("type") != "text":
             return False
@@ -66,7 +66,7 @@ class ActiveWhiteListSystem(BasicConfig, BasicSystem):
         # 先检查是否是开启/关闭命令
         if await self.handle_enable_disable(boardcast_info):
             return True
-        
+
         return await self._handle_msg(boardcast_info)
 
     async def _handle_msg(self, boardcast_info: BoardcastInfo) -> bool:
@@ -93,16 +93,16 @@ class ActiveWhiteListSystem(BasicConfig, BasicSystem):
 
         if not command.startswith(system_name):
             return False
-        
+
         command = command.replace(system_name, "", 1).strip()
-        
+
         if command.startswith(self.get_tr("add")):
             return await self._handle_add(boardcast_info)
         elif command.startswith(self.get_tr("remove")):
             return await self._handle_remove(boardcast_info)
         elif command.startswith(self.get_tr("list")):
             return await self._handle_list(boardcast_info)
-        
+
         return await self._handle_help(boardcast_info)
 
     async def _handle_add(self, boardcast_info: BoardcastInfo) -> bool:
@@ -110,23 +110,35 @@ class ActiveWhiteListSystem(BasicConfig, BasicSystem):
         command = boardcast_info.message[0].get("data", {}).get("text", "")
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
         system_name = self.get_tr("name")
-        
+
         command = command.replace(command_prefix, "", 1).strip()
         command = command.replace(system_name, "", 1).strip()
         command = command.replace(self.get_tr("add"), "", 1).strip()
-        
+
         if not command:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("add_usage"))])
+            await self.reply(
+                boardcast_info, [MessageBuilder.text(self.get_tr("add_usage"))]
+            )
             return True
-        
+
         player = command.split()[0]  # 获取第一个参数作为玩家名
-        
+
         if player in self:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("player_already_in_list", player_name=player))])
+            await self.reply(
+                boardcast_info,
+                [
+                    MessageBuilder.text(
+                        self.get_tr("player_already_in_list", player_name=player)
+                    )
+                ],
+            )
             return True
 
         self[player] = True
-        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("player_added", player_name=player))])
+        await self.reply(
+            boardcast_info,
+            [MessageBuilder.text(self.get_tr("player_added", player_name=player))],
+        )
         return True
 
     async def _handle_remove(self, boardcast_info: BoardcastInfo) -> bool:
@@ -134,34 +146,55 @@ class ActiveWhiteListSystem(BasicConfig, BasicSystem):
         command = boardcast_info.message[0].get("data", {}).get("text", "")
         command_prefix = self.config.get("GUGUBot", {}).get("command_prefix", "#")
         system_name = self.get_tr("name")
-        
+
         command = command.replace(command_prefix, "", 1).strip()
         command = command.replace(system_name, "", 1).strip()
         command = command.replace(self.get_tr("remove"), "", 1).strip()
-        
+
         if not command:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("remove_usage"))])
+            await self.reply(
+                boardcast_info, [MessageBuilder.text(self.get_tr("remove_usage"))]
+            )
             return True
-        
+
         player = command.split()[0]  # 获取第一个参数作为玩家名
-        
+
         if player not in self:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("player_not_in_list", player_name=player))])
+            await self.reply(
+                boardcast_info,
+                [
+                    MessageBuilder.text(
+                        self.get_tr("player_not_in_list", player_name=player)
+                    )
+                ],
+            )
             return True
 
         del self[player]
-        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("player_removed", player_name=player))])
+        await self.reply(
+            boardcast_info,
+            [MessageBuilder.text(self.get_tr("player_removed", player_name=player))],
+        )
         return True
 
     async def _handle_list(self, boardcast_info: BoardcastInfo) -> bool:
         """处理查看列表命令"""
         if len(self) == 0:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("list_empty"))])
+            await self.reply(
+                boardcast_info, [MessageBuilder.text(self.get_tr("list_empty"))]
+            )
             return True
-        
+
         players = list(self.keys())
         players_str = "\n".join(players)
-        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("list_content", count=len(players), players=players_str))])
+        await self.reply(
+            boardcast_info,
+            [
+                MessageBuilder.text(
+                    self.get_tr("list_content", count=len(players), players=players_str)
+                )
+            ],
+        )
         return True
 
     async def _handle_help(self, boardcast_info: BoardcastInfo) -> bool:
@@ -171,24 +204,24 @@ class ActiveWhiteListSystem(BasicConfig, BasicSystem):
         add_cmd = self.get_tr("add")
         remove_cmd = self.get_tr("remove")
         list_cmd = self.get_tr("list")
-        
+
         help_msg = self.get_tr(
             "help_msg",
             command_prefix=command_prefix,
             name=system_name,
             add=add_cmd,
             remove=remove_cmd,
-            list=list_cmd
+            list=list_cmd,
         )
         await self.reply(boardcast_info, [MessageBuilder.text(help_msg)])
         return True
 
     def add_player(self, player: str) -> bool:
         """添加玩家到活跃白名单（程序调用接口）
-        
+
         Args:
             player: 玩家名
-            
+
         Returns:
             bool: 是否成功添加（如果玩家已在列表中则返回False）
         """
@@ -199,10 +232,10 @@ class ActiveWhiteListSystem(BasicConfig, BasicSystem):
 
     def remove_player(self, player: str) -> bool:
         """从活跃白名单移除玩家（程序调用接口）
-        
+
         Args:
             player: 玩家名
-            
+
         Returns:
             bool: 是否成功移除（如果玩家不在列表中则返回False）
         """
@@ -213,10 +246,10 @@ class ActiveWhiteListSystem(BasicConfig, BasicSystem):
 
     def is_in_whitelist(self, player: str) -> bool:
         """检查玩家是否在活跃白名单中
-        
+
         Args:
             player: 玩家名
-            
+
         Returns:
             bool: 玩家是否在活跃白名单中
         """
@@ -224,20 +257,19 @@ class ActiveWhiteListSystem(BasicConfig, BasicSystem):
 
     def get_all_players(self) -> List[str]:
         """获取所有活跃白名单玩家
-        
+
         Returns:
             List[str]: 活跃白名单玩家列表
         """
         return list(self.keys())
-    
+
     def should_filter_player(self, player_name: str) -> bool:
         """检查是否应该过滤该玩家（在 inactive_check 时使用）
-        
+
         Args:
             player_name: 玩家名
-            
+
         Returns:
             bool: 如果玩家在活跃白名单中，返回True（应该过滤掉）
         """
         return self.is_in_whitelist(player_name)
-

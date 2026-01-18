@@ -18,7 +18,9 @@ class BanWordSystem(BasicConfig, BasicSystem):
     提供添加、删除、显示违禁词，以及违禁词检测等功能。
     """
 
-    def __init__(self, server: PluginServerInterface, config: Optional[BotConfig] = None) -> None:
+    def __init__(
+        self, server: PluginServerInterface, config: Optional[BotConfig] = None
+    ) -> None:
         """初始化违禁词系统。"""
         BasicSystem.__init__(self, "ban_words", enable=False, config=config)
         data_path = Path(server.get_data_folder()) / "system" / "ban_words.json"
@@ -41,7 +43,7 @@ class BanWordSystem(BasicConfig, BasicSystem):
         """
         if boardcast_info.event_type != "message":
             return False
-        
+
         message = boardcast_info.message
 
         if not message:
@@ -50,7 +52,7 @@ class BanWordSystem(BasicConfig, BasicSystem):
         # 先检查是否是开启/关闭命令
         if await self.handle_enable_disable(boardcast_info):
             return True
-        
+
         return await self._handle_msg(boardcast_info)
 
     async def _handle_msg(self, boardcast_info: BoardcastInfo) -> bool:
@@ -62,23 +64,32 @@ class BanWordSystem(BasicConfig, BasicSystem):
         ban_check = self._check_ban(messages)
         if ban_check and not is_admin and self.enable:
             ban_word, reason = ban_check
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("ban_word_detected", ban_word=ban_word, reason=reason))])
+            await self.reply(
+                boardcast_info,
+                [
+                    MessageBuilder.text(
+                        self.get_tr(
+                            "ban_word_detected", ban_word=ban_word, reason=reason
+                        )
+                    )
+                ],
+            )
             return True
-        
+
         # 处理命令
         if is_admin and self.is_command(boardcast_info):
             return await self._handle_command(boardcast_info)
-        
+
         return False
 
     def _check_ban(self, messages: List[dict]) -> Optional[Tuple[str, str]]:
         """检查消息中是否包含违禁词
-        
+
         Parameters
         ----------
         messages : List[dict]
             要检查的消息
-            
+
         Returns
         -------
         tuple or None
@@ -100,16 +111,16 @@ class BanWordSystem(BasicConfig, BasicSystem):
 
         if not command.startswith(system_name):
             return False
-        
+
         command = command.replace(system_name, "", 1).strip()
-        
+
         if command.startswith(self.get_tr("add")):
             return await self._handle_add(boardcast_info)
         elif command.startswith(self.get_tr("remove")):
             return await self._handle_remove(boardcast_info)
         elif command.startswith(self.get_tr("list")):
             return await self._handle_list(boardcast_info)
-        
+
         return await self._handle_help(boardcast_info)
 
     async def _handle_add(self, boardcast_info: BoardcastInfo) -> bool:
@@ -124,28 +135,38 @@ class BanWordSystem(BasicConfig, BasicSystem):
 
         if not command:
             await self.reply(
-                boardcast_info, 
-                [MessageBuilder.text(self.get_tr("add_format_error", command_prefix=command_prefix, name=system_name, add=add_command))]
+                boardcast_info,
+                [
+                    MessageBuilder.text(
+                        self.get_tr(
+                            "add_format_error",
+                            command_prefix=command_prefix,
+                            name=system_name,
+                            add=add_command,
+                        )
+                    )
+                ],
             )
             return True
-        
+
         parts = command.split(maxsplit=1)
         if len(parts) != 2:
             await self.reply(
-                boardcast_info, 
-                [MessageBuilder.text(self.get_tr("add_instruction"))]
+                boardcast_info, [MessageBuilder.text(self.get_tr("add_instruction"))]
             )
             return True
-        
+
         ban_word = parts[0]
         reason = parts[1]
 
         self[ban_word] = reason
         self.save()
-        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("add_success"))])
+        await self.reply(
+            boardcast_info, [MessageBuilder.text(self.get_tr("add_success"))]
+        )
 
         return True
-    
+
     async def _handle_remove(self, boardcast_info: BoardcastInfo) -> bool:
         """处理删除违禁词命令"""
         command = boardcast_info.message[0].get("data", {}).get("text", "")
@@ -157,26 +178,39 @@ class BanWordSystem(BasicConfig, BasicSystem):
             command = command.replace(i, "", 1).strip()
 
         if command not in self:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("remove_not_exist"))])
+            await self.reply(
+                boardcast_info, [MessageBuilder.text(self.get_tr("remove_not_exist"))]
+            )
             return True
-        
+
         del self[command]
         self.save()
-        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("remove_success"))])
+        await self.reply(
+            boardcast_info, [MessageBuilder.text(self.get_tr("remove_success"))]
+        )
         return True
 
     async def _handle_list(self, boardcast_info: BoardcastInfo) -> bool:
         """处理显示违禁词列表命令"""
 
         if len(self) == 0:
-            await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("list_empty"))])
+            await self.reply(
+                boardcast_info, [MessageBuilder.text(self.get_tr("list_empty"))]
+            )
             return True
-        
+
         ban_word_list = []
         for word, reason in self.items():
             ban_word_list.append(f"{word}: {reason}")
-        ban_word_list = '\n'.join(ban_word_list)
-        await self.reply(boardcast_info, [MessageBuilder.text(self.get_tr("ban_word_list", ban_word_list=ban_word_list))])
+        ban_word_list = "\n".join(ban_word_list)
+        await self.reply(
+            boardcast_info,
+            [
+                MessageBuilder.text(
+                    self.get_tr("ban_word_list", ban_word_list=ban_word_list)
+                )
+            ],
+        )
         return True
 
     async def _handle_help(self, boardcast_info: BoardcastInfo) -> bool:
@@ -189,14 +223,14 @@ class BanWordSystem(BasicConfig, BasicSystem):
         remove_cmd = self.get_tr("remove")
         list_cmd = self.get_tr("list")
         help_msg = self.get_tr(
-            "help_msg", 
-            command_prefix=command_prefix, 
+            "help_msg",
+            command_prefix=command_prefix,
             name=system_name,
             enable=enable_cmd,
             disable=disable_cmd,
             add=add_cmd,
             remove=remove_cmd,
-            list=list_cmd
+            list=list_cmd,
         )
         await self.reply(boardcast_info, [MessageBuilder.text(help_msg)])
         return True
