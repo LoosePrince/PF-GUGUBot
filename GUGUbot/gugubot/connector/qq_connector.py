@@ -247,6 +247,66 @@ class QQWebSocketConnector(BasicConnector):
                 result.append(item)
         return result
 
+    # 非文本消息类型的虚拟长度
+    _TYPE_LENGTHS = {"image": 100, "default": 20}
+
+    def _get_item_length(self, item: dict) -> int:
+        """获取单个消息元素的长度"""
+        if item.get("type") == "text":
+            return len(item.get("data", {}).get("text", ""))
+        return self._TYPE_LENGTHS.get(item.get("type"), self._TYPE_LENGTHS["default"])
+
+    def _split_message(self, message: list, max_length: int = 2000) -> list[list]:
+        """将消息分割成多个部分，每部分不超过指定长度"""
+        total = sum(self._get_item_length(m) for m in message if isinstance(m, dict))
+        if total <= max_length:
+            return [message]
+
+        result, current_part, current_len = [], [], 0
+
+        def flush():
+            nonlocal current_part, current_len
+            if current_part:
+                result.append(current_part)
+                current_part, current_len = [], 0
+
+        for item in message:
+            if not isinstance(item, dict):
+                continue
+
+            if item.get("type") != "text":
+                item_len = self._get_item_length(item)
+                if current_len + item_len > max_length:
+                    flush()
+                current_part.append(item)
+                current_len += item_len
+                continue
+
+            # 处理文本：可能需要拆分
+            text = item.get("data", {}).get("text", "")
+            while text:
+                space = max_length - current_len
+                if space <= 0:
+                    flush()
+                    space = max_length
+
+                if len(text) <= space:
+                    current_part.append({"type": "text", "data": {"text": text}})
+                    current_len += len(text)
+                    break
+
+                # 优先在换行符处分割
+                chunk = text[:space]
+                if (pos := chunk.rfind('\n')) > space // 2:
+                    chunk = text[:pos + 1]
+
+                current_part.append({"type": "text", "data": {"text": chunk}})
+                current_len += len(chunk)
+                text = text[len(chunk):]
+
+        flush()
+        return result
+
     async def send_message(self, processed_info: ProcessedInfo) -> None:
         if not self.enable:
             return
@@ -318,18 +378,33 @@ class QQWebSocketConnector(BasicConnector):
         elif source != "QQ" and source != "" and processed_info.sender == "":
             message = CQHandler.parse(f"[{source}] ") + message
 
+        # 获取消息最大长度配置，默认为 2000
+        max_message_length = self.config.get_keys(
+            ["connector", "QQ", "max_message_length"], 2000
+        )
+
+        # 分割消息（如果太长）
+        message_parts = self._split_message(message, max_length=max_message_length)
+
         for target_id, target_type in target.items():
+            
             if not target_id.isdigit():
                 continue
 
-            if target_type == "group":
-                await self.bot.send_group_msg(group_id=int(target_id), message=message)
-            elif target_type == "private":
-                await self.bot.send_private_msg(user_id=int(target_id), message=message)
-            else:
-                await self.bot.send_temp_msg(
-                    group_id=int(target_type), user_id=int(target_id), message=message
-                )
+            for part in message_parts:
+                if target_type == "group":
+                    await self.bot.send_group_msg(group_id=int(target_id), message=part)
+                elif target_type == "private":
+                    await self.bot.send_private_msg(user_id=int(target_id), message=part)
+                else:
+                    await self.bot.send_temp_msg(
+                        group_id=int(target_type), user_id=int(target_id), message=part
+                    )
+                
+                # 如果消息被分割成多段，每段之间稍微延迟，避免发送过快
+                if len(message_parts) > 1:
+                    random_time = random.uniform(0.5, 1.5)
+                    await asyncio.sleep(random_time)
 
     async def disconnect(self) -> None:
         """断开与QQ WebSocket服务器的连接"""
