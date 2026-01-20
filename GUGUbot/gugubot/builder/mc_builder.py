@@ -54,6 +54,7 @@ class McMessageBuilder:
         image_previewer: bool = False,
         player_manager: PlayerManager = None,
         is_admin: bool = False,
+        bot_id: Optional[str] = None,
     ) -> RText:
         def get_player_name(player_id: str) -> str:
             if player_manager:
@@ -63,13 +64,17 @@ class McMessageBuilder:
             return player_id
 
         def process_at(data: Dict[str, str]) -> RText:
-            player_name = get_player_name(data["qq"])
+            qq_id = data.get("qq", "")
+            # 跳过对机器人的@
+            if bot_id and str(qq_id) == str(bot_id):
+                return RText("")
+            player_name = get_player_name(qq_id)
             if is_admin:
                 return (
                     RText(f"[@{player_name}]", color=RColor.aqua)
                     .set_hover_text(f"点击草稿 @{player_name} 的消息")
                     .set_click_event(
-                        action=RAction.suggest_command, value=f"[CQ:at,qq={data['qq']}]"
+                        action=RAction.suggest_command, value=f"[CQ:at,qq={qq_id}]"
                     )
                 )
             else:

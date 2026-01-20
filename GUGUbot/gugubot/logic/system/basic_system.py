@@ -131,6 +131,7 @@ class BasicSystem:
             source_id=boardcast_info.source_id,
             sender=boardcast_info.sender,
             sender_id=boardcast_info.sender_id,
+            receiver=boardcast_info.receiver,
             raw=boardcast_info.raw,
             server=boardcast_info.server,
             logger=boardcast_info.logger,

@@ -1,7 +1,8 @@
-import traceback
-
+import html
 import json
-from typing import Dict, Optional
+import re
+import traceback
+from typing import Dict, List, Optional
 
 from gugubot.parser.basic_parser import BasicParser
 from gugubot.builder.qq_builder import ArrayHandler, CQHandler
@@ -15,6 +16,95 @@ class QQParser(BasicParser):
 
     处理来自QQ平台的消息，包括群聊消息、私聊消息等。
     """
+
+    def _get_reply_message_id(self, message: List[dict]) -> Optional[int]:
+        """从消息中获取回复消息的ID"""
+        for item in message:
+            if item.get("type") == "reply":
+                if msg_id := item.get("data", {}).get("id"):
+                    try:
+                        return int(msg_id)
+                    except (ValueError, TypeError):
+                        pass
+        return None
+
+    def _extract_sender_from_template(self, text: str, template: str) -> Optional[str]:
+        """从模板中提取发送者名字，模板如 "[{display_name}] {sender}: "
+        
+        支持模板前面有额外前缀、后面有正文消息的情况
+        """
+        try:
+            # display_name 不跨越方括号，sender 不包含常见分隔符
+            pattern = (
+                re.escape(template)
+                .replace(r"\{display_name\}", r"[^\[\]]+")
+                .replace(r"\{sender\}", r"([^\[\]:\n]+)")
+            )
+            if match := re.search(pattern, text):
+                return match.group(1).strip()
+        except re.error:
+            pass
+        return None
+
+    def _parse_sender_from_template(self, text: str, templates: List) -> Optional[str]:
+        """使用聊天模板从消息文本中解析出发送者名字"""
+        # 没有配置模板时，尝试默认格式 [{source}] {sender}:
+        if not templates:
+            # sender 不包含 [ ] : 这些分隔符
+            if match := re.search(r"\[[^\[\]]+\]\s*([^\[\]:\n]+):\s", text):
+                return match.group(1).strip()
+            return None
+
+        # 展开模板列表（支持新旧两种格式）
+        template_strs = (
+            key for item in templates
+            for key in (item.keys() if isinstance(item, dict) else [item])
+        )
+        return next(
+            (sender for t in template_strs if (sender := self._extract_sender_from_template(text, t))),
+            None
+        )
+
+    def _get_replied_text(self, data: dict) -> str:
+        """从API返回的消息数据中提取文本内容"""
+        if raw := data.get("raw_message", ""):
+            # 解码 HTML 实体 & 移除 CQ 码
+            text = html.unescape(raw)
+            return re.sub(r"\[CQ:[^\]]+\]", "", text)
+        return "".join(
+            item.get("data", {}).get("text", "")
+            for item in data.get("message", [])
+            if item.get("type") == "text"
+        )
+
+    async def _get_receiver_from_reply(self, message: List[dict]) -> Optional[str]:
+        """从回复消息中获取原始发送者作为receiver（仅当回复机器人消息时）"""
+        if not (reply_msg_id := self._get_reply_message_id(message)):
+            return None
+
+        try:
+            replied_msg = await self.connector.bot.get_msg(message_id=reply_msg_id)
+            if not replied_msg or replied_msg.get("status") != "ok":
+                return None
+
+            data = replied_msg.get("data", {})
+
+            # 仅处理回复机器人自己的消息
+            if data.get("sender", {}).get("user_id") != self.connector.bot.self_id:
+                return None
+
+            if not (replied_text := self._get_replied_text(data)):
+                return None
+
+            templates = self.connector.config.get_keys(["connector", "QQ", "chat_templates"], [])
+            if sender := self._parse_sender_from_template(replied_text, templates):
+                self.logger.debug(f"从回复消息中解析出receiver: {sender}")
+                return sender
+
+        except Exception as e:
+            self.logger.debug(f"获取回复消息receiver失败: {e}")
+
+        return None
 
     async def parse(self, raw_message: str) -> Optional[BoardcastInfo]:
         """解析QQ消息。
@@ -65,6 +155,9 @@ class QQParser(BasicParser):
                     self.logger.debug(f"已在connector层拦截排除用户 {sender_id} 的消息")
                     return None
 
+                # 尝试从回复消息中获取receiver（如果回复的是机器人转发的消息）
+                receiver = await self._get_receiver_from_reply(parsed_message)
+
                 # 创建并处理QQ消息对象
                 boardcase_info = BoardcastInfo(
                     event_type=event_type,
@@ -78,6 +171,7 @@ class QQParser(BasicParser):
                     receiver_source=self.connector.source,  # 对于非桥接消息，receiver_source 等于 source
                     sender=sender_name,
                     sender_id=sender_id,
+                    receiver=receiver,  # 从回复消息中解析的接收者
                     is_admin=self._is_admin(source_id) or self._is_admin(sender_id)
                 )
 

@@ -22,6 +22,7 @@ class BoardcastInfo:
     sender: str = ""
     sender_id: str = ""
     receiver_source: str = ""  # 接收消息的本地 connector 的 source
+    receiver: Optional[str] = None  # 消息的接收者（例如回复消息时的原发送者）
 
     is_admin: bool = False
 

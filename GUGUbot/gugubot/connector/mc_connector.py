@@ -97,10 +97,16 @@ class MCConnector(BasicConnector):
             player_manager = getattr(self.connector_manager.system_manager.get_system("bound"), "player_manager", None)
             is_admin = await player_manager.is_admin(sender_id) if player_manager else False
 
+            # 获取机器人QQ号，用于过滤对机器人的@
+            bot_id = None
+            qq_source = self.config.get_keys(["connector", "QQ", "source_name"], "QQ")
+            if qq_connector := self.connector_manager.get_connector(qq_source):
+                bot_id = getattr(getattr(qq_connector, "bot", None), "self_id", None)
+
             Rtext_conect = self.builder.array_to_RText(
                 message, sender_id=sender_id, 
                 low_game_version=is_low_version, chat_image=use_chat_image, image_previewer=use_image_previewer,
-                player_manager=player_manager, is_admin=is_admin
+                player_manager=player_manager, is_admin=is_admin, bot_id=bot_id
             )
 
             if player_manager:
