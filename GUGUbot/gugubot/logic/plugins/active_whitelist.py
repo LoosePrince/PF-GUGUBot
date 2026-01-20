@@ -29,7 +29,7 @@ class ActiveWhiteListSystem(BasicConfig, BasicSystem):
             server: MCDR 服务器实例
             config: 机器人配置
         """
-        BasicSystem.__init__(self, "active_whitelist", enable=False, config=config)
+        BasicSystem.__init__(self, "active_whitelist", enable=True, config=config)
         self.server = server
 
         # 设置数据文件路径
