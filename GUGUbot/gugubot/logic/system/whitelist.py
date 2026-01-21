@@ -43,6 +43,10 @@ class WhitelistSystem(BasicSystem):
         boardcast_info: BoardcastInfo
             广播信息，包含消息内容
         """
+        # 先检查是否是开启/关闭命令
+        if await self.handle_enable_disable(boardcast_info):
+            return True
+
         if boardcast_info.event_type != "message":
             return False
 

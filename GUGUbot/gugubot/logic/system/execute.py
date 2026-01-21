@@ -92,6 +92,9 @@ class ExecuteSystem(BasicSystem):
         if await self.handle_enable_disable(boardcast_info):
             return True
 
+        if not self.enable:
+            return False
+
         if not self.is_command(boardcast_info):
             return False
 

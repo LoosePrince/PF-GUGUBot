@@ -53,6 +53,9 @@ class BanWordSystem(BasicConfig, BasicSystem):
         if await self.handle_enable_disable(boardcast_info):
             return True
 
+        if not self.enable:
+            return False
+
         return await self._handle_msg(boardcast_info)
 
     async def _handle_msg(self, boardcast_info: BoardcastInfo) -> bool:

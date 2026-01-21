@@ -48,6 +48,13 @@ class BoundSystem(BasicSystem):
         boardcast_info: BoardcastInfo
             广播信息，包含消息内容
         """
+        # 先检查是否是开启/关闭命令
+        if await self.handle_enable_disable(boardcast_info):
+            return True
+
+        if not self.enable:
+            return False
+
         # 处理退群事件
         if (
             boardcast_info.event_type == "notice"
@@ -70,10 +77,6 @@ class BoundSystem(BasicSystem):
 
         if first_message.get("type") != "text":
             return False
-
-        # 先检查是否是开启/关闭命令
-        if await self.handle_enable_disable(boardcast_info):
-            return True
 
         return await self._handle_msg(boardcast_info)
 

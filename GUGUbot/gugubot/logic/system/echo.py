@@ -47,6 +47,9 @@ class EchoSystem(BasicSystem):
         if await self.handle_enable_disable(boardcast_info):
             return True
 
+        if not self.enable:
+            return False
+
         # 检查是否是QQ私聊消息，如果是则不广播
         if boardcast_info.source == "QQ" and boardcast_info.event_sub_type == "private":
             return False
