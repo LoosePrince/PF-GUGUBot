@@ -36,7 +36,8 @@ class TestConnector(BasicConnector):
         super().__init__(source="test", config=config)
         self.server = server
         self.logger = logger or server.logger
-        self.enable = config.get_keys(["show_message_in_console"], True)
+        print(config.get_keys(["GUGUBot", "show_message_in_console"], True))
+        self.enable = config.get_keys(["GUGUBot", "show_message_in_console"], True)
 
     async def connect(self) -> None:
         """连接到TEST服务器。
