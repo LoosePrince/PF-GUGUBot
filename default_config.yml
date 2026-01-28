@@ -143,6 +143,7 @@ system:
 
   key_words:   # 关键词回复
     enable: true
+    admin_only: false   # 仅管理员可用 :: 开启后只有管理员才能触发关键词命令
     max_add_time: 30 # 最大添加时间(秒) :: 超过这个时间后，关键词添加会过期
 
   list:   # 在线玩家查询
