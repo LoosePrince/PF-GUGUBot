@@ -129,6 +129,11 @@ class KeyWordSystem(BasicConfig, BasicSystem):
         if not any(command.startswith(i) for i in valid_commands):
             return False
 
+        # 检查是否仅管理员可用
+        admin_only = self.config.get_keys(["system", "key_words", "admin_only"], False)
+        if admin_only and not boardcast_info.is_admin:
+            return False
+
         command = command.replace(system_name, "", 1).strip()
 
         if command.startswith(self.get_tr("add")):
