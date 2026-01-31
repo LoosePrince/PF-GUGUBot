@@ -267,6 +267,8 @@ class UnboundCheckSystem(BasicConfig, BasicSystem):
                 ["connector", "QQ", "permissions", "admin_group_ids"], []
             )
             for admin_group_id in admin_group_ids:
+                if not admin_group_id:
+                    continue
                 try:
                     member_list_result = (
                         await self.qq_connector.bot.get_group_member_list(

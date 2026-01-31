@@ -213,6 +213,8 @@ class PlayerManager(BasicConfig):
             if source == config.get_keys(["connector", "QQ", "source_name"], "QQ"):
                 admin_group_member_ids = set()
                 for admin_group_id in admin_group_ids:
+                    if not admin_group_id:
+                        continue
                     try:
                         admin_group_members = await self.bound_system.system_manager.connector_manager.get_connector(
                             "QQ"
