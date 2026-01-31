@@ -59,7 +59,7 @@ def create_on_player_join(
             # 构建消息
             processed_info = ProcessedInfo(
                 processed_message=[MessageBuilder.text(message)],
-                source=minecraft_source_name,
+                _source=minecraft_source_name,  # 使用 _source 参数
                 source_id="",
                 sender="",
                 raw=None,
@@ -132,7 +132,7 @@ def create_on_player_left(
             # 构建消息
             processed_info = ProcessedInfo(
                 processed_message=[MessageBuilder.text(message)],
-                source=minecraft_source_name,
+                _source=minecraft_source_name,  # 使用 _source 参数
                 source_id="",
                 sender="",
                 raw=None,

@@ -80,7 +80,7 @@ class MCConnector(BasicConnector):
         self.builder: McMessageBuilder
 
         message = processed_info.processed_message
-        source = processed_info.source
+        source = processed_info.source.origin  # 获取原始来源作为显示名称
         source_id = processed_info.source_id
         sender = processed_info.sender
         sender_id = processed_info.sender_id

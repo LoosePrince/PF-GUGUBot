@@ -60,7 +60,7 @@ class BoundSystem(BasicSystem):
             boardcast_info.event_type == "notice"
             and boardcast_info.event_sub_type == "group_decrease"
         ):
-            if boardcast_info.source == "QQ":
+            if boardcast_info.source.is_from("QQ"):
                 return await self._handle_quit_member(boardcast_info)
             return False
 
@@ -154,7 +154,7 @@ class BoundSystem(BasicSystem):
             return True
 
         # 解析消息段
-        source = boardcast_info.source
+        source = boardcast_info.source.origin  # 获取原始来源作为平台标识
         target_id = boardcast_info.sender_id  # 默认绑定到发送者
         player_name = ""
         is_bedrock = False
@@ -429,7 +429,7 @@ class BoundSystem(BasicSystem):
     async def _unbind_current_user(self, boardcast_info: BoardcastInfo) -> bool:
         """解绑当前用户的Java版玩家名（默认行为）"""
         player = self.player_manager.get_player(
-            str(boardcast_info.sender_id), platform=boardcast_info.source
+            str(boardcast_info.sender_id), platform=boardcast_info.source.origin
         )
         if not player:
             await self.reply(
@@ -498,7 +498,7 @@ class BoundSystem(BasicSystem):
         is_admin = boardcast_info.is_admin
         # 检查是否是绑定玩家
         if not is_admin and boardcast_info.sender_id not in player.accounts.get(
-            boardcast_info.source, []
+            boardcast_info.source.origin, []
         ):
             await self.reply(
                 boardcast_info, [MessageBuilder.text(self.get_tr("no_bindings"))]

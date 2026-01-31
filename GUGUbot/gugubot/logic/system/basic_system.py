@@ -127,7 +127,7 @@ class BasicSystem:
 
         return ProcessedInfo(
             processed_message=boardcast_info.message,
-            source=boardcast_info.source,
+            _source=boardcast_info.source,  # 传递完整的 Source 对象
             source_id=boardcast_info.source_id,
             sender=boardcast_info.sender,
             sender_id=boardcast_info.sender_id,
@@ -140,23 +140,24 @@ class BasicSystem:
         )
 
     async def reply(self, boardcast_info: BoardcastInfo, message: List[dict]) -> None:
-        # 构造基础 target
-        target_source = boardcast_info.source_id if boardcast_info.source_id and boardcast_info.source_id.isdigit() else boardcast_info.source  
+        # 构造基础 target - 使用原始来源作为 target key
+        origin_source = boardcast_info.source.origin
+        target_source = boardcast_info.source_id if boardcast_info.source_id and boardcast_info.source_id.isdigit() else origin_source
         target = {target_source: boardcast_info.event_sub_type}
         
-        # 检查是否是 bridge 回复（receiver_source 是 Bridge，但 source 不是 Bridge）
+        # 检查是否是 bridge 回复（receiver_source 是 Bridge，但原始来源不是 Bridge）
         bridge_name = self.config.get_keys(
             ["connector", "minecraft_bridge", "source_name"],
             "Bridge"
         )
         
-        if boardcast_info.receiver_source == bridge_name and boardcast_info.source != bridge_name:
-            # 如果 receiver_source 是 Bridge，但 source 不是 Bridge, 则将 target 设置为 source
+        if boardcast_info.receiver_source == bridge_name and not boardcast_info.source.is_from(bridge_name):
+            # 如果 receiver_source 是 Bridge，但原始来源不是 Bridge, 则将 target 设置为 source
             target[boardcast_info.receiver_source] = boardcast_info.event_sub_type
 
         respond = ProcessedInfo(
             processed_message=message,
-            source=boardcast_info.source,
+            _source=boardcast_info.source,  # 传递完整的 Source 对象
             source_id=boardcast_info.source_id,
             sender=self.system_manager.server.tr("gugubot.bot_name"),
             sender_id=None,
@@ -167,7 +168,8 @@ class BasicSystem:
             target=target
         )
 
-        receiver_source = boardcast_info.receiver_source if boardcast_info.receiver_source else boardcast_info.source
+        # 使用当前接收来源或原始来源
+        receiver_source = boardcast_info.receiver_source or origin_source
         await self.system_manager.connector_manager.broadcast_processed_info(
             respond,
             include=[receiver_source]

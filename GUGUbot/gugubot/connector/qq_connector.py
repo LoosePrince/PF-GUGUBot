@@ -325,13 +325,14 @@ class QQWebSocketConnector(BasicConnector):
         target = processed_info.target or forward_group_target
 
         message = processed_info.processed_message
-        source = processed_info.source
+        source = processed_info.source  # Source 对象
         source_id = processed_info.source_id
 
         # 去除消息中的 Minecraft 颜色代码
         message = self._strip_color_codes_from_message(message)
 
-        if source != "QQ" and source != "" and processed_info.sender != "":
+        # 检查原始来源是否不是 QQ（需要添加来源前缀）
+        if not source.is_from("QQ") and source.origin and processed_info.sender:
             # 从config中获取聊天模板列表
             chat_templates = self.config.get_keys(
                 ["connector", "QQ", "chat_templates"], []
@@ -370,18 +371,18 @@ class QQWebSocketConnector(BasicConnector):
 
                 # 使用模板格式化消息，{display_name}对应source，{sender}对应processed_info.sender
                 formatted_text = template.format(
-                    display_name=source, sender=processed_info.sender
+                    display_name=source.origin, sender=processed_info.sender
                 )
             else:
                 # 默认格式（向后兼容）
-                formatted_text = f"[{source}] {processed_info.sender}: "
+                formatted_text = f"[{source.origin}] {processed_info.sender}: "
 
             source_message = CQHandler.parse(formatted_text)
             message = source_message + message
 
         # 如果是玩家进出服务器消息，不显示发送者
-        elif source != "QQ" and source != "" and processed_info.sender == "":
-            message = CQHandler.parse(f"[{source}] ") + message
+        elif not source.is_from("QQ") and source.origin and processed_info.sender == "":
+            message = CQHandler.parse(f"[{source.origin}] ") + message
 
         # 获取消息最大长度配置，默认为 2000
         max_message_length = self.config.get_keys(

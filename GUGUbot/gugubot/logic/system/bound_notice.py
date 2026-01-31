@@ -76,7 +76,7 @@ class BoundNoticeSystem(BasicSystem):
 
         # 检查玩家是否在玩家管理器中
         player = self.bound_system.player_manager.get_player(
-            boardcast_info.sender_id, platform=boardcast_info.source
+            boardcast_info.sender_id, platform=boardcast_info.source.origin
         )
 
         # 如果玩家未绑定，发送提醒消息

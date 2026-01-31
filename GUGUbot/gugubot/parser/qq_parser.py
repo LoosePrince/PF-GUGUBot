@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 
 from gugubot.parser.basic_parser import BasicParser
 from gugubot.builder.qq_builder import ArrayHandler, CQHandler
-from gugubot.utils.types import BoardcastInfo
+from gugubot.utils.types import BoardcastInfo, Source
 
 
 class QQParser(BasicParser):
@@ -166,9 +166,8 @@ class QQParser(BasicParser):
                     raw=message_data,
                     server=self.server,
                     logger=self.logger,
-                    source=self.connector.source,
+                    _source=Source(self.connector.source),  # 使用 Source 类追踪来源链
                     source_id=str(source_id),
-                    receiver_source=self.connector.source,  # 对于非桥接消息，receiver_source 等于 source
                     sender=sender_name,
                     sender_id=sender_id,
                     receiver=receiver,  # 从回复消息中解析的接收者
@@ -185,9 +184,8 @@ class QQParser(BasicParser):
                     raw=message_data,
                     server=self.server,
                     logger=self.logger,
-                    source=self.connector.source,
+                    _source=Source(self.connector.source),  # 使用 Source 类追踪来源链
                     source_id=message_data.get("user_id"),
-                    receiver_source=self.connector.source,  # 对于非桥接消息，receiver_source 等于 source
                 )
             
             return boardcase_info

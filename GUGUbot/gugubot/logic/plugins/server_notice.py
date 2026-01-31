@@ -56,7 +56,7 @@ async def broadcast_server_start(
         # 构建消息
         processed_info = ProcessedInfo(
             processed_message=[MessageBuilder.text(message)],
-            source=minecraft_source_name,
+            _source=minecraft_source_name,  # 使用 _source 参数
             source_id="",
             sender=server.tr("gugubot.bot_name"),
             raw=None,
@@ -121,7 +121,7 @@ async def broadcast_server_stop(
         # 构建消息
         processed_info = ProcessedInfo(
             processed_message=[MessageBuilder.text(message)],
-            source=minecraft_source_name,
+            _source=minecraft_source_name,  # 使用 _source 参数
             source_id="",
             sender=server.tr("gugubot.bot_name"),
             raw=None,

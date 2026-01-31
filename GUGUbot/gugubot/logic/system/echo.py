@@ -51,11 +51,11 @@ class EchoSystem(BasicSystem):
             return False
 
         # 检查是否是QQ私聊消息，如果是则不广播
-        if boardcast_info.source == "QQ" and boardcast_info.event_sub_type == "private":
+        if boardcast_info.source.is_from("QQ") and boardcast_info.event_sub_type == "private":
             return False
 
         # 检查是否是QQ管理群的消息，如果是则不广播
-        if boardcast_info.source == "QQ" and boardcast_info.event_sub_type == "group":
+        if boardcast_info.source.is_from("QQ") and boardcast_info.event_sub_type == "group":
             admin_group_ids = self.config.get_keys(
                 ["connector", "QQ", "permissions", "admin_group_ids"], []
             )
@@ -73,12 +73,8 @@ class EchoSystem(BasicSystem):
             processed_info = self.create_processed_info(boardcast_info)
 
             # 转发到其他平台（排除接收消息的本地 connector）
-            # 使用 receiver_source 如果存在，否则回退到 source
-            exclude_source = (
-                boardcast_info.receiver_source
-                if boardcast_info.receiver_source
-                else boardcast_info.source
-            )
+            # 使用 receiver_source（当前接收者）作为排除来源
+            exclude_source = boardcast_info.receiver_source or boardcast_info.source.origin
             await self.system_manager.connector_manager.broadcast_processed_info(
                 processed_info, exclude=[exclude_source]
             )

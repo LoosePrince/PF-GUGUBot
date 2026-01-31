@@ -57,7 +57,7 @@ async def broadcast_msg(
     await connector_manager.broadcast_processed_info(
         ProcessedInfo(
             processed_message=[MessageBuilder.text(message)],
-            source=config.get_keys(
+            _source=config.get_keys(  # 使用 _source 参数
                 ["connector", "minecraft", "source_name"], "Minecraft"
             ),
             source_id="",

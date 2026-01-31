@@ -333,7 +333,7 @@ class ExecuteSystem(BasicSystem):
             # 构造 ProcessedInfo，保持 source 为原始发送渠道
             processed_info = ProcessedInfo(
                 processed_message=[MessageBuilder.text(command_text)],
-                source=boardcast_info.source,
+                _source=boardcast_info.source,  # 传递完整的 Source 对象
                 source_id=boardcast_info.source_id,
                 sender=boardcast_info.sender,
                 sender_id=boardcast_info.sender_id,

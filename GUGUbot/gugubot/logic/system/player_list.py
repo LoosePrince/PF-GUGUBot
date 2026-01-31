@@ -127,20 +127,20 @@ class PlayerListSystem(BasicSystem):
         这个方法确保玩家列表查询的回复只发送到发起查询的连接器（如 QQ），
         而不会通过 Bridge 转发到其他服务器（如 Minecraft）。
         """
-        # 确定回复目标：优先使用原始 source
-        reply_target = boardcast_info.source
+        # 确定回复目标：使用原始来源
+        origin_source = boardcast_info.source.origin
 
         # 构造 target
         target_source = (
             boardcast_info.source_id
             if boardcast_info.source_id and str(boardcast_info.source_id).isdigit()
-            else boardcast_info.source
+            else origin_source
         )
         target = {target_source: boardcast_info.event_sub_type}
 
         respond = ProcessedInfo(
             processed_message=message,
-            source=boardcast_info.source,
+            _source=boardcast_info.source,  # 传递完整的 Source 对象
             source_id=boardcast_info.source_id,
             sender=self.system_manager.server.tr("gugubot.bot_name"),
             sender_id=None,
@@ -573,7 +573,7 @@ class PlayerListSystem(BasicSystem):
 
             processed_info = ProcessedInfo(
                 processed_message=[MessageBuilder.text(command_text)],
-                source=boardcast_info.source,
+                _source=boardcast_info.source,  # 传递完整的 Source 对象
                 source_id=boardcast_info.source_id,
                 sender=boardcast_info.sender,
                 sender_id=boardcast_info.sender_id,
@@ -660,7 +660,7 @@ class PlayerListSystem(BasicSystem):
 
             processed_info = ProcessedInfo(
                 processed_message=[MessageBuilder.text(response_text)],
-                source=boardcast_info.source,
+                _source=boardcast_info.source,  # 传递完整的 Source 对象
                 source_id=boardcast_info.source_id,
                 sender=boardcast_info.sender,
                 sender_id=boardcast_info.sender_id,
@@ -884,7 +884,7 @@ class PlayerListSystem(BasicSystem):
 
             processed_info = ProcessedInfo(
                 processed_message=[MessageBuilder.text(command_text)],
-                source=boardcast_info.source,
+                _source=boardcast_info.source,  # 传递完整的 Source 对象
                 source_id=boardcast_info.source_id,
                 sender=boardcast_info.sender,
                 sender_id=boardcast_info.sender_id,

@@ -9,7 +9,7 @@ from mcdreforged.api.types import Info
 from gugubot.builder import McMessageBuilder
 from gugubot.connector.basic_connector import BasicConnector
 from gugubot.config.BotConfig import BotConfig
-from gugubot.utils.types import ProcessedInfo, BoardcastInfo
+from gugubot.utils.types import ProcessedInfo, BoardcastInfo, Source
 from gugubot.parser.mc_parser import MCParser
 from gugubot.ws import WebSocketFactory
 
@@ -261,15 +261,20 @@ class BridgeConnector(BasicConnector):
             if target and self.source not in target and len(target) == 1:
                 return
 
+            # 从消息数据中恢复 Source 对象
+            source_data = message_data.get("source")
+            source = Source.from_any(source_data)
+            # 添加当前 connector 作为接收来源
+            source.add(self.source)
+
             processed_info = BoardcastInfo(
                 event_type="message",
                 event_sub_type=message_data.get("event_sub_type", "group"),
                 message=message_data.get("processed_message", []),
                 sender=message_data.get("sender", "System"),
                 sender_id=message_data.get("sender_id", None),
-                source=message_data.get("source", ""),
+                _source=source,
                 source_id=message_data.get("source_id", ""),
-                receiver_source=self.source,
                 raw=message_data.get("raw", message_data),
                 server=self.server,
                 logger=self.logger,
@@ -291,12 +296,15 @@ class BridgeConnector(BasicConnector):
         if not self.enable:
             return
 
+        # 将 Source 序列化为列表以便通过 WebSocket 传输
+        source_list = processed_info.source.to_list() if processed_info.source else []
+
         message_data = {
             "sender": processed_info.sender or "System",
             "sender_id": processed_info.sender_id,
             "event_sub_type": processed_info.event_sub_type,
             "receiver": processed_info.receiver,
-            "source": self.source,
+            "source": source_list,  # 使用列表格式传输完整的来源链
             "source_id": processed_info.source_id,
             "raw": processed_info.raw,
             "processed_message": processed_info.processed_message,

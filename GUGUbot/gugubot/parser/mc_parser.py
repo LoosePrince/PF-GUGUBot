@@ -7,7 +7,7 @@ from mcdreforged.api.types import PluginServerInterface, Info
 
 from gugubot.builder import CQHandler
 from gugubot.parser.basic_parser import BasicParser
-from gugubot.utils.types import BoardcastInfo
+from gugubot.utils.types import BoardcastInfo, Source
 
 
 class MCParser(BasicParser):
@@ -49,9 +49,8 @@ class MCParser(BasicParser):
                 raw=content,
                 server=server,
                 logger=self.logger,
-                source=self.connector.source,
+                _source=Source(self.connector.source),  # 使用 Source 类追踪来源链
                 source_id=None,
-                receiver_source=self.connector.source,  # 对于非桥接消息，receiver_source 等于 source
                 sender=raw_message.player,
                 sender_id=raw_message.player,
                 is_admin=await self.connector._is_admin(raw_message.player)

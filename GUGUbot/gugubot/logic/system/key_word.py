@@ -85,7 +85,7 @@ class KeyWordSystem(BasicConfig, BasicSystem):
 
             keyword_processed_info = ProcessedInfo(
                 processed_message=self[content],
-                source=boardcast_info.source,
+                _source=boardcast_info.source,  # 传递完整的 Source 对象
                 source_id=boardcast_info.source_id,
                 sender=self.get_tr("gugubot.bot_name", global_key=True),
                 raw=boardcast_info.raw,
@@ -94,12 +94,8 @@ class KeyWordSystem(BasicConfig, BasicSystem):
                 event_sub_type=boardcast_info.event_sub_type,
             )
 
-            # 使用 receiver_source 如果存在，否则回退到 source
-            exclude_source = (
-                boardcast_info.receiver_source
-                if boardcast_info.receiver_source
-                else boardcast_info.source
-            )
+            # 使用 receiver_source（当前接收者）或原始来源作为排除来源
+            exclude_source = boardcast_info.receiver_source or boardcast_info.source.origin
             await self.system_manager.connector_manager.broadcast_processed_info(
                 original_processed_info, exclude=[exclude_source]
             )
