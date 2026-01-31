@@ -311,11 +311,16 @@ class QQWebSocketConnector(BasicConnector):
         if not self.enable:
             return
 
+        # 优先使用 forward_group_ids，如果未配置则回退到 group_ids（保持向后兼容）
         forward_group_ids = self.config.get_keys(
-            ["connector", "QQ", "permissions", "group_ids"], []
+            ["connector", "QQ", "permissions", "forward_group_ids"], []
         )
+        if not forward_group_ids or not any(forward_group_ids):
+            forward_group_ids = self.config.get_keys(
+                ["connector", "QQ", "permissions", "group_ids"], []
+            )
         forward_group_target = {
-            str(group_id): "group" for group_id in forward_group_ids
+            str(group_id): "group" for group_id in forward_group_ids if group_id
         }
         target = processed_info.target or forward_group_target
 

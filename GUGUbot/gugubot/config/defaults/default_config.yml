@@ -32,8 +32,11 @@ connector:
       - 
       - 
 
-      group_ids:       # qq群号 :: 要监听，转发的qq群号
+      group_ids:       # qq群号 :: 要监听的qq群号（这些群的消息会转发到MC）
       - 12345615646416
+
+      forward_group_ids:       # 转发目标群号 :: MC消息转发到这些群（留空则使用group_ids）
+      - 
 
       friend_is_admin: false       # 好友即是管理 :: 开放管理权限给机器人好友
       custom_group_name:       # 自定义游戏内显示群名 :: （可选）不设置默认转发[群名称]
