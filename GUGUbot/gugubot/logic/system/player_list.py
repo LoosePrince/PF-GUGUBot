@@ -127,14 +127,14 @@ class PlayerListSystem(BasicSystem):
         这个方法确保玩家列表查询的回复只发送到发起查询的连接器（如 QQ），
         而不会通过 Bridge 转发到其他服务器（如 Minecraft）。
         """
-        # 确定回复目标：使用原始来源
-        origin_source = boardcast_info.source.origin
+        # 确定回复目标：使用原始来源的连接器名称
+        reply_target = boardcast_info.source.current
 
         # 构造 target
         target_source = (
             boardcast_info.source_id
-            if boardcast_info.source_id and str(boardcast_info.source_id).isdigit()
-            else origin_source
+            if boardcast_info.source.origin and str(boardcast_info.source_id).isdigit()
+            else reply_target
         )
         target = {target_source: boardcast_info.event_sub_type}
 
@@ -162,11 +162,9 @@ class PlayerListSystem(BasicSystem):
 
         if not self.enable:
             return False
-
-        if not self.is_command(boardcast_info):
-            return False
-
+        
         message = boardcast_info.message
+        print(message)
         if not message or message[0].get("type") != "text":
             return False
 
@@ -184,6 +182,9 @@ class PlayerListSystem(BasicSystem):
         if command.startswith(self.bridge_query_cmd):
             await self._handle_bridge_query(boardcast_info, command)
             return True
+
+        if not self.is_command(boardcast_info):
+            return False
 
         # 3. Check for normal user command
         list_type = self._get_list_type_from_command(command)
@@ -373,6 +374,7 @@ class PlayerListSystem(BasicSystem):
         """处理来自其他服务器的响应"""
         try:
             parts = command.split("|")
+            print(parts)
             if len(parts) < 4:
                 return
 

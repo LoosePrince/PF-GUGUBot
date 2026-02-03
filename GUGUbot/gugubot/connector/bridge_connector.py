@@ -309,7 +309,7 @@ class BridgeConnector(BasicConnector):
             "raw": processed_info.raw,
             "processed_message": processed_info.processed_message,
             "target": processed_info.target,
-            "is_admin": await self._is_admin(processed_info.sender_id),
+            "is_admin": await self._is_admin(processed_info.sender_id) if self.is_main_server else None,
         }
 
         if self.is_main_server:
