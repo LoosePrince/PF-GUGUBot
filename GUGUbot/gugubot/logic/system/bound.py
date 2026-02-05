@@ -647,13 +647,16 @@ class BoundSystem(BasicSystem):
             notification_parts.append(f"QQ号: {user_id}")
 
             if player:
-                # 获取所有绑定的玩家名（转换为字符串）
-                all_player_names = [str(name) for name in player.java_name] + [
-                    str(name) for name in player.bedrock_name
-                ]
-                if all_player_names:
-                    player_names_str = ", ".join(all_player_names)
-                    notification_parts.append(f"绑定玩家: {player_names_str}")
+                # 获取所有绑定的玩家名，并区分 Java 与基岩
+                java_names = [str(name) for name in player.java_name]
+                bedrock_names = [str(name) for name in player.bedrock_name]
+                if java_names or bedrock_names:
+                    if java_names:
+                        java_str = "Java: " + ", ".join(java_names)
+                        notification_parts.append(f"绑定玩家({java_str})")
+                    if bedrock_names:
+                        bedrock_str = "基岩: " + ", ".join(bedrock_names)
+                        notification_parts.append(f"绑定玩家({bedrock_str})")
                 else:
                     notification_parts.append("未绑定玩家")
             else:
