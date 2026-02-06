@@ -152,16 +152,17 @@ class ConnectorManager:
         tasks = []
         to_conectors = self.connectors
 
+        # 使用 re.escape 将来源名按字面匹配，避免 source_name 中的正则特殊字符（如 [ ]）导致排除/包含失效
         if include is not None:
             to_conectors = [
-                c for c in to_conectors if any(re.match(p, c.source) for p in include)
+                c for c in to_conectors if any(re.match(re.escape(p), c.source) for p in include)
             ]
 
         if exclude is not None:
             to_conectors = [
                 c
                 for c in to_conectors
-                if not any(re.match(p, c.source) for p in exclude)
+                if not any(re.match(re.escape(p), c.source) for p in exclude)
             ]
 
         connector_info = f"广播消息到连接器: {to_conectors}"
