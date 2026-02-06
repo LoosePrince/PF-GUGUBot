@@ -163,6 +163,9 @@ class PlayerListSystem(BasicSystem):
         if not self.enable:
             return False
         
+        if boardcast_info.event_type != "message":
+            return False
+
         message = boardcast_info.message
 
         if not message or message[0].get("type") != "text":

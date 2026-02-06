@@ -77,6 +77,9 @@ class StartupCommandSystem(BasicConfig, BasicSystem):
         if not self.enable:
             return False
 
+        if boardcast_info.event_type != "message":
+            return False
+
         if not self.is_command(boardcast_info):
             return False
 
