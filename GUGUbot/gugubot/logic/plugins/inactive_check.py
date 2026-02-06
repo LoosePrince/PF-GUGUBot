@@ -591,7 +591,10 @@ class InactiveCheckSystem(BasicConfig, BasicSystem):
                         auto_fix_enabled = self.config.get_keys(
                             ["system", "inactive_check", "auto_fix_card"], True
                         )
-                        if auto_fix_enabled:
+                        change_group_card = self.config.get_keys(
+                            ["connector", "QQ", "others", "change_group_card"], True
+                        )
+                        if auto_fix_enabled and change_group_card:
                             try:
                                 await self.qq_connector.bot.set_group_card(
                                     group_id=int(group_id),

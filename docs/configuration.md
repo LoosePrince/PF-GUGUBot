@@ -89,6 +89,7 @@ connector:
     
     others:
       forward_other_bot: false  # 是否转发官方机器人的消息
+      change_group_card: true  # 是否修改群员群名片（绑定ID时自动修改群名片为游戏名）
 ```
 
 #### 连接设置说明

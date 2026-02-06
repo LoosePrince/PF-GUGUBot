@@ -52,6 +52,7 @@ connector:
 
     others:
       forward_other_bot: false       # 转发官方机器人回复
+      change_group_card: true       # 是否修改群员群名片 :: 绑定ID时自动修改群名片为游戏名
 
   minecraft:   # Minecraft连接器
     source_name: "Minecraft" # 服务器显示名称 :: 如果是主服务器，会显示这个名称

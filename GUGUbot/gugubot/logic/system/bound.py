@@ -338,7 +338,9 @@ class BoundSystem(BasicSystem):
                 target_id: str,
             ):
                 """如果是QQ来源，则设置群名片"""
-                if platform == "QQ":
+                if platform == "QQ" and self.config.get_keys(
+                    ["connector", "QQ", "others", "change_group_card"], True
+                ):
                     await self.system_manager.connector_manager.get_connector(
                         "QQ"
                     ).bot.set_group_card(
