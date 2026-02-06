@@ -293,7 +293,7 @@ class BridgeConnector(BasicConnector):
 
     async def send_message(self, processed_info: ProcessedInfo) -> None:
         """发送消息"""
-        if not self.enable:
+        if not self.enable or not self.enable_receive:
             return
 
         # 将 Source 序列化为列表以便通过 WebSocket 传输
@@ -343,7 +343,7 @@ class BridgeConnector(BasicConnector):
 
     async def on_message(self, raw: Any) -> BoardcastInfo:
         """处理接收到的消息"""
-        if not self.enable:
+        if not self.enable or not self.enable_send:
             return None
 
         if self.parser:

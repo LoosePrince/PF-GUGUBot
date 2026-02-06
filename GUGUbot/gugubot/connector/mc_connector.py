@@ -71,7 +71,7 @@ class MCConnector(BasicConnector):
         ValueError
             当消息格式无效时
         """
-        if not self.enable:
+        if not self.enable or not self.enable_receive:
             return
 
         if not self.server.is_server_running():
@@ -154,7 +154,7 @@ class MCConnector(BasicConnector):
             接收到的信息对象
         """
         try:
-            if not self.enable:
+            if not self.enable or not self.enable_send:
                 return
             
             is_player = info.is_player

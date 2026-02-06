@@ -38,6 +38,9 @@ class TestConnector(BasicConnector):
         self.logger = logger or server.logger
         print(config.get_keys(["GUGUBot", "show_message_in_console"], True))
         self.enable = config.get_keys(["GUGUBot", "show_message_in_console"], True)
+        # TestConnector 使用 show_message_in_console 配置作为开关
+        self.enable_send = self.enable
+        self.enable_receive = self.enable
 
     async def connect(self) -> None:
         """连接到TEST服务器。
@@ -67,7 +70,7 @@ class TestConnector(BasicConnector):
         ValueError
             当消息格式无效时
         """
-        if not self.enable:
+        if not self.enable or not self.enable_receive:
             return
 
         self.logger.info(f"[GUGUBot]发送消息: {boardcast_info}")
@@ -90,7 +93,7 @@ class TestConnector(BasicConnector):
             'type': 'chat'  # 或其他消息类型
         }
         """
-        if not self.enable:
+        if not self.enable or not self.enable_send:
             return
 
         self.logger.debug(f"[GUGUBot]接收消息: {raw}")

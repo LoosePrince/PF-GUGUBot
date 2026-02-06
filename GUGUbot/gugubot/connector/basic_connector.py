@@ -50,6 +50,12 @@ class BasicConnector(ABC):
         self.logger: Any = None  # Will be set when registered to ConnectorManager
         self.config: BotConfig = config or {}
         self.enable: bool = config.get_keys(["connector", self.source, "enable"], True)
+        self.enable_receive: bool = config.get_keys(
+            ["connector", self.source, "enable_receive"], self.enable
+        )
+        self.enable_send: bool = config.get_keys(
+            ["connector", self.source, "enable_send"], self.enable
+        )
 
     @abstractmethod
     async def connect(self) -> None:
@@ -75,7 +81,8 @@ class BasicConnector(ABC):
 
         Note
         ----
-        Implementations should check self.enable and return early if disabled.
+        Implementations should check self.enable (master switch) and self.enable_receive,
+        return early if either is disabled.
         """
         raise NotImplementedError
 
@@ -94,6 +101,7 @@ class BasicConnector(ABC):
 
         Note
         ----
-        Implementations should check self.enable and return early if disabled.
+        Implementations should check self.enable (master switch) and self.enable_send,
+        return early if either is disabled.
         """
         raise NotImplementedError

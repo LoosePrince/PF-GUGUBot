@@ -12,6 +12,8 @@ connector:
   QQ:   # QQ连接器
     source_name: "QQ" # QQ 显示名称
     enable: true # 是否启用
+    enable_receive: true # 是否接收消息 :: 控制是否处理来自QQ的消息
+    enable_send: true # 是否发送消息 :: 控制是否向QQ发送消息
     connection:
       host: 127.0.0.1 # 主机地址
       port: 8777 # 端口
@@ -54,6 +56,8 @@ connector:
   minecraft:   # Minecraft连接器
     source_name: "Minecraft" # 服务器显示名称 :: 如果是主服务器，会显示这个名称
     enable: true # 是否启用
+    enable_receive: true # 是否接收消息 :: 控制是否处理来自MC的消息
+    enable_send: true # 是否发送消息 :: 控制是否向MC发送消息
 
     mc_achievement: true     # 转发 MC 成就
     mc_death: true     # 转发 MC 死亡消息
@@ -89,6 +93,8 @@ connector:
   minecraft_bridge:   # Minecraft桥接器
     source_name: "Main" # 桥接服务器显示名称 :: 如果不是主服务器，会显示这个名称
     enable: true # 是否启用
+    enable_receive: true # 是否接收消息 :: 控制是否处理来自其他服务器的消息
+    enable_send: true # 是否发送消息 :: 控制是否向其他服务器发送消息
 
     is_main_server: true     # 是否为主服务器 :: 发送消息到其他服务器
 
