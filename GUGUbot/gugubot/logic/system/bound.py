@@ -89,6 +89,18 @@ class BoundSystem(BasicSystem):
 
         return False
 
+    @staticmethod
+    def _starts_with_command(text: str, cmd: str) -> bool:
+        """判断 text 是否以 cmd 作为完整命令前缀开头。
+
+        确保 cmd 后面紧跟空格或到达字符串末尾，
+        避免 "绑定提醒" 被 "绑定" 错误匹配。
+        """
+        if not text.startswith(cmd):
+            return False
+        remaining = text[len(cmd):]
+        return not remaining or remaining[0] == " "
+
     async def _handle_command(self, boardcast_info: BoardcastInfo) -> bool:
         """处理绑定相关命令"""
         command = boardcast_info.message[0].get("data", {}).get("text", "")
@@ -103,7 +115,7 @@ class BoundSystem(BasicSystem):
             self.get_tr("unbind"),
             self.get_tr("search"),
         ]
-        if not any(command.startswith(i) for i in valid_commands):
+        if not any(self._starts_with_command(command, i) for i in valid_commands):
             return False
 
         command = command.replace(system_name, "", 1).strip()
