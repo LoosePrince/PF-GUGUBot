@@ -164,7 +164,7 @@ class PlayerListSystem(BasicSystem):
             return False
         
         message = boardcast_info.message
-        print(message)
+
         if not message or message[0].get("type") != "text":
             return False
 
@@ -374,7 +374,7 @@ class PlayerListSystem(BasicSystem):
         """处理来自其他服务器的响应"""
         try:
             parts = command.split("|")
-            print(parts)
+
             if len(parts) < 4:
                 return
 
