@@ -308,7 +308,7 @@ class QQWebSocketConnector(BasicConnector):
         return result
 
     async def send_message(self, processed_info: ProcessedInfo) -> None:
-        if not self.enable or not self.enable_receive:
+        if not self.enable:
             return
 
         # 优先使用 forward_group_ids，如果未配置则回退到 group_ids（保持向后兼容）
@@ -445,7 +445,7 @@ class QQWebSocketConnector(BasicConnector):
         注意:
             WebSocket 回调运行在独立线程中，需要将异步任务正确调度到事件循环
         """
-        if not self.enable or not self.enable_send:
+        if not self.enable:
             return
 
         try:

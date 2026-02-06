@@ -68,15 +68,23 @@ class EchoSystem(BasicSystem):
         if boardcast_info.event_type != "message":
             return False
 
+        # 若消息来源 connector 的 enable_send=False，直接不转发（return），而不是仅从目标里排除
+        source_name = boardcast_info.receiver_source or boardcast_info.source.origin
+        source_connector = self.system_manager.connector_manager.get_connector(source_name)
+        if source_connector is not None and not source_connector.enable_send:
+            return False
+
         try:
             # 准备转发的消息
             processed_info = self.create_processed_info(boardcast_info)
 
-            # 转发到其他平台（排除接收消息的本地 connector）
-            # 使用 receiver_source（当前接收者）作为排除来源
-            exclude_source = boardcast_info.receiver_source or boardcast_info.source.origin
+            # 转发到其他平台（排除：来源 connector、enable_receive=False、enable_send=False 的目标）
+            exclude_sources = [source_name]
+            for c in self.system_manager.connector_manager.connectors:
+                if not c.enable_receive:
+                    exclude_sources.append(c.source)
             await self.system_manager.connector_manager.broadcast_processed_info(
-                processed_info, exclude=[exclude_source]
+                processed_info, exclude=exclude_sources
             )
 
             return True

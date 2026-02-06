@@ -69,7 +69,7 @@ class TestConnector(BasicConnector):
         ValueError
             当消息格式无效时
         """
-        if not self.enable or not self.enable_receive:
+        if not self.enable:
             return
 
         self.logger.info(f"[GUGUBot]发送消息: {boardcast_info}")
@@ -92,7 +92,7 @@ class TestConnector(BasicConnector):
             'type': 'chat'  # 或其他消息类型
         }
         """
-        if not self.enable or not self.enable_send:
+        if not self.enable:
             return
 
         self.logger.debug(f"[GUGUBot]接收消息: {raw}")

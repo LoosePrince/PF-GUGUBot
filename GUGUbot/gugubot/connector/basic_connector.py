@@ -81,8 +81,8 @@ class BasicConnector(ABC):
 
         Note
         ----
-        Implementations should check self.enable (master switch) and self.enable_receive,
-        return early if either is disabled.
+        Implementations may check self.enable (master switch) and return early if disabled.
+        enable_send 由 connector_manager 在广播时统一过滤，此处无需再判。
         """
         raise NotImplementedError
 
@@ -101,7 +101,7 @@ class BasicConnector(ABC):
 
         Note
         ----
-        Implementations should check self.enable (master switch) and self.enable_send,
-        return early if either is disabled.
+        Implementations may check self.enable (master switch) and return early if disabled.
+        enable_receive 由 echo 在转发时统一排除，此处无需再判。
         """
         raise NotImplementedError

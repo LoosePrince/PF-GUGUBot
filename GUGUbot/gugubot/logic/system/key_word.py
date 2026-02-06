@@ -81,11 +81,35 @@ class KeyWordSystem(BasicConfig, BasicSystem):
             return True
 
         if content in self:
+            # 与 echo 一致：来源 connector enable_send=False 则不转发到任何其他渠道
+            source_name = boardcast_info.receiver_source or boardcast_info.source.origin
+            source_connector = self.system_manager.connector_manager.get_connector(source_name)
+            if source_connector is not None and not source_connector.enable_send:
+                return False
+
             original_processed_info = self.create_processed_info(boardcast_info)
 
+            # 排除来源、enable_receive=False（不接收转发的端）；enable_send 已在上方按来源判断
+            exclude_source = source_name
+            exclude_for_echo = [exclude_source]
+            exclude_receive_only = [
+                c.source for c in self.system_manager.connector_manager.connectors
+                if not c.enable_receive
+            ]
+            exclude_for_echo.extend(exclude_receive_only)
+
+            # 原文转发：排除来源 + 未开启的 connector
+            await self.system_manager.connector_manager.broadcast_processed_info(
+                original_processed_info, exclude=exclude_for_echo
+            )
+
+            # 关键词回复：reply 只发到当前触发的群/会话，避免 QQ 多群时发到别的群
+            await self.reply(boardcast_info, self[content])
+
+            # 再广播到其他 connector（MC、bridge 等），排除来源端和未开启的 connector
             keyword_processed_info = ProcessedInfo(
                 processed_message=self[content],
-                _source=boardcast_info.source,  # 传递完整的 Source 对象
+                _source=boardcast_info.source,
                 source_id=boardcast_info.source_id,
                 sender=self.get_tr("gugubot.bot_name", global_key=True),
                 raw=boardcast_info.raw,
@@ -93,15 +117,8 @@ class KeyWordSystem(BasicConfig, BasicSystem):
                 logger=boardcast_info.logger,
                 event_sub_type=boardcast_info.event_sub_type,
             )
-
-            # 使用 receiver_source（当前接收者）或原始来源作为排除来源
-            exclude_source = boardcast_info.receiver_source or boardcast_info.source.origin
             await self.system_manager.connector_manager.broadcast_processed_info(
-                original_processed_info, exclude=[exclude_source]
-            )
-
-            await self.system_manager.connector_manager.broadcast_processed_info(
-                keyword_processed_info
+                keyword_processed_info, exclude=exclude_for_echo
             )
 
             return True
