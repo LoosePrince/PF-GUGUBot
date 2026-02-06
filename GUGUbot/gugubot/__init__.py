@@ -29,6 +29,7 @@ from gugubot.logic.plugins import (
     UnboundCheckSystem,
     InactiveCheckSystem,
     ActiveWhiteListSystem,
+    CrossBroadcastSystem,
 )
 from gugubot.config import BotConfig
 from gugubot.utils import (
@@ -160,6 +161,10 @@ async def on_load(server: PluginServerInterface, old) -> None:
         systems.insert(9, unbound_check_system)
         systems.insert(10, inactive_check_system)
         systems.insert(11, active_whitelist_system)
+
+    # 跨平台强制广播（#mc / !!qq），放在 echo 前以便处理后可拦截不再走 echo）
+    cross_broadcast_system = CrossBroadcastSystem(config=gugubot_config)
+    systems.insert(len(systems) - 1, cross_broadcast_system)
 
     for system in systems:
         system_manager.register_system(system)

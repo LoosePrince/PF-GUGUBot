@@ -14,6 +14,7 @@ from gugubot.logic.plugins.player_notice import (
 from gugubot.logic.plugins.unbound_check import UnboundCheckSystem
 from gugubot.logic.plugins.inactive_check import InactiveCheckSystem
 from gugubot.logic.plugins.active_whitelist import ActiveWhiteListSystem
+from gugubot.logic.plugins.cross_broadcast import CrossBroadcastSystem
 
 __all__ = [
     'broadcast_server_start',
@@ -23,5 +24,6 @@ __all__ = [
     'UnboundCheckSystem',
     'InactiveCheckSystem',
     'ActiveWhiteListSystem',
+    'CrossBroadcastSystem',
 ]
 

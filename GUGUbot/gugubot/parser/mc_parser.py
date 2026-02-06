@@ -65,7 +65,13 @@ class MCParser(BasicParser):
 
     def _ignore_message(self, content: str) -> bool:
         """检查消息是否需要忽略"""
-        config  = self.connector.config
+        config = self.connector.config
+        # !!qq 用于跨平台广播到 QQ，不忽略
+        qq_cmd = config.get_keys(["system", "cross_broadcast", "qq_command"], "!!qq")
+        qq_cmd_prefix = qq_cmd.split()[0] if qq_cmd.split() else qq_cmd
+        if content.strip().startswith(qq_cmd_prefix):
+            return False
+
         ignore_mc_command_patterns = config.get_keys(["connector", "minecraft", "ignore_mc_command_patterns"], [])
 
         for pattern in ignore_mc_command_patterns:
