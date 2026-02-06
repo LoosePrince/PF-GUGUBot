@@ -5,7 +5,7 @@
 在 MC 端发送 !!qq <消息> 可将消息仅广播到 QQ。
 """
 
-from gugubot.builder import MessageBuilder
+from gugubot.builder import CQHandler
 from gugubot.logic.system.basic_system import BasicSystem
 from gugubot.utils.types import BoardcastInfo, ProcessedInfo
 
@@ -59,9 +59,8 @@ class CrossBroadcastSystem(BasicSystem):
         connector = self.system_manager.connector_manager.get_connector(mc_source)
         if not connector or not connector.enable:
             return False
-        msg = content or " "
         processed_info = ProcessedInfo(
-            processed_message=[MessageBuilder.text(msg)],
+            processed_message=CQHandler.parse(content or " "),
             _source=boardcast_info.source,
             source_id=boardcast_info.source_id,
             sender=boardcast_info.sender,
@@ -83,9 +82,8 @@ class CrossBroadcastSystem(BasicSystem):
         connector = self.system_manager.connector_manager.get_connector(qq_source)
         if not connector or not connector.enable:
             return False
-        msg = content or " "
         processed_info = ProcessedInfo(
-            processed_message=[MessageBuilder.text(msg)],
+            processed_message=CQHandler.parse(content or " "),
             _source=boardcast_info.source,
             source_id=boardcast_info.source_id,
             sender=boardcast_info.sender,
