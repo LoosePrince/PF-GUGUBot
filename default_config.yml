@@ -145,6 +145,11 @@ system:
   echo:   # 转发系统
     enable: true
 
+  cross_broadcast:   # 跨平台强制广播 :: QQ发 #mc 仅到MC，MC发 !!qq 仅到QQ（突破 enable_send 限制）
+    enable: true
+    mc_command: "mc"    # QQ 端命令：{command_prefix}{mc_command} 消息
+    qq_command: "!!qq"  # MC 端命令：{qq_command} 消息
+
   execute:   # 命令执行系统
     enable: false
     allow_bridge_execute: true   # 是否允许通过 bridge 执行命令
