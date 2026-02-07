@@ -87,39 +87,46 @@ class KeyWordSystem(BasicConfig, BasicSystem):
             if source_connector is not None and not source_connector.enable_send:
                 return False
 
-            original_processed_info = self.create_processed_info(boardcast_info)
-
-            # 排除来源、enable_receive=False（不接收转发的端）；enable_send 已在上方按来源判断
-            exclude_source = source_name
-            exclude_for_echo = [exclude_source]
-            exclude_receive_only = [
-                c.source for c in self.system_manager.connector_manager.connectors
-                if not c.enable_receive
-            ]
-            exclude_for_echo.extend(exclude_receive_only)
-
-            # 原文转发：排除来源 + 未开启的 connector
-            await self.system_manager.connector_manager.broadcast_processed_info(
-                original_processed_info, exclude=exclude_for_echo
+            # 是否转发到其他连接器
+            forward_to_other = self.config.get_keys(
+                ["system", "key_words", "forward_to_other_connector"], True
             )
+
+            if forward_to_other:
+                original_processed_info = self.create_processed_info(boardcast_info)
+
+                # 排除来源、enable_receive=False（不接收转发的端）；enable_send 已在上方按来源判断
+                exclude_source = source_name
+                exclude_for_echo = [exclude_source]
+                exclude_receive_only = [
+                    c.source for c in self.system_manager.connector_manager.connectors
+                    if not c.enable_receive
+                ]
+                exclude_for_echo.extend(exclude_receive_only)
+
+                # 原文转发：排除来源 + 未开启的 connector
+                await self.system_manager.connector_manager.broadcast_processed_info(
+                    original_processed_info, exclude=exclude_for_echo
+                )
 
             # 关键词回复：reply 只发到当前触发的群/会话，避免 QQ 多群时发到别的群
             await self.reply(boardcast_info, self[content])
 
-            # 再广播到其他 connector（MC、bridge 等），排除来源端和未开启的 connector
-            keyword_processed_info = ProcessedInfo(
-                processed_message=self[content],
-                _source=boardcast_info.source,
-                source_id=boardcast_info.source_id,
-                sender=self.get_tr("gugubot.bot_name", global_key=True),
-                raw=boardcast_info.raw,
-                server=boardcast_info.server,
-                logger=boardcast_info.logger,
-                event_sub_type=boardcast_info.event_sub_type,
-            )
-            await self.system_manager.connector_manager.broadcast_processed_info(
-                keyword_processed_info, exclude=exclude_for_echo
-            )
+            if forward_to_other:
+                # 再广播到其他 connector（MC、bridge 等），排除来源端和未开启的 connector
+                keyword_processed_info = ProcessedInfo(
+                    processed_message=self[content],
+                    _source=boardcast_info.source,
+                    source_id=boardcast_info.source_id,
+                    sender=self.get_tr("gugubot.bot_name", global_key=True),
+                    raw=boardcast_info.raw,
+                    server=boardcast_info.server,
+                    logger=boardcast_info.logger,
+                    event_sub_type=boardcast_info.event_sub_type,
+                )
+                await self.system_manager.connector_manager.broadcast_processed_info(
+                    keyword_processed_info, exclude=exclude_for_echo
+                )
 
             return True
 
